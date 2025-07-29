@@ -6,35 +6,117 @@ py = import('python').find_installation('python3')
 numpy_include_dir = run_command(
   py, '-c', 'import numpy; print(numpy.get_include())'
 ).stdout().strip()
+numpy_inc = run_command(py, '-c', 'import numpy,sys;sys.stdout.write(numpy.get_include())').stdout().strip() 
 # Find the path to numpy/f2py/src where fortranobject.h resides
-f2py_include = run_command(py, '-c', 'import numpy.f2py; import os; print(os.path.join(os.path.dirname(numpy.f2py.__file__), "src"))', check: true).stdout().strip()
-
+fortranobject_src = run_command(py, '-c', 'import numpy,os,sys;import os;sys.stdout.write(os.path.join(os.path.dirname(numpy.__file__),"f2py","src","fortranobject.c"))').stdout().strip()
+numpy_f2py_src = run_command(py, '-c', 'import numpy,os,sys;sys.stdout.write(os.path.join(os.path.dirname(numpy.__file__),"f2py","src"))').stdout().strip()
+cc = meson.get_compiler('c')
+fc = meson.get_compiler('fortran')
+python_dep = py.dependency()
+fortran_sources = files(
+  'nnls/nnls.f',
+  'nnls/nnls_regularized.f90',
+  'nnls/nnls_regularized_loop.f90',
+  'nnls/venk_brd.f90',
+  'lapack-3.4.0/SRC/dgesv.f',
+  'lapack-3.4.0/SRC/dgetrf.f',
+  'lapack-3.4.0/SRC/dgetrs.f',
+  'lapack-3.4.0/SRC/dgetf2.f',
+  'lapack-3.4.0/SRC/dlaswp.f',
+  'lapack-3.4.0/SRC/ilaenv.f',
+  'lapack-3.4.0/SRC/iparmq.f',
+  'lapack-3.4.0/SRC/ieeeck.f',
+  'lapack-3.4.0/INSTALL/dlamch.f',
+  'lapack-3.4.0/BLAS/SRC/dgemm.f',
+  'lapack-3.4.0/BLAS/SRC/dgemv.f',
+  'lapack-3.4.0/BLAS/SRC/dtrsm.f',
+  'lapack-3.4.0/BLAS/SRC/dger.f',
+  'lapack-3.4.0/BLAS/SRC/dscal.f',
+  'lapack-3.4.0/BLAS/SRC/dswap.f',
+  'lapack-3.4.0/BLAS/SRC/idamax.f',
+  'lapack-3.4.0/BLAS/SRC/daxpy.f',
+  'lapack-3.4.0/BLAS/SRC/lsame.f',
+  'lapack-3.4.0/BLAS/SRC/xerbla.f',
+  )
 python_inc_dir = run_command(py, ['-c', 'from sysconfig import get_paths; print(get_paths()["include"])']).stdout().strip()
 
-# Add linker arguments for linking against the Fortran runtime
-add_project_link_arguments('-lgfortran', language: 'fortran')
-
-# Custom target to copy fortranobject.h into the build directory
-fortran_header = custom_target(
-  'copy_fortranobject',
-  input: f2py_include + '/fortranobject.h',
-  output: 'fortranobject.h',
-  command: [py, '-c', # python copy b/c cp doesn't work on windows
-    'import shutil, sys; shutil.copy(sys.argv[1], sys.argv[2])',
-    '@INPUT@', meson.project_build_root()],
+c_wrappers = custom_target(
+    'f2py_wrappers',
+    # interface blocks require the modules containing fit variables
+    input: [
+      'nnls/nnls.f',
+      'nnls/nnls_regularized.f90',
+      'nnls/nnls_regularized_loop.f90',
+      'nnls/venk_brd.f90',
+      'lapack-3.4.0/SRC/dgesv.f',
+      'lapack-3.4.0/SRC/dgetrf.f',
+      'lapack-3.4.0/SRC/dgetrs.f',
+      'lapack-3.4.0/SRC/dgetf2.f',
+      'lapack-3.4.0/SRC/dlaswp.f',
+      'lapack-3.4.0/SRC/ilaenv.f',
+      'lapack-3.4.0/SRC/iparmq.f',
+      'lapack-3.4.0/SRC/ieeeck.f',
+      'lapack-3.4.0/INSTALL/dlamch.f',
+      'lapack-3.4.0/BLAS/SRC/dgemm.f',
+      'lapack-3.4.0/BLAS/SRC/dgemv.f',
+      'lapack-3.4.0/BLAS/SRC/dtrsm.f',
+      'lapack-3.4.0/BLAS/SRC/dger.f',
+      'lapack-3.4.0/BLAS/SRC/dscal.f',
+      'lapack-3.4.0/BLAS/SRC/dswap.f',
+      'lapack-3.4.0/BLAS/SRC/idamax.f',
+      'lapack-3.4.0/BLAS/SRC/daxpy.f',
+      'lapack-3.4.0/BLAS/SRC/lsame.f',
+      'lapack-3.4.0/BLAS/SRC/xerbla.f',
+      ],
+    output: ['_nnlsmodule.c', '_nnls-f2pywrappers2.f90'],
+    command: [py, '-m', 'numpy.f2py', '@INPUT@', '-m', '_nnls', '--lower'],
+    build_by_default: true,
 )
 
-# Custom target to compile fortranobject.c into an object file
-fortranobject_o = custom_target(
-  'fortranobject.o',
-  input: join_paths(f2py_include, 'fortranobject.c'),
-  output: 'fortranobject.o',
-  command: ['gcc', '-fPIC', '-c', '@INPUT@', '-o', '@OUTPUT@', '-I' + f2py_include, '-I'+python_inc_dir, '-I'+numpy_include_dir],
-  build_by_default: true
+fixed_lib = static_library(
+    'nnls_fixed',
+    fortran_sources,
+    fortran_args: ['-O2','-g','-fopenmp','-std=gnu','-ffixed-form','-ffixed-line-length-none'],
+    pic: true,
+    install: false,
 )
 
-# Pre-generated F2PY wrapper C file
-pregen_f2py = files('meson_f2py/_nnlsmodule.c')
+mod_dir = join_paths(meson.current_build_dir(), 'libnnls_fixed.a.p')
+
+c_sources = files(
+    fortranobject_src,
+)
+
+c_lib = static_library(
+    'nnls_c',
+    c_sources + [c_wrappers[0]],
+    c_args: ['-DADD_UNDERSCORE', '-I' + numpy_inc, '-I' + numpy_f2py_src],
+    dependencies: [python_dep],
+    pic: true,
+    install: false,
+)
+
+wrapper_lib = static_library(
+    'nnls_wrapper',
+    c_wrappers[1],
+    fortran_args: ['-O2','-g','-std=gnu', '-I' + mod_dir],
+    dependencies: [python_dep],
+    pic: true,
+    install: false,
+)
+
+py.extension_module(
+    '_nnls',
+    [],
+    objects: [
+        fixed_lib.extract_all_objects(),
+        wrapper_lib.extract_all_objects(),
+        c_lib.extract_all_objects(),
+    ],
+    c_args: ['-I'+numpy_inc, '-I'+numpy_f2py_src],
+    subdir: 'nnls',
+    install: true,
+)
 
 fortran_args = []
 if host_machine.system() == 'windows'
@@ -44,43 +126,6 @@ else
     # Assume Linux or other Unix-like systems
     fortran_args += ['-fallow-argument-mismatch'] # Equivalent to extra_f77_compile_args
 endif
-
-# Define the Fortran extension module
-nnls_extension = py.extension_module(
-  '_nnls',
-  sources: [
-    pregen_f2py,
-    fortran_header,
-    fortranobject_o,
-    'nnls/nnls.f',
-    'nnls/nnls_regularized.f90',
-    'nnls/nnls_regularized_loop.f90',
-    'nnls/venk_brd.f90',
-    'lapack-3.4.0/SRC/dgesv.f',
-    'lapack-3.4.0/SRC/dgetrf.f',
-    'lapack-3.4.0/SRC/dgetrs.f',
-    'lapack-3.4.0/SRC/dgetf2.f',
-    'lapack-3.4.0/SRC/dlaswp.f',
-    'lapack-3.4.0/SRC/ilaenv.f',
-    'lapack-3.4.0/SRC/iparmq.f',
-    'lapack-3.4.0/SRC/ieeeck.f',
-    'lapack-3.4.0/INSTALL/dlamch.f',
-    'lapack-3.4.0/BLAS/SRC/dgemm.f',
-    'lapack-3.4.0/BLAS/SRC/dgemv.f',
-    'lapack-3.4.0/BLAS/SRC/dtrsm.f',
-    'lapack-3.4.0/BLAS/SRC/dger.f',
-    'lapack-3.4.0/BLAS/SRC/dscal.f',
-    'lapack-3.4.0/BLAS/SRC/dswap.f',
-    'lapack-3.4.0/BLAS/SRC/idamax.f',
-    'lapack-3.4.0/BLAS/SRC/daxpy.f',
-    'lapack-3.4.0/BLAS/SRC/lsame.f',
-    'lapack-3.4.0/BLAS/SRC/xerbla.f',
-  ],
-  include_directories: include_directories(numpy_include_dir),
-  install: true,
-  cpp_args: ['-DADD_UNDERSCORE', '-I'+numpy_include_dir],  # Equivalent to define_macros=[("ADD_UNDERSCORE", None)]
-  fortran_args: fortran_args,
-)
 
 subdir('pyspecdata')
 
