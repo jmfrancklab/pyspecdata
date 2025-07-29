@@ -2,24 +2,10 @@ import numpy as np
 from numpy import linspace, r_, exp, sqrt
 from numpy.random import seed
 from conftest import load_module
+from pyspecdata.matrix_math import venk_nnls
 import sys
 
 # ensure submodules are reloaded fresh for this test
-for name in [
-    "pyspecdata.nnls",
-    "pyspecdata.matrix_math.nnls",
-    "pyspecdata.core",
-]:
-    sys.modules.pop(name, None)
-
-load_module("nnls")
-matrix_nnls = load_module("matrix_math.nnls")
-
-load_module("general_functions")
-core = load_module("core")
-nddata = core.nddata
-init_logging = load_module("general_functions").init_logging
-
 mu1 = 0.5
 sigma1 = 0.3
 
@@ -61,7 +47,7 @@ def test_highlevel_nnls():
         logT1,
         lambda x, y: 1 - 2 * exp(-x / 10 ** (y)),
         l=sqrt(solution.get_prop("opt_alpha")),
-        method=matrix_nnls.venk_nnls,
+        method=venk_nnls,
     )
     diff = np.linalg.norm(solution_stackcalc.data - solution_venk.data)
     assert diff < 0.054 * np.linalg.norm(
