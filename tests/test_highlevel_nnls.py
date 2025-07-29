@@ -2,11 +2,10 @@ import numpy as np
 from numpy import linspace, r_, exp, sqrt
 from numpy.random import seed
 from conftest import load_module
+from pyspecdata.matrix_math import venk_nnls
 core = load_module("core")
 nddata = core.nddata
 init_logging = load_module("general_functions").init_logging
-from pyspecdata.matrix_math import venk_nnls
-import sys
 
 # ensure submodules are reloaded fresh for this test
 mu1 = 0.5
