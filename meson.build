@@ -13,11 +13,8 @@ numpy_f2py_src = run_command(py, '-c', 'import numpy,os,sys;sys.stdout.write(os.
 cc = meson.get_compiler('c')
 fc = meson.get_compiler('fortran')
 python_dep = py.dependency()
-fortran_sources = files(
+fixed_sources = files(
   'nnls/nnls.f',
-  'nnls/nnls_regularized.f90',
-  'nnls/nnls_regularized_loop.f90',
-  'nnls/venk_brd.f90',
   'lapack-3.4.0/SRC/dgesv.f',
   'lapack-3.4.0/SRC/dgetrf.f',
   'lapack-3.4.0/SRC/dgetrs.f',
@@ -37,6 +34,12 @@ fortran_sources = files(
   'lapack-3.4.0/BLAS/SRC/daxpy.f',
   'lapack-3.4.0/BLAS/SRC/lsame.f',
   'lapack-3.4.0/BLAS/SRC/xerbla.f',
+  )
+
+free_sources = files(
+  'nnls/nnls_regularized.f90',
+  'nnls/nnls_regularized_loop.f90',
+  'nnls/venk_brd.f90',
   )
 python_inc_dir = run_command(py, ['-c', 'from sysconfig import get_paths; print(get_paths()["include"])']).stdout().strip()
 
@@ -75,13 +78,21 @@ c_wrappers = custom_target(
 
 fixed_lib = static_library(
     'nnls_fixed',
-    fortran_sources,
-    fortran_args: ['-O2','-g','-fopenmp','-std=gnu','-ffixed-form','-ffixed-line-length-none'],
+    fixed_sources,
+    fortran_args: ['-O2','-g','-fopenmp','-std=gnu','-ffixed-form','-ffixed-line-length-none','-fallow-argument-mismatch'],
     pic: true,
     install: false,
 )
 
-mod_dir = join_paths(meson.current_build_dir(), 'libnnls_fixed.a.p')
+free_lib = static_library(
+    'nnls_free',
+    free_sources,
+    fortran_args: ['-O2','-g','-fopenmp','-std=gnu','-fallow-argument-mismatch'],
+    pic: true,
+    install: false,
+)
+
+mod_dir_fixed = join_paths(meson.current_build_dir(), 'libnnls_fixed.a.p')
 
 c_sources = files(
     fortranobject_src,
@@ -99,7 +110,7 @@ c_lib = static_library(
 wrapper_lib = static_library(
     'nnls_wrapper',
     c_wrappers[1],
-    fortran_args: ['-O2','-g','-std=gnu', '-I' + mod_dir],
+    fortran_args: ['-O2','-g','-std=gnu', '-I' + mod_dir_fixed],
     dependencies: [python_dep],
     pic: true,
     install: false,
@@ -110,6 +121,7 @@ py.extension_module(
     [],
     objects: [
         fixed_lib.extract_all_objects(),
+        free_lib.extract_all_objects(),
         wrapper_lib.extract_all_objects(),
         c_lib.extract_all_objects(),
     ],
@@ -117,15 +129,6 @@ py.extension_module(
     subdir: 'nnls',
     install: true,
 )
-
-fortran_args = []
-if host_machine.system() == 'windows'
-    # Windows-specific flags can go here if needed
-    # fortran_args += ['some-windows-specific-flag']
-else
-    # Assume Linux or other Unix-like systems
-    fortran_args += ['-fallow-argument-mismatch'] # Equivalent to extra_f77_compile_args
-endif
 
 subdir('pyspecdata')
 
