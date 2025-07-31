@@ -1,12 +1,16 @@
 [build-system]
-requires = ["meson-python", "meson>=0.55", "ninja", "numpy>=1.21.0"]  # Specify a suitable version of numpy
+requires = ["meson-python>=0.15", "meson>=1.2", "ninja>=1.11",
+         "numpy>=1.26.5", # 1.26.4 has weird fortran issues
+         ]
 build-backend = "mesonpy"
 
 [project]
 name = "pyspecdata"
 dependencies = [
     "sympy",
-    "numpy",
+    "numpy>=1.26.5", # because we've done a bit of work to make this work
+    "numexpr>=2.10.0", # less than this causes errors with pytables
+    "tables>=3.10.1", # less than this causes errors with pytables
     "scipy",
     "h5py",
     "matplotlib>=3.8.0",  # sharex is a problem in 3.5-6

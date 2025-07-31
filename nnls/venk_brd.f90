@@ -1,6 +1,6 @@
   subroutine venk_brd(initial_alpha,k0_mat,m,n,m_r,f,alpha_out,tol,maxiter)
     !f2py threadsafe
-    ! implement the Butler–Reeds–Dawson solver in Fortran
+    ! implement the Butler-Reeds-Dawson solver in Fortran
     integer,intent(in) :: m,n,maxiter
     double precision,intent(in) :: initial_alpha,tol
     double precision,intent(in) :: k0_mat(m,n),m_r(m)
