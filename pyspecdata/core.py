@@ -2088,6 +2088,9 @@ class nddata(object):
         e.g. to convert a variable from seconds
         to the units of `axisname`, do
         `var_s/d.div_units("axisname","s")`
+
+        e.g. to convert `axisname` to μs, do
+        `d["axisname"] *= d.div_units("axisname","μs")`
         """
         if arg2 is not None:
             denom_units = Q_(arg2)
