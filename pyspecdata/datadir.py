@@ -468,6 +468,8 @@ def getDATADIR(*args, **kwargs):
                 d = dict(pyspec_config._config_parser.items("General"))[
                     "data_directory"
                 ]
+                d = os.path.expanduser(d)
+
                 exp_directory = walk_and_grab_best_match(d)
                 if exp_directory is None:
                     raise ValueError(
