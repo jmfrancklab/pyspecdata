@@ -18,29 +18,6 @@ except Exception:
 sys.modules['numpy.core.rec'] = rec
 np.core.rec = rec
 
-# try to use real matplotlib; fall back to a minimal stub
-try:  # pragma: no cover - used only when matplotlib is available
-    import matplotlib.pyplot as plt  # noqa: F401
-    import matplotlib.pylab as pylab  # noqa: F401
-    sys.modules["pylab"] = pylab
-except Exception:  # pragma: no cover
-    plt = types.ModuleType("pyplot")
-    plt.rcParams = {"figure.figsize": (6.4, 4.8)}
-
-    def _rc(*_args, **_kwargs):
-        pass
-
-    plt.rc = _rc
-    plt.gci = lambda: None
-    sys.modules.setdefault("matplotlib", types.ModuleType("matplotlib"))
-    sys.modules["matplotlib"].pyplot = plt
-    sys.modules["matplotlib.pyplot"] = plt
-    sys.modules["matplotlib.pylab"] = plt
-    _pylab = types.ModuleType("pylab")
-    _pylab.pi = np.pi
-    _pylab.r_ = np.r_
-    sys.modules["pylab"] = _pylab
-
 # load nddata using helper to avoid requiring full dependencies
 core = load_module('core', use_real_pint=True)
 nddata = core.nddata
@@ -76,12 +53,9 @@ def _generate_nddata():
     return a
 
 
-def _check_hdf_layout(g, a):
+def _check_layout(g, a):
     assert "data" in g
-    dimlabels = [
-        x[0].decode() if isinstance(x[0], (bytes, np.bytes_)) else x[0]
-        for x in g.attrs["dimlabels"]
-    ]
+    dimlabels = [x[0].decode("utf-8") for x in g.attrs["dimlabels"]]
     assert dimlabels == ["t", "f"]
 
     axes_group = g["axes"]
@@ -110,10 +84,10 @@ def test_hdf5_layout(tmp_path):
     a.hdf5_write("sample.h5", directory=str(tmp_path))
     with h5py.File(tmp_path / "sample.h5", "r") as f:
         assert "test_nd" in f
-        _check_hdf_layout(f["test_nd"], a)
+        _check_layout(f["test_nd"], a)
 
 
 def test_hdf5_layout_from_state():
     a = _generate_nddata()
     g = dummy_class_from_step1(a.__getstate__())
-    _check_hdf_layout(g, a)
+    _check_layout(g, a)

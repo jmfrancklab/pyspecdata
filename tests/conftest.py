@@ -198,7 +198,8 @@ def load_module(name: str, *, use_real_pint: bool = False):
         pylab_stub.rcParams = {
             "axes.prop_cycle": types.SimpleNamespace(
                 by_key=lambda: {"color": ["k"]}
-            )
+            ),
+            "figure.figsize": (6.4, 4.8),
         }
         pylab_stub.pi = np.pi
         pylab_stub.r_ = np.r_
