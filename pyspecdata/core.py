@@ -115,8 +115,6 @@ plt.rcParams["ytick.direction"] = "out"
 # rcParams['font.size'] = 6
 plt.rcParams["axes.grid"] = False
 plt.rcParams["image.cmap"] = "jet"
-if "figure.figsize" not in plt.rcParams:
-    plt.rcParams["figure.figsize"] = (6.4, 4.8)
 plt.rcParams["figure.figsize"] = (
     plt.rcParams["figure.figsize"][0],
     plt.rcParams["figure.figsize"][0] / (1 + np.sqrt(5)) * 2,
@@ -1365,32 +1363,19 @@ class nddata(object):
         axes = {}
         for lbl in self.dimlabels:
             axes[lbl] = {
-                "data": np.array(self.getaxis(lbl)),
-                "axis_coords_units": str(self.get_units(lbl) or ""),
+                "data": self.getaxis(lbl),
+                "axis_coords_units": self.get_units(lbl),
             }
-
-        def clean_metadata(obj):
-            """Recursively convert metadata to basic Python/numpy types."""
-
-            if isinstance(obj, dict):
-                return {k: clean_metadata(v) for k, v in obj.items()}
-            if isinstance(obj, list):
-                return [clean_metadata(v) for v in obj]
-            if isinstance(obj, tuple):
-                return [clean_metadata(v) for v in obj]
-            if isinstance(obj, np.ndarray):
-                return np.array(obj)
-            return obj
 
         data_error = None
         if getattr(self, "data_error", None) is not None:
-            data_error = np.array(self.data_error)
+            data_error = self.data_error
 
         return {
-            "data": np.array(self.data),
-            "dimlabels": list(self.dimlabels),
+            "data": self.data,
+            "dimlabels": self.dimlabels,
             "axes": axes,
-            "other_info": clean_metadata(getattr(self, "other_info", {})),
+            "other_info": self.other_info,
             "data_units": self.data_units,
             "data_error": data_error,
         }
