@@ -1,3 +1,4 @@
+# flake8: noqa
 """Minimal axis utilities used by the test-suite.
 
 This module provides a very small subset of the functionality described in
@@ -9,101 +10,64 @@ replacement for the full featured version.
 from __future__ import annotations
 
 from collections import ChainMap, OrderedDict
-from typing import Iterable, List, MutableMapping
+from typing import Iterable, List, TYPE_CHECKING
 
 import numpy as np
 
 
 class axis_collection:
-    """A collection of :class:`axis` objects.
+    """A collection of :class:`nddata_axis` objects.
 
-    Designed so that an instance of `axis_collection` is an attribute of `nddata` called `axes`,
-    which behaves like a dictionary whose keys are the `dimlabels` of the `nddata` object,
-    and whose values are :class:`axis` objects.
-
-    Used to make sure that no axis names or aliases are duplicated.
-
-    You can add axes to the collection in any of the following ways, where `example_nddata` is an nddata instance.
-    (Remember that all `nddata` instances have an attribute `axes` of type `axis_collection`).
-
-    building a new axis
-        `example_nddata.axes['t2'] = ax_[0:1.2:100j]`
-        or
-        `example_nddata.axes['t2'] = ax_[0:1.2:0.01]`
-        (uses the same notation as numpy `r_[…]`)
-
-        this takes the place of `labels` or `setaxis` in old versions of pyspecdata.
-
-    associating an existing axis
-        `example_nddata.axes += existing_axis` `existing_axis` **must** have a
-        name or alias that matches one of `example_nddata.dimlabels`.
+    Axes are stored in insertion order and may be looked up by name using
+    dictionary-style access.  The collection ensures that no axis names or
+    aliases are duplicated.
 
     Attributes
     ----------
-    dimlabels: list
-        This is the same `dimlabels` attribute as the instance of the parent class.
     names_used: ChainMap
-        Stores a list of all the names and aliases used by the `axis` objects
-        that are contained in the collection,
-        as well as the axes for any conjugate domains.
-        since these need to be unique.
-
-        This is simply
-        `ChainMap(ax1.references,ax2.references,…,etc.)`
+        Mapping of all names and aliases used within the collection.
     """
 
-    def __init__(self, dimlabels: Iterable[str]):
-        self.dimlabels: List[str] = list(dimlabels)
-        self._axes: MutableMapping[str, nddata_axis] = {}
+    def __init__(self):
+        self._axes: "OrderedDict[str, nddata_axis]" = OrderedDict()
         self.names_used: ChainMap = ChainMap()
 
     def __getitem__(self, key: str) -> "nddata_axis":
         return self._axes[key]
 
     def __setitem__(self, key: str, value: "nddata_axis") -> None:
-        if key not in self.dimlabels:
-            raise KeyError(key)
-        if key in self._axes:
-            old = self._axes[key]
-            self.names_used.maps = [
-                m for m in self.names_used.maps if not m or list(m.values())[0] is not old
-            ]
-        if not getattr(value, "names", []):
-            value.names = [key]
-        for name in value.names:
-            if name in self.names_used:
+        if getattr(value, "name", None) and value.name != key:
+            raise ValueError("axis name mismatch")
+        value.name = key
+        for ref in value.references:
+            if ref in self.names_used:
                 raise ValueError("duplicate axis name")
-        self.names_used.maps.append({n: value for n in value.names})
         self._axes[key] = value
+        self.names_used.maps.append(value.references)
 
     def __iadd__(self, axis: "nddata_axis") -> "axis_collection":
-        for name in axis.names:
-            if name in self.dimlabels:
-                self[name] = axis
-                return self
-        raise ValueError("axis name does not match any dimlabel")
-
-    def rename(self, old: str, new: str) -> "axis_collection":
-        """Rename an axis. If `oldname` is the preferred name of the axis,
-        also go into dimlabels, and change the name
-        (since dimlabels is the same list used by the `nddata` that
-        contains the collection, it will update the dimlabel there as
-        well)"""
-        if old not in self.dimlabels:
-            raise ValueError(f"{old!r} not a current dimlabel")
-        idx = self.dimlabels.index(old)
-        self.dimlabels[idx] = new
-        if old in self._axes:
-            ax = self._axes.pop(old)
-            ax.names = [new if n == old else n for n in ax.names]
-            self._axes[new] = ax
+        self[axis.name] = axis
         return self
+
+    @property
+    def dimlabels(self) -> List[str]:
+        return list(self._axes.keys())
+
+    @property
+    def shape(self):
+        from .ndshape import ndshape_base as ndshape
+
+        sizes = [ax.size for ax in self._axes.values()]
+        return ndshape(sizes, self.dimlabels)
 
 
 class _ax_class_maker:
-    def __getitem__(self, slc):
-        if not isinstance(slc, slice):  # pragma: no cover - defensive
-            raise TypeError("axis builder expects slice syntax")
+    def __getitem__(self, item):
+        if not (isinstance(item, tuple) and len(item) == 2):  # pragma: no cover - defensive
+            raise TypeError("axis builder expects ('name', slice)")
+        name, slc = item
+        if not isinstance(name, str) or not isinstance(slc, slice):
+            raise TypeError("axis builder expects ('name', slice)")
         start = 0.0 if slc.start is None else float(slc.start)
         stop = float(slc.stop)
         step = slc.step
@@ -111,7 +75,9 @@ class _ax_class_maker:
             arr = np.linspace(start, stop, int(abs(step)))
         else:
             arr = np.arange(start, stop, float(step))
-        return nddata_axis(arr)
+        axis = nddata_axis(arr)
+        axis.name = name
+        return axis
 
 
 ax_ = _ax_class_maker()
@@ -271,7 +237,8 @@ class nddata_axis:
             omitted, an empty axis is created for later modification.
         """
         self.data = np.array(arr, dtype=float)
-        self.names: List[str] = []
+        self.name: str = ""
+        self.aliases: List[str] = []
 
     # ------------------------------------------------------------------
     # basic helpers
@@ -284,11 +251,9 @@ class nddata_axis:
 
     @property
     def references(self) -> OrderedDict:
-        """returns OrderedDict of all names and aliases such that keys all point to the current instance (`self`)
-
-        the idea is that this should be placed in a `ChainMap` object to be used by the :class:`axis_collection` class that contains the axis.
-        """
-        return OrderedDict((name, self) for name in self.names)
+        """Mapping of all names and aliases for duplicate checking."""
+        names = [self.name] + list(getattr(self, "aliases", []))
+        return OrderedDict((n, self) for n in names if n)
 
     # ------------------------------------------------------------------
     # slicing and indexing
@@ -306,7 +271,7 @@ class nddata_axis:
     # ------------------------------------------------------------------
     # arithmetic helpers
     def _reshape_for(self, other: "nddata"):
-        idx = other.dimlabels.index(self.names[0])
+        idx = other.dimlabels.index(self.name)
         shape = [1] * other.data.ndim
         shape[idx] = self.size
         return self.data.reshape(shape)
@@ -314,15 +279,30 @@ class nddata_axis:
     def __mul__(self, other):
         if isinstance(other, np.ndarray):
             return self.data * other
+        if isinstance(other, nddata_axis):
+            from .core import nddata
+
+            data = np.outer(self.data, other.data)
+            result = nddata(data, [self.name, other.name])
+            result.axes = axis_collection()
+            result.axes += self
+            result.axes += other
+            return result
         if hasattr(other, "data") and hasattr(other, "dimlabels"):
-            arr = self._reshape_for(other)
-            result = other.__class__(other.data * arr, other.dimlabels)
-            result.axes = axis_collection(result.dimlabels)
-            for name in result.dimlabels:
-                if name == self.names[0]:
-                    result.axes[name] = self
-                else:
-                    result.axes[name] = other.axes[name]
+            if self.name in other.dimlabels:
+                arr = self._reshape_for(other)
+                data = other.data * arr
+                dimlabels = list(other.dimlabels)
+            else:
+                arr = self.data.reshape((self.size,) + (1,) * other.data.ndim)
+                data = arr * other.data
+                dimlabels = [self.name] + list(other.dimlabels)
+            result = other.__class__(data, dimlabels)
+            result.axes = axis_collection()
+            result.axes += self
+            for name in other.dimlabels:
+                if name != self.name:
+                    result.axes += other.axes[name]
             return result
         return self.data * other
 
@@ -342,8 +322,5 @@ class nddata_axis:
 
 
 # delayed import to avoid circular dependency when type checking
-from typing import TYPE_CHECKING
-
 if TYPE_CHECKING:  # pragma: no cover
     from .core import nddata  # noqa: F401
-

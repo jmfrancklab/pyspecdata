@@ -48,3 +48,13 @@ def test_no_duplicate_aliases():
     b.aliases = ["time"]
     with pytest.raises(ValueError):
         axes += b
+
+
+def test_dimlabels_and_shape_properties():
+    axes = axis_mod.axis_collection()
+    axes += axis_mod.ax_["t", 0:1:5j]
+    axes += axis_mod.ax_["s", 0:1:3j]
+    assert axes.dimlabels == ["t", "s"]
+    shp = axes.shape
+    assert shp.dimlabels == ["t", "s"]
+    assert shp.shape == [5, 3]
