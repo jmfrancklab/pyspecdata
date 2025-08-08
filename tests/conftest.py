@@ -23,7 +23,6 @@ def load_module(name: str, *, use_real_pint: bool = False):
         environment without the real dependency installed.
     """
     # provide dummy replacements for optional compiled dependencies
-    sys.modules.setdefault("tables", types.ModuleType("tables"))
     sys.modules.setdefault("h5py", types.ModuleType("h5py"))
 
     if not use_real_pint:

@@ -7140,12 +7140,12 @@ class nddata(object):
                     and self.get_error() is not None
                     and len(self.get_error()) > 0
                 ):
-                    thistable = np.core.rec.fromarrays(
+                    thistable = np.rec.fromarrays(
                         [self.data, self.get_error()], names="data,error"
                     )
                     mydataattrs.remove("data_error")
                 else:
-                    thistable = np.core.rec.fromarrays(
+                    thistable = np.rec.fromarrays(
                         [self.data], names="data"
                     )
                 mydataattrs.remove("data")
@@ -7206,7 +7206,7 @@ class nddata(object):
                                 > 0
                             ):  # this is needed to avoid all errors, though I
                                 # guess I could use try/except
-                                thistable = np.core.rec.fromarrays(
+                                thistable = np.rec.fromarrays(
                                     [
                                         myaxisattrsforthisdim["axis_coords"],
                                         myaxisattrsforthisdim[
@@ -7217,7 +7217,7 @@ class nddata(object):
                                 )
                                 myaxisattrsforthisdim.pop("axis_coords_error")
                             else:
-                                thistable = np.core.rec.fromarrays(
+                                thistable = np.rec.fromarrays(
                                     [myaxisattrsforthisdim["axis_coords"]],
                                     names="data",
                                 )

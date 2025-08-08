@@ -7,14 +7,6 @@ from conftest import load_module
 
 # ensure optional compiled dependency is stubbed
 sys.modules.setdefault("_nnls", types.ModuleType("_nnls"))
-# numpy.core.rec was removed in newer numpy, but nddata.hdf5_write expects it
-rec = types.ModuleType("rec")
-try:
-    rec.fromarrays = np.core.records.fromarrays
-except Exception:
-    rec.fromarrays = np.core.records.fromarrays
-sys.modules["numpy.core.rec"] = rec
-np.core.rec = rec
 
 # load nddata using helper to avoid requiring full dependencies
 core = load_module("core", use_real_pint=True)
@@ -30,6 +22,9 @@ class DummyGroup(dict):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.attrs = self
+        for k, v in self.items():
+            if type(v) is dict:
+                self[k] = DummyGroup(v)
 
 
 def _generate_nddata():
