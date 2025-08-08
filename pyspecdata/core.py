@@ -1357,6 +1357,81 @@ class nddata(object):
     def _contains_symbolic(self, string):
         return string[:9] == "symbolic_" and hasattr(self, string)
 
+    # {{{ serialization helpers
+    def __getstate__(self):
+        class Node(dict):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.attrs = self
+
+        axes = Node()
+        for lbl in self.dimlabels:
+            axes[lbl] = Node(
+                {
+                    "data": np.array(self.getaxis(lbl)),
+                    "axis_coords_units": str(self.get_units(lbl) or ""),
+                }
+            )
+
+        def meta_to_state(d):
+            out = Node()
+            for k, v in d.items():
+                if isinstance(v, dict):
+                    out[k] = meta_to_state(v)
+                elif isinstance(v, (list, tuple, np.ndarray)):
+                    out[k] = Node({"LISTELEMENTS": list(v)})
+                else:
+                    out[k] = v
+            return out
+
+        meta = meta_to_state(getattr(self, "meta", {}))
+        data_error = None
+        if getattr(self, "data_error", None) is not None:
+            data_error = np.array(self.data_error)
+        return Node(
+            {
+                "data": np.array(self.data),
+                "dimlabels": list(self.dimlabels),
+                "axes": axes,
+                "meta": meta,
+                "data_units": self.data_units,
+                "data_error": data_error,
+            }
+        )
+
+    def __setstate__(self, state):
+        def meta_from_state(d):
+            out = {}
+            for k, v in d.items():
+                if isinstance(v, dict) and "LISTELEMENTS" in v:
+                    out[k] = list(v["LISTELEMENTS"])
+                elif isinstance(v, dict):
+                    out[k] = meta_from_state(v)
+                else:
+                    out[k] = v
+            return out
+
+        dimlabels = state.get("dimlabels", [])
+        axes_node = state.get("axes", {})
+        axis_coords = [np.array(axes_node[l]["data"]) for l in dimlabels]
+        axis_units = [axes_node[l].get("axis_coords_units") for l in dimlabels]
+        data = np.array(state["data"])
+        self.__my_init__(
+            data,
+            list(data.shape),
+            dimlabels,
+            axis_coords=axis_coords,
+            axis_coords_units=axis_units,
+            data_units=state.get("data_units"),
+        )
+        self.data_error = state.get("data_error")
+        if self.data_error is not None:
+            self.data_error = np.array(self.data_error)
+        self.meta = meta_from_state(state.get("meta", {}))
+        return
+
+    # }}}
+
     # {{{ for printing
     def __repr_pretty__(self, p, cycle):
         if cycle:
