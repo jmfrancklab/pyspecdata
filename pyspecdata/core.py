@@ -1360,27 +1360,26 @@ class nddata(object):
         return string[:9] == "symbolic_" and hasattr(self, string)
 
     def __getstate__(self):
-        """Return a simple dictionary describing the nddata state."""
-
-        class AttrDict(dict):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
-                self.attrs = self
+        """Return a plain ``dict`` describing the ``nddata`` state."""
 
         axes = {}
         for lbl in self.dimlabels:
-            axes[lbl] = AttrDict(
-                {
-                    "data": np.array(self.getaxis(lbl)),
-                    "axis_coords_units": str(self.get_units(lbl) or ""),
-                }
-            )
+            axes[lbl] = {
+                "data": np.array(self.getaxis(lbl)),
+                "axis_coords_units": str(self.get_units(lbl) or ""),
+            }
 
-        def serialize_other_info(obj):
+        def clean_metadata(obj):
+            """Recursively convert metadata to basic Python/numpy types."""
+
             if isinstance(obj, dict):
-                return AttrDict({k: serialize_other_info(v) for k, v in obj.items()})
-            if isinstance(obj, (list, tuple, np.ndarray)):
-                return AttrDict({"LISTELEMENTS": [serialize_other_info(v) for v in obj]})
+                return {k: clean_metadata(v) for k, v in obj.items()}
+            if isinstance(obj, list):
+                return [clean_metadata(v) for v in obj]
+            if isinstance(obj, tuple):
+                return [clean_metadata(v) for v in obj]
+            if isinstance(obj, np.ndarray):
+                return np.array(obj)
             return obj
 
         data_error = None
@@ -1391,7 +1390,7 @@ class nddata(object):
             "data": np.array(self.data),
             "dimlabels": list(self.dimlabels),
             "axes": axes,
-            "other_info": serialize_other_info(getattr(self, "other_info", {})),
+            "other_info": clean_metadata(getattr(self, "other_info", {})),
             "data_units": self.data_units,
             "data_error": data_error,
         }
@@ -1433,8 +1432,6 @@ class nddata(object):
 
         def deserialize_other_info(obj):
             if isinstance(obj, dict):
-                if "LISTELEMENTS" in obj and len(obj) == 1:
-                    return [deserialize_other_info(v) for v in obj["LISTELEMENTS"]]
                 return {
                     decode_if_bytes(k): deserialize_other_info(v)
                     for k, v in obj.items()
