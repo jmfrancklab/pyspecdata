@@ -8,7 +8,7 @@ replacement for the full featured version.
 
 from __future__ import annotations
 
-from collections import ChainMap
+from collections import ChainMap, OrderedDict
 from typing import Iterable, List, MutableMapping
 
 import numpy as np
@@ -258,7 +258,18 @@ class nddata_axis:
 
     __array_priority__ = 1000
 
-    def __init__(self, arr: Iterable[float]):
+    def __init__(self, arr: Iterable[float] = ()):  # type: ignore[assignment]
+        """Either instantiates an empty array or analyzes ``arr`` for conversion.
+
+        To construct with the analog of ``r_[...]``, see the helper class
+        :data:`ax_`, which is more efficient than passing a full array.
+
+        Parameters
+        ----------
+        arr
+            Iterable of coordinate values used to populate the axis.  If
+            omitted, an empty axis is created for later modification.
+        """
         self.data = np.array(arr, dtype=float)
         self.names: List[str] = []
 
@@ -270,6 +281,14 @@ class nddata_axis:
 
     def to_array(self) -> np.ndarray:
         return self.data
+
+    @property
+    def references(self) -> OrderedDict:
+        """returns OrderedDict of all names and aliases such that keys all point to the current instance (`self`)
+
+        the idea is that this should be placed in a `ChainMap` object to be used by the :class:`axis_collection` class that contains the axis.
+        """
+        return OrderedDict((name, self) for name in self.names)
 
     # ------------------------------------------------------------------
     # slicing and indexing
