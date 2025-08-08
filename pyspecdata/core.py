@@ -1361,11 +1361,15 @@ class nddata(object):
         """Return a plain ``dict`` describing the ``nddata`` state."""
 
         axes = {}
-        for lbl in self.dimlabels:
-            axes[lbl] = {
+        for j, lbl in enumerate(self.dimlabels):
+            axis_state = {
                 "data": self.getaxis(lbl),
                 "axis_coords_units": self.get_units(lbl),
             }
+            err = self.get_error(lbl)
+            if err is not None:
+                axis_state["error"] = err
+            axes[lbl] = axis_state
         def serialize_other_info(obj):
             if isinstance(obj, dict):
                 return {k: serialize_other_info(v) for k, v in obj.items()}
@@ -1373,17 +1377,16 @@ class nddata(object):
                 return {"LISTELEMENTS": [serialize_other_info(v) for v in obj]}
             return obj
 
-        data_error = None
+        data_state = {"data": self.data}
         if getattr(self, "data_error", None) is not None:
-            data_error = self.data_error
+            data_state["error"] = self.data_error
 
         return {
-            "data": self.data,
+            "data": data_state,
             "dimlabels": self.dimlabels,
             "axes": axes,
             "other_info": serialize_other_info(self.other_info),
             "data_units": self.get_units(),
-            "data_error": data_error,
         }
 
     def __setstate__(self, state):
@@ -1409,15 +1412,28 @@ class nddata(object):
         self.axis_coords_error = []
         for lbl in dimlabels:
             axinfo = axes_state.get(lbl, {})
-            self.axis_coords.append(np.array(axinfo.get("data", [])))
+            coords = np.array(axinfo.get("data", []))
+            self.axis_coords.append(coords)
             unit = decode_if_bytes(axinfo.get("axis_coords_units"))
             self.axis_coords_units.append(unit)
-            self.axis_coords_error.append(None)
+            err = axinfo.get("error")
+            self.axis_coords_error.append(
+                np.array(err) if err is not None else None
+            )
 
-        self.data = np.array(state["data"])
-        self.data_error = state.get("data_error")
-        if self.data_error is not None:
-            self.data_error = np.array(self.data_error)
+        shape = tuple(len(ax) for ax in self.axis_coords)
+
+        data_state = state["data"]
+        if isinstance(data_state, dict):
+            self.data = np.array(data_state.get("data")).reshape(shape)
+            err = data_state.get("error")
+            self.data_error = (
+                np.array(err).reshape(shape) if err is not None else None
+            )
+        else:
+            self.data = np.array(data_state).reshape(shape)
+            err = state.get("data_error")
+            self.data_error = np.array(err).reshape(shape) if err is not None else None
 
         self.data_units = decode_if_bytes(state.get("data_units"))
 
