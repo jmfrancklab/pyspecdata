@@ -81,7 +81,7 @@ def test_hdf5_layout(tmp_path):
         _check_layout(f["test_nd"], a)
 
 
-def test_hdf5_layout_from_state():
+def test_state_layout():
     a = _generate_nddata()
     g = DummyGroup(a.__getstate__())
     _check_layout(g, a)
