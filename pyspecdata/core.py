@@ -1357,6 +1357,87 @@ class nddata(object):
     def _contains_symbolic(self, string):
         return string[:9] == "symbolic_" and hasattr(self, string)
 
+    def __getstate__(self):
+        """Return a plain ``dict`` describing the ``nddata`` state."""
+
+        axes = {}
+        for lbl in self.dimlabels:
+            axes[lbl] = {
+                "data": self.getaxis(lbl),
+                "axis_coords_units": self.get_units(lbl),
+            }
+        def serialize_other_info(obj):
+            if isinstance(obj, dict):
+                return {k: serialize_other_info(v) for k, v in obj.items()}
+            if isinstance(obj, (list, tuple)):
+                return {"LISTELEMENTS": [serialize_other_info(v) for v in obj]}
+            return obj
+
+        data_error = None
+        if getattr(self, "data_error", None) is not None:
+            data_error = self.data_error
+
+        return {
+            "data": self.data,
+            "dimlabels": self.dimlabels,
+            "axes": axes,
+            "other_info": serialize_other_info(self.other_info),
+            "data_units": self.get_units(),
+            "data_error": data_error,
+        }
+
+    def __setstate__(self, state):
+        """Restore object state from a dictionary."""
+
+        def decode_if_bytes(x):
+            if isinstance(x, (bytes, np.bytes_)):
+                return x.decode("utf-8")
+            return x
+
+        missing = [k for k in ("dimlabels", "data") if k not in state]
+        if missing:
+            raise ValueError(
+                "state is missing required keys: " + ", ".join(missing)
+            )
+
+        dimlabels = [decode_if_bytes(lbl) for lbl in state["dimlabels"]]
+        self.dimlabels = list(dimlabels)
+
+        axes_state = state.get("axes", {})
+        self.axis_coords = []
+        self.axis_coords_units = []
+        self.axis_coords_error = []
+        for lbl in dimlabels:
+            axinfo = axes_state.get(lbl, {})
+            self.axis_coords.append(np.array(axinfo.get("data", [])))
+            unit = decode_if_bytes(axinfo.get("axis_coords_units"))
+            self.axis_coords_units.append(unit)
+            self.axis_coords_error.append(None)
+
+        self.data = np.array(state["data"])
+        self.data_error = state.get("data_error")
+        if self.data_error is not None:
+            self.data_error = np.array(self.data_error)
+
+        self.data_units = decode_if_bytes(state.get("data_units"))
+
+        def deserialize_other_info(obj):
+            if isinstance(obj, dict):
+                if "LISTELEMENTS" in obj and len(obj) == 1:
+                    return [deserialize_other_info(v) for v in obj["LISTELEMENTS"]]
+                return {
+                    decode_if_bytes(k): deserialize_other_info(v)
+                    for k, v in obj.items()
+                }
+            elif isinstance(obj, list):
+                return [deserialize_other_info(v) for v in obj]
+            else:
+                return decode_if_bytes(obj)
+
+        self.other_info = deserialize_other_info(state.get("other_info", {}))
+        self.genftpairs = False
+        return
+
     # {{{ for printing
     def __repr_pretty__(self, p, cycle):
         if cycle:

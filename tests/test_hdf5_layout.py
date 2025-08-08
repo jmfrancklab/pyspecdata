@@ -39,7 +39,7 @@ def _generate_nddata():
     a.set_units("f", "Hz")
     a.set_units("V")
     a.name("test_nd")
-    a.meta = {"level1": {"level2": 5, "level2list": [1, 2, 3]}}
+    a.other_info.update({"level1": {"level2": 5, "level2list": [1, 2, 3]}})
     return a
 
 
@@ -70,11 +70,11 @@ def _check_layout(g, a):
             axis_unit = axis_unit.decode()
         assert axis_unit == unit
 
-    meta = g["meta"]
-    assert "level1" in meta
-    assert meta["level1"].attrs["level2"] == 5
+    other_info = g["other_info"]
+    assert "level1" in other_info
+    assert other_info["level1"].attrs["level2"] == 5
     np.testing.assert_array_equal(
-        meta["level1"].attrs["level2list"]["LISTELEMENTS"], [1, 2, 3]
+        other_info["level1"].attrs["level2list"]["LISTELEMENTS"], [1, 2, 3]
     )
 
 
