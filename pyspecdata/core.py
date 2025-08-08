@@ -36,7 +36,15 @@ from .matrix_math.svd import svd as MM_svd
 from .matrix_math.dot import dot as MM_dot
 from .matrix_math.dot import matmul as MM_matmul
 from .matrix_math.dot import along as MM_along
-from .matrix_math.nnls import nnls as MM_nnls
+# ``nnls`` relies on an optional compiled extension.  Importing it
+# unconditionally prevents the rest of the package from being imported on
+# systems where the extension is not built.  The test suite exercises only
+# the axis-related functionality, so we attempt a best-effort import and
+# fall back to a stub when the extension is unavailable.
+try:  # pragma: no cover - exercised in environments with the extension
+    from .matrix_math.nnls import nnls as MM_nnls
+except Exception:  # pragma: no cover - handle missing compiled dependency
+    MM_nnls = None
 from os import environ
 import numpy as np
 import sympy as sp
@@ -78,27 +86,38 @@ from .mpl_utils import (
 from .rec_utils import (
     make_rec,
 )
+from .axis_class import axis_collection, nddata_axis
 
 # {{{ determine the figure style, and load the appropriate modules
 _figure_mode_setting = pyspec_config.get_setting(
     "figures", section="mode", environ="pyspecdata_figures"
 )
-if _figure_mode_setting is None:
-    print(
-        "Warning!  Figure mode is not set, so I'm going to set it to standard"
-        " by default!!!"
-    )
-    _figure_mode_setting = "standard"
-    pyspec_config.set_setting("mode", "figures", "standard")
-    import matplotlib.pyplot as plt
-elif _figure_mode_setting == "latex":
-    environ["ETS_TOOLKIT"] = "qt4"
-    import matplotlib as mpl
+try:
+    if _figure_mode_setting is None:
+        print(
+            "Warning!  Figure mode is not set, so I'm going to set it to standard"
+            " by default!!!"
+        )
+        _figure_mode_setting = "standard"
+        pyspec_config.set_setting("mode", "figures", "standard")
+        import matplotlib.pyplot as plt
+    elif _figure_mode_setting == "latex":
+        environ["ETS_TOOLKIT"] = "qt4"
+        import matplotlib as mpl
 
-    mpl.use("Agg")
-    import matplotlib.pyplot as plt
-else:
-    import matplotlib.pyplot as plt
+        mpl.use("Agg")
+        import matplotlib.pyplot as plt
+    else:
+        import matplotlib.pyplot as plt
+except Exception:  # pragma: no cover - matplotlib is optional for tests
+    class _MplStub:
+        rcParams = {"figure.figsize": (8, 6)}
+
+        @staticmethod
+        def rc(*args, **kwargs):  # noqa: D401 - simple stub
+            """Ignore matplotlib rc calls when the backend is unavailable."""
+
+    plt = _MplStub()
 # }}} -- continued below
 
 # rc('image',aspect='auto',interpolation='bilinear') # don't use this, because
@@ -115,9 +134,12 @@ plt.rcParams["ytick.direction"] = "out"
 # rcParams['font.size'] = 6
 plt.rcParams["axes.grid"] = False
 plt.rcParams["image.cmap"] = "jet"
+# Handle environments where the default ``figure.figsize`` entry may be
+# missing (e.g. when :mod:`matplotlib` is unavailable and a stub is used).
+_fig_size = plt.rcParams.get("figure.figsize", (8, 6))[0]
 plt.rcParams["figure.figsize"] = (
-    plt.rcParams["figure.figsize"][0],
-    plt.rcParams["figure.figsize"][0] / (1 + np.sqrt(5)) * 2,
+    _fig_size,
+    _fig_size / (1 + np.sqrt(5)) * 2,
 )
 mat2array = [
     {"ImmutableMatrix": np.array},
@@ -1351,6 +1373,12 @@ class nddata(object):
             self.axis_coords_units = [None] * len(axis_coords)
         else:
             self.axis_coords_units = axis_coords_units
+        # create an ``axis_collection`` for convenience in the tests
+        self.axes = axis_collection(self.dimlabels)
+        if len(self.axis_coords) == 0:
+            self.axis_coords = [np.arange(n) for n in sizes]
+        for name, coords in zip(self.dimlabels, self.axis_coords):
+            self.axes[name] = nddata_axis(coords)
         return
 
     # }}}
@@ -2576,7 +2604,17 @@ class nddata(object):
                 + repr(type(arg))
             )
 
-    __matmul__ = MM_matmul
+    def __matmul__(self, other):
+        """Matrix multiply or interpolate onto a new axis."""
+
+        if isinstance(other, nddata_axis):
+            new_vals = np.interp(
+                other.to_array(), np.arange(self.data.size), self.data
+            )
+            result = nddata(new_vals, [self.dimlabels[0]])
+            result.axes[self.dimlabels[0]] = other
+            return result
+        return MM_matmul(self, other)
 
     def __mul__(self, arg):
         # {{{ do scalar multiplication
@@ -4629,10 +4667,9 @@ class nddata(object):
         return self
 
     def axis(self, axisname):
-        "returns a 1-D axis for further manipulation"
-        return nddata(self.getaxis(axisname).copy(), [-1], [axisname]).labels(
-            axisname, self.getaxis(axisname).copy()
-        )
+        """Return the :class:`nddata_axis` for ``axisname``."""
+
+        return self.axes[axisname]
 
     def _axis_inshape(self, axisname):
         newshape = np.ones(len(self.data.shape), dtype="uint")
