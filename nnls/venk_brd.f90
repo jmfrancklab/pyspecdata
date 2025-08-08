@@ -1,6 +1,6 @@
   subroutine venk_brd(initial_alpha,k0_mat,m,n,m_r,f,alpha_out,tol,maxiter)
     !f2py threadsafe
-    ! implement the Butler–Reeds–Dawson solver in Fortran
+    ! implement the Butler-Reeds-Dawson solver in Fortran
     integer,intent(in) :: m,n,maxiter
     double precision,intent(in) :: initial_alpha,tol
     double precision,intent(in) :: k0_mat(m,n),m_r(m)
@@ -11,10 +11,11 @@
     double precision :: alpha,alpha_new,sqrt_n
     integer :: iter,j
     double precision :: norm_mr
+    external dgemv
     sqrt_n = sqrt(dble(m))
     alpha = initial_alpha
 
-    allocate(c(m),tempvec(m))
+    allocate(c(m),tempvec(n))
     c = 1.0d0
     norm_mr = norm2(m_r)
     do iter=1,maxiter
@@ -24,7 +25,7 @@
       if (abs(alpha_new-alpha)/alpha < tol) exit
       alpha = alpha_new
     end do
-    tempvec = matmul(transpose(k0_mat),c)
+    call dgemv('T',m,n,1.0d0,k0_mat,m,c,1,0.0d0,tempvec,1)
     do j=1,n
       if (tempvec(j) > 0.d0) then
         f(j) = tempvec(j)
@@ -47,8 +48,8 @@
     integer,allocatable :: piv(:)
     double precision,allocatable :: delta_c(:)
     double precision :: chi_old,chi_new,s,denom,norm_grad,norm_mr
-    external dgesv
-    allocate(delta_c(n), tempvec(m))
+    external dgesv, dgemm
+    allocate(delta_c(m), tempvec(m))
     allocate(g_mat(m,m),c_new(m),grad(m),newgrad(m),h_mat(m,m),h_mat_copy(m,m),k0_t(n),piv(m))
     norm_mr = norm2(m_r)
     !write(*,*) 'venk_nnls called with', alpha, 'and initial c'
@@ -66,7 +67,7 @@
       h_mat_copy = h_mat
       ! IN: m, 1, m, m INOUT: h_mat,delta_c OUT: piv,info
       call dgesv(m,1,h_mat_copy,m,piv,delta_c,m,info)
-      tempvec = matmul(h_mat,delta_c)
+      call dgemm('N','N',m,1,m,1.0d0,h_mat,m,delta_c,m,0.0d0,tempvec,m)
       denom = dot_product(delta_c,tempvec)
       if (denom == 0.d0) denom = 1.d-12
       s = dot_product(delta_c,grad) / denom
@@ -96,7 +97,11 @@
       subroutine chi_func(c_forchi,g_mat_forchi,alpha_forchi,m_r_forchi,val_forchi)
         double precision,intent(in)::c_forchi(:),g_mat_forchi(size(c_forchi),size(c_forchi)),alpha_forchi,m_r_forchi(:)
         double precision,intent(out)::val_forchi
-        val_forchi = dot_product(c_forchi,matmul(g_mat_forchi,c_forchi)) &
+        double precision :: temp(size(c_forchi))
+        call dgemm('N','N',size(c_forchi),1,size(c_forchi),1.0d0, &
+            g_mat_forchi,size(c_forchi),c_forchi,size(c_forchi),0.0d0, &
+            temp,size(c_forchi))
+        val_forchi = dot_product(c_forchi,temp) &
           & + alpha_forchi*dot_product(c_forchi,c_forchi) &
           & - dot_product(c_forchi,m_r_forchi)
       end subroutine chi_func
@@ -131,7 +136,9 @@
     integer,intent(in)::m
     double precision,intent(in)::g_mat(m,m),c(m),alpha,m_r(m)
     double precision,intent(out)::grad(m)
-    grad = matmul(g_mat,c) + alpha*c - m_r
+    double precision :: temp(m)
+    call dgemm('N','N',m,1,m,1.0d0,g_mat,m,c,m,0.0d0,temp,m)
+    grad = temp + alpha*c - m_r
   end subroutine compute_grad
   subroutine add_diag(g_mat,m,alpha,h_mat)
     integer,intent(in)::m

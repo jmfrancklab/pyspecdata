@@ -3,7 +3,7 @@ name: Build and Publish Wheels
 on:
   push:
     tags:
-      - 'v[0-9.]*'  # digits and dots after v, e.g. v1.2.3
+      - 'v[0-9]*'  # glob patterns only; this matches tags like v1.2.3
 
 jobs:
   build_wheels:

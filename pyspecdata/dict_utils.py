@@ -90,7 +90,7 @@ def unmake_ndarray(array_to_conv, name_forprint="unknown"):
             )
         )
         # }}}
-    elif type(array_to_conv) in [np.string_, np.int32, np.float64, np.bool_]:
+    elif type(array_to_conv) in [np.bytes_, np.int32, np.float64, np.bool_]:
         # {{{ map numpy strings onto normal strings
         retval = array_to_conv.tolist()
         logger.debug(
@@ -103,7 +103,7 @@ def unmake_ndarray(array_to_conv, name_forprint="unknown"):
         # {{{ deal with lists
         logger.debug(strm(name_forprint, "is a list"))
         typeofall = list(map(type, array_to_conv))
-        if all([x is np.string_ for x in typeofall]):
+        if all([x is np.bytes_ for x in typeofall]):
             logger.debug(
                 strm(name_forprint, "=", typeofall, "are all numpy strings")
             )
