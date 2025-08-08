@@ -37,6 +37,7 @@ from .matrix_math.dot import dot as MM_dot
 from .matrix_math.dot import matmul as MM_matmul
 from .matrix_math.dot import along as MM_along
 from .matrix_math.nnls import nnls as MM_nnls
+import os
 from os import environ
 import numpy as np
 import sympy as sp
@@ -1359,54 +1360,46 @@ class nddata(object):
 
     # {{{ serialization helpers
     def __getstate__(self):
-        class Node(dict):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
-                self.attrs = self
-
-        axes = Node()
+        axes = {}
         for lbl in self.dimlabels:
-            axes[lbl] = Node(
-                {
-                    "data": np.array(self.getaxis(lbl)),
-                    "axis_coords_units": str(self.get_units(lbl) or ""),
-                }
-            )
+            axes[lbl] = {
+                "data": np.array(self.getaxis(lbl)),
+                "axis_coords_units": str(self.get_units(lbl) or ""),
+            }
 
-        def meta_to_state(d):
-            out = Node()
+        def other_info_to_state(d):
+            out = {}
             for k, v in d.items():
                 if isinstance(v, dict):
-                    out[k] = meta_to_state(v)
+                    out[k] = other_info_to_state(v)
                 elif isinstance(v, (list, tuple, np.ndarray)):
-                    out[k] = Node({"LISTELEMENTS": list(v)})
+                    out[k] = {"LISTELEMENTS": list(v)}
                 else:
                     out[k] = v
             return out
 
-        meta = meta_to_state(getattr(self, "meta", {}))
+        other_info = other_info_to_state(getattr(self, "other_info", {}))
         data_error = None
         if getattr(self, "data_error", None) is not None:
             data_error = np.array(self.data_error)
-        return Node(
-            {
-                "data": np.array(self.data),
-                "dimlabels": list(self.dimlabels),
-                "axes": axes,
-                "meta": meta,
-                "data_units": self.data_units,
-                "data_error": data_error,
-            }
-        )
+        state = {
+            "data": np.array(self.data),
+            "dimlabels": list(self.dimlabels),
+            "axes": axes,
+            "other_info": other_info,
+            "data_units": self.data_units,
+            "data_error": data_error,
+        }
+        return state
 
     def __setstate__(self, state):
-        def meta_from_state(d):
+        def other_info_from_state(d):
             out = {}
             for k, v in d.items():
                 if isinstance(v, dict) and "LISTELEMENTS" in v:
                     out[k] = list(v["LISTELEMENTS"])
                 elif isinstance(v, dict):
-                    out[k] = meta_from_state(v)
+                    out[k] = other_info_from_state(v)
                 else:
                     out[k] = v
             return out
@@ -1427,10 +1420,50 @@ class nddata(object):
         self.data_error = state.get("data_error")
         if self.data_error is not None:
             self.data_error = np.array(self.data_error)
-        self.meta = meta_from_state(state.get("meta", {}))
+        self.other_info = other_info_from_state(state.get("other_info", {}))
         return
 
     # }}}
+
+    def _hdf5_write_fallback(self, filename, group_path):
+        import h5py
+
+        state = self.__getstate__()
+
+        def ensure_group(root, path):
+            g = root
+            for part in filter(None, path.split("/")):
+                g = g.require_group(part)
+            return g
+
+        with h5py.File(filename, "w") as f:
+            g = ensure_group(f, group_path)
+            g.create_dataset("data", data=state["data"])
+            g.attrs["dimlabels"] = np.array(state["dimlabels"], dtype="S")
+            axes_group = g.create_group("axes")
+            for lbl, ax in state["axes"].items():
+                ds = axes_group.create_group(lbl)
+                ds.create_dataset("data", data=ax["data"])
+                ds.attrs["axis_coords_units"] = ax["axis_coords_units"]
+
+            def write_info(group, info):
+                for k, v in info.items():
+                    if isinstance(v, dict):
+                        if "LISTELEMENTS" in v:
+                            sub = group.create_group(k)
+                            sub.create_dataset("LISTELEMENTS", data=np.array(v["LISTELEMENTS"]))
+                        else:
+                            sub = group.create_group(k)
+                            write_info(sub, v)
+                    else:
+                        group.attrs[k] = v
+
+            info_group = g.create_group("other_info")
+            write_info(info_group, state["other_info"])
+            if state.get("data_units") is not None:
+                g.attrs["data_units"] = state["data_units"]
+            if state.get("data_error") is not None:
+                g.create_dataset("data_error", data=state["data_error"])
 
     # {{{ for printing
     def __repr_pretty__(self, p, cycle):
@@ -7041,17 +7074,27 @@ class nddata(object):
                     "yourobject.name('setname')",
                 )
             )
+        if isinstance(thisname, (bytes, np.bytes_)):
+            thisname = thisname.decode("utf-8")
         if isinstance(thisname, str):
             h5path += thisname
         else:
             raise ValueError(
                 strm(
                     "problem trying to store HDF5 file; you need to",
-                    "set the ``name'' property of the nddata object to a"
+                    "set the ``name'' property of the nddata object to a",
                     " string",
                     "first!",
                 )
             )
+        try:
+            import tables  # type: ignore
+            tables.open_file
+        except Exception:
+            filename, _, group_path = h5path.partition("/")
+            filepath = os.path.join(directory, filename)
+            self._hdf5_write_fallback(filepath, group_path)
+            return
         h5file, bottomnode = h5nodebypath(
             h5path, directory=directory
         )  # open the file and move to the right node

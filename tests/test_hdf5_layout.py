@@ -21,17 +21,6 @@ core = load_module("core", use_real_pint=True)
 nddata = core.nddata
 
 
-class DummyGroup(dict):
-    """Minimal dict subclass mimicking an h5py group/dataset.
-
-    Accessing ``attrs['key']`` simply returns ``self['key']``.
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.attrs = self
-
-
 def _generate_nddata():
     a = nddata(np.arange(6).reshape(2, 3), ["t", "f"])
     a.labels({"t": np.linspace(0.0, 1.0, 2), "f": np.array([10, 20, 30])})
@@ -39,13 +28,18 @@ def _generate_nddata():
     a.set_units("f", "Hz")
     a.set_units("V")
     a.name("test_nd")
-    a.meta = {"level1": {"level2": 5, "level2list": [1, 2, 3]}}
+    a.other_info.update({"level1": {"level2": 5, "level2list": [1, 2, 3]}})
     return a
 
 
 def _check_layout(g, a):
+    def get_value(obj, key):
+        if hasattr(obj, "attrs") and key in obj.attrs:
+            return obj.attrs[key]
+        return obj[key]
+
     assert "data" in g
-    raw_labels = g.attrs["dimlabels"]
+    raw_labels = get_value(g, "dimlabels")
     dimlabels = []
     for lbl in raw_labels:
         if not isinstance(lbl, (bytes, np.bytes_, str)) and hasattr(
@@ -64,18 +58,22 @@ def _check_layout(g, a):
     ]:
         assert name in axes_group
         ds = axes_group[name]
-        np.testing.assert_allclose(ds["data"], coords)
-        axis_unit = ds.attrs["axis_coords_units"]
+        np.testing.assert_allclose(np.array(ds["data"]), coords)
+        axis_unit = get_value(ds, "axis_coords_units")
         if isinstance(axis_unit, (bytes, np.bytes_)):
             axis_unit = axis_unit.decode()
         assert axis_unit == unit
 
-    meta = g["meta"]
-    assert "level1" in meta
-    assert meta["level1"].attrs["level2"] == 5
-    np.testing.assert_array_equal(
-        meta["level1"].attrs["level2list"]["LISTELEMENTS"], [1, 2, 3]
-    )
+    other_info = g["other_info"]
+    assert "level1" in other_info
+    level1 = other_info["level1"]
+    assert get_value(level1, "level2") == 5
+    lvl2list = get_value(level1, "level2list")
+    if isinstance(lvl2list, dict):
+        arr = lvl2list["LISTELEMENTS"]
+    else:
+        arr = np.array(lvl2list["LISTELEMENTS"])
+    np.testing.assert_array_equal(arr, [1, 2, 3])
 
 
 def test_hdf5_layout(tmp_path):
@@ -88,5 +86,5 @@ def test_hdf5_layout(tmp_path):
 
 def test_hdf5_layout_from_state():
     a = _generate_nddata()
-    g = DummyGroup(a.__getstate__())
+    g = a.__getstate__()
     _check_layout(g, a)
