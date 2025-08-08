@@ -35,8 +35,9 @@ jobs:
           WHEEL=$(ls wheelhouse/*$(python -c "import sys;print(f'cp{sys.version_info.major}{sys.version_info.minor}')")*.whl | head -n 1)
           pip install "$WHEEL"
           python -c "import pyspecdata, sys; print('smoke test version', pyspecdata.__version__)"
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: wheelhouse
           path: wheelhouse/*.whl
           if-no-files-found: error
 
@@ -44,8 +45,9 @@ jobs:
     needs: build_wheels
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
+          name: wheelhouse
           path: dist
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
