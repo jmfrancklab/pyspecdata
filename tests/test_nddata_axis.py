@@ -6,9 +6,13 @@ ns = load_module("core")
 
 
 def build_axis():
-    a = axis_mod.ax_[0:10:11j]
-    a.names = ["t"]
-    return a
+    """Helper constructing a time axis."""
+    return axis_mod.ax_["t", 0:10:11j]
+
+
+def test_axis_builder_sets_name():
+    axis = axis_mod.ax_["t", 0:5:6j]
+    assert getattr(axis, "name", None) == "t"
 
 
 def test_indexing_returns_value():
@@ -58,8 +62,7 @@ def test_multiplication_with_nddata_diffdim():
 
 def test_multiplication_between_axes_diffdim():
     a = build_axis()
-    b = axis_mod.ax_[0:5:6j]
-    b.names = ["s"]
+    b = axis_mod.ax_["s", 0:5:6j]
     result = a * b
     assert isinstance(result, ns.nddata)
     assert result.dimlabels == ["t", "s"]
@@ -77,8 +80,7 @@ def test_function_application_returns_axis():
 def test_interpolation_operator():
     a = build_axis()
     data = ns.nddata(np.sin(a.to_array()), ["t"])
-    new_axis = axis_mod.ax_[0:10:21j]
-    new_axis.names = ["t"]
+    new_axis = axis_mod.ax_["t", 0:10:21j]
     interp = data @ new_axis
     assert isinstance(interp, ns.nddata)
     assert np.allclose(interp.axis("t").to_array(), new_axis.to_array())
