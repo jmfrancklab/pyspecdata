@@ -37,7 +37,6 @@ from .matrix_math.dot import dot as MM_dot
 from .matrix_math.dot import matmul as MM_matmul
 from .matrix_math.dot import along as MM_along
 from .matrix_math.nnls import nnls as MM_nnls
-import os
 from os import environ
 import numpy as np
 import sympy as sp
@@ -116,10 +115,11 @@ plt.rcParams["ytick.direction"] = "out"
 # rcParams['font.size'] = 6
 plt.rcParams["axes.grid"] = False
 plt.rcParams["image.cmap"] = "jet"
-figsize = plt.rcParams.get("figure.figsize", (6.0, 4.0))
+if "figure.figsize" not in plt.rcParams:
+    plt.rcParams["figure.figsize"] = (6.4, 4.8)
 plt.rcParams["figure.figsize"] = (
-    figsize[0],
-    figsize[0] / (1 + np.sqrt(5)) * 2,
+    plt.rcParams["figure.figsize"][0],
+    plt.rcParams["figure.figsize"][0] / (1 + np.sqrt(5)) * 2,
 )
 mat2array = [
     {"ImmutableMatrix": np.array},
@@ -1359,36 +1359,36 @@ class nddata(object):
     def _contains_symbolic(self, string):
         return string[:9] == "symbolic_" and hasattr(self, string)
 
-    # {{{ serialization helpers
-    class _HDFGroup(dict):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.attrs = self
-
     def __getstate__(self):
+        def make_node(mapping=None, attrs=None):
+            cls = type("Node", (dict,), {})
+            node = cls({} if mapping is None else mapping)
+            node.attrs = {} if attrs is None else attrs
+            return node
+
         axes = {}
         for lbl in self.dimlabels:
-            axes[lbl] = self._HDFGroup(
-                data=np.array(self.getaxis(lbl)),
-                axis_coords_units=str(self.get_units(lbl) or ""),
+            axes[lbl] = make_node(
+                {"data": np.array(self.getaxis(lbl))},
+                {"axis_coords_units": str(self.get_units(lbl) or "")},
             )
 
-        def other_info_to_state(d):
-            out = self._HDFGroup()
+        def serialize_info(d):
+            mapping = {}
             for k, v in d.items():
                 if isinstance(v, dict):
-                    out[k] = other_info_to_state(v)
+                    mapping[k] = make_node(attrs=serialize_info(v))
                 elif isinstance(v, (list, tuple, np.ndarray)):
-                    out[k] = self._HDFGroup(LISTELEMENTS=list(v))
+                    mapping[k] = make_node({"LISTELEMENTS": list(v)})
                 else:
-                    out[k] = v
-            return out
+                    mapping[k] = v
+            return mapping
 
-        other_info = other_info_to_state(getattr(self, "other_info", {}))
+        other_info = make_node(serialize_info(getattr(self, "other_info", {})))
         data_error = None
         if getattr(self, "data_error", None) is not None:
             data_error = np.array(self.data_error)
-        state = {
+        return {
             "data": np.array(self.data),
             "dimlabels": list(self.dimlabels),
             "axes": axes,
@@ -1396,25 +1396,12 @@ class nddata(object):
             "data_units": self.data_units,
             "data_error": data_error,
         }
-        return state
 
     def __setstate__(self, state):
         def decode_if_bytes(x):
             if isinstance(x, (bytes, np.bytes_)):
                 return x.decode("utf-8")
             return x
-
-        def other_info_from_state(d):
-            out = {}
-            for k, v in d.items():
-                k = decode_if_bytes(k)
-                if isinstance(v, dict) and "LISTELEMENTS" in v:
-                    out[k] = [decode_if_bytes(x) for x in v["LISTELEMENTS"]]
-                elif isinstance(v, dict):
-                    out[k] = other_info_from_state(v)
-                else:
-                    out[k] = decode_if_bytes(v)
-            return out
 
         missing = [k for k in ("dimlabels", "data") if k not in state]
         if missing:
@@ -1425,15 +1412,16 @@ class nddata(object):
         dimlabels = [decode_if_bytes(lbl) for lbl in state["dimlabels"]]
         self.dimlabels = list(dimlabels)
 
-        axes_node = state.get("axes", {})
+        axes_state = state.get("axes", {})
         self.axis_coords = []
         self.axis_coords_units = []
         self.axis_coords_error = []
         for lbl in dimlabels:
-            axinfo = axes_node.get(lbl, {})
-            self.axis_coords.append(np.array(axinfo.get("data", [])))
-            unit = decode_if_bytes(axinfo.get("axis_coords_units"))
-            self.axis_coords_units.append(unit)
+            axinfo = axes_state.get(lbl, {})
+            data = axinfo.get("data", [])
+            unit = getattr(axinfo, "attrs", {}).get("axis_coords_units")
+            self.axis_coords.append(np.array(data))
+            self.axis_coords_units.append(decode_if_bytes(unit))
             self.axis_coords_error.append(None)
 
         self.data = np.array(state["data"])
@@ -1442,11 +1430,28 @@ class nddata(object):
             self.data_error = np.array(self.data_error)
 
         self.data_units = decode_if_bytes(state.get("data_units"))
-        self.other_info = other_info_from_state(state.get("other_info", {}))
+
+        def deserialize_info(obj):
+            if isinstance(obj, dict):
+                attrs = {}
+                if hasattr(obj, "attrs"):
+                    attrs = {
+                        decode_if_bytes(k): deserialize_info(v)
+                        for k, v in obj.attrs.items()
+                    }
+                if "LISTELEMENTS" in obj:
+                    return [decode_if_bytes(x) for x in obj["LISTELEMENTS"]]
+                data = {
+                    decode_if_bytes(k): deserialize_info(v)
+                    for k, v in obj.items()
+                }
+                data.update(attrs)
+                return data
+            return decode_if_bytes(obj)
+
+        self.other_info = deserialize_info(state.get("other_info", {}))
         self.genftpairs = False
         return
-
-    # }}}
 
     # {{{ for printing
     def __repr_pretty__(self, p, cycle):
@@ -7057,68 +7062,20 @@ class nddata(object):
                     "yourobject.name('setname')",
                 )
             )
-        if isinstance(thisname, (bytes, np.bytes_)):
-            thisname = thisname.decode("utf-8")
         if isinstance(thisname, str):
             h5path += thisname
         else:
             raise ValueError(
                 strm(
                     "problem trying to store HDF5 file; you need to",
-                    "set the ``name'' property of the nddata object to a",
+                    "set the ``name'' property of the nddata object to a"
                     " string",
                     "first!",
                 )
             )
-        try:
-            import tables  # type: ignore
-            if getattr(tables, "open_file", None) is None:
-                raise ImportError
-            h5file, bottomnode = h5nodebypath(
-                h5path, directory=directory
-            )  # open the file and move to the right node
-        except Exception:
-            import h5py
-
-            state = self.__getstate__()
-            filename, groupname = h5path.split("/", 1)
-            fullpath = os.path.join(directory, filename)
-            with h5py.File(fullpath, "w") as f:
-                g = f.create_group(groupname)
-                g.create_dataset("data", data=state["data"])
-                g.attrs["dimlabels"] = np.array(state["dimlabels"], dtype="S")
-                axes_group = g.create_group("axes")
-                for lbl, ax in state["axes"].items():
-                    ds = axes_group.create_group(lbl)
-                    ds.create_dataset("data", data=ax["data"])
-                    ds.attrs["axis_coords_units"] = ax["axis_coords_units"]
-
-                def write_info(group, info):
-                    for k, v in info.items():
-                        if isinstance(v, dict) and "LISTELEMENTS" in v:
-                            arr = np.array(
-                                [tuple([v["LISTELEMENTS"]])],
-                                dtype=[
-                                    (
-                                        "LISTELEMENTS",
-                                        np.array(v["LISTELEMENTS"]).dtype,
-                                        (len(v["LISTELEMENTS"]),),
-                                    )
-                                ],
-                            )
-                            group.attrs[k] = arr[0]
-                        elif isinstance(v, dict):
-                            sg = group.create_group(k)
-                            write_info(sg, v)
-                        else:
-                            group.attrs[k] = v
-
-                write_info(g.create_group("other_info"), state["other_info"])
-                if state["data_units"] is not None:
-                    g.attrs["data_units"] = state["data_units"]
-                if state["data_error"] is not None:
-                    g.create_dataset("data_error", data=state["data_error"])
-            return
+        h5file, bottomnode = h5nodebypath(
+            h5path, directory=directory
+        )  # open the file and move to the right node
         try:
             # print 'DEBUG 1: bottomnode is',bottomnode
             # }}}
