@@ -1360,44 +1360,45 @@ class nddata(object):
         return string[:9] == "symbolic_" and hasattr(self, string)
 
     def __getstate__(self):
-        def make_node(mapping=None, attrs=None):
-            cls = type("Node", (dict,), {})
-            node = cls({} if mapping is None else mapping)
-            node.attrs = {} if attrs is None else attrs
-            return node
+        """Return a simple dictionary describing the nddata state."""
+
+        class AttrDict(dict):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.attrs = self
 
         axes = {}
         for lbl in self.dimlabels:
-            axes[lbl] = make_node(
-                {"data": np.array(self.getaxis(lbl))},
-                {"axis_coords_units": str(self.get_units(lbl) or "")},
+            axes[lbl] = AttrDict(
+                {
+                    "data": np.array(self.getaxis(lbl)),
+                    "axis_coords_units": str(self.get_units(lbl) or ""),
+                }
             )
 
-        def serialize_info(d):
-            mapping = {}
-            for k, v in d.items():
-                if isinstance(v, dict):
-                    mapping[k] = make_node(attrs=serialize_info(v))
-                elif isinstance(v, (list, tuple, np.ndarray)):
-                    mapping[k] = make_node({"LISTELEMENTS": list(v)})
-                else:
-                    mapping[k] = v
-            return mapping
+        def serialize_other_info(obj):
+            if isinstance(obj, dict):
+                return AttrDict({k: serialize_other_info(v) for k, v in obj.items()})
+            if isinstance(obj, (list, tuple, np.ndarray)):
+                return AttrDict({"LISTELEMENTS": [serialize_other_info(v) for v in obj]})
+            return obj
 
-        other_info = make_node(serialize_info(getattr(self, "other_info", {})))
         data_error = None
         if getattr(self, "data_error", None) is not None:
             data_error = np.array(self.data_error)
+
         return {
             "data": np.array(self.data),
             "dimlabels": list(self.dimlabels),
             "axes": axes,
-            "other_info": other_info,
+            "other_info": serialize_other_info(getattr(self, "other_info", {})),
             "data_units": self.data_units,
             "data_error": data_error,
         }
 
     def __setstate__(self, state):
+        """Restore object state from a dictionary."""
+
         def decode_if_bytes(x):
             if isinstance(x, (bytes, np.bytes_)):
                 return x.decode("utf-8")
@@ -1418,10 +1419,9 @@ class nddata(object):
         self.axis_coords_error = []
         for lbl in dimlabels:
             axinfo = axes_state.get(lbl, {})
-            data = axinfo.get("data", [])
-            unit = getattr(axinfo, "attrs", {}).get("axis_coords_units")
-            self.axis_coords.append(np.array(data))
-            self.axis_coords_units.append(decode_if_bytes(unit))
+            self.axis_coords.append(np.array(axinfo.get("data", [])))
+            unit = decode_if_bytes(axinfo.get("axis_coords_units"))
+            self.axis_coords_units.append(unit)
             self.axis_coords_error.append(None)
 
         self.data = np.array(state["data"])
@@ -1431,25 +1431,19 @@ class nddata(object):
 
         self.data_units = decode_if_bytes(state.get("data_units"))
 
-        def deserialize_info(obj):
+        def deserialize_other_info(obj):
             if isinstance(obj, dict):
-                attrs = {}
-                if hasattr(obj, "attrs"):
-                    attrs = {
-                        decode_if_bytes(k): deserialize_info(v)
-                        for k, v in obj.attrs.items()
-                    }
-                if "LISTELEMENTS" in obj:
-                    return [decode_if_bytes(x) for x in obj["LISTELEMENTS"]]
-                data = {
-                    decode_if_bytes(k): deserialize_info(v)
+                if "LISTELEMENTS" in obj and len(obj) == 1:
+                    return [deserialize_other_info(v) for v in obj["LISTELEMENTS"]]
+                return {
+                    decode_if_bytes(k): deserialize_other_info(v)
                     for k, v in obj.items()
                 }
-                data.update(attrs)
-                return data
+            if isinstance(obj, list):
+                return [deserialize_other_info(v) for v in obj]
             return decode_if_bytes(obj)
 
-        self.other_info = deserialize_info(state.get("other_info", {}))
+        self.other_info = deserialize_other_info(state.get("other_info", {}))
         self.genftpairs = False
         return
 
