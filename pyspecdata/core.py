@@ -116,9 +116,10 @@ plt.rcParams["ytick.direction"] = "out"
 # rcParams['font.size'] = 6
 plt.rcParams["axes.grid"] = False
 plt.rcParams["image.cmap"] = "jet"
+figsize = plt.rcParams.get("figure.figsize", (6.0, 4.0))
 plt.rcParams["figure.figsize"] = (
-    plt.rcParams["figure.figsize"][0],
-    plt.rcParams["figure.figsize"][0] / (1 + np.sqrt(5)) * 2,
+    figsize[0],
+    figsize[0] / (1 + np.sqrt(5)) * 2,
 )
 mat2array = [
     {"ImmutableMatrix": np.array},
@@ -1393,77 +1394,54 @@ class nddata(object):
         return state
 
     def __setstate__(self, state):
+        def decode_if_bytes(x):
+            if isinstance(x, (bytes, np.bytes_)):
+                return x.decode("utf-8")
+            return x
+
         def other_info_from_state(d):
             out = {}
             for k, v in d.items():
+                k = decode_if_bytes(k)
                 if isinstance(v, dict) and "LISTELEMENTS" in v:
-                    out[k] = list(v["LISTELEMENTS"])
+                    out[k] = [decode_if_bytes(x) for x in v["LISTELEMENTS"]]
                 elif isinstance(v, dict):
                     out[k] = other_info_from_state(v)
                 else:
-                    out[k] = v
+                    out[k] = decode_if_bytes(v)
             return out
 
-        dimlabels = state.get("dimlabels", [])
+        missing = [k for k in ("dimlabels", "data") if k not in state]
+        if missing:
+            raise ValueError(
+                "state is missing required keys: " + ", ".join(missing)
+            )
+
+        dimlabels = [decode_if_bytes(lbl) for lbl in state["dimlabels"]]
+        self.dimlabels = list(dimlabels)
+
         axes_node = state.get("axes", {})
-        axis_coords = [np.array(axes_node[l]["data"]) for l in dimlabels]
-        axis_units = [axes_node[l].get("axis_coords_units") for l in dimlabels]
-        data = np.array(state["data"])
-        self.__my_init__(
-            data,
-            list(data.shape),
-            dimlabels,
-            axis_coords=axis_coords,
-            axis_coords_units=axis_units,
-            data_units=state.get("data_units"),
-        )
+        self.axis_coords = []
+        self.axis_coords_units = []
+        self.axis_coords_error = []
+        for lbl in dimlabels:
+            axinfo = axes_node.get(lbl, {})
+            self.axis_coords.append(np.array(axinfo.get("data", [])))
+            unit = decode_if_bytes(axinfo.get("axis_coords_units"))
+            self.axis_coords_units.append(unit)
+            self.axis_coords_error.append(None)
+
+        self.data = np.array(state["data"])
         self.data_error = state.get("data_error")
         if self.data_error is not None:
             self.data_error = np.array(self.data_error)
+
+        self.data_units = decode_if_bytes(state.get("data_units"))
         self.other_info = other_info_from_state(state.get("other_info", {}))
+        self.genftpairs = False
         return
 
     # }}}
-
-    def _hdf5_write_fallback(self, filename, group_path):
-        import h5py
-
-        state = self.__getstate__()
-
-        def ensure_group(root, path):
-            g = root
-            for part in filter(None, path.split("/")):
-                g = g.require_group(part)
-            return g
-
-        with h5py.File(filename, "w") as f:
-            g = ensure_group(f, group_path)
-            g.create_dataset("data", data=state["data"])
-            g.attrs["dimlabels"] = np.array(state["dimlabels"], dtype="S")
-            axes_group = g.create_group("axes")
-            for lbl, ax in state["axes"].items():
-                ds = axes_group.create_group(lbl)
-                ds.create_dataset("data", data=ax["data"])
-                ds.attrs["axis_coords_units"] = ax["axis_coords_units"]
-
-            def write_info(group, info):
-                for k, v in info.items():
-                    if isinstance(v, dict):
-                        if "LISTELEMENTS" in v:
-                            sub = group.create_group(k)
-                            sub.create_dataset("LISTELEMENTS", data=np.array(v["LISTELEMENTS"]))
-                        else:
-                            sub = group.create_group(k)
-                            write_info(sub, v)
-                    else:
-                        group.attrs[k] = v
-
-            info_group = g.create_group("other_info")
-            write_info(info_group, state["other_info"])
-            if state.get("data_units") is not None:
-                g.attrs["data_units"] = state["data_units"]
-            if state.get("data_error") is not None:
-                g.create_dataset("data_error", data=state["data_error"])
 
     # {{{ for printing
     def __repr_pretty__(self, p, cycle):
@@ -7090,11 +7068,10 @@ class nddata(object):
         try:
             import tables  # type: ignore
             tables.open_file
-        except Exception:
-            filename, _, group_path = h5path.partition("/")
-            filepath = os.path.join(directory, filename)
-            self._hdf5_write_fallback(filepath, group_path)
-            return
+        except Exception as e:
+            raise RuntimeError(
+                "PyTables is required for hdf5_write but could not be imported"
+            ) from e
         h5file, bottomnode = h5nodebypath(
             h5path, directory=directory
         )  # open the file and move to the right node
