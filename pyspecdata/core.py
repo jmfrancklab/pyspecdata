@@ -1360,21 +1360,26 @@ class nddata(object):
         return string[:9] == "symbolic_" and hasattr(self, string)
 
     # {{{ serialization helpers
+    class _HDFGroup(dict):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.attrs = self
+
     def __getstate__(self):
         axes = {}
         for lbl in self.dimlabels:
-            axes[lbl] = {
-                "data": np.array(self.getaxis(lbl)),
-                "axis_coords_units": str(self.get_units(lbl) or ""),
-            }
+            axes[lbl] = self._HDFGroup(
+                data=np.array(self.getaxis(lbl)),
+                axis_coords_units=str(self.get_units(lbl) or ""),
+            )
 
         def other_info_to_state(d):
-            out = {}
+            out = self._HDFGroup()
             for k, v in d.items():
                 if isinstance(v, dict):
                     out[k] = other_info_to_state(v)
                 elif isinstance(v, (list, tuple, np.ndarray)):
-                    out[k] = {"LISTELEMENTS": list(v)}
+                    out[k] = self._HDFGroup(LISTELEMENTS=list(v))
                 else:
                     out[k] = v
             return out
@@ -7067,14 +7072,53 @@ class nddata(object):
             )
         try:
             import tables  # type: ignore
-            tables.open_file
-        except Exception as e:
-            raise RuntimeError(
-                "PyTables is required for hdf5_write but could not be imported"
-            ) from e
-        h5file, bottomnode = h5nodebypath(
-            h5path, directory=directory
-        )  # open the file and move to the right node
+            if getattr(tables, "open_file", None) is None:
+                raise ImportError
+            h5file, bottomnode = h5nodebypath(
+                h5path, directory=directory
+            )  # open the file and move to the right node
+        except Exception:
+            import h5py
+
+            state = self.__getstate__()
+            filename, groupname = h5path.split("/", 1)
+            fullpath = os.path.join(directory, filename)
+            with h5py.File(fullpath, "w") as f:
+                g = f.create_group(groupname)
+                g.create_dataset("data", data=state["data"])
+                g.attrs["dimlabels"] = np.array(state["dimlabels"], dtype="S")
+                axes_group = g.create_group("axes")
+                for lbl, ax in state["axes"].items():
+                    ds = axes_group.create_group(lbl)
+                    ds.create_dataset("data", data=ax["data"])
+                    ds.attrs["axis_coords_units"] = ax["axis_coords_units"]
+
+                def write_info(group, info):
+                    for k, v in info.items():
+                        if isinstance(v, dict) and "LISTELEMENTS" in v:
+                            arr = np.array(
+                                [tuple([v["LISTELEMENTS"]])],
+                                dtype=[
+                                    (
+                                        "LISTELEMENTS",
+                                        np.array(v["LISTELEMENTS"]).dtype,
+                                        (len(v["LISTELEMENTS"]),),
+                                    )
+                                ],
+                            )
+                            group.attrs[k] = arr[0]
+                        elif isinstance(v, dict):
+                            sg = group.create_group(k)
+                            write_info(sg, v)
+                        else:
+                            group.attrs[k] = v
+
+                write_info(g.create_group("other_info"), state["other_info"])
+                if state["data_units"] is not None:
+                    g.attrs["data_units"] = state["data_units"]
+                if state["data_error"] is not None:
+                    g.create_dataset("data_error", data=state["data_error"])
+            return
         try:
             # print 'DEBUG 1: bottomnode is',bottomnode
             # }}}
