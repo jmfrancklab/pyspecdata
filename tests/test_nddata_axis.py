@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 from conftest import load_module
 
 axis_mod = load_module("axis_class")
@@ -45,6 +44,27 @@ def test_multiplication_with_nddata():
     result = a * data
     assert isinstance(result, ns.nddata)
     assert np.allclose(result.data, a.to_array())
+
+
+def test_multiplication_with_nddata_diffdim():
+    a = build_axis()
+    data = ns.nddata(np.ones(3), ["s"])
+    result = a * data
+    assert isinstance(result, ns.nddata)
+    assert result.dimlabels == ["t", "s"]
+    expected = np.outer(a.to_array(), data.data)
+    assert np.allclose(result.data, expected)
+
+
+def test_multiplication_between_axes_diffdim():
+    a = build_axis()
+    b = axis_mod.ax_[0:5:6j]
+    b.names = ["s"]
+    result = a * b
+    assert isinstance(result, ns.nddata)
+    assert result.dimlabels == ["t", "s"]
+    expected = np.outer(a.to_array(), b.to_array())
+    assert np.allclose(result.data, expected)
 
 
 def test_function_application_returns_axis():
