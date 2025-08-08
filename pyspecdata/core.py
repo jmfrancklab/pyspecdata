@@ -1366,6 +1366,12 @@ class nddata(object):
                 "data": self.getaxis(lbl),
                 "axis_coords_units": self.get_units(lbl),
             }
+        def serialize_other_info(obj):
+            if isinstance(obj, dict):
+                return {k: serialize_other_info(v) for k, v in obj.items()}
+            if isinstance(obj, (list, tuple)):
+                return {"LISTELEMENTS": [serialize_other_info(v) for v in obj]}
+            return obj
 
         data_error = None
         if getattr(self, "data_error", None) is not None:
@@ -1375,8 +1381,8 @@ class nddata(object):
             "data": self.data,
             "dimlabels": self.dimlabels,
             "axes": axes,
-            "other_info": self.other_info,
-            "data_units": self.data_units,
+            "other_info": serialize_other_info(self.other_info),
+            "data_units": self.get_units(),
             "data_error": data_error,
         }
 
@@ -1417,13 +1423,16 @@ class nddata(object):
 
         def deserialize_other_info(obj):
             if isinstance(obj, dict):
+                if "LISTELEMENTS" in obj and len(obj) == 1:
+                    return [deserialize_other_info(v) for v in obj["LISTELEMENTS"]]
                 return {
                     decode_if_bytes(k): deserialize_other_info(v)
                     for k, v in obj.items()
                 }
-            if isinstance(obj, list):
+            elif isinstance(obj, list):
                 return [deserialize_other_info(v) for v in obj]
-            return decode_if_bytes(obj)
+            else:
+                return decode_if_bytes(obj)
 
         self.other_info = deserialize_other_info(state.get("other_info", {}))
         self.genftpairs = False
