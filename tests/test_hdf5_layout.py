@@ -2,6 +2,7 @@ import sys
 import types
 import numpy as np
 import h5py
+import pickle
 
 from conftest import load_module
 
@@ -116,4 +117,13 @@ def test_nddata_hdf5_roundtrip(tmp_path):
     a = _generate_nddata()
     a.hdf5_write("sample.h5", directory=str(tmp_path))
     b = nddata_hdf5("sample.h5/test_nd", directory=str(tmp_path))
+    _check_loaded(b, a)
+
+
+def test_nddata_pickle_roundtrip(tmp_path):
+    a = _generate_nddata()
+    with open(tmp_path / "sample.pkl", "wb") as f:
+        pickle.dump(a, f)
+    with open(tmp_path / "sample.pkl", "rb") as f:
+        b = pickle.load(f)
     _check_loaded(b, a)
