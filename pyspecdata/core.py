@@ -7393,10 +7393,8 @@ class nddata_hdf5(nddata):
         datadict = h5loaddict(datanode)
         # {{{ load the data, and pop it from datadict
         try:
-            datarecordarray = datadict["data"][
-                "data"
-            ]  # the table is called data, and the data of the table is called
-            #    data
+            dataentry = datadict["data"]
+            datarecordarray = dataentry["data"]  # the table is called data
             mydata = datarecordarray["data"]
         except Exception:
             raise ValueError("I can't find the nddata.data")
@@ -7404,6 +7402,11 @@ class nddata_hdf5(nddata):
             kwargs.update({"data_error": datarecordarray["error"]})
         except Exception:
             logger.debug(strm("No error found\n\n"))
+        data_units = dataentry.get("data_units")
+        if data_units is not None and isinstance(data_units, (bytes, np.bytes_)):
+            data_units = data_units.decode("utf-8")
+        if data_units is not None:
+            kwargs.update({"data_units": data_units})
         datadict.pop("data")
         # }}}
         # {{{ be sure to load the dimlabels
@@ -7512,6 +7515,8 @@ class nddata_hdf5(nddata):
                 det_shape.append(temp)
             try:
                 self.data = self.data.reshape(det_shape)
+                if self.data_error is not None:
+                    self.data_error = np.array(self.data_error).reshape(det_shape)
             except Exception:
                 raise RuntimeError(
                     strm(

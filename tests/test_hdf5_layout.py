@@ -11,6 +11,7 @@ sys.modules.setdefault("_nnls", types.ModuleType("_nnls"))
 # load nddata using helper to avoid requiring full dependencies
 core = load_module("core", use_real_pint=True)
 nddata = core.nddata
+nddata_hdf5 = core.nddata_hdf5
 
 
 class DummyGroup(dict):
@@ -83,6 +84,20 @@ def _check_layout(g, a):
     )
 
 
+def _check_loaded(b, a):
+    assert list(b.dimlabels) == list(a.dimlabels)
+    np.testing.assert_allclose(b.data.real, a.data.real)
+    np.testing.assert_allclose(b.data.imag, a.data.imag)
+    np.testing.assert_allclose(b.get_error(), a.get_error())
+    for name in a.dimlabels:
+        np.testing.assert_allclose(b.getaxis(name), a.getaxis(name))
+        np.testing.assert_allclose(b.get_error(name), a.get_error(name))
+        assert b.get_units(name) == a.get_units(name)
+    assert b.get_units() == a.get_units()
+    assert b.name() == a.name()
+    assert b.other_info == a.other_info
+
+
 def test_hdf5_layout(tmp_path):
     a = _generate_nddata()
     a.hdf5_write("sample.h5", directory=str(tmp_path))
@@ -95,3 +110,10 @@ def test_state_layout():
     a = _generate_nddata()
     g = DummyGroup(a.__getstate__())
     _check_layout(g, a)
+
+
+def test_nddata_hdf5_roundtrip(tmp_path):
+    a = _generate_nddata()
+    a.hdf5_write("sample.h5", directory=str(tmp_path))
+    b = nddata_hdf5("sample.h5/test_nd", directory=str(tmp_path))
+    _check_loaded(b, a)
