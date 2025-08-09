@@ -1361,15 +1361,14 @@ class nddata(object):
         """Return a plain ``dict`` describing the ``nddata`` state."""
 
         axes = {}
-        for lbl in self.dimlabels:
-            axes[lbl] = {
+        for j, lbl in enumerate(self.dimlabels):
+            axis_state = {
                 "data": self.getaxis(lbl),
                 "axis_coords_units": self.get_units(lbl),
             }
             err = self.get_error(lbl)
             if err is not None:
                 axes[lbl]["error"] = err
-
         def serialize_other_info(obj):
             if isinstance(obj, dict):
                 return {k: serialize_other_info(v) for k, v in obj.items()}
@@ -1440,6 +1439,8 @@ class nddata(object):
             )
         else:
             self.data = data_state.reshape(shape)
+            err = state.get("data_error")
+            self.data_error = err.reshape(shape) if err is not None else None
 
         self.data_units = decode_if_bytes(state.get("data_units"))
 
@@ -7286,7 +7287,7 @@ class nddata(object):
                 test = repr(
                     bottomnode
                 )  # somehow, this prevents it from claiming that the
-                #    bottomnode is None --> some type of bug?
+                    #    bottomnode is None --> some type of bug?
                 logger.debug(strm("bottomnode", test))
                 if "dimlabels" in myotherattrs:
                     bottomnode._v_attrs.__setattr__(
@@ -7406,10 +7407,8 @@ class nddata_hdf5(nddata):
         datadict = h5loaddict(datanode)
         # {{{ load the data, and pop it from datadict
         try:
-            datarecordarray = datadict["data"][
-                "data"
-            ]  # the table is called data, and the data of the table is called
-            #    data
+            dataentry = datadict["data"]
+            datarecordarray = dataentry["data"]  # the table is called data
             mydata = datarecordarray["data"]
         except Exception:
             raise ValueError("I can't find the nddata.data")
@@ -7417,6 +7416,11 @@ class nddata_hdf5(nddata):
             kwargs.update({"data_error": datarecordarray["error"]})
         except Exception:
             logger.debug(strm("No error found\n\n"))
+        data_units = dataentry.get("data_units")
+        if data_units is not None and isinstance(data_units, (bytes, np.bytes_)):
+            data_units = data_units.decode("utf-8")
+        if data_units is not None:
+            kwargs.update({"data_units": data_units})
         datadict.pop("data")
         # }}}
         # {{{ be sure to load the dimlabels
@@ -7525,6 +7529,8 @@ class nddata_hdf5(nddata):
                 det_shape.append(temp)
             try:
                 self.data = self.data.reshape(det_shape)
+                if self.data_error is not None:
+                    self.data_error = np.array(self.data_error).reshape(det_shape)
             except Exception:
                 raise RuntimeError(
                     strm(
