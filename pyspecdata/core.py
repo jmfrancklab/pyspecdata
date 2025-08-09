@@ -1366,24 +1366,35 @@ class nddata(object):
                 "data": self.getaxis(lbl),
                 "axis_coords_units": self.get_units(lbl),
             }
+            err = self.get_error(lbl)
+            if err is not None:
+                axes[lbl]["error"] = err
+
         def serialize_other_info(obj):
             if isinstance(obj, dict):
                 return {k: serialize_other_info(v) for k, v in obj.items()}
             if isinstance(obj, (list, tuple)):
-                return {"LISTELEMENTS": [serialize_other_info(v) for v in obj]}
+                elements = [serialize_other_info(v) for v in obj]
+                arr = np.array(elements)
+                rec = np.zeros(
+                    1, dtype=[("LISTELEMENTS", arr.dtype, arr.shape)]
+                )[0]
+                rec["LISTELEMENTS"] = arr
+                return rec
             return obj
 
-        data_error = None
         if getattr(self, "data_error", None) is not None:
-            data_error = self.data_error
+            data_state = {"data": self.data}
+            data_state["error"] = self.data_error
+        else:
+            data_state = self.data
 
         return {
-            "data": self.data,
+            "data": data_state,
             "dimlabels": self.dimlabels,
             "axes": axes,
             "other_info": serialize_other_info(self.other_info),
             "data_units": self.get_units(),
-            "data_error": data_error,
         }
 
     def __setstate__(self, state):
@@ -1409,22 +1420,37 @@ class nddata(object):
         self.axis_coords_error = []
         for lbl in dimlabels:
             axinfo = axes_state.get(lbl, {})
-            self.axis_coords.append(np.array(axinfo.get("data", [])))
+            coords = np.array(axinfo.get("data", []))
+            self.axis_coords.append(coords)
             unit = decode_if_bytes(axinfo.get("axis_coords_units"))
             self.axis_coords_units.append(unit)
-            self.axis_coords_error.append(None)
+            err = axinfo.get("error")
+            self.axis_coords_error.append(
+                np.array(err) if err is not None else None
+            )
 
-        self.data = np.array(state["data"])
-        self.data_error = state.get("data_error")
-        if self.data_error is not None:
-            self.data_error = np.array(self.data_error)
+        shape = tuple(len(ax) for ax in self.axis_coords)
+
+        data_state = state["data"]
+        if isinstance(data_state, dict):
+            self.data = data_state.get("data").reshape(shape)
+            err = data_state.get("error")
+            self.data_error = (
+                np.array(err).reshape(shape) if err is not None else None
+            )
+        else:
+            self.data = data_state.reshape(shape)
 
         self.data_units = decode_if_bytes(state.get("data_units"))
 
         def deserialize_other_info(obj):
+            if (
+                isinstance(obj, (np.void, np.ndarray))
+                and getattr(obj, "dtype", None) is not None
+                and obj.dtype.names == ("LISTELEMENTS",)
+            ):
+                return [deserialize_other_info(v) for v in obj["LISTELEMENTS"]]
             if isinstance(obj, dict):
-                if "LISTELEMENTS" in obj and len(obj) == 1:
-                    return [deserialize_other_info(v) for v in obj["LISTELEMENTS"]]
                 return {
                     decode_if_bytes(k): deserialize_other_info(v)
                     for k, v in obj.items()
@@ -7145,9 +7171,7 @@ class nddata(object):
                     )
                     mydataattrs.remove("data_error")
                 else:
-                    thistable = np.rec.fromarrays(
-                        [self.data], names="data"
-                    )
+                    thistable = np.rec.fromarrays([self.data], names="data")
                 mydataattrs.remove("data")
                 datatable = h5table(bottomnode, "data", thistable)
                 # print 'DEBUG 2: bottomnode is',bottomnode
@@ -7264,6 +7288,11 @@ class nddata(object):
                 )  # somehow, this prevents it from claiming that the
                 #    bottomnode is None --> some type of bug?
                 logger.debug(strm("bottomnode", test))
+                if "dimlabels" in myotherattrs:
+                    bottomnode._v_attrs.__setattr__(
+                        "dimlabels", np.array(self.dimlabels, dtype="S")
+                    )
+                    myotherattrs.remove("dimlabels")
                 h5attachattributes(
                     bottomnode,
                     [
@@ -7377,10 +7406,8 @@ class nddata_hdf5(nddata):
         datadict = h5loaddict(datanode)
         # {{{ load the data, and pop it from datadict
         try:
-            datarecordarray = datadict["data"][
-                "data"
-            ]  # the table is called data, and the data of the table is called
-            #    data
+            dataentry = datadict["data"]
+            datarecordarray = dataentry["data"]  # the table is called data
             mydata = datarecordarray["data"]
         except Exception:
             raise ValueError("I can't find the nddata.data")
@@ -7388,6 +7415,13 @@ class nddata_hdf5(nddata):
             kwargs.update({"data_error": datarecordarray["error"]})
         except Exception:
             logger.debug(strm("No error found\n\n"))
+        data_units = dataentry.get("data_units")
+        if data_units is not None and isinstance(
+            data_units, (bytes, np.bytes_)
+        ):
+            data_units = data_units.decode("utf-8")
+        if data_units is not None:
+            kwargs.update({"data_units": data_units})
         datadict.pop("data")
         # }}}
         # {{{ be sure to load the dimlabels
@@ -7496,6 +7530,10 @@ class nddata_hdf5(nddata):
                 det_shape.append(temp)
             try:
                 self.data = self.data.reshape(det_shape)
+                if self.data_error is not None:
+                    self.data_error = np.array(self.data_error).reshape(
+                        det_shape
+                    )
             except Exception:
                 raise RuntimeError(
                     strm(
