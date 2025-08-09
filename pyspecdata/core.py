@@ -7278,8 +7278,13 @@ class nddata(object):
                 test = repr(
                     bottomnode
                 )  # somehow, this prevents it from claiming that the
-                #    bottomnode is None --> some type of bug?
+                    #    bottomnode is None --> some type of bug?
                 logger.debug(strm("bottomnode", test))
+                if "dimlabels" in myotherattrs:
+                    bottomnode._v_attrs.__setattr__(
+                        "dimlabels", np.array(self.dimlabels, dtype="S")
+                    )
+                    myotherattrs.remove("dimlabels")
                 h5attachattributes(
                     bottomnode,
                     [

@@ -12,21 +12,15 @@ def hdf_save_dict_to_group(group, data):
     for k, v in data.items():
         if issubclass(type(v), np.ndarray):
             logger.debug("Dataset type %s" % str(v.dtype))
-            # Split complex into real and imaginary because Matlab
-            # function cannot handle compound data types.
-            if np.issubdtype(v.dtype, np.complexfloating):
-                logger.debug(
-                    "Adding %s=%s %s as real and imag datasets"
-                    % (k, str(v.shape), str(v.dtype))
-                )
-                group.create_dataset("%s.r" % k, data=v.real)
-                group.create_dataset("%s.i" % k, data=v.imag)
-            else:
-                logger.debug("Adding %s=%s as dataset" % (k, v))
-                group.create_dataset(k, data=v, dtype=v.dtype)
+            logger.debug("Adding %s=%s as dataset" % (k, v))
+            group.create_dataset(k, data=v, dtype=v.dtype)
         elif issubclass(type(v), dict):
-            subgroup = group.create_group(k)
-            hdf_save_dict_to_group(subgroup, v)
+            if set(v.keys()) == {"LISTELEMENTS"}:
+                arr = np.rec.fromarrays([v["LISTELEMENTS"]], names="LISTELEMENTS")
+                group.attrs[k] = arr
+            else:
+                subgroup = group.create_group(k)
+                hdf_save_dict_to_group(subgroup, v)
         else:
             if v is None:
                 continue

@@ -47,35 +47,24 @@ def _generate_nddata():
 def _check_layout(g, a):
     assert "data" in g
     raw_labels = g.attrs["dimlabels"]
-    if hasattr(raw_labels, "astype"):
-        raw_labels = raw_labels.astype("S")
-    dimlabels = []
-    for lbl in raw_labels:
-        if isinstance(lbl, (bytes, np.bytes_)):
-            lbl = lbl.decode("utf-8")
-        dimlabels.append(lbl)
+    dimlabels = [
+        lbl.decode("utf-8") if isinstance(lbl, (bytes, np.bytes_)) else lbl
+        for lbl in raw_labels
+    ]
     assert dimlabels == ["t", "f"]
 
     axes_group = g["axes"]
     shape = tuple(len(axes_group[name]["data"]) for name in dimlabels)
-    data_ds = g["data"]
-    if hasattr(data_ds, "keys") and "data.r" in data_ds:
-        data_vals = (
-            np.array(data_ds["data.r"]) + 1j * np.array(data_ds["data.i"])
-        ).reshape(shape)
-    else:
-        data_vals = np.array(data_ds["data"]).reshape(shape)
-    error_vals = np.array(data_ds["error"]).reshape(shape)
+    data_vals = np.array(g["data"]["data"]).reshape(shape)
+    error_vals = np.array(g["data"]["error"]).reshape(shape)
     np.testing.assert_allclose(data_vals.real, a.data.real)
     np.testing.assert_allclose(data_vals.imag, a.data.imag)
     np.testing.assert_allclose(error_vals, a.get_error())
 
     for name in dimlabels:
-        coords = a.getaxis(name)
         unit = "s" if name == "t" else "Hz"
-        assert name in axes_group
         ds = axes_group[name]
-        np.testing.assert_allclose(ds["data"], coords)
+        np.testing.assert_allclose(ds["data"], a.getaxis(name))
         np.testing.assert_allclose(ds["error"], a.get_error(name))
         axis_unit = ds.attrs["axis_coords_units"]
         if isinstance(axis_unit, (bytes, np.bytes_)):
@@ -86,17 +75,9 @@ def _check_layout(g, a):
     assert "level1" in other_info
     lvl1 = other_info["level1"]
     assert lvl1.attrs["level2"] == 5
-    if "level2list" in lvl1.attrs:
-        lvl2list = lvl1.attrs["level2list"]
-        if (
-            isinstance(lvl2list, dict) and "LISTELEMENTS" in lvl2list
-        ):
-            lvl2list = lvl2list["LISTELEMENTS"]
-        elif getattr(lvl2list, "dtype", None) is not None and "LISTELEMENTS" in getattr(lvl2list.dtype, "names", []) :
-            lvl2list = lvl2list["LISTELEMENTS"]
-    else:
-        lvl2list = lvl1["level2list"].attrs["LISTELEMENTS"]
-    np.testing.assert_array_equal(lvl2list, [1, 2, 3])
+    np.testing.assert_array_equal(
+        lvl1.attrs["level2list"]["LISTELEMENTS"], [1, 2, 3]
+    )
 
 
 def _check_loaded(b, a):
