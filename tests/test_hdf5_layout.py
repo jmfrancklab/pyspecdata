@@ -59,7 +59,12 @@ def _check_layout(g, a):
     axes_group = g["axes"]
     shape = tuple(len(axes_group[name]["data"]) for name in dimlabels)
     data_ds = g["data"]
-    data_vals = np.array(data_ds["data"]).reshape(shape)
+    if hasattr(data_ds, "keys") and "data.r" in data_ds:
+        data_vals = (
+            np.array(data_ds["data.r"]) + 1j * np.array(data_ds["data.i"])
+        ).reshape(shape)
+    else:
+        data_vals = np.array(data_ds["data"]).reshape(shape)
     error_vals = np.array(data_ds["error"]).reshape(shape)
     np.testing.assert_allclose(data_vals.real, a.data.real)
     np.testing.assert_allclose(data_vals.imag, a.data.imag)
@@ -79,10 +84,19 @@ def _check_layout(g, a):
 
     other_info = g["other_info"]
     assert "level1" in other_info
-    assert other_info["level1"].attrs["level2"] == 5
-    np.testing.assert_array_equal(
-        other_info["level1"].attrs["level2list"]["LISTELEMENTS"], [1, 2, 3]
-    )
+    lvl1 = other_info["level1"]
+    assert lvl1.attrs["level2"] == 5
+    if "level2list" in lvl1.attrs:
+        lvl2list = lvl1.attrs["level2list"]
+        if (
+            isinstance(lvl2list, dict) and "LISTELEMENTS" in lvl2list
+        ):
+            lvl2list = lvl2list["LISTELEMENTS"]
+        elif getattr(lvl2list, "dtype", None) is not None and "LISTELEMENTS" in getattr(lvl2list.dtype, "names", []) :
+            lvl2list = lvl2list["LISTELEMENTS"]
+    else:
+        lvl2list = lvl1["level2list"].attrs["LISTELEMENTS"]
+    np.testing.assert_array_equal(lvl2list, [1, 2, 3])
 
 
 def _check_loaded(b, a):
@@ -127,3 +141,15 @@ def test_nddata_pickle_roundtrip(tmp_path):
     with open(tmp_path / "sample.pkl", "rb") as f:
         b = pickle.load(f)
     _check_loaded(b, a)
+
+
+def test_state_hdf_dict_roundtrip(tmp_path):
+    a = _generate_nddata()
+    state = a.__getstate__()
+    hdf_mod = load_module("file_saving.hdf_save_dict_to_group")
+    hdf_save_dict_to_group = hdf_mod.hdf_save_dict_to_group
+    with h5py.File(tmp_path / "state.h5", "w") as f:
+        g = f.create_group("test_nd")
+        hdf_save_dict_to_group(g, state)
+    with h5py.File(tmp_path / "state.h5", "r") as f:
+        _check_layout(f["test_nd"], a)
