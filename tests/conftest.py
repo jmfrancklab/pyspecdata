@@ -26,6 +26,7 @@ def load_module(
     """
     # provide dummy replacements for optional compiled dependencies
     if not use_real_h5py:
+        sys.modules.setdefault("tables", types.ModuleType("tables"))
         sys.modules.setdefault("h5py", types.ModuleType("h5py"))
     if not use_real_pint:
         try:
