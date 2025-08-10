@@ -1,5 +1,5 @@
-from ..general_functions import *
-from pylab import *
+import logging
+import numpy as np
 
 logger = logging.getLogger("pyspecdata.hdf_save_dict_to_group")
 
@@ -16,7 +16,9 @@ def hdf_save_dict_to_group(group, data):
             group.create_dataset(k, data=v, dtype=v.dtype)
         elif issubclass(type(v), dict):
             if set(v.keys()) == {"LISTELEMENTS"}:
-                arr = np.rec.fromarrays([v["LISTELEMENTS"]], names="LISTELEMENTS")
+                arr = np.rec.fromarrays(
+                    [v["LISTELEMENTS"]], names="LISTELEMENTS"
+                )
                 group.attrs[k] = arr
             else:
                 subgroup = group.create_group(k)
