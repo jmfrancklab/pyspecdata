@@ -1395,7 +1395,7 @@ class nddata(object):
         )
 
         dimlabels = [
-            np.bytes_(lbl) if isinstance(lbl, str) else lbl
+            (np.bytes_(lbl),) if isinstance(lbl, str) else (lbl,)
             for lbl in self.dimlabels
         ]
 
@@ -1405,6 +1405,14 @@ class nddata(object):
             "axes": axes,
             "other_info": serialize_other_info(self.other_info),
         }
+
+    def __deepcopy__(self, memo):
+        "don't involve setstate/getstate in deepcopy"
+        dup = self.__class__.__new__(self.__class__)
+        memo[id(self)] = dup
+        dup.__dict__ = {k: deepcopy(v, memo) for k, v in self.__dict__.items()}
+        # rebuild any transients if needed
+        return dup
 
     def __setstate__(self, state):
         """Restore object state from a dictionary."""
@@ -1420,7 +1428,7 @@ class nddata(object):
                 "state is missing required keys: " + ", ".join(missing)
             )
 
-        dimlabels = [decode_if_bytes(lbl) for lbl in state["dimlabels"]]
+        dimlabels = [decode_if_bytes(lbl) for (lbl,) in state["dimlabels"]]
         self.dimlabels = list(dimlabels)
 
         axes_state = state.get("axes", {})
