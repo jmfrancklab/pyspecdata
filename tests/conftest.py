@@ -9,7 +9,9 @@ import os
 PACKAGE_ROOT = pathlib.Path(__file__).resolve().parents[1] / "pyspecdata"
 
 
-def load_module(name: str, *, use_real_pint: bool = False):
+def load_module(
+    name: str, *, use_real_pint: bool = False, use_real_h5py: bool = True
+):
     """Load a pyspecdata submodule without requiring external packages.
 
     Parameters
@@ -23,8 +25,8 @@ def load_module(name: str, *, use_real_pint: bool = False):
         environment without the real dependency installed.
     """
     # provide dummy replacements for optional compiled dependencies
-    sys.modules.setdefault("h5py", types.ModuleType("h5py"))
-
+    if not use_real_h5py:
+        sys.modules.setdefault("h5py", types.ModuleType("h5py"))
     if not use_real_pint:
         try:
             import pint  # noqa: F401

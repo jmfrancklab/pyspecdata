@@ -4,16 +4,18 @@ import numpy as np
 import h5py
 import pickle
 import os
-
+# tests/conftest.py
 from conftest import load_module
 
 # ensure optional compiled dependency is stubbed
 sys.modules.setdefault("_nnls", types.ModuleType("_nnls"))
 
 # load nddata using helper to avoid requiring full dependencies
-core = load_module("core", use_real_pint=True)
+core = load_module("core", use_real_pint=True, use_real_h5py=True)
 nddata = core.nddata
 nddata_hdf5 = core.nddata_hdf5
+hmod = load_module("file_saving.hdf_save_dict_to_group", use_real_pint=True, use_real_h5py=True)
+hdf_save_dict_to_group = hmod.hdf_save_dict_to_group
 
 
 class DummyGroup(dict):
@@ -172,10 +174,9 @@ def test_nddata_pickle_roundtrip(tmp_path):
 def test_state_hdf_dict_roundtrip(tmp_path):
     a = _generate_nddata()
     state = a.__getstate__()
-    hdf_mod = load_module("file_saving.hdf_save_dict_to_group")
     with h5py.File(tmp_path / "state.h5", "w") as f:
         g = f.create_group("test_nd")
-        hdf_mod.hdf_save_dict_to_group(g, state)
+        hdf_save_dict_to_group(g, state)
     with h5py.File(tmp_path / "state.h5", "r") as f:
         _check_layout(f["test_nd"], a)
     os.remove(tmp_path / "state.h5")
@@ -184,10 +185,9 @@ def test_state_hdf_dict_roundtrip(tmp_path):
 def test_state_hdf_dict_roundtrip_noerr(tmp_path):
     a = _generate_nddata_noerr()
     state = a.__getstate__()
-    hdf_mod = load_module("file_saving.hdf_save_dict_to_group")
     with h5py.File(tmp_path / "state.h5", "w") as f:
         g = f.create_group("test_nd")
-        hdf_mod.hdf_save_dict_to_group(g, state)
+        hdf_save_dict_to_group(g, state)
     with h5py.File(tmp_path / "state.h5", "r") as f:
         _check_layout(f["test_nd"], a, haserr=False)
     os.remove(tmp_path / "state.h5")
