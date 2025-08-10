@@ -7425,6 +7425,13 @@ class nddata_hdf5(nddata):
             kwargs.update({"data_error": datarecordarray["error"]})
         except Exception:
             logger.debug(strm("No error found\n\n"))
+        data_units = datadict["data"].get("data_units")
+        if data_units is not None and isinstance(
+            data_units, (bytes, np.bytes_)
+        ):
+            data_units = data_units.decode("utf-8")
+        if data_units is not None:
+            kwargs.update({"data_units": data_units})
         datadict.pop("data")
         # }}}
         # {{{ be sure to load the dimlabels
@@ -7533,6 +7540,8 @@ class nddata_hdf5(nddata):
                 det_shape.append(temp)
             try:
                 self.data = self.data.reshape(det_shape)
+                if self.data_error is not None:
+                    self.data_error = self.data_error.reshape(det_shape)
             except Exception:
                 raise RuntimeError(
                     strm(

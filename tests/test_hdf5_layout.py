@@ -65,7 +65,10 @@ def _generate_nddata_noerr():
 
 def _check_layout(g, a, haserr=True):
     assert "data" in g
-    dimlabels = [j.decode("utf-8") for j in g.attrs["dimlabels"]]
+    print("g:",dir(g))
+    print("g.attrs:",g.attrs.keys())
+    print("g.attrs['dimlabels']:",g.attrs['dimlabels'])
+    dimlabels = [j[0].decode("utf-8") for j in g.attrs["dimlabels"]]
     assert dimlabels[0] == "t"
     assert dimlabels[1] == "f"
     if "data_units" not in g["data"].attrs:
@@ -105,6 +108,7 @@ def _check_loaded(b, a):
     np.testing.assert_allclose(b.data.imag, a.data.imag)
     if a.get_error() is not None:
         np.testing.assert_allclose(b.get_error(), a.get_error())
+    assert a.data.shape == b.data.shape
     for name in a.dimlabels:
         np.testing.assert_allclose(b.getaxis(name), a.getaxis(name))
         if a.get_error(name) is not None:
