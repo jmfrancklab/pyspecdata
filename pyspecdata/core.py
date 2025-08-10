@@ -1357,6 +1357,117 @@ class nddata(object):
     def _contains_symbolic(self, string):
         return string[:9] == "symbolic_" and hasattr(self, string)
 
+    def __getstate__(self):
+        """Return a plain ``dict`` describing the ``nddata`` state."""
+
+        axes = {}
+        for lbl in self.dimlabels:
+            units = self.get_units(lbl)
+            axes[lbl] = {
+                "data": self.getaxis(lbl),
+                "axis_coords_units": (
+                    np.bytes_(units) if units is not None else None
+                ),
+            }
+            err = self.get_error(lbl)
+            if err is not None:
+                axes[lbl]["error"] = err
+
+        def serialize_other_info(obj):
+            if isinstance(obj, dict):
+                return {k: serialize_other_info(v) for k, v in obj.items()}
+            if isinstance(obj, (list, tuple)):
+                elements = [serialize_other_info(v) for v in obj]
+                arr = np.array(elements)
+                rec = np.zeros(
+                    1, dtype=[("LISTELEMENTS", arr.dtype, arr.shape)]
+                )[0]
+                rec["LISTELEMENTS"] = arr
+                return rec
+            return obj
+
+        data_state = {"data": self.data}
+        if getattr(self, "data_error", None) is not None:
+            data_state["error"] = self.data_error
+        units = self.get_units()
+        data_state["data_units"] = (
+            np.bytes_(units) if units is not None else None
+        )
+
+        dimlabels = [
+            np.bytes_(lbl) if isinstance(lbl, str) else lbl
+            for lbl in self.dimlabels
+        ]
+
+        return {
+            "data": data_state,
+            "dimlabels": dimlabels,
+            "axes": axes,
+            "other_info": serialize_other_info(self.other_info),
+        }
+
+    def __setstate__(self, state):
+        """Restore object state from a dictionary."""
+
+        def decode_if_bytes(x):
+            if isinstance(x, (bytes, np.bytes_)):
+                return x.decode("utf-8")
+            return x
+
+        missing = [k for k in ("dimlabels", "data") if k not in state]
+        if missing:
+            raise ValueError(
+                "state is missing required keys: " + ", ".join(missing)
+            )
+
+        dimlabels = [decode_if_bytes(lbl) for lbl in state["dimlabels"]]
+        self.dimlabels = list(dimlabels)
+
+        axes_state = state.get("axes", {})
+        self.axis_coords = []
+        self.axis_coords_units = []
+        self.axis_coords_error = []
+        for lbl in dimlabels:
+            axinfo = axes_state.get(lbl, {})
+            coords = np.array(axinfo.get("data", []))
+            self.axis_coords.append(coords)
+            unit = decode_if_bytes(axinfo.get("axis_coords_units"))
+            self.axis_coords_units.append(unit)
+            err = axinfo.get("error")
+            self.axis_coords_error.append(
+                np.array(err) if err is not None else None
+            )
+
+        shape = tuple(len(ax) for ax in self.axis_coords)
+
+        data_state = state["data"]
+        self.data = data_state.get("data").reshape(shape)
+        err = data_state.get("error")
+        self.data_error = err.reshape(shape) if err is not None else None
+
+        self.data_units = decode_if_bytes(data_state.get("data_units"))
+
+        def deserialize_other_info(obj):
+            if (
+                isinstance(obj, (np.void, np.ndarray))
+                and getattr(obj, "dtype", None) is not None
+                and obj.dtype.names == ("LISTELEMENTS",)
+            ):
+                return [deserialize_other_info(v) for v in obj["LISTELEMENTS"]]
+            if isinstance(obj, dict):
+                return {
+                    decode_if_bytes(k): deserialize_other_info(v)
+                    for k, v in obj.items()
+                }
+            elif isinstance(obj, list):
+                return [deserialize_other_info(v) for v in obj]
+            else:
+                return decode_if_bytes(obj)
+
+        self.other_info = deserialize_other_info(state.get("other_info", {}))
+        self.genftpairs = False
+        return
+
     # {{{ for printing
     def __repr_pretty__(self, p, cycle):
         if cycle:
@@ -7068,14 +7179,12 @@ class nddata(object):
                     and self.get_error() is not None
                     and len(self.get_error()) > 0
                 ):
-                    thistable = np.core.rec.fromarrays(
+                    thistable = np.rec.fromarrays(
                         [self.data, self.get_error()], names="data,error"
                     )
                     mydataattrs.remove("data_error")
                 else:
-                    thistable = np.core.rec.fromarrays(
-                        [self.data], names="data"
-                    )
+                    thistable = np.rec.fromarrays([self.data], names="data")
                 mydataattrs.remove("data")
                 datatable = h5table(bottomnode, "data", thistable)
                 # print 'DEBUG 2: bottomnode is',bottomnode
@@ -7134,7 +7243,7 @@ class nddata(object):
                                 > 0
                             ):  # this is needed to avoid all errors, though I
                                 # guess I could use try/except
-                                thistable = np.core.rec.fromarrays(
+                                thistable = np.rec.fromarrays(
                                     [
                                         myaxisattrsforthisdim["axis_coords"],
                                         myaxisattrsforthisdim[
@@ -7145,7 +7254,7 @@ class nddata(object):
                                 )
                                 myaxisattrsforthisdim.pop("axis_coords_error")
                             else:
-                                thistable = np.core.rec.fromarrays(
+                                thistable = np.rec.fromarrays(
                                     [myaxisattrsforthisdim["axis_coords"]],
                                     names="data",
                                 )
@@ -7192,6 +7301,11 @@ class nddata(object):
                 )  # somehow, this prevents it from claiming that the
                 #    bottomnode is None --> some type of bug?
                 logger.debug(strm("bottomnode", test))
+                if "dimlabels" in myotherattrs:
+                    bottomnode._v_attrs.__setattr__(
+                        "dimlabels", np.array(self.dimlabels, dtype="S")
+                    )
+                    myotherattrs.remove("dimlabels")
                 h5attachattributes(
                     bottomnode,
                     [
@@ -7305,10 +7419,8 @@ class nddata_hdf5(nddata):
         datadict = h5loaddict(datanode)
         # {{{ load the data, and pop it from datadict
         try:
-            datarecordarray = datadict["data"][
-                "data"
-            ]  # the table is called data, and the data of the table is called
-            #    data
+            dataentry = datadict["data"]
+            datarecordarray = dataentry["data"]  # the table is called data
             mydata = datarecordarray["data"]
         except Exception:
             raise ValueError("I can't find the nddata.data")
@@ -7316,6 +7428,13 @@ class nddata_hdf5(nddata):
             kwargs.update({"data_error": datarecordarray["error"]})
         except Exception:
             logger.debug(strm("No error found\n\n"))
+        data_units = dataentry.get("data_units")
+        if data_units is not None and isinstance(
+            data_units, (bytes, np.bytes_)
+        ):
+            data_units = data_units.decode("utf-8")
+        if data_units is not None:
+            kwargs.update({"data_units": data_units})
         datadict.pop("data")
         # }}}
         # {{{ be sure to load the dimlabels
@@ -7424,6 +7543,8 @@ class nddata_hdf5(nddata):
                 det_shape.append(temp)
             try:
                 self.data = self.data.reshape(det_shape)
+                if self.data_error is not None:
+                    self.data_error = self.data_error.reshape(det_shape)
             except Exception:
                 raise RuntimeError(
                     strm(
