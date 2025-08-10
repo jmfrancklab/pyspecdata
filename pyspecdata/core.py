@@ -2199,6 +2199,9 @@ class nddata(object):
         e.g. to convert a variable from seconds
         to the units of `axisname`, do
         `var_s/d.div_units("axisname","s")`
+
+        e.g. to convert `axisname` to μs, do
+        `d["axisname"] *= d.div_units("axisname","μs")`
         """
         if arg2 is not None:
             denom_units = Q_(arg2)
@@ -3419,27 +3422,40 @@ class nddata(object):
         return func
         # }}}
 
-    def argmax(self, *args, **kwargs):
-        r"""find the max along a particular axis, and get rid of that axis,
-        replacing it with the index number of the max value
+    def argmax(self, *axes, **kwargs):
+        r"""If `.argmax('dimname')` find the max along a particular dimension, and
+        get rid of that dimension, replacing it with the index number of the max
+        value.
+
+        If `.argmax()`: return a dictionary giving the coordinates of the
+        overall maximum point.
 
         Parameters
         ==========
         raw_index: bool
-            return the raw (np.ndarray) numerical index, rather than the
-            corresponding axis value Note that the result returned is still,
-            however, an nddata (rather than numpy np.ndarray) object.
+            Return the raw (np.ndarray) numerical index, rather than the
+            corresponding axis value.
+            Note that the result returned is still, however, an nddata (rather
+            than numpy np.ndarray) object.
         """
-        # {{{ process arguments
-        axes = self._possibly_one_axis(*args)
-        raw_index = False
-        if "raw_index" in list(kwargs.keys()):
-            raw_index = kwargs.pop("raw_index")
-        if len(kwargs) > 0:
-            raise ValueError("I didn't understand the kwargs:", repr(kwargs))
-        if isinstance(axes, str):
+        raw_index = process_kwargs([("raw_index", False)], kwargs)
+        if len(axes) == 0:
+            raw_indices = dict(
+                zip(
+                    self.dimlabels,
+                    np.unravel_index(
+                        self.data.ravel().argmax(), self.data.shape
+                    ),
+                )
+            )
+            if raw_index:
+                return raw_indices
+            else:
+                return dict(
+                    [(k, self.getaxis(k)[v]) for k, v in raw_indices.items()]
+                )
+        if type(axes) is str:
             axes = [axes]
-        # }}}
         for j in range(0, len(axes)):
             try:
                 thisindex = self.axn(axes[j])
@@ -3448,27 +3464,20 @@ class nddata(object):
                 print("doesn't contain: ", axes[j])
                 raise
             temp = self.data.copy()
-            temp[~np.isfinite(temp)] = temp[np.isfinite(temp)].min()
+            temp[~np.isfinite(temp)] = temp[np.isfinite(temp)].max()
             argmax_result = np.argmax(temp, axis=thisindex)
-            argmax_units = self.get_units(axes[j])
             if raw_index:
                 self.data = argmax_result
             else:
-                if self.axis_coords[thisindex] is None:
-                    raise ValueError(
-                        "It doesn't make sense to call argmax if you have"
-                        " removed the axis coordinates! (getaxis yields None"
-                        " for %s" % thisindex
-                    )
                 self.data = self.axis_coords[thisindex][argmax_result]
-                self.set_units(argmax_units)
             self._pop_axis_info(thisindex)
         return self
 
     def argmin(self, *axes, **kwargs):
-        r"""If `.argmin('axisname')` find the min along a particular axis, and
-        get rid of that axis, replacing it with the index number of the max
+        r"""If `.argmin('dimname')` find the min along a particular dimension, and
+        get rid of that dimension, replacing it with the index number of the max
         value.
+
         If `.argmin()`: return a dictionary giving the coordinates of the
         overall minimum point.
 
