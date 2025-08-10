@@ -164,7 +164,7 @@ def test_state_hdf_dict_roundtrip(tmp_path):
         hdf_mod.hdf_save_dict_to_group(g, state)
     with h5py.File(tmp_path / "state.h5", "r") as f:
         _check_layout(f["test_nd"], a)
-    os.remove(tmp_path / "sample.pkl")
+    os.remove(tmp_path / "state.h5")
 
 def test_state_hdf_dict_roundtrip_noerr(tmp_path):
     a = _generate_nddata_noerr()
@@ -175,4 +175,4 @@ def test_state_hdf_dict_roundtrip_noerr(tmp_path):
         hdf_mod.hdf_save_dict_to_group(g, state)
     with h5py.File(tmp_path / "state.h5", "r") as f:
         _check_layout(f["test_nd"], a, haserr=False)
-    os.remove(tmp_path / "sample.pkl")
+    os.remove(tmp_path / "state.h5")

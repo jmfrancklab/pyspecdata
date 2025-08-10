@@ -1361,14 +1361,18 @@ class nddata(object):
         """Return a plain ``dict`` describing the ``nddata`` state."""
 
         axes = {}
-        for j, lbl in enumerate(self.dimlabels):
-            axis_state = {
+        for lbl in self.dimlabels:
+            units = self.get_units(lbl)
+            axes[lbl] = {
                 "data": self.getaxis(lbl),
-                "axis_coords_units": self.get_units(lbl),
+                "axis_coords_units": (
+                    np.bytes_(units) if units is not None else None
+                ),
             }
             err = self.get_error(lbl)
             if err is not None:
                 axes[lbl]["error"] = err
+
         def serialize_other_info(obj):
             if isinstance(obj, dict):
                 return {k: serialize_other_info(v) for k, v in obj.items()}
@@ -1382,18 +1386,24 @@ class nddata(object):
                 return rec
             return obj
 
+        data_state = {"data": self.data}
         if getattr(self, "data_error", None) is not None:
-            data_state = {"data": self.data}
             data_state["error"] = self.data_error
-        else:
-            data_state = self.data
+        units = self.get_units()
+        data_state["data_units"] = (
+            np.bytes_(units) if units is not None else None
+        )
+
+        dimlabels = [
+            np.bytes_(lbl) if isinstance(lbl, str) else lbl
+            for lbl in self.dimlabels
+        ]
 
         return {
             "data": data_state,
-            "dimlabels": self.dimlabels,
+            "dimlabels": dimlabels,
             "axes": axes,
             "other_info": serialize_other_info(self.other_info),
-            "data_units": self.get_units(),
         }
 
     def __setstate__(self, state):
@@ -1431,18 +1441,11 @@ class nddata(object):
         shape = tuple(len(ax) for ax in self.axis_coords)
 
         data_state = state["data"]
-        if isinstance(data_state, dict):
-            self.data = data_state.get("data").reshape(shape)
-            err = data_state.get("error")
-            self.data_error = (
-                np.array(err).reshape(shape) if err is not None else None
-            )
-        else:
-            self.data = data_state.reshape(shape)
-            err = state.get("data_error")
-            self.data_error = err.reshape(shape) if err is not None else None
+        self.data = data_state.get("data").reshape(shape)
+        err = data_state.get("error")
+        self.data_error = err.reshape(shape) if err is not None else None
 
-        self.data_units = decode_if_bytes(state.get("data_units"))
+        self.data_units = decode_if_bytes(data_state.get("data_units"))
 
         def deserialize_other_info(obj):
             if (
@@ -7287,7 +7290,7 @@ class nddata(object):
                 test = repr(
                     bottomnode
                 )  # somehow, this prevents it from claiming that the
-                    #    bottomnode is None --> some type of bug?
+                #    bottomnode is None --> some type of bug?
                 logger.debug(strm("bottomnode", test))
                 if "dimlabels" in myotherattrs:
                     bottomnode._v_attrs.__setattr__(
@@ -7417,7 +7420,9 @@ class nddata_hdf5(nddata):
         except Exception:
             logger.debug(strm("No error found\n\n"))
         data_units = dataentry.get("data_units")
-        if data_units is not None and isinstance(data_units, (bytes, np.bytes_)):
+        if data_units is not None and isinstance(
+            data_units, (bytes, np.bytes_)
+        ):
             data_units = data_units.decode("utf-8")
         if data_units is not None:
             kwargs.update({"data_units": data_units})
@@ -7530,7 +7535,7 @@ class nddata_hdf5(nddata):
             try:
                 self.data = self.data.reshape(det_shape)
                 if self.data_error is not None:
-                    self.data_error = np.array(self.data_error).reshape(det_shape)
+                    self.data_error = self.data_error.reshape(det_shape)
             except Exception:
                 raise RuntimeError(
                     strm(
