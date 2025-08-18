@@ -24,6 +24,17 @@ def load_module(
         implementation of :mod:`pint` is supplied so that tests can run in an
         environment without the real dependency installed.
     """
+    full_name = f"pyspecdata.{name}"
+    existing = sys.modules.get(full_name)
+    if existing is not None:
+        existing_file = getattr(existing, "__file__", None)
+        if existing_file:
+            try:
+                if pathlib.Path(existing_file).resolve().is_relative_to(PACKAGE_ROOT):
+                    return existing
+            except Exception:
+                if str(PACKAGE_ROOT) in str(existing_file):
+                    return existing
     # provide dummy replacements for optional compiled dependencies
     # ``h5py`` is required and available, so we avoid stubbing it. For
     # optional dependencies such as :mod:`tables`, fall back to a minimal
@@ -321,9 +332,9 @@ def load_module(
         pkg.__path__ = existing_paths + [str(PACKAGE_ROOT)]
 
     spec = importlib.util.spec_from_file_location(
-        f"pyspecdata.{name}", PACKAGE_ROOT / f"{name.replace('.', '/')}.py"
+        full_name, PACKAGE_ROOT / f"{name.replace('.', '/')}.py"
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    sys.modules[f"pyspecdata.{name}"] = module
+    sys.modules[full_name] = module
     return module
