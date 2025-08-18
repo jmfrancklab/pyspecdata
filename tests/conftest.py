@@ -25,9 +25,14 @@ def load_module(
         environment without the real dependency installed.
     """
     # provide dummy replacements for optional compiled dependencies
-    if not use_real_h5py:
+    # ``h5py`` is required and available, so we avoid stubbing it. For
+    # optional dependencies such as :mod:`tables`, fall back to a minimal
+    # stub only when the real package is missing.
+    try:
+        import tables  # noqa: F401
+    except Exception:
         sys.modules.setdefault("tables", types.ModuleType("tables"))
-        sys.modules.setdefault("h5py", types.ModuleType("h5py"))
+
     if not use_real_pint:
         try:
             import pint  # noqa: F401
@@ -200,7 +205,8 @@ def load_module(
         pylab_stub.rcParams = {
             "axes.prop_cycle": types.SimpleNamespace(
                 by_key=lambda: {"color": ["k"]}
-            )
+            ),
+            "figure.figsize": [1, 1],
         }
         pylab_stub.pi = np.pi
         pylab_stub.r_ = np.r_
