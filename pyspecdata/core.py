@@ -64,13 +64,8 @@ from .general_functions import (
     scalar_or_zero_order,
     strm,
 )
-from .hdf_utils import (
-    h5loaddict,
-    h5child,
-    h5table,
-    h5nodebypath,
-    h5attachattributes,
-)
+from .file_saving.hdf_save_dict_to_group import hdf_save_dict_to_group, hdf_load_dict_from_group
+import os
 from .mpl_utils import (
     plot_label_points,
     default_cycler,
@@ -7018,57 +7013,20 @@ class nddata(object):
             )
 
     # }}}
+
+
     # {{{ hdf5 write
     def hdf5_write(self, h5path, directory="."):
-        r"""Write the nddata to an HDF5 file.
-
-        `h5path` is the name of the file followed by the node path where
-        you want to put it -- it does **not** include the directory where
-        the file lives.
-        The directory can be passed to the `directory` argument.
-
-        You can use either :func:`~pyspecdata.find_file` or
-        :func:`~pyspecdata.nddata_hdf5` to read the data, as shown below.
-        When reading this, please note that HDF5 files store *multiple*
-        datasets,
-        and each is named (here, the name is `test_data`).
-
-        .. figure:: ../doc_src/_static/presentation_images/image39.png
-           :align: center
-
-           View of an HDF5 file with nddata arrays and metadata inside
-           ViTables.
-
-        .. code-block:: python
-
-            from pyspecdata import *
-            init_logging('debug')
-            a = nddata(r_[0:5:10j], 'x')
-            a.name('test_data')
-            try:
-                a.hdf5_write('example.h5',getDATADIR(exp_type='Sam'))
-            except Exception:
-                print("file already exists, not creating again -- delete the
-                file or node if wanted")
-            # read the file by the "raw method"
-            b = nddata_hdf5('example.h5/test_data',
-                    getDATADIR(exp_type='Sam'))
-            print("found data:",b)
-            # or use the find file method
-            c = find_file('example.h5', exp_type='Sam',
-                    expno='test_data')
-            print("found data:",c)
+        r"""Write the :class:`nddata` to an HDF5 file.
 
         Parameters
         ----------
         h5path : str
-            The name of the file followed by the node path where
-            you want to put it -- it does **not** include the directory where
-            the file lives.
-            (Because HDF5 files contain an internal directory-like group
-            structure.)
+            Name of the file followed by an optional internal path.
+            The dataset name is taken from the ``name`` property of the
+            :class:`nddata` instance.
         directory : str
-            the directory where the HDF5 file lives.
+            Directory where the HDF5 file lives.
         """
         for thisax in self.dimlabels:
             if self.getaxis(thisax) is None or len(self.getaxis(thisax)) == 0:
@@ -7080,499 +7038,54 @@ class nddata(object):
                         " to HDF5 if you do not label all your axes!!",
                     )
                 )
-        # {{{ add the final node based on the name stored in the nddata
-        #     structure
-        if h5path[-1] != "/":
-            h5path += "/"  # make sure it ends in a slash first
+        if "/" in h5path:
+            filename, internal = h5path.split("/", 1)
+        else:
+            filename, internal = h5path, ""
         try:
             thisname = self.get_prop("name")
         except Exception:
             raise ValueError(
                 strm(
                     "You're trying to save an nddata object which",
-                    "does not yet have a name, and you can't do this! Run",
-                    "yourobject.name('setname')",
+                    " does not yet have a name, and you can't do this! Run",
+                    " yourobject.name('setname')",
                 )
             )
-        if isinstance(thisname, str):
-            h5path += thisname
-        else:
+        if not isinstance(thisname, str):
             raise ValueError(
                 strm(
                     "problem trying to store HDF5 file; you need to",
-                    "set the ``name'' property of the nddata object to a"
-                    " string",
-                    "first!",
+                    " set the ``name'' property of the nddata object to a",
+                    " string first!",
                 )
             )
-        h5file, bottomnode = h5nodebypath(
-            h5path, directory=directory
-        )  # open the file and move to the right node
-        try:
-            # print 'DEBUG 1: bottomnode is',bottomnode
-            # }}}
-            # {{{ print out the attributes of the data
-            myattrs = normal_attrs(self)
-            # {{{ separate them into data and axes
-            mydataattrs = list(filter((lambda x: x[0:4] == "data"), myattrs))
-            myotherattrs = list(filter((lambda x: x[0:4] != "data"), myattrs))
-            myotherattrs = [
-                x
-                for x in myotherattrs
-                if x not in ["C", "sin", "cos", "exp", "log10"]
-            ]
-            myaxisattrs = list(
-                filter((lambda x: x[0:4] == "axis"), myotherattrs)
-            )
-            myotherattrs = list(
-                filter((lambda x: x[0:4] != "axis"), myotherattrs)
-            )
-            logger.debug(
-                strm(
-                    lsafe(
-                        "data attributes:",
-                        list(
-                            zip(
-                                mydataattrs,
-                                [
-                                    type(self.__getattribute__(x))
-                                    for x in mydataattrs
-                                ],
-                            )
-                        ),
-                    ),
-                    "\n\n",
-                )
-            )
-            logger.debug(
-                strm(
-                    lsafe(
-                        "axis attributes:",
-                        list(
-                            zip(
-                                myaxisattrs,
-                                [
-                                    type(self.__getattribute__(x))
-                                    for x in myaxisattrs
-                                ],
-                            )
-                        ),
-                    ),
-                    "\n\n",
-                )
-            )
-            logger.debug(
-                strm(
-                    lsafe(
-                        "other attributes:",
-                        list(
-                            zip(
-                                myotherattrs,
-                                [
-                                    type(self.__getattribute__(x))
-                                    for x in myotherattrs
-                                ],
-                            )
-                        ),
-                    ),
-                    "\n\n",
-                )
-            )
-            # }}}
-            # }}}
-            # {{{ write the data table
-            if "data" in mydataattrs:
-                if (
-                    "data_error" in mydataattrs
-                    and self.get_error() is not None
-                    and len(self.get_error()) > 0
-                ):
-                    thistable = np.rec.fromarrays(
-                        [self.data, self.get_error()], names="data,error"
-                    )
-                    mydataattrs.remove("data_error")
-                else:
-                    thistable = np.rec.fromarrays([self.data], names="data")
-                mydataattrs.remove("data")
-                datatable = h5table(bottomnode, "data", thistable)
-                # print 'DEBUG 2: bottomnode is',bottomnode
-                # print 'DEBUG 2: datatable is',datatable
-                logger.debug(strm("Writing remaining axis attributes\n\n"))
-                if len(mydataattrs) > 0:
-                    h5attachattributes(datatable, mydataattrs, self)
-            else:
-                raise ValueError(
-                    "I can't find the data object when trying to save the HDF5"
-                    " file!!"
-                )
-            # }}}
-            # {{{ write the axes tables
-            if "axis_coords" in myaxisattrs:
-                if len(self.axis_coords) > 0:
-                    # {{{ create an 'axes' node
-                    axesnode = h5child(
-                        bottomnode,  # current node
-                        "axes",  # the child
-                        create=True,
-                    )
-                    # }}}
-                    for j, axisname in enumerate(
-                        self.dimlabels
-                    ):  # make a table for each different dimension
-                        myaxisattrsforthisdim = dict([
-                            (x, self.__getattribute__(x)[j])
-                            for x in list(myaxisattrs)
-                            if len(self.__getattribute__(x)) > 0
-                        ])  # collect the attributes for this dimension and
-                        #    their values
-                        logger.debug(
-                            strm(
-                                lsafe(
-                                    "for axis",
-                                    axisname,
-                                    "myaxisattrsforthisdim=",
-                                    myaxisattrsforthisdim,
-                                )
-                            )
-                        )
-                        if (
-                            "axis_coords" in list(myaxisattrsforthisdim.keys())
-                            and myaxisattrsforthisdim["axis_coords"]
-                            is not None
-                        ):
-                            if (
-                                "axis_coords_error"
-                                in list(myaxisattrsforthisdim.keys())
-                                and myaxisattrsforthisdim["axis_coords_error"]
-                                is not None
-                                and len(
-                                    myaxisattrsforthisdim["axis_coords_error"]
-                                )
-                                > 0
-                            ):  # this is needed to avoid all errors, though I
-                                # guess I could use try/except
-                                thistable = np.rec.fromarrays(
-                                    [
-                                        myaxisattrsforthisdim["axis_coords"],
-                                        myaxisattrsforthisdim[
-                                            "axis_coords_error"
-                                        ],
-                                    ],
-                                    names="data,error",
-                                )
-                                myaxisattrsforthisdim.pop("axis_coords_error")
-                            else:
-                                thistable = np.rec.fromarrays(
-                                    [myaxisattrsforthisdim["axis_coords"]],
-                                    names="data",
-                                )
-                            myaxisattrsforthisdim.pop("axis_coords")
-                        datatable = h5table(axesnode, axisname, thistable)
-                        # print 'DEBUG 3: axesnode is',axesnode
-                        logger.debug(
-                            strm(
-                                "Writing remaining axis attributes for",
-                                axisname,
-                                "\n\n",
-                            )
-                        )
-                        if len(myaxisattrsforthisdim) > 0:
-                            h5attachattributes(
-                                datatable,
-                                list(myaxisattrsforthisdim.keys()),
-                                list(myaxisattrsforthisdim.values()),
-                            )
-            # }}}
-            # {{{ Check the remaining attributes.
-            logger.debug(
-                strm(
-                    lsafe(
-                        "other attributes:",
-                        list(
-                            zip(
-                                myotherattrs,
-                                [
-                                    type(self.__getattribute__(x))
-                                    for x in myotherattrs
-                                ],
-                            )
-                        ),
-                    ),
-                    "\n\n",
-                )
-            )
-            logger.debug(strm("Writing remaining other attributes\n\n"))
-            if len(myotherattrs) > 0:
-                # print 'DEBUG 4: bottomnode is',bottomnode
-                test = repr(
-                    bottomnode
-                )  # somehow, this prevents it from claiming that the
-                #    bottomnode is None --> some type of bug?
-                logger.debug(strm("bottomnode", test))
-                h5attachattributes(
-                    bottomnode,
-                    [
-                        j
-                        for j in myotherattrs
-                        if not self._contains_symbolic(j)
-                    ],
-                    self,
-                )
-                warnlist = [
-                    j
-                    for j in myotherattrs
-                    if (not self._contains_symbolic(j))
-                    and isinstance(self.__getattribute__(j), dict)
-                ]
-                # {{{ to avoid pickling, test that none of the attributes I'm
-                #     trying to write are dictionaries or lists
-                if len(warnlist) > 0:
-                    print(
-                        "WARNING!!, attributes", warnlist, "are dictionaries!"
-                    )
-                warnlist = [
-                    j
-                    for j in myotherattrs
-                    if (not self._contains_symbolic(j))
-                    and isinstance(self.__getattribute__(j), list)
-                ]
-                if len(warnlist) > 0:
-                    print("WARNING!!, attributes", warnlist, "are lists!")
-                # }}}
-                logger.debug(
-                    strm(
-                        lsafe(
-                            "other attributes:",
-                            list(
-                                zip(
-                                    myotherattrs,
-                                    [
-                                        type(self.__getattribute__(x))
-                                        for x in myotherattrs
-                                    ],
-                                )
-                            ),
-                        ),
-                        "\n\n",
-                    )
-                )
-            # }}}
-        finally:
-            h5file.close()
+        fullpath = "/".join(p for p in [internal.strip("/"), thisname] if p)
+        state = self.__getstate__()
+        filepath = os.path.join(directory, filename)
+        import h5py
+        with h5py.File(filepath, "a") as f:
+            if fullpath in f:
+                del f[fullpath]
+            g = f.create_group(fullpath)
+            hdf_save_dict_to_group(g, state)
 
     # }}}
 
-
-class testclass:
-    def __getitem__(self, *args, **kwargs):
-        logger.debug(
-            strm(
-                "you called __getitem__ with args", args, "and kwargs", kwargs
-            )
-        )
-        return
-
-    def __getattribute__(self, *args, **kwargs):
-        logger.debug(
-            strm(
-                "you called __getattribute__ with args",
-                args,
-                "and kwargs",
-                kwargs,
-            )
-        )
-        return
-
-
 class nddata_hdf5(nddata):
-    r"""Load an :class:`nddata` object saved with
-    :meth:`nddata.hdf5_write`.
+    r"""Load an :class:`nddata` object saved with :meth:`nddata.hdf5_write`."""
 
-    This subclass opens an array from an HDF5 file and exposes it as a
-    regular ``nddata`` instance.  Use :func:`pyspecdata.find_file` to
-    conveniently locate the desired file and then instantiate this class
-    or call :func:`nddata_hdf5` directly.
-    """
-
-    def __repr__(self):
-        if hasattr(self, "_node_children"):
-            return repr(self.datanode)
+    def __init__(self, h5path, directory="."):
+        if "/" in h5path:
+            filename, internal = h5path.split("/", 1)
         else:
-            return nddata.__repr__(self)
-        atexit.register(self._cleanup)
-
-    def _cleanup(self):
-        if hasattr(self, "_node_children"):
-            self.h5file.close()
-            del self.h5file
-            del self.datanode
-        return
-
-    def __init__(self, pathstring, directory=".", mode="r"):
-        self.pathstring = pathstring
-        # try:
-        self.h5file, self.datanode = h5nodebypath(
-            pathstring, check_only=True, directory=directory, mode=mode
-        )
-        logger.debug("about to call _init_datanode")
-        self._init_datanode(self.datanode)
-        atexit.register(self._cleanup)
-
-    def _init_datanode(self, datanode, **kwargs):
-        datadict = h5loaddict(datanode)
-        # {{{ load the data, and pop it from datadict
-        try:
-            datarecordarray = datadict["data"][
-                "data"
-            ]  # the table is called data, and the data of the table is called
-            #    data
-            mydata = datarecordarray["data"]
-        except Exception:
-            raise ValueError("I can't find the nddata.data")
-        try:
-            kwargs.update({"data_error": datarecordarray["error"]})
-        except Exception:
-            logger.debug(strm("No error found\n\n"))
-        data_units = datadict["data"].get("data_units")
-        if data_units is not None and isinstance(
-            data_units, (bytes, np.bytes_)
-        ):
-            data_units = data_units.decode("utf-8")
-        if data_units is not None:
-            kwargs.update({"data_units": data_units})
-        datadict.pop("data")
-        # }}}
-        # {{{ be sure to load the dimlabels
-        mydimlabels = [j.decode("utf-8") for j in datadict["dimlabels"]]
-        if len(mydimlabels) == 1:
-            if len(mydimlabels[0]) == 1:
-                mydimlabels = list(
-                    [mydimlabels[0][0]]
-                )  # for some reason, think I need to do this for length 1
-        # }}}
-        # {{{ load the axes and pop them from datadict
-        datadict.pop("dimlabels")
-        if "axes" in list(datadict.keys()):
-            myaxiscoords = [None] * len(mydimlabels)
-            myaxiscoordserror = [None] * len(mydimlabels)
-            myaxis_units = [None] * len(mydimlabels)
-            logger.debug(
-                strm(
-                    "about to read out the various axes:",
-                    list(datadict["axes"].keys()),
-                )
-            )
-            for axisname in list(datadict["axes"].keys()):
-                try:
-                    axisnumber = mydimlabels.index(axisname)
-                except AttributeError:
-                    raise AttributeError(
-                        strm(
-                            "mydimlabels is not in the right format!\nit looks"
-                            " like this:\n",
-                            mydimlabels,
-                            type(mydimlabels),
-                        )
-                    )
-                except ValueError:
-                    raise ValueError(
-                        strm(
-                            "mydimlabels is not in the right format!\nit looks"
-                            " like this:\n",
-                            mydimlabels,
-                            type(mydimlabels),
-                        )
-                    )
-                recordarrayofaxis = datadict["axes"][axisname]["data"]
-                if "axis_coords_units" in datadict["axes"][axisname].keys():
-                    myaxis_units[axisnumber] = datadict["axes"][axisname][
-                        "axis_coords_units"
-                    ]
-                else:
-                    if ("Scans" in axisname) or ("ph" in axisname):
-                        pass
-                    else:
-                        print(
-                            "You didn't set units for %s before saving the"
-                            " data!!!" % axisname
-                        )
-                myaxiscoords[axisnumber] = recordarrayofaxis["data"]
-                if "error" in recordarrayofaxis.dtype.names:
-                    myaxiscoordserror[axisnumber] = recordarrayofaxis["error"]
-                datadict["axes"][axisname].pop("data")
-                for k in list(datadict["axes"][axisname].keys()):
-                    logger.debug(
-                        strm(
-                            "Warning, attribute",
-                            k,
-                            "of axis table",
-                            axisname,
-                            "remains, but the code to load this is not yet"
-                            " supported",
-                        )
-                    )
-                datadict["axes"].pop(axisname)
-            kwargs.update({"axis_coords": myaxiscoords})
-            kwargs.update({"axis_coords_units": myaxis_units})
-            kwargs.update({"axis_coords_error": myaxiscoordserror})
-        elif len(mydimlabels) > 1:
-            raise ValueError(
-                "The current version uses the axis labels to"
-                "figure out the shape of the data\nBecause you stored"
-                "unlabeled data, I can't figure out the shape of the"
-                "data!!"
-            )
-            # the reshaping this refers to is done below
-        # }}}
-        logger.debug(
-            strm(
-                "about to initialize data with shape",
-                mydata.shape,
-                "labels",
-                mydimlabels,
-                "and kwargs",
-                kwargs,
-            )
-        )
-        nddata.__init__(self, mydata, mydata.shape, mydimlabels, **kwargs)
-        # {{{ reshape multidimensional data to match the axes
-        if len(mydimlabels) > 1:
-            det_shape = []
-            for thisdimlabel in mydimlabels:
-                try:
-                    temp = self.getaxis(thisdimlabel)
-                except Exception:
-                    temp = -1  # no axis is given
-                if isinstance(temp, np.ndarray):
-                    temp = len(temp)
-                det_shape.append(temp)
-            try:
-                self.data = self.data.reshape(det_shape)
-                if self.data_error is not None:
-                    self.data_error = self.data_error.reshape(det_shape)
-            except Exception:
-                raise RuntimeError(
-                    strm(
-                        "The data is of shape",
-                        self.data.shape,
-                        "and I try to reshape it into",
-                        det_shape,
-                        "corresponding to the dimensions",
-                        mydimlabels,
-                        "--> this fails!",
-                    )
-                )
-        # }}}
-        for remainingattribute in list(datadict.keys()):
-            self.__setattr__(remainingattribute, datadict[remainingattribute])
-        self.h5file.close()
-        del self.h5file
-        del self.datanode
-        return
-
-
-# }}}
-
+            raise ValueError("h5path must include an internal path to the dataset")
+        filepath = os.path.join(directory, filename)
+        import h5py
+        with h5py.File(filepath, "r") as f:
+            g = f[internal]
+            state = hdf_load_dict_from_group(g)
+        self.__setstate__(state)
 
 class ndshape(ndshape_base):
     r"""A class for describing the shape and dimension names of nddata objects.

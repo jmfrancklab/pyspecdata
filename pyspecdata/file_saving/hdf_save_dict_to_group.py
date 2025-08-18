@@ -1,5 +1,6 @@
 from ..general_functions import *
 from pylab import *
+import h5py
 
 logger = logging.getLogger("pyspecdata.hdf_save_dict_to_group")
 
@@ -39,3 +40,19 @@ def hdf_save_dict_to_group(group, data):
                 group.attrs[k] = [
                     x.encode("utf-8") if isinstance(x, str) else x for x in v
                 ]
+
+def hdf_load_dict_from_group(group):
+    """Recursively load an HDF5 group into a plain ``dict``.
+
+    This mirrors :func:`hdf_save_dict_to_group` and returns a dictionary
+    representation of ``group`` suitable for :meth:`nddata.__setstate__`.
+    """
+    retval = {}
+    for k, v in group.items():
+        if isinstance(v, h5py.Dataset):
+            retval[k] = v[()]
+        else:
+            retval[k] = hdf_load_dict_from_group(v)
+    for k, v in group.attrs.items():
+        retval[k] = v
+    return retval
