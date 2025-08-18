@@ -64,7 +64,10 @@ from .general_functions import (
     scalar_or_zero_order,
     strm,
 )
-from .file_saving.hdf_save_dict_to_group import hdf_save_dict_to_group, hdf_load_dict_from_group
+from .file_saving.hdf_save_dict_to_group import (
+    hdf_save_dict_to_group,
+    hdf_load_dict_from_group,
+)
 import os
 from .mpl_utils import (
     plot_label_points,
@@ -7014,7 +7017,6 @@ class nddata(object):
 
     # }}}
 
-
     # {{{ hdf5 write
     def hdf5_write(self, h5path, directory="."):
         r"""Write the :class:`nddata` to an HDF5 file.
@@ -7064,6 +7066,7 @@ class nddata(object):
         state = self.__getstate__()
         filepath = os.path.join(directory, filename)
         import h5py
+
         with h5py.File(filepath, "a") as f:
             if fullpath in f:
                 del f[fullpath]
@@ -7072,6 +7075,7 @@ class nddata(object):
 
     # }}}
 
+
 class nddata_hdf5(nddata):
     r"""Load an :class:`nddata` object saved with :meth:`nddata.hdf5_write`."""
 
@@ -7079,13 +7083,17 @@ class nddata_hdf5(nddata):
         if "/" in h5path:
             filename, internal = h5path.split("/", 1)
         else:
-            raise ValueError("h5path must include an internal path to the dataset")
+            raise ValueError(
+                "h5path must include an internal path to the dataset"
+            )
         filepath = os.path.join(directory, filename)
         import h5py
+
         with h5py.File(filepath, "r") as f:
             g = f[internal]
             state = hdf_load_dict_from_group(g)
         self.__setstate__(state)
+
 
 class ndshape(ndshape_base):
     r"""A class for describing the shape and dimension names of nddata objects.
