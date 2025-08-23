@@ -514,6 +514,28 @@ def xepr_load_acqu(filename):
         else:
             return None
 
+    def replace_escaped_newlines(val):
+        if isinstance(val, str):
+            val = val.replace("\\n", "\n")
+            if val and val[0] == "'" and val[-1] == "'":
+                val = val[1:-1]
+            return val
+        if isinstance(val, list):
+            return [replace_escaped_newlines(v) for v in val]
+        return val
+
+    def collapse_string_lists(val):
+        if isinstance(val, list):
+            flattened = []
+            for item in val:
+                item = collapse_string_lists(item)
+                if isinstance(item, str):
+                    flattened.append(item)
+                else:
+                    return val
+            return " ".join(flattened)
+        return val
+
     which_block = None
     block_re = re.compile(r"^ *#(\w+)")
     comment_re = re.compile(r"^ *\*")
@@ -561,18 +583,18 @@ def xepr_load_acqu(filename):
                                     )
                                 )
                                 values = [
-                                    v.replace("\\n", "\n")
-                                    if isinstance(v, str)
-                                    else v
-                                    for v in values
+                                    replace_escaped_newlines(v) for v in values
                                 ]
+                                values = collapse_string_lists(values)
                                 block_list.append((m.groups()[0], values))
                                 # }}}
                             else:
                                 value = auto_string_convert(m.groups()[1])
-                                if isinstance(value, str):
-                                    value = value.replace("\\n", "\n")
+                                value = replace_escaped_newlines(value)
+                                value = collapse_string_lists(value)
                                 block_list.append((m.groups()[0], value))
+                        elif line == "":
+                            continue
                         else:
                             raise ValueError(
                                 "I don't know what to do with the line:\n"

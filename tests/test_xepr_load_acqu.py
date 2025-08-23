@@ -41,3 +41,25 @@ def test_line_continuation(tmp_path):
     result = xepr_load_acqu(str(dsc))
     expected = "firstlinesecondline\nthirdfourth"
     assert result["BLOCK"]["VAR"] == expected
+
+
+def test_ignore_blank_line(tmp_path):
+    dsc = tmp_path / "blank.dsc"
+    dsc.write_text(
+        "#BLOCK\nVAR1 one\n\nVAR2 two\n"
+    )
+    result = xepr_load_acqu(str(dsc))
+    assert result["BLOCK"]["VAR1"] == "one"
+    assert result["BLOCK"]["VAR2"] == "two"
+
+
+def test_join_string_lists(tmp_path):
+    dsc = tmp_path / "lists.dsc"
+    dsc.write_text(
+        "#BLOCK\n"
+        "LIST1 'foo' 'bar'\n"
+        "LIST2 'foo' 'bar', 'baz' 'qux'\n"
+    )
+    result = xepr_load_acqu(str(dsc))
+    assert result["BLOCK"]["LIST1"] == "foo bar"
+    assert result["BLOCK"]["LIST2"] == "foo bar baz qux"
