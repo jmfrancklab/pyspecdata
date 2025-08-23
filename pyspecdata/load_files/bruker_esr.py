@@ -322,6 +322,8 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
     if "PlsSPELPrgTxt" in data.get_prop():
 
         def find_phcyc(d):
+            "PulseSPEL allows many phase cycle lists in the exp file, with"
+            "only one selected.  Show the selected one."
             pattern = (
                 r'begin +(lists\d*) +"'
                 + re.escape(d.get_prop("PlsSPELLISTSlct"))
@@ -338,6 +340,8 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
         data.find_phcyc = types.MethodType(find_phcyc, data)
 
         def find_ppg(d):
+            "PulseSPEL allows many pulse programs in the exp file, with only"
+            "one selected.  Show the selected one."
             pattern = (
                 r'begin +(exp\d*) +"'
                 + d.get_prop("PlsSPELEXPSlct")
