@@ -574,12 +574,13 @@ def xepr_load_acqu(filename):
                     else:
                         m = variable_re.search(line)
                         if m:
-                            if "," in m.groups()[1]:
+                            raw_val = m.groups()[1]
+                            if "," in raw_val and "\\n" not in raw_val:
                                 # {{{ break into lists
                                 values = list(
                                     map(
                                         auto_string_convert,
-                                        comma_re.split(m.groups()[1]),
+                                        comma_re.split(raw_val),
                                     )
                                 )
                                 values = [
@@ -589,7 +590,7 @@ def xepr_load_acqu(filename):
                                 block_list.append((m.groups()[0], values))
                                 # }}}
                             else:
-                                value = auto_string_convert(m.groups()[1])
+                                value = auto_string_convert(raw_val)
                                 value = replace_escaped_newlines(value)
                                 value = collapse_string_lists(value)
                                 block_list.append((m.groups()[0], value))

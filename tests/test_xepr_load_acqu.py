@@ -53,13 +53,22 @@ def test_ignore_blank_line(tmp_path):
     assert result["BLOCK"]["VAR2"] == "two"
 
 
-def test_join_string_lists(tmp_path):
-    dsc = tmp_path / "lists.dsc"
+def test_multiline_parameter(tmp_path):
+    dsc = tmp_path / "ppg.dsc"
     dsc.write_text(
         "#BLOCK\n"
-        "LIST1 'foo' 'bar'\n"
-        "LIST2 'foo' 'bar', 'baz' 'qux'\n"
+        "PpgText Here is text belonging to the pulse program\\n\\\n"
+        "Yes, this text belongs to the pulse program\\n\\\n"
+        "Yes, indeed it does\\n\\\n"
+        "\\n\n"
+        "AnotherParam 20\n"
     )
     result = xepr_load_acqu(str(dsc))
-    assert result["BLOCK"]["LIST1"] == "foo bar"
-    assert result["BLOCK"]["LIST2"] == "foo bar baz qux"
+    expected = (
+        "Here is text belonging to the pulse program\n"
+        "Yes, this text belongs to the pulse program\n"
+        "Yes, indeed it does\n"
+        "\n"
+    )
+    assert result["BLOCK"]["PpgText"] == expected
+    assert result["BLOCK"]["AnotherParam"] == 20
