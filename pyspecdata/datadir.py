@@ -11,6 +11,7 @@ import logging
 import atexit
 import collections
 from subprocess import Popen, PIPE
+from pathlib import Path
 
 logger = logging.getLogger("pyspecdata.datadir")
 unknown_exp_type_name = "XXX--unknown--XXX"
@@ -383,7 +384,8 @@ def getDATADIR(*args, **kwargs):
         )
         equal_matches = []
         containing_matches = []
-        for d, s, _ in walklevel(walking_top_dir, level=2):
+        pathlevel = len(Path(exp_type).parts)
+        for d, s, _ in walklevel(walking_top_dir, level=pathlevel):
             logger.debug(strm("walking: ", d, s))
             s[:] = [
                 j

@@ -218,7 +218,7 @@ def DCCT(
     cmap=None,
     pass_frq_slice=False,
     scaling_factor=1,
-    max_coh_jump={"ph1": 1, "ph2": 2},
+    max_coh_jump=None,
     direct="t2",
     title=None,
     arrow_dx=30,
@@ -286,6 +286,15 @@ def DCCT(
         dictionary containing the unique transforms generated in
         this function for scaled translations
     """
+    if max_coh_jump is None:
+        all_ph = [j for j in this_nddata.dimlabels if j.startswith("ph")]
+        all_ph.sort()
+        if all_ph != [f"ph{j+1}" for j in range(len(all_ph))]:
+            raise ValueError(
+                "If your phases don't label by pulse number, I can't"
+                " automatically determine max_coh_jump"
+            )
+        max_coh_jump = dict([(f"ph{j+1}", j + 1) for j in range(len(all_ph))])
     x = []  # List to put direct dim into
     y = []  # List to put indirect dims into
     if fig is None:
@@ -310,7 +319,9 @@ def DCCT(
     if no_aliasing_calc:
         for this_dim in [j for j in my_data.dimlabels if j.startswith("ph")]:
 
-            ordered_labels[this_dim] = [f"{j}" for j in my_data.getaxis(this_dim)]
+            ordered_labels[this_dim] = [
+                f"{j}" for j in my_data.getaxis(this_dim)
+            ]
     else:
         for this_dim in [j for j in my_data.dimlabels if j.startswith("ph")]:
             if my_data.get_ft_prop(this_dim):
@@ -339,20 +350,21 @@ def DCCT(
                     ]  # grab the columns, which are the labels for all aliases
                     #    that belong at this index
                     if j == 0:
-                        temp = ", ".join(
-                            ["%d" % j for j in np.sort(temp[np.isfinite(temp)])]
-                        )
+                        temp = ", ".join([
+                            "%d" % j for j in np.sort(temp[np.isfinite(temp)])
+                        ])
                     else:
-                        temp = ", ".join(
-                            ["%+d" % j for j in np.sort(temp[np.isfinite(temp)])]
-                        )
+                        temp = ", ".join([
+                            "%+d" % j for j in np.sort(temp[np.isfinite(temp)])
+                        ])
                     if len(temp) == 0:
                         temp = "X"
                     labels_in_order.append(temp)
                 ordered_labels[this_dim] = labels_in_order
             else:
                 ordered_labels[this_dim] = [
-                    "0" if j == 0.0 else f"{j}" for j in my_data.getaxis(this_dim)
+                    "0" if j == 0.0 else f"{j}"
+                    for j in my_data.getaxis(this_dim)
                 ]
     for this_dim in [
         j for j in my_data.dimlabels[:-1] if not j.startswith("ph")
