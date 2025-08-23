@@ -72,3 +72,12 @@ def test_multiline_parameter(tmp_path):
     )
     assert result["BLOCK"]["PpgText"] == expected
     assert result["BLOCK"]["AnotherParam"] == 20
+
+
+def test_space_separated_string(tmp_path):
+    dsc = tmp_path / "spaced.dsc"
+    dsc.write_text(
+        "#BLOCK\nPlsSPELEXPSlct     Echo separate cycles\n",
+    )
+    result = xepr_load_acqu(str(dsc))
+    assert result["BLOCK"]["PlsSPELEXPSlct"] == "Echo separate cycles"
