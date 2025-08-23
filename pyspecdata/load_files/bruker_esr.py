@@ -517,13 +517,20 @@ def xepr_load_acqu(filename):
     which_block = None
     block_re = re.compile(r"^ *#(\w+)")
     comment_re = re.compile(r"^ *\*")
-    variable_re = re.compile(r"^ *([^\s]*)\s+(.*?) *$")
+    variable_re = re.compile(r"^ *([^\s]*)\s+(.*?) *$", re.DOTALL)
     comma_re = re.compile(r"\s*,\s*")
     block_list = None # to clarify this is unset to start
     with open(filename, "r", encoding="utf-8") as fp:
         blocks = {}
         # {{{ read lines and assign to the appropriate block
         for line in fp:
+            line = line.rstrip("\n")
+            while line.rstrip().endswith("\\"):
+                line = line.rstrip()[:-1]
+                continuation = fp.readline()
+                if continuation == "":
+                    break
+                line += continuation.rstrip("\n")
             m = comment_re.search(line)
             if m:
                 pass
@@ -547,21 +554,25 @@ def xepr_load_acqu(filename):
                         if m:
                             if "," in m.groups()[1]:
                                 # {{{ break into lists
-                                block_list.append((
-                                    m.groups()[0],
-                                    list(
-                                        map(
-                                            auto_string_convert,
-                                            comma_re.split(m.groups()[1]),
-                                        )
-                                    ),
-                                ))
+                                values = list(
+                                    map(
+                                        auto_string_convert,
+                                        comma_re.split(m.groups()[1]),
+                                    )
+                                )
+                                values = [
+                                    v.replace("\\n", "\n")
+                                    if isinstance(v, str)
+                                    else v
+                                    for v in values
+                                ]
+                                block_list.append((m.groups()[0], values))
                                 # }}}
                             else:
-                                block_list.append((
-                                    m.groups()[0],
-                                    auto_string_convert(m.groups()[1]),
-                                ))
+                                value = auto_string_convert(m.groups()[1])
+                                if isinstance(value, str):
+                                    value = value.replace("\\n", "\n")
+                                block_list.append((m.groups()[0], value))
                         else:
                             raise ValueError(
                                 "I don't know what to do with the line:\n"
