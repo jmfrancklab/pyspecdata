@@ -7,6 +7,7 @@ import re
 from io import StringIO
 import os
 import logging
+import types
 
 logger = logging.getLogger("pyspecdata.load_files.bruker_esr")
 b0_texstr = r"$B_0$"
@@ -317,6 +318,45 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
     if "Field" in data.dimlabels:
         data.rename("Field", b0_texstr)
     # }}}
+    # {{{ add pulsspel functions
+    if "PlsSPELPrgTxt" in data.get_prop():
+
+        def find_phcyc(d):
+            "PulseSPEL allows many phase cycle lists in the exp file, with"
+            "only one selected.  Show the selected one."
+            pattern = (
+                r'begin +(lists\d*) +"'
+                + re.escape(d.get_prop("PlsSPELLISTSlct"))
+                + r'"(.*?)end \1'
+            )
+            match = re.search(
+                pattern, d.get_prop("PlsSPELPrgTxt"), flags=re.DOTALL
+            )
+            if match:
+                return match.group(0)  # full block including begin/end
+            else:
+                raise ValueError("couldn't find phcyc")
+
+        data.find_phcyc = types.MethodType(find_phcyc, data)
+
+        def find_ppg(d):
+            "PulseSPEL allows many pulse programs in the exp file, with only"
+            "one selected.  Show the selected one."
+            pattern = (
+                r'begin +(exp\d*) +"'
+                + d.get_prop("PlsSPELEXPSlct")
+                + r'"(.*?)end \1'
+            )
+            match = re.search(
+                pattern, d.get_prop("PlsSPELPrgTxt"), flags=re.DOTALL
+            )
+            if match:
+                return match.group(0)  # full block including begin/end
+            else:
+                raise ValueError("couldn't find ppg with pattern: " + pattern)
+
+        data.find_ppg = types.MethodType(find_ppg, data)
+    # }}}
     return data
 
 
@@ -514,16 +554,47 @@ def xepr_load_acqu(filename):
         else:
             return None
 
+    def replace_escaped_newlines(val):
+        if isinstance(val, str):
+            val = val.replace("\\n", "\n")
+            if val and val[0] == "'" and val[-1] == "'":
+                val = val[1:-1]
+            return val
+        if isinstance(val, list):
+            return [replace_escaped_newlines(v) for v in val]
+        return val
+
+    def collapse_string_lists(val):
+        if isinstance(val, list):
+            flattened = []
+            for item in val:
+                item = collapse_string_lists(item)
+                if isinstance(item, str):
+                    flattened.append(item)
+                else:
+                    return val
+            return " ".join(flattened)
+        return val
+
     which_block = None
     block_re = re.compile(r"^ *#(\w+)")
     comment_re = re.compile(r"^ *\*")
-    variable_re = re.compile(r"^ *([^\s]*)\s+(.*?) *$")
+    variable_re = re.compile(r"^ *([^\s]*)\s+(.*?) *$", re.DOTALL)
     comma_re = re.compile(r"\s*,\s*")
-    block_list = None # to clarify this is unset to start
+    block_list = None  # to clarify this is unset to start
     with open(filename, "r", encoding="utf-8") as fp:
         blocks = {}
         # {{{ read lines and assign to the appropriate block
         for line in fp:
+            line = line.rstrip("\n")
+            continued = False
+            while line.rstrip().endswith("\\"):
+                line = line.rstrip()[:-1]
+                continuation = fp.readline()
+                if continuation == "":
+                    break
+                line += continuation.rstrip("\n")
+                continued = True
             m = comment_re.search(line)
             if m:
                 pass
@@ -545,23 +616,31 @@ def xepr_load_acqu(filename):
                     else:
                         m = variable_re.search(line)
                         if m:
-                            if "," in m.groups()[1]:
+                            raw_val = m.groups()[1]
+                            if continued:
+                                value = replace_escaped_newlines(raw_val)
+                                block_list.append((m.groups()[0], value))
+                            elif "," in raw_val and "\\n" not in raw_val:
                                 # {{{ break into lists
-                                block_list.append((
-                                    m.groups()[0],
-                                    list(
-                                        map(
-                                            auto_string_convert,
-                                            comma_re.split(m.groups()[1]),
-                                        )
-                                    ),
-                                ))
+                                values = list(
+                                    map(
+                                        auto_string_convert,
+                                        comma_re.split(raw_val),
+                                    )
+                                )
+                                values = [
+                                    replace_escaped_newlines(v) for v in values
+                                ]
+                                values = collapse_string_lists(values)
+                                block_list.append((m.groups()[0], values))
                                 # }}}
                             else:
-                                block_list.append((
-                                    m.groups()[0],
-                                    auto_string_convert(m.groups()[1]),
-                                ))
+                                value = auto_string_convert(raw_val)
+                                value = replace_escaped_newlines(value)
+                                value = collapse_string_lists(value)
+                                block_list.append((m.groups()[0], value))
+                        elif line == "":
+                            continue
                         else:
                             raise ValueError(
                                 "I don't know what to do with the line:\n"
