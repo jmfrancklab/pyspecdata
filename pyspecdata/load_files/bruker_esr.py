@@ -7,6 +7,7 @@ import re
 from io import StringIO
 import os
 import logging
+import types
 
 logger = logging.getLogger("pyspecdata.load_files.bruker_esr")
 b0_texstr = r"$B_0$"
@@ -317,6 +318,41 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
     if "Field" in data.dimlabels:
         data.rename("Field", b0_texstr)
     # }}}
+    # {{{ add pulsspel functions
+    if "PlsSPELPrgTxt" in data.get_prop():
+
+        def find_phcyc(d):
+            pattern = (
+                r'begin +(lists\d*) +"'
+                + re.escape(d.get_prop("PlsSPELLISTSlct"))
+                + r'"(.*?)end \1'
+            )
+            match = re.search(
+                pattern, d.get_prop("PlsSPELPrgTxt"), flags=re.DOTALL
+            )
+            if match:
+                return match.group(0)  # full block including begin/end
+            else:
+                raise ValueError("couldn't find phcyc")
+
+        data.find_phcyc = types.MethodType(find_phcyc, data)
+
+        def find_ppg(d):
+            pattern = (
+                r'begin +(exp\d*) +"'
+                + d.get_prop("PlsSPELEXPSlct")
+                + r'"(.*?)end \1'
+            )
+            match = re.search(
+                pattern, d.get_prop("PlsSPELPrgTxt"), flags=re.DOTALL
+            )
+            if match:
+                return match.group(0)  # full block including begin/end
+            else:
+                raise ValueError("couldn't find ppg with pattern: " + pattern)
+
+        data.find_ppg = types.MethodType(find_ppg, data)
+    # }}}
     return data
 
 
@@ -541,7 +577,7 @@ def xepr_load_acqu(filename):
     comment_re = re.compile(r"^ *\*")
     variable_re = re.compile(r"^ *([^\s]*)\s+(.*?) *$", re.DOTALL)
     comma_re = re.compile(r"\s*,\s*")
-    block_list = None # to clarify this is unset to start
+    block_list = None  # to clarify this is unset to start
     with open(filename, "r", encoding="utf-8") as fp:
         blocks = {}
         # {{{ read lines and assign to the appropriate block
