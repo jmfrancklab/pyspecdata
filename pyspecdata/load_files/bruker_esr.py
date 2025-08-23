@@ -547,12 +547,14 @@ def xepr_load_acqu(filename):
         # {{{ read lines and assign to the appropriate block
         for line in fp:
             line = line.rstrip("\n")
+            continued = False
             while line.rstrip().endswith("\\"):
                 line = line.rstrip()[:-1]
                 continuation = fp.readline()
                 if continuation == "":
                     break
                 line += continuation.rstrip("\n")
+                continued = True
             m = comment_re.search(line)
             if m:
                 pass
@@ -575,7 +577,10 @@ def xepr_load_acqu(filename):
                         m = variable_re.search(line)
                         if m:
                             raw_val = m.groups()[1]
-                            if "," in raw_val and "\\n" not in raw_val:
+                            if continued:
+                                value = replace_escaped_newlines(raw_val)
+                                block_list.append((m.groups()[0], value))
+                            elif "," in raw_val and "\\n" not in raw_val:
                                 # {{{ break into lists
                                 values = list(
                                     map(

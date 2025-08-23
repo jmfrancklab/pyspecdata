@@ -81,3 +81,18 @@ def test_space_separated_string(tmp_path):
     )
     result = xepr_load_acqu(str(dsc))
     assert result["BLOCK"]["PlsSPELEXPSlct"] == "Echo separate cycles"
+
+
+def test_multiline_numeric_text(tmp_path):
+    dsc = tmp_path / "numeric.dsc"
+    dsc.write_text(
+        "#BLOCK\n"
+        "PpgText start 180 \\\n"
+        "number 90\\nnext \\\n"
+        "final\n"
+        "AnotherParam 20\n"
+    )
+    result = xepr_load_acqu(str(dsc))
+    expected = "start 180 number 90\nnext final"
+    assert result["BLOCK"]["PpgText"] == expected
+    assert result["BLOCK"]["AnotherParam"] == 20
