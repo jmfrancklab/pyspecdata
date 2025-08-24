@@ -582,15 +582,16 @@ def xepr_load_acqu(filename):
     variable_re = re.compile(r"^ *([^\s]*)\s+(.*?) *$", re.DOTALL)
     comma_re = re.compile(r"\s*,\s*")
     block_list = None  # to clarify this is unset to start
-    with open(filename, "r", encoding="utf-8") as fp:
+    with open(filename, "r", encoding="utf-8", newline="\n") as fp:
         blocks = {}
         # {{{ read lines and assign to the appropriate block
         for line in fp:
             line = line.rstrip("\n")
             continued = False
             while line.rstrip().endswith("\\"):
-                line = line.rstrip()[:-1]
-                continuation = fp.readline()
+                # for some reason, \r all over the place
+                line = line.rstrip()[:-1].replace("\r", "")
+                continuation = next(fp)
                 if continuation == "":
                     break
                 line += continuation.rstrip("\n")
@@ -645,7 +646,10 @@ def xepr_load_acqu(filename):
                             raise ValueError(
                                 "I don't know what to do with the line:\n"
                                 + line
+                                + "previous was:\n"
+                                + prev_line
                             )
+            prev_line = line
         blocks.update({which_block: dict(block_list)})
         # }}}
     return blocks
