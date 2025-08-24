@@ -557,6 +557,7 @@ def xepr_load_acqu(filename):
     def replace_escaped_newlines(val):
         if isinstance(val, str):
             val = val.replace("\\n", "\n")
+            val = val.replace("\n\\","\n")
             if val and val[0] == "'" and val[-1] == "'":
                 val = val[1:-1]
             return val
@@ -582,16 +583,37 @@ def xepr_load_acqu(filename):
     variable_re = re.compile(r"^ *([^\s]*)\s+(.*?) *$", re.DOTALL)
     comma_re = re.compile(r"\s*,\s*")
     block_list = None  # to clarify this is unset to start
-    with open(filename, "r", encoding="utf-8", newline="\n") as fp:
+    with open(filename, "r", encoding="utf-8") as fp:
         blocks = {}
         # {{{ read lines and assign to the appropriate block
-        for line in fp:
+        continued = False
+        while True:
+            if continued is True:
+                line = lookahead_line
+            else:
+                try:
+                    line = next(fp)
+                except StopIteration:
+                    break
             line = line.rstrip("\n")
             continued = False
             while line.rstrip().endswith("\\"):
                 # for some reason, \r all over the place
-                line = line.rstrip()[:-1].replace("\r", "")
-                continuation = next(fp)
+                line = line.rstrip()[:-1]
+                if continued is True:
+                    continuation = lookahead_line
+                else:
+                    continuation = next(fp)
+                # {{{ deal with an error in how the files are stored --
+                #     sometimes we get a real \n and a \\n
+                lookahead_line = next(fp)
+                if (
+                    lookahead_line.startswith("\\n")
+                    or lookahead_line.strip() == ""
+                    and not continuation.endswith("\\")
+                ):
+                    continuation += "\\"
+                # }}}
                 if continuation == "":
                     break
                 line += continuation.rstrip("\n")
