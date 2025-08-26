@@ -8,9 +8,31 @@ from io import StringIO
 import os
 import logging
 import types
+import numbers
 
 logger = logging.getLogger("pyspecdata.load_files.bruker_esr")
 b0_texstr = r"$B_0$"
+
+
+def _collapse_string_lists(val):
+    flattened = []
+    for item in val:
+        if (
+            isinstance(item, list)
+            or isinstance(item, tuple)
+            and not all(
+                [j == "REAL" or j == "CPLX" or j == "IMAG" for j in val]
+            )
+        ):
+            print("recursing with", item)
+            flattened.append(_collapse_string_lists(item))
+        elif isinstance(item, numbers.Number):
+            flattened.append(str(item))
+        elif isinstance(item, str):
+            flattened.append(item)
+        else:
+            raise TypeError("type of", type(item), "not understood")
+    return " ".join(flattened)
 
 
 def xepr(filename, exp_type=None, dimname="", verbose=False):
@@ -337,6 +359,16 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
             else:
                 raise ValueError("couldn't find phcyc")
 
+        if type(data.get_prop("PlsSPELLISTSlct")) in [tuple, list]:
+            data.set_prop(
+                "PlsSPELLISTSlct",
+                _collapse_string_lists(data.get_prop("PlsSPELLISTSlct")),
+            )
+        if type(data.get_prop("PlsSPELEXPSlct")) in [tuple, list]:
+            data.set_prop(
+                "PlsSPELEXPSlct",
+                _collapse_string_lists(data.get_prop("PlsSPELEXPSlct")),
+            )
         data.find_phcyc = types.MethodType(find_phcyc, data)
 
         def find_ppg(d):
@@ -565,20 +597,6 @@ def xepr_load_acqu(filename):
             return [replace_escaped_newlines(v) for v in val]
         return val
 
-    def collapse_string_lists(val):
-        if isinstance(val, list) and not all(
-            [j == "REAL" or j == "IMAG" for j in val]
-        ):
-            flattened = []
-            for item in val:
-                item = collapse_string_lists(item)
-                if isinstance(item, str):
-                    flattened.append(item)
-                else:
-                    return val
-            return " ".join(flattened)
-        return val
-
     which_block = None
     block_re = re.compile(r"^ *#(\w+)")
     comment_re = re.compile(r"^ *\*")
@@ -656,13 +674,19 @@ def xepr_load_acqu(filename):
                                 values = [
                                     replace_escaped_newlines(v) for v in values
                                 ]
-                                values = collapse_string_lists(values)
+                                if isinstance(value, list) or isinstance(
+                                    value, tuple
+                                ):
+                                    values = _collapse_string_lists(values)
                                 block_list.append((m.groups()[0], values))
                                 # }}}
                             else:
                                 value = auto_string_convert(raw_val)
                                 value = replace_escaped_newlines(value)
-                                value = collapse_string_lists(value)
+                                if isinstance(value, list) or isinstance(
+                                    value, tuple
+                                ):
+                                    value = _collapse_string_lists(value)
                                 block_list.append((m.groups()[0], value))
                         elif line == "":
                             continue
