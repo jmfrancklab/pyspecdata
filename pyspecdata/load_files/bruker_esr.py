@@ -557,7 +557,7 @@ def xepr_load_acqu(filename):
     def replace_escaped_newlines(val):
         if isinstance(val, str):
             val = val.replace("\\n", "\n")
-            val = val.replace("\n\\","\n")
+            val = val.replace("\n\\", "\n")
             if val and val[0] == "'" and val[-1] == "'":
                 val = val[1:-1]
             return val
@@ -566,7 +566,9 @@ def xepr_load_acqu(filename):
         return val
 
     def collapse_string_lists(val):
-        if isinstance(val, list):
+        if isinstance(val, list) and not all(
+            [j == "REAL" or j == "IMAG" for j in val]
+        ):
             flattened = []
             for item in val:
                 item = collapse_string_lists(item)
