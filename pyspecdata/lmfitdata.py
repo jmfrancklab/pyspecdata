@@ -102,9 +102,7 @@ class lmfitdata(nddata):
             # move nddata attributes into the current instance
             myattrs = normal_attrs(args[0])
             for j in range(0, len(myattrs)):
-                self.__setattr__(
-                    myattrs[j], args[0].__getattribute__(myattrs[j])
-                )
+                self.__setattr__(myattrs[j], args[0].__getattribute__(myattrs[j]))
         else:
             nddata.__init__(self, *args, **kwargs)
         if fit_axis is None:
@@ -140,9 +138,9 @@ class lmfitdata(nddata):
         ==========
         this_expr: sympy expression
         """
-        assert issympy(
-            this_expr
-        ), "for now, the functional form must be a sympy expression"
+        assert issympy(this_expr), (
+            "for now, the functional form must be a sympy expression"
+        )
         self.expression = this_expr
         # {{{ decide which symbols are parameters vs. variables
         #     here, I discriminate "names" which are strings from "symbols"
@@ -225,21 +223,17 @@ class lmfitdata(nddata):
                         and "max" in guesses[this_name].keys()
                         and "value" in guesses[this_name].keys()
                     ):
-                        aeval = asteval.Interpreter(
-                            symtable=guesses[this_name]
-                        )
+                        aeval = asteval.Interpreter(symtable=guesses[this_name])
                         temp = aeval("2*(value-min)/(max-min)-1")
                         Pinternal = np.arcsin(temp)
                         assert abs(Pinternal / np.pi) < 0.48, (
                             "Your guess is too close to your"
                             f" bounds!!\n(P_internal/π for {this_name} is"
-                            f" {Pinternal/np.pi})\n(this will play havoc with"
+                            f" {Pinternal / np.pi})\n(this will play havoc with"
                             " the minuit boundaries used by lmfit)"
                         )
                     for k, v in guesses[this_name].items():
-                        if (
-                            k != "print"
-                        ):  # appears to be a method -- not deepcopyable
+                        if k != "print":  # appears to be a method -- not deepcopyable
                             setattr(self.guess_parameters[this_name], k, v)
                             self.guess_dict[this_name][k] = v
                 elif np.isscalar(guesses[this_name]):
@@ -260,12 +254,9 @@ class lmfitdata(nddata):
         guess_parameters"""
         if hasattr(self, "guess_dict"):
             self.guess_dictionary = {
-                k: self.guess_parameters[k].value
-                for k in self.guess_parameters.keys()
+                k: self.guess_parameters[k].value for k in self.guess_parameters.keys()
             }
-            return [
-                self.guess_parameters[k].value for k in self.parameter_names
-            ]
+            return [self.guess_parameters[k].value for k in self.parameter_names]
         else:
             return [1.0] * len(self.variable_names)
 
@@ -337,22 +328,22 @@ class lmfitdata(nddata):
         #    line to make it more compact/efficient for one variable, we want
         #    to leave open the posisbility that we will be using more than one
         #    variable
-        newdata.data[:] = self.fitfunc_multiarg_v2(*(
-            tuple(
-                (
-                    variable_coords[j]
-                    if j in variable_coords.keys()
-                    else self.getaxis(j)
+        newdata.data[:] = self.fitfunc_multiarg_v2(
+            *(
+                tuple(
+                    (
+                        variable_coords[j]
+                        if j in variable_coords.keys()
+                        else self.getaxis(j)
+                    )
+                    for j in self.variable_names
                 )
-                for j in self.variable_names
+                + tuple(self.fit_coeff)
             )
-            + tuple(self.fit_coeff)
-        )).flatten()
+        ).flatten()
         newdata.name(str(self.name()))
         logging.debug(
-            strm(
-                "Is residual transform none?", self.residual_transform is None
-            )
+            strm("Is residual transform none?", self.residual_transform is None)
         )
         return (
             newdata
@@ -469,27 +460,27 @@ class lmfitdata(nddata):
                 )
                 for j in self.jacobian_symbolic
             ]
-        jacobian_array = np.array([
-            self._apply_residual_transform(
-                j(
-                    *(self.getaxis(k) for k in self.variable_names),
-                    **pars.valuesdict(),
-                )
-            )  # function elements on the outside, so parameters can go on the
-            #    inside
-            for j in self.jacobian_lambda
-        ])
-        if np.issubdtype(
-            self.data.dtype, np.complexfloating
-        ) and not np.issubdtype(jacobian_array.dtype, np.complexfloating):
+        jacobian_array = np.array(
+            [
+                self._apply_residual_transform(
+                    j(
+                        *(self.getaxis(k) for k in self.variable_names),
+                        **pars.valuesdict(),
+                    )
+                )  # function elements on the outside, so parameters can go on the
+                #    inside
+                for j in self.jacobian_lambda
+            ]
+        )
+        if np.issubdtype(self.data.dtype, np.complexfloating) and not np.issubdtype(
+            jacobian_array.dtype, np.complexfloating
+        ):
             if self.data.dtype == np.complex64:
                 jacobian_array = np.complex64(jacobian_array)
             elif self.data.dtype == np.complex128:
                 jacobian_array = np.complex128(jacobian_array)
             else:
-                raise ValueError(
-                    "I don't understand the dtype", self.data.dtype
-                )
+                raise ValueError("I don't understand the dtype", self.data.dtype)
         jacobian_array = jacobian_array.view(float)
         jacobian_array = jacobian_array[
             :, self.nan_mask
@@ -540,7 +531,7 @@ class lmfitdata(nddata):
         retval: ndarray
             just return the ndarray
         """
-        if self.data_transform is None:
+        if not hasattr(self, "data_transform") or self.data_transform is None:
             self.data_transform = self.residual_transform
         if self.data_transform is not None:
             if not hasattr(self, "_transformed_data"):
@@ -703,9 +694,7 @@ class lmfitdata(nddata):
         #     way the function looks.  Though this is a pain, it's
         #     better.
         for j in range(0, len(self.parameter_names)):
-            symbol = sp.printing.latex(self.parameter_symbols[j]).replace(
-                "$", ""
-            )
+            symbol = sp.printing.latex(self.parameter_symbols[j]).replace("$", "")
             logging.debug(strm('DEBUG: replacing symbol "', symbol, '"'))
             location = retval.find(symbol)
             while location != -1:
