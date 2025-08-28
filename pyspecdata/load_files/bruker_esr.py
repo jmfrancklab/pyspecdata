@@ -385,7 +385,13 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
             if match:
                 return match.group(0)  # full block including begin/end
             else:
-                raise ValueError("couldn't find ppg with pattern: " + pattern)
+                raise ValueError(
+                    d.get_prop("PlsSPELPrgTxt")
+                    + "\n\n"
+                    + "couldn't find ppg with pattern: "
+                    + pattern
+                    + "in above"
+                )
 
         data.find_ppg = types.MethodType(find_ppg, data)
     # }}}
@@ -633,8 +639,13 @@ def xepr_load_acqu(filename):
                     and not continuation.endswith("\\")
                 ):
                     continuation += "\\"
+                elif line.startswith(
+                    "PlsSPELPrgTxt"
+                ) and not continuation.startswith("PlsSPELShpTxt"):
+                    continuation += "\\"
                 # }}}
                 if continuation == "":
+                    print("broke on empty")
                     break
                 line += continuation.rstrip("\n")
                 continued = True
@@ -674,18 +685,14 @@ def xepr_load_acqu(filename):
                                 values = [
                                     replace_escaped_newlines(v) for v in values
                                 ]
-                                if isinstance(value, list) or isinstance(
-                                    value, tuple
-                                ):
+                                if isinstance(value, list):
                                     values = _collapse_string_lists(values)
                                 block_list.append((m.groups()[0], values))
                                 # }}}
                             else:
                                 value = auto_string_convert(raw_val)
                                 value = replace_escaped_newlines(value)
-                                if isinstance(value, list) or isinstance(
-                                    value, tuple
-                                ):
+                                if isinstance(value, list):
                                     value = _collapse_string_lists(value)
                                 block_list.append((m.groups()[0], value))
                         elif line == "":

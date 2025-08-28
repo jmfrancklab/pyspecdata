@@ -48,6 +48,7 @@ from sympy.functions.elementary.miscellaneous import sqrt as sympy_sqrt
 import scipy.sparse as sparse
 from scipy.interpolate import interp1d
 import logging
+import numbers
 from .ndshape import ndshape_base
 from . import fourier as this_fourier
 from . import axis_manipulation
@@ -2619,9 +2620,12 @@ class nddata(object):
         unitA = Q_(
             "dimensionless" if self.get_units() is None else self.get_units()
         )
-        unitB = Q_(
-            "dimensionless" if arg.get_units() is None else arg.get_units()
-        )
+        if isinstance(arg, nddata):
+            unitB = Q_(
+                "dimensionless" if arg.get_units() is None else arg.get_units()
+            )
+        else:
+            unitB = Q_("dimensionless")
         prod = unitA * unitB
         unit_ret = f"{prod.to_compact().units:~P}"
         unit_ret = None if len(unit_ret) == 0 else unit_ret
@@ -5980,6 +5984,8 @@ class nddata(object):
         )
         if len(rightdata.shape) > 0:
             left_shape = np.shape(self.data[leftindex])
+            if not self.data.flags.writeable:
+                self.data = self.data.copy()
             try:
                 self.data[leftindex] = rightdata.reshape(
                     left_shape
@@ -6597,6 +6603,10 @@ class nddata(object):
                         args[j],
                         "I expected a 'dimname':(range_start,range_stop)",
                     )
+                    assert all([
+                        isinstance(j, numbers.Number) or j is None
+                        for j in target
+                    ]), f"one of {target} is not a number!"
                     if len(target) == 1:
                         sensible_list.append(
                             (hash("range"), dimname, target[0], None)
@@ -6762,8 +6772,27 @@ class nddata(object):
                     elif temp_low == -inf:
                         temp_low = 0
                     else:
-                        logger.debug(strm("looking for", temp_low))
+                        logger.debug(
+                            strm(
+                                "looking for",
+                                temp_low,
+                                "type(thisaxis)",
+                                type(thisaxis),
+                            )
+                        )
                         temp_low = np.searchsorted(thisaxis, temp_low)
+                        logger.debug(
+                            strm(
+                                "searchsorted",
+                                thisaxis,
+                                "with temp_low",
+                                temp_low,
+                                "gave",
+                                temp_low,
+                                "vs",
+                                len(thisaxis),
+                            )
+                        )
                         if temp_low >= len(thisaxis):
                             raise ValueError(
                                 'the lower value of your slice %s on the "%s"'

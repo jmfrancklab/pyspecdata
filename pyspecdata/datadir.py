@@ -3,6 +3,7 @@ even though the location of the raw spectral data might change.
 
 This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file.
 """
+
 import os, sys, csv
 import configparser
 import platform
@@ -53,11 +54,9 @@ class MyConfig(object):
             )
         ):
             raise ValueError(
-                "one of section, key, "
-                "value are not a string! They are: "
+                "one of section, key, value are not a string! They are: "
                 + str(
-                    list(type(j) for j in [this_section, this_key,
-                                           this_value])
+                    list(type(j) for j in [this_section, this_key, this_value])
                 )
             )
         if self._config_parser is None:
@@ -128,8 +127,12 @@ class MyConfig(object):
         if this_key in self.config_vars[section].keys():
             logger.debug(
                 strm(
-                    "I pulled", this_key, "in", section, "from the",
-                    "config_vars"
+                    "I pulled",
+                    this_key,
+                    "in",
+                    section,
+                    "from the",
+                    "config_vars",
                 )
             )
             return self.config_vars[section][this_key]
@@ -222,19 +225,15 @@ def get_notebook_dir(*args):
         base_notebook_dir = os.path.expanduser(base_notebook_dir)
         if not os.path.exists(base_notebook_dir):
             raise ValueError(
-                (
-                    "It seems that your notebook directory (the main"
-                    "directory containing your latex files) isn't either (1)"
-                    'called "notebook" and immediately underneath your home'
-                    "directory or (2) registered in the [General] block of"
-                    " your"
-                )
+                "It seems that your notebook directory (the main"
+                "directory containing your latex files) isn't either (1)"
+                'called "notebook" and immediately underneath your home'
+                "directory or (2) registered in the [General] block of"
+                " your"
                 + pyspec_config.config_location
-                + (
-                    "file.\nThis probably means that you want to add a line"
-                    " like \nnotebook_directory = [path to your main notebook"
-                    " directory here]\nTo the [General] block of "
-                )
+                + "file.\nThis probably means that you want to add a line"
+                " like \nnotebook_directory = [path to your main notebook"
+                " directory here]\nTo the [General] block of "
                 + pyspec_config.config_location
             )
     retval = (base_notebook_dir,) + args
@@ -360,10 +359,8 @@ def getDATADIR(*args, **kwargs):
         some_dir = some_dir.rstrip(os.path.sep)
         assert os.path.isdir(some_dir), strm(
             some_dir,
-            (
-                "is not a directory (probably an invalid entry in your"
-                "pyspecdata config file)"
-            ),
+            "is not a directory (probably an invalid entry in your"
+            "pyspecdata config file)",
         )
         num_sep = some_dir.count(os.path.sep)
         for root, dirs, files in os.walk(some_dir):
@@ -392,20 +389,16 @@ def getDATADIR(*args, **kwargs):
                 for j in s
                 if j[0] not in [".", "_"] and ".hfssresults" not in j
             ]  # prune the walk
-            equal_matches.extend(
-                [
-                    os.path.join(d, j)
-                    for j in s
-                    if os.path.join(d, j).lower().endswith(exp_type.lower())
-                ]
-            )
-            containing_matches.extend(
-                [
-                    os.path.join(d, j)
-                    for j in s
-                    if exp_type.lower() in os.path.join(d, j).lower()
-                ]
-            )
+            equal_matches.extend([
+                os.path.join(d, j)
+                for j in s
+                if os.path.join(d, j).lower().endswith(exp_type.lower())
+            ])
+            containing_matches.extend([
+                os.path.join(d, j)
+                for j in s
+                if exp_type.lower() in os.path.join(d, j).lower()
+            ])
 
         def grab_smallest(matches):
             if len(matches) > 0:
@@ -442,8 +435,7 @@ def getDATADIR(*args, **kwargs):
 
     if exp_type is not None:
         # {{{ determine the experiment subdirectory
-        exp_directory = pyspec_config.get_setting(exp_type,
-                                                  section="ExpTypes")
+        exp_directory = pyspec_config.get_setting(exp_type, section="ExpTypes")
         if exp_directory is None:
             logger.debug(
                 strm(
@@ -554,8 +546,7 @@ class cached_searcher(object):
     def search_for(self, exp_type, specific_remote=None):
         if not self.has_run:
             print(strm("about to grab the directory list for", exp_type))
-            logger.info(strm("about to grab the directory list for",
-                             exp_type))
+            logger.info(strm("about to grab the directory list for", exp_type))
             self.grab_dirlist(specific_remote=specific_remote)
         # {{{ if we found exactly the exp_type inside the specific_remote,
         #     that's what we want!
@@ -614,12 +605,14 @@ def rclone_search(fname, exp_type, dirname):
                 + str(result)
             )
         elif len(result) == 0:
-            raise ValueError("I can't find a remote corresponding to your"
-                             f" exp_type {exp_type}.  Note that I only search"
-                             "  for a remote if I can't find a file in the"
-                             "  local directory, so this might be due to the"
-                             "  fact that I can't find the file in the local"
-                             "  directory.")
+            raise ValueError(
+                "I can't find a remote corresponding to your"
+                f" exp_type {exp_type}.  Note that I only search"
+                "  for a remote if I can't find a file in the"
+                "  local directory, so this might be due to the"
+                "  fact that I can't find the file in the local"
+                "  directory."
+            )
         else:
             remotelocation = result[0]
             logging.debug("about to write to RcloneRemotes")
@@ -632,7 +625,9 @@ def rclone_search(fname, exp_type, dirname):
     )
     if not fname.startswith("*"):
         fname = "*" + fname
-    if not fname.endswith("*"):
+    if fname.endswith(r"\b"):
+        fname = fname[:-2]
+    elif not fname.endswith("*"):
         fname = fname + "*"
     cmd = strm(
         "rclone copy -v --include '%s' %s %s"
@@ -648,7 +643,7 @@ def rclone_search(fname, exp_type, dirname):
     logger.info(f"I'm about to run\n{cmd}")
     os.system(cmd)
     logger.info("... done")
-    return
+    return cmd
 
 
 def log_fname(logname, fname, dirname, exp_type):

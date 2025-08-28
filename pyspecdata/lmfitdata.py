@@ -255,8 +255,9 @@ class lmfitdata(nddata):
         return self
 
     def guess(self):
-        r"""Old code that we are preserving here -- provide the guess for our
-        parameters; by default, based on pseudoinverse"""
+        r"""return a simple dictionary of the current guess values, pulling
+        them from the internal lmfit Parameters object called
+        guess_parameters"""
         if hasattr(self, "guess_dict"):
             self.guess_dictionary = {
                 k: self.guess_parameters[k].value
@@ -500,6 +501,13 @@ class lmfitdata(nddata):
         )
         return jacobian_array
 
+    def define_data_transform(self, thefunc):
+        """sometimes, we want to transform the data differently from the
+        model -- e.g. if we want to apply modulation to our modeled data,
+        but the data already includes the effects of modulation"""
+        self.data_transform = thefunc
+        return thefunc
+
     def define_residual_transform(self, thefunc):
         """If we do something like fit a lorentzian or voigt lineshape,
         it makes more sense to define our fit function in the time domain,
@@ -532,9 +540,11 @@ class lmfitdata(nddata):
         retval: ndarray
             just return the ndarray
         """
-        if self.residual_transform is not None:
+        if self.data_transform is None:
+            self.data_transform = self.residual_transform
+        if self.data_transform is not None:
             if not hasattr(self, "_transformed_data"):
-                self._transformed_data = self.residual_transform(self.C)
+                self._transformed_data = self.data_transform(self.C)
             return self._transformed_data.data
         else:
             return self.data

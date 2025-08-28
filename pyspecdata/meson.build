@@ -13,6 +13,7 @@ py_sources=[
 'ipy.py',
 'latexscripts.py',
 'lmfitdata.py',
+'lmfitdataGUI.py',
 'mpl_utils.py',
 'ndshape.py',
 'nnls.py',

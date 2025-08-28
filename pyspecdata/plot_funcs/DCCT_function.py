@@ -224,6 +224,7 @@ def DCCT(
     arrow_dx=30,
     arrow_dy=30,
     no_aliasing_calc=False,
+    interpolation=None,
     **kwargs,
 ):
     """DCCT plot.
@@ -275,6 +276,8 @@ def DCCT(
         Maximum allowed transitions for each phase cycle
     direct : str
         Name of direct axis
+    interpolation: str (default None)
+        Override the auto-chosen interpolation.
     title : str
         Title for DCCT plot
 
@@ -573,28 +576,31 @@ def DCCT(
         width_px, height_px = ax_list[0].transAxes.transform((1, 1)) - ax_list[
             0
         ].transAxes.transform((0, 0))
-        if A["smooshed", j].data.shape[0] > width_px:
-            logging.debug(
-                strm(
-                    "using bilinear interpolation because data is",
-                    A["smooshed", j].data.shape[0],
-                    "wide, but each image block has only",
-                    width_px,
-                    "pixels",
+        if interpolation:
+            kwargs['interpolation'] = interpolation
+        else:
+            if A["smooshed", j].data.shape[0] > width_px:
+                logging.debug(
+                    strm(
+                        "using bilinear interpolation because data is",
+                        A["smooshed", j].data.shape[0],
+                        "wide, but each image block has only",
+                        width_px,
+                        "pixels",
+                    )
                 )
-            )
-            kwargs["interpolation"] = "bilinear"
-        elif A["smooshed", j].data.shape[1] > height_px:
-            logging.debug(
-                strm(
-                    "using bilinear interpolation because data is",
-                    A["smooshed", j].data.shape[1],
-                    "high, but each image block has only",
-                    height_px,
-                    "pixels",
+                kwargs["interpolation"] = "bilinear"
+            elif A["smooshed", j].data.shape[1] > height_px:
+                logging.debug(
+                    strm(
+                        "using bilinear interpolation because data is",
+                        A["smooshed", j].data.shape[1],
+                        "high, but each image block has only",
+                        height_px,
+                        "pixels",
+                    )
                 )
-            )
-            kwargs["interpolation"] = "bilinear"
+                kwargs["interpolation"] = "bilinear"
         # }}}
         if real_data:
             kwargs["cmap"] = cmap

@@ -35,6 +35,7 @@ from .load_files import *
 from .figlist import *
 from .nnls import *
 from .lmfitdata import lmfitdata
+from .lmfitdataGUI import lmfitdataGUI
 from .generate_fake_data import fake_data
 from .dict_utils import make_ndarray, unmake_ndarray
 from .load_files.zenodo import zenodo_upload, create_deposition
