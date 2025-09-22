@@ -540,28 +540,41 @@ class cached_searcher(object):
             ) as proc:
                 for j in proc.stdout:
                     self.dirlist.append(thisremote + "/" + j.strip())
-            logger.info("done checking that remote")
+            logger.debug(f"done checking that remote -- got {self.dirlist}")
         return
 
     def search_for(self, exp_type, specific_remote=None):
+        logger.debug(
+            f"search_for exp_type={exp_type} inside"
+            f" specific_remote={specific_remote}"
+        )
         if not self.has_run:
-            print(strm("about to grab the directory list for", exp_type))
-            logger.info(strm("about to grab the directory list for", exp_type))
             self.grab_dirlist(specific_remote=specific_remote)
-        # {{{ if we found exactly the exp_type inside the specific_remote,
-        #     that's what we want!
         if specific_remote is not None:
+            # {{{ if we found exactly the exp_type inside the specific_remote,
+            #     that's what we want!
+            logger.debug(f"drilling down, I'm looking for for {specific_remote + '/' + exp_type} inside {self.dirlist}")
             if specific_remote + "/" + exp_type + "/" in self.dirlist:
                 logger.debug(
                     "found exactly the right exp_type inside the"
                     " specific_remote"
                 )
                 return [specific_remote + "/" + exp_type + "/"]
-        # }}}
-        potential_hits = [
-            j for j in self.dirlist if exp_type.lower() in j.lower()
-        ]
-        logger.debug(strm("found potential hits", potential_hits))
+            # }}}
+        else:
+            potential_hits = [
+                j for j in self.dirlist if exp_type.lower() in j.lower()
+            ]
+            logger.debug(
+                strm(
+                    "found potential hits",
+                    potential_hits,
+                    "when looking for",
+                    exp_type.lower(),
+                ),
+                "inside",
+                self.dirlist,
+            )
         return potential_hits
 
 
