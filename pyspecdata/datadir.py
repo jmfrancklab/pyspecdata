@@ -640,7 +640,9 @@ class cached_searcher(object):
             else:
                 suggestions = search_space_strings[:suggest_limit]
             suggestion_text = (
-                " Did you mean one of these?" + "\n\t•\t" + "\n\t•\t".join(suggestions)
+                " Did you mean one of these?"
+                + "\n\t•\t"
+                + "\n\t•\t".join(suggestions)
                 if suggestions
                 else ""
             )
