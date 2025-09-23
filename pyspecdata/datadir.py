@@ -499,6 +499,27 @@ def getDATADIR(*args, **kwargs):
 
                 exp_directory = walk_and_grab_best_match(d)
                 if exp_directory is None:
+                    partial_match_value, partial_match_prefix_len = (
+                        find_registered_prefix_match(
+                            exp_type_path,
+                            section="ExpTypes",
+                            prefer_longest=True,
+                        )
+                    )
+                    if partial_match_value is not None:
+                        partial_match_directory = Path(
+                            partial_match_value
+                        ).expanduser()
+                        unmatched_parts = exp_type_path.parts[
+                            partial_match_prefix_len:
+                        ]
+                        target_dir = partial_match_directory.joinpath(
+                            *unmatched_parts
+                        )
+                        mkdir_hint = " (from partial path match)"
+                    else:
+                        target_dir = d / Path(*exp_type_path.parts)
+                        mkdir_hint = " (under datadir)"
                     message = (
                         "even after walking the whole data directory, I can't"
                         + " find a match for "
@@ -508,8 +529,8 @@ def getDATADIR(*args, **kwargs):
                         + " directory to your local file structure, somewhere"
                         + " where it's findable by pyspecdata (listed in your"
                         + " pyspecdata config file) -- i.e. mkdir -p "
-                        + exp_type
-                        + " in the right place"
+                        + str(target_dir)
+                        + mkdir_hint
                     )
                     print(message)
                     prompt = input(
@@ -517,7 +538,6 @@ def getDATADIR(*args, **kwargs):
                         " for you? [y/N]: "
                     ).strip()
                     if prompt.lower() in {"y", "yes"}:
-                        target_dir = d / exp_type_path
                         target_dir.mkdir(parents=True, exist_ok=True)
                         pyspec_config.set_setting(
                             "ExpTypes", exp_type_key, str(target_dir)
@@ -543,6 +563,47 @@ def getDATADIR(*args, **kwargs):
     if len(retval[-1]) != 0:
         retval = retval + ("",)
     return os.path.join(*retval)
+
+
+def find_registered_prefix_match(
+    exp_type_path,
+    *,
+    section,
+    allow_full_match=True,
+    prefer_longest=True,
+):
+    """Return the stored value corresponding to the best prefix match."""
+
+    if exp_type_path is None:
+        return None, 0
+    if (
+        pyspec_config._config_parser is None
+        or not pyspec_config._config_parser.has_section(section)
+    ):
+        return None, 0
+    exp_dir_parts = exp_type_path.parts
+    if allow_full_match:
+        max_prefix_len = len(exp_dir_parts)
+    else:
+        max_prefix_len = len(exp_dir_parts) - 1
+    if max_prefix_len <= 0:
+        return None, 0
+    matches = []
+    for prefix_len in range(max_prefix_len, 0, -1):
+        partial_key = PureWindowsPath(*exp_dir_parts[:prefix_len]).as_posix()
+        partial_key_casefold = partial_key.casefold()
+        for stored_key, stored_value in pyspec_config._config_parser.items(
+            section
+        ):
+            normalized_key = PureWindowsPath(stored_key).as_posix().casefold()
+            if normalized_key == partial_key_casefold:
+                if prefer_longest:
+                    return stored_value, prefix_len
+                matches.append((prefix_len, stored_value))
+                break
+    if not prefer_longest and matches:
+        return matches[-1][1], matches[-1][0]
+    return None, 0
 
 
 class cached_searcher(object):
@@ -738,20 +799,24 @@ def rclone_search(fname, exp_type, dirname):
     result = []
     if remotelocation is None:
         # {{{ first see the exp_type is contained inside something else
-        exp_dir_parts = exp_type_path.parts
-        for specificity in range(len(exp_dir_parts) - 1):
-            parent_path = PureWindowsPath(*exp_dir_parts[: -(specificity + 1)])
-            remotelocation = pyspec_config.get_setting(
-                parent_path.as_posix().casefold(),
-                section="RcloneRemotes",
-            )
-            if remotelocation is not None:
-                logger.debug(f"did find one level up {remotelocation}")
+        partial_remote, partial_prefix_len = find_registered_prefix_match(
+            exp_type_path,
+            section="RcloneRemotes",
+            allow_full_match=False,
+            prefer_longest=False,
+        )
+        if partial_remote is not None:
+            remotelocation = partial_remote
+            logger.debug(f"did find one level up {remotelocation}")
+            unmatched_parts = exp_type_path.parts[partial_prefix_len:]
+            if unmatched_parts:
                 result = cached_searcher_instance.search_for(
-                    PureWindowsPath(*exp_dir_parts[-(specificity + 1) :]),
+                    PureWindowsPath(*unmatched_parts),
                     specific_remote=remotelocation,
                     require_match=True,
                 )
+            else:
+                result = [remotelocation]
         # }}}
         # {{{ only do a general search if the previous failed
         if remotelocation is None:
