@@ -68,7 +68,7 @@ def test_multiline_parameter(tmp_path):
         "Here is text belonging to the pulse program\n"
         "Yes, this text belongs to the pulse program\n"
         "Yes, indeed it does\n"
-        "\n"
+        "\n\n"
     )
     assert result["BLOCK"]["PpgText"] == expected
     assert result["BLOCK"]["AnotherParam"] == 20

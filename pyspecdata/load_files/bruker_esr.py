@@ -632,17 +632,21 @@ def xepr_load_acqu(filename):
                     continuation = next(fp)
                 # {{{ deal with an error in how the files are stored --
                 #     sometimes we get a real \n and a \\n
-                lookahead_line = next(fp)
-                if (
-                    lookahead_line.startswith("\\n")
-                    or lookahead_line.strip() == ""
-                    and not continuation.endswith("\\")
-                ):
-                    continuation += "\\"
-                elif line.startswith(
-                    "PlsSPELPrgTxt"
-                ) and not continuation.startswith("PlsSPELShpTxt"):
-                    continuation += "\\"
+                try:
+                    lookahead_line = next(fp)
+                except StopIteration:
+                    lookahead_line = ""
+                if lookahead_line:
+                    if (
+                        lookahead_line.startswith("\\n")
+                        or lookahead_line.strip() == ""
+                        and not continuation.endswith("\\")
+                    ):
+                        continuation += "\\"
+                    elif line.startswith(
+                        "PlsSPELPrgTxt"
+                    ) and not continuation.startswith("PlsSPELShpTxt"):
+                        continuation += "\\"
                 # }}}
                 if continuation == "":
                     print("broke on empty")
