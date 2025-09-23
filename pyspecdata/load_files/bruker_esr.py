@@ -609,6 +609,8 @@ def xepr_load_acqu(filename):
     variable_re = re.compile(r"^ *([^\s]*)\s+(.*?) *$", re.DOTALL)
     comma_re = re.compile(r"\s*,\s*")
     block_list = None  # to clarify this is unset to start
+    lookahead_line = None
+    prev_line = None
     with open(filename, "r", encoding="utf-8") as fp:
         blocks = {}
         # {{{ read lines and assign to the appropriate block
