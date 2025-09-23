@@ -398,7 +398,9 @@ def getDATADIR(*args, **kwargs):
         equal_matches = []
         containing_matches = []
         pathlevel = len(exp_type_path.parts) or 1
-        for candidate in iter_candidate_dirs(walking_top_dir, max_depth=pathlevel):
+        for candidate in iter_candidate_dirs(
+            walking_top_dir, max_depth=pathlevel
+        ):
             logger.debug(strm("walking: ", candidate))
             candidate_key = candidate.as_posix().casefold()
             if candidate_key.endswith(exp_type_match_value):
@@ -441,9 +443,13 @@ def getDATADIR(*args, **kwargs):
 
     if exp_type is not None:
         # {{{ determine the experiment subdirectory
-        exp_directory = pyspec_config.get_setting(exp_type_key, section="ExpTypes")
+        exp_directory = pyspec_config.get_setting(
+            exp_type_key, section="ExpTypes"
+        )
         if exp_directory is None and exp_type != exp_type_key:
-            exp_directory = pyspec_config.get_setting(exp_type, section="ExpTypes")
+            exp_directory = pyspec_config.get_setting(
+                exp_type, section="ExpTypes"
+            )
         if (
             exp_directory is None
             and pyspec_config._config_parser is not None
@@ -452,10 +458,14 @@ def getDATADIR(*args, **kwargs):
             for stored_key, stored_value in pyspec_config._config_parser.items(
                 "ExpTypes"
             ):
-                normalized_key = PureWindowsPath(stored_key).as_posix().casefold()
+                normalized_key = (
+                    PureWindowsPath(stored_key).as_posix().casefold()
+                )
                 if normalized_key == exp_type_match_value:
                     exp_directory = stored_value
-                    pyspec_config.set_setting("ExpTypes", exp_type_key, stored_value)
+                    pyspec_config.set_setting(
+                        "ExpTypes", exp_type_key, stored_value
+                    )
                     break
         if exp_directory is not None:
             exp_directory = Path(exp_directory).expanduser()
@@ -503,8 +513,8 @@ def getDATADIR(*args, **kwargs):
                     )
                     print(message)
                     prompt = input(
-                        "Would you like pyspecdata to create this directory for you? "
-                        "[y/N]: "
+                        "Would you like pyspecdata to create this directory"
+                        " for you? [y/N]: "
                     ).strip()
                     if prompt.lower() in {"y", "yes"}:
                         target_dir = d / exp_type_path
@@ -607,21 +617,30 @@ class cached_searcher(object):
             if not search_space:
                 search_space = self.dirlist
             search_space_strings = [
-                candidate.as_posix() if hasattr(candidate, "as_posix") else str(candidate)
+                (
+                    candidate.as_posix()
+                    if hasattr(candidate, "as_posix")
+                    else str(candidate)
+                )
                 for candidate in search_space
             ]
             lower_to_original = {
-                candidate.casefold(): candidate for candidate in search_space_strings
+                candidate.casefold(): candidate
+                for candidate in search_space_strings
             }
             close_matches = get_close_matches(
-                exp_type_casefold, list(lower_to_original.keys()), n=suggest_limit
+                exp_type_casefold,
+                list(lower_to_original.keys()),
+                n=suggest_limit,
             )
             if close_matches:
-                suggestions = [lower_to_original[match] for match in close_matches]
+                suggestions = [
+                    lower_to_original[match] for match in close_matches
+                ]
             else:
                 suggestions = search_space_strings[:suggest_limit]
             suggestion_text = (
-                " Did you mean: " + ", ".join(suggestions) + "?"
+                " Did you mean one of these?" + "\n\t•\t" + "\n\t•\t".join(suggestions)
                 if suggestions
                 else ""
             )
@@ -632,7 +651,8 @@ class cached_searcher(object):
             )
             raise ValueError(
                 "I can't find a remote directory matching "
-                f"{exp_type_path.as_posix()}{location_hint}." + suggestion_text
+                f"{exp_type_path.as_posix()}{location_hint}."
+                + suggestion_text
             )
 
         logger.debug(
@@ -645,7 +665,8 @@ class cached_searcher(object):
             remote_path = PureWindowsPath(specific_remote)
             logger.debug(
                 "drilling down, I'm looking for for"
-                f" {(remote_path / exp_type_path).as_posix()} inside {self.dirlist}"
+                f" {(remote_path / exp_type_path).as_posix()} inside"
+                f" {self.dirlist}"
             )
             target = (remote_path / exp_type_path).as_posix().casefold()
             remote_casefold = remote_path.as_posix().casefold()
