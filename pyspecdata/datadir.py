@@ -7,6 +7,7 @@ This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file.
 import os, sys, csv
 import configparser
 import platform
+from difflib import get_close_matches
 from .general_functions import process_kwargs, strm
 import logging
 import atexit
@@ -589,9 +590,51 @@ class cached_searcher(object):
         self.has_run = True
         return
 
-    def search_for(self, exp_type, specific_remote=None):
+    def search_for(
+        self,
+        exp_type,
+        specific_remote=None,
+        *,
+        require_match=False,
+        suggest_limit=3,
+    ):
         exp_type_path = PureWindowsPath(exp_type)
         exp_type_casefold = exp_type_path.as_posix().casefold()
+
+        def _raise_no_match(search_space):
+            if not require_match:
+                return []
+            if not search_space:
+                search_space = self.dirlist
+            search_space_strings = [
+                candidate.as_posix() if hasattr(candidate, "as_posix") else str(candidate)
+                for candidate in search_space
+            ]
+            lower_to_original = {
+                candidate.casefold(): candidate for candidate in search_space_strings
+            }
+            close_matches = get_close_matches(
+                exp_type_casefold, list(lower_to_original.keys()), n=suggest_limit
+            )
+            if close_matches:
+                suggestions = [lower_to_original[match] for match in close_matches]
+            else:
+                suggestions = search_space_strings[:suggest_limit]
+            suggestion_text = (
+                " Did you mean: " + ", ".join(suggestions) + "?"
+                if suggestions
+                else ""
+            )
+            location_hint = (
+                f" within {specific_remote}"
+                if specific_remote is not None
+                else ""
+            )
+            raise ValueError(
+                "I can't find a remote directory matching "
+                f"{exp_type_path.as_posix()}{location_hint}." + suggestion_text
+            )
+
         logger.debug(
             f"search_for exp_type={exp_type_path} inside"
             f" specific_remote={specific_remote}"
@@ -605,20 +648,28 @@ class cached_searcher(object):
                 f" {(remote_path / exp_type_path).as_posix()} inside {self.dirlist}"
             )
             target = (remote_path / exp_type_path).as_posix().casefold()
+            remote_casefold = remote_path.as_posix().casefold()
+            potential_hits = []
+            remote_space = []
             for candidate in self.dirlist:
-                candidate_key = candidate.as_posix().casefold()
+                candidate_posix = candidate.as_posix()
+                candidate_key = candidate_posix.casefold()
+                if candidate_key.startswith(remote_casefold):
+                    remote_space.append(candidate)
                 if candidate_key == target:
                     logger.debug(
                         "found exactly the right exp_type inside the"
                         " specific_remote"
                     )
-                    return [candidate.as_posix()]
-            return []
-        potential_hits = [
-            candidate
-            for candidate in self.dirlist
-            if exp_type_casefold in candidate.as_posix().casefold()
-        ]
+                    potential_hits.append(candidate_posix)
+            if not potential_hits:
+                return _raise_no_match(remote_space)
+            return potential_hits
+        potential_hits = []
+        for candidate in self.dirlist:
+            candidate_posix = candidate.as_posix()
+            if exp_type_casefold in candidate_posix.casefold():
+                potential_hits.append(candidate_posix)
         logger.debug(
             strm(
                 "found potential hits",
@@ -629,7 +680,9 @@ class cached_searcher(object):
             "inside",
             self.dirlist,
         )
-        return [candidate.as_posix() for candidate in potential_hits]
+        if not potential_hits:
+            return _raise_no_match(self.dirlist)
+        return potential_hits
 
 
 cached_searcher_instance = cached_searcher()
@@ -659,6 +712,7 @@ def rclone_search(fname, exp_type, dirname):
                     "RcloneRemotes", exp_type_casefold, stored_value
                 )
                 break
+    result = []
     if remotelocation is None:
         # {{{ first see the exp_type is contained inside something else
         exp_dir_parts = exp_type_path.parts
@@ -673,6 +727,7 @@ def rclone_search(fname, exp_type, dirname):
                 result = cached_searcher_instance.search_for(
                     PureWindowsPath(*exp_dir_parts[-(specificity + 1) :]),
                     specific_remote=remotelocation,
+                    require_match=True,
                 )
         # }}}
         # {{{ only do a general search if the previous failed
@@ -681,22 +736,15 @@ def rclone_search(fname, exp_type, dirname):
                 f"remote location {exp_type.lower()} not previously stored,"
                 " so search for it!"
             )
-            result = cached_searcher_instance.search_for(exp_type_path)
+            result = cached_searcher_instance.search_for(
+                exp_type_path, require_match=True
+            )
         # }}}
         if len(result) > 1:
             raise ValueError(
                 f"the exp_type that you've selected, {exp_type}, is ambiguous"
                 ", and could refer to the following remote locations:\n"
                 + str(result)
-            )
-        elif len(result) == 0:
-            raise ValueError(
-                "I can't find a remote corresponding to your"
-                f" exp_type {exp_type}.  Note that I only search"
-                "  for a remote if I can't find a file in the"
-                "  local directory, so this might be due to the"
-                "  fact that I can't find the file in the local"
-                "  directory."
             )
         else:
             remotelocation = result[0]
