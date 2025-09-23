@@ -507,7 +507,9 @@ def getDATADIR(*args, **kwargs):
                         )
                     )
                     if partial_match_value is not None:
-                        partial_match_directory = Path(partial_match_value).expanduser()
+                        partial_match_directory = Path(
+                            partial_match_value
+                        ).expanduser()
                         unmatched_parts = exp_type_path.parts[
                             partial_match_prefix_len:
                         ]
@@ -590,7 +592,9 @@ def find_registered_prefix_match(
     for prefix_len in range(max_prefix_len, 0, -1):
         partial_key = PureWindowsPath(*exp_dir_parts[:prefix_len]).as_posix()
         partial_key_casefold = partial_key.casefold()
-        for stored_key, stored_value in pyspec_config._config_parser.items(section):
+        for stored_key, stored_value in pyspec_config._config_parser.items(
+            section
+        ):
             normalized_key = PureWindowsPath(stored_key).as_posix().casefold()
             if normalized_key == partial_key_casefold:
                 if prefer_longest:
