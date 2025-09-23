@@ -7,12 +7,13 @@ This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file.
 import os, sys, csv
 import configparser
 import platform
+from difflib import get_close_matches
 from .general_functions import process_kwargs, strm
 import logging
 import atexit
 import collections
 from subprocess import Popen, PIPE
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 logger = logging.getLogger("pyspecdata.datadir")
 unknown_exp_type_name = "XXX--unknown--XXX"
@@ -344,30 +345,45 @@ def getDATADIR(*args, **kwargs):
             would take forever).
     """
     exp_type = process_kwargs([("exp_type", None)], kwargs)
+    if exp_type is not None:
+        exp_type_path = PureWindowsPath(exp_type)
+        exp_type_key = exp_type_path.as_posix()
+        exp_type_match_value = exp_type_path.as_posix().casefold()
+    else:
+        exp_type_path = None
+        exp_type_key = None
+        exp_type_match_value = None
     base_data_dir = pyspec_config.get_setting(
         "data_directory",
         environ="PYTHON_DATA_DIR",
         default="~/experimental_data",
     )
-    if exp_type is not None and "/" in exp_type:
-        exp_type = os.path.normpath(exp_type)
+    if base_data_dir is not None:
+        base_data_dir = Path(base_data_dir).expanduser()
 
     # the following is from
     # https://stackoverflow.com/questions/229186
     # /os-walk-without-digging-into-directories-below
-    def walklevel(some_dir, level=1):
-        some_dir = some_dir.rstrip(os.path.sep)
-        assert os.path.isdir(some_dir), strm(
+    def iter_candidate_dirs(some_dir, max_depth=1):
+        some_dir = Path(some_dir)
+        assert some_dir.is_dir(), strm(
             some_dir,
             "is not a directory (probably an invalid entry in your"
             "pyspecdata config file)",
         )
-        num_sep = some_dir.count(os.path.sep)
-        for root, dirs, files in os.walk(some_dir):
-            yield root, dirs, files
-            num_sep_this = root.count(os.path.sep)
-            if num_sep + level <= num_sep_this:
-                del dirs[:]
+        queue = collections.deque([(some_dir, 0)])
+        while queue:
+            current_dir, depth = queue.popleft()
+            if depth >= max_depth:
+                continue
+            for child in current_dir.iterdir():
+                if not child.is_dir():
+                    continue
+                name = child.name
+                if name[0] in [".", "_"] or ".hfssresults" in name:
+                    continue
+                yield child
+                queue.append((child, depth + 1))
 
     def walk_and_grab_best_match(walking_top_dir):
         logger.debug(
@@ -381,33 +397,25 @@ def getDATADIR(*args, **kwargs):
         )
         equal_matches = []
         containing_matches = []
-        pathlevel = len(Path(exp_type).parts)
-        for d, s, _ in walklevel(walking_top_dir, level=pathlevel):
-            logger.debug(strm("walking: ", d, s))
-            s[:] = [
-                j
-                for j in s
-                if j[0] not in [".", "_"] and ".hfssresults" not in j
-            ]  # prune the walk
-            equal_matches.extend([
-                os.path.join(d, j)
-                for j in s
-                if os.path.join(d, j).lower().endswith(exp_type.lower())
-            ])
-            containing_matches.extend([
-                os.path.join(d, j)
-                for j in s
-                if exp_type.lower() in os.path.join(d, j).lower()
-            ])
+        pathlevel = len(exp_type_path.parts) or 1
+        for candidate in iter_candidate_dirs(
+            walking_top_dir, max_depth=pathlevel
+        ):
+            logger.debug(strm("walking: ", candidate))
+            candidate_key = candidate.as_posix().casefold()
+            if candidate_key.endswith(exp_type_match_value):
+                equal_matches.append(candidate)
+            if exp_type_match_value in candidate_key:
+                containing_matches.append(candidate)
 
         def grab_smallest(matches):
             if len(matches) > 0:
                 if len(matches) == 1:
                     return matches[0]
                 else:
-                    min_length_match = min(list(map(len, matches)))
+                    min_length_match = min(len(x.parts) for x in matches)
                     matches = [
-                        x for x in matches if len(x) == min_length_match
+                        x for x in matches if len(x.parts) == min_length_match
                     ]
                     if len(matches) != 1:
                         raise ValueError(
@@ -430,12 +438,37 @@ def getDATADIR(*args, **kwargs):
         # exp_directory: exp_directory =
         # [exp_directory.replace(base_dir,'%(base)s')]
         # }}}
-        pyspec_config.set_setting("ExpTypes", exp_type, exp_directory)
+        pyspec_config.set_setting("ExpTypes", exp_type_key, str(exp_directory))
         return exp_directory
 
     if exp_type is not None:
         # {{{ determine the experiment subdirectory
-        exp_directory = pyspec_config.get_setting(exp_type, section="ExpTypes")
+        exp_directory = pyspec_config.get_setting(
+            exp_type_key, section="ExpTypes"
+        )
+        if exp_directory is None and exp_type != exp_type_key:
+            exp_directory = pyspec_config.get_setting(
+                exp_type, section="ExpTypes"
+            )
+        if (
+            exp_directory is None
+            and pyspec_config._config_parser is not None
+            and pyspec_config._config_parser.has_section("ExpTypes")
+        ):
+            for stored_key, stored_value in pyspec_config._config_parser.items(
+                "ExpTypes"
+            ):
+                normalized_key = (
+                    PureWindowsPath(stored_key).as_posix().casefold()
+                )
+                if normalized_key == exp_type_match_value:
+                    exp_directory = stored_value
+                    pyspec_config.set_setting(
+                        "ExpTypes", exp_type_key, stored_value
+                    )
+                    break
+        if exp_directory is not None:
+            exp_directory = Path(exp_directory).expanduser()
         if exp_directory is None:
             logger.debug(
                 strm(
@@ -462,11 +495,11 @@ def getDATADIR(*args, **kwargs):
                 d = dict(pyspec_config._config_parser.items("General"))[
                     "data_directory"
                 ]
-                d = os.path.expanduser(d)
+                d = Path(d).expanduser()
 
                 exp_directory = walk_and_grab_best_match(d)
                 if exp_directory is None:
-                    raise ValueError(
+                    message = (
                         "even after walking the whole data directory, I can't"
                         + " find a match for "
                         + exp_type
@@ -478,6 +511,20 @@ def getDATADIR(*args, **kwargs):
                         + exp_type
                         + " in the right place"
                     )
+                    print(message)
+                    prompt = input(
+                        "Would you like pyspecdata to create this directory"
+                        " for you? [y/N]: "
+                    ).strip()
+                    if prompt.lower() in {"y", "yes"}:
+                        target_dir = d / exp_type_path
+                        target_dir.mkdir(parents=True, exist_ok=True)
+                        pyspec_config.set_setting(
+                            "ExpTypes", exp_type_key, str(target_dir)
+                        )
+                        exp_directory = target_dir
+                    else:
+                        raise ValueError(message)
         if exp_directory is None:
             logger.debug(
                 strm(
@@ -488,10 +535,11 @@ def getDATADIR(*args, **kwargs):
                 )
             )
             exp_directory = walk_and_grab_best_match(base_data_dir)
-        retval = (exp_directory,) + args
+        exp_directory = Path(exp_directory)
+        retval = (str(exp_directory),) + args
         # }}}
     else:
-        retval = (base_data_dir,) + args
+        retval = (str(base_data_dir),) + args
     if len(retval[-1]) != 0:
         retval = retval + ("",)
     return os.path.join(*retval)
@@ -527,8 +575,6 @@ class cached_searcher(object):
             print(
                 "checking remote", thisremote, "... this might take a minute"
             )
-            # do NOT quote the filename -- quotes are typically stripped off
-            # by the shell -- they would be literal here
             cmd = ["rclone", "lsf", "-R", "--dirs-only", thisremote]
             logger.info(
                 "grabbing all dir info with "
@@ -539,42 +585,126 @@ class cached_searcher(object):
                 cmd, stdout=PIPE, stderr=PIPE, encoding="utf-8"
             ) as proc:
                 for j in proc.stdout:
-                    self.dirlist.append(thisremote + "/" + j.strip())
+                    child = PureWindowsPath(j.strip())
+                    remote_root = PureWindowsPath(thisremote)
+                    child_fragment = child.as_posix()
+                    if child_fragment == ".":
+                        combined_str = remote_root.as_posix()
+                    elif remote_root.as_posix().endswith(":"):
+                        combined_str = remote_root.as_posix() + child_fragment
+                    else:
+                        combined_str = (remote_root / child).as_posix()
+                    combined = PureWindowsPath(combined_str)
+                    self.dirlist.append(combined)
             logger.debug(f"done checking that remote -- got {self.dirlist}")
+        self.has_run = True
         return
 
-    def search_for(self, exp_type, specific_remote=None):
+    def search_for(
+        self,
+        exp_type,
+        specific_remote=None,
+        *,
+        require_match=False,
+        suggest_limit=3,
+    ):
+        exp_type_path = PureWindowsPath(exp_type)
+        exp_type_casefold = exp_type_path.as_posix().casefold()
+
+        def _raise_no_match(search_space):
+            if not require_match:
+                return []
+            if not search_space:
+                search_space = self.dirlist
+            search_space_strings = [
+                (
+                    candidate.as_posix()
+                    if hasattr(candidate, "as_posix")
+                    else str(candidate)
+                )
+                for candidate in search_space
+            ]
+            lower_to_original = {
+                candidate.casefold(): candidate
+                for candidate in search_space_strings
+            }
+            close_matches = get_close_matches(
+                exp_type_casefold,
+                list(lower_to_original.keys()),
+                n=suggest_limit,
+            )
+            if close_matches:
+                suggestions = [
+                    lower_to_original[match] for match in close_matches
+                ]
+            else:
+                suggestions = search_space_strings[:suggest_limit]
+            suggestion_text = (
+                " Did you mean one of these?"
+                + "\n\t•\t"
+                + "\n\t•\t".join(suggestions)
+                if suggestions
+                else ""
+            )
+            location_hint = (
+                f" within {specific_remote}"
+                if specific_remote is not None
+                else ""
+            )
+            raise ValueError(
+                "I can't find a remote directory matching "
+                f"{exp_type_path.as_posix()}{location_hint}."
+                + suggestion_text
+            )
+
         logger.debug(
-            f"search_for exp_type={exp_type} inside"
+            f"search_for exp_type={exp_type_path} inside"
             f" specific_remote={specific_remote}"
         )
         if not self.has_run:
             self.grab_dirlist(specific_remote=specific_remote)
         if specific_remote is not None:
-            # {{{ if we found exactly the exp_type inside the specific_remote,
-            #     that's what we want!
-            logger.debug(f"drilling down, I'm looking for for {specific_remote + '/' + exp_type} inside {self.dirlist}")
-            if specific_remote + "/" + exp_type + "/" in self.dirlist:
-                logger.debug(
-                    "found exactly the right exp_type inside the"
-                    " specific_remote"
-                )
-                return [specific_remote + "/" + exp_type + "/"]
-            # }}}
-        else:
-            potential_hits = [
-                j for j in self.dirlist if exp_type.lower() in j.lower()
-            ]
+            remote_path = PureWindowsPath(specific_remote)
             logger.debug(
-                strm(
-                    "found potential hits",
-                    potential_hits,
-                    "when looking for",
-                    exp_type.lower(),
-                ),
-                "inside",
-                self.dirlist,
+                "drilling down, I'm looking for for"
+                f" {(remote_path / exp_type_path).as_posix()} inside"
+                f" {self.dirlist}"
             )
+            target = (remote_path / exp_type_path).as_posix().casefold()
+            remote_casefold = remote_path.as_posix().casefold()
+            potential_hits = []
+            remote_space = []
+            for candidate in self.dirlist:
+                candidate_posix = candidate.as_posix()
+                candidate_key = candidate_posix.casefold()
+                if candidate_key.startswith(remote_casefold):
+                    remote_space.append(candidate)
+                if candidate_key == target:
+                    logger.debug(
+                        "found exactly the right exp_type inside the"
+                        " specific_remote"
+                    )
+                    potential_hits.append(candidate_posix)
+            if not potential_hits:
+                return _raise_no_match(remote_space)
+            return potential_hits
+        potential_hits = []
+        for candidate in self.dirlist:
+            candidate_posix = candidate.as_posix()
+            if exp_type_casefold in candidate_posix.casefold():
+                potential_hits.append(candidate_posix)
+        logger.debug(
+            strm(
+                "found potential hits",
+                potential_hits,
+                "when looking for",
+                exp_type_casefold,
+            ),
+            "inside",
+            self.dirlist,
+        )
+        if not potential_hits:
+            return _raise_no_match(self.dirlist)
         return potential_hits
 
 
@@ -585,22 +715,42 @@ def rclone_search(fname, exp_type, dirname):
     logger.debug(
         strm("rclone search called with fname:", fname, "exp_type:", exp_type)
     )
+    exp_type_path = PureWindowsPath(exp_type)
+    exp_type_casefold = exp_type_path.as_posix().casefold()
     remotelocation = pyspec_config.get_setting(
-        exp_type.lower(), section="RcloneRemotes"
+        exp_type_casefold, section="RcloneRemotes"
     )
+    if (
+        remotelocation is None
+        and pyspec_config._config_parser is not None
+        and pyspec_config._config_parser.has_section("RcloneRemotes")
+    ):
+        for stored_key, stored_value in pyspec_config._config_parser.items(
+            "RcloneRemotes"
+        ):
+            normalized_key = PureWindowsPath(stored_key).as_posix().casefold()
+            if normalized_key == exp_type_casefold:
+                remotelocation = stored_value
+                pyspec_config.set_setting(
+                    "RcloneRemotes", exp_type_casefold, stored_value
+                )
+                break
+    result = []
     if remotelocation is None:
         # {{{ first see the exp_type is contained inside something else
-        exp_dir_list = exp_type.split("/")
-        for specificity in range(len(exp_dir_list) - 1):
+        exp_dir_parts = exp_type_path.parts
+        for specificity in range(len(exp_dir_parts) - 1):
+            parent_path = PureWindowsPath(*exp_dir_parts[: -(specificity + 1)])
             remotelocation = pyspec_config.get_setting(
-                "/".join(exp_dir_list[: -(specificity + 1)]).lower(),
+                parent_path.as_posix().casefold(),
                 section="RcloneRemotes",
             )
             if remotelocation is not None:
                 logger.debug(f"did find one level up {remotelocation}")
                 result = cached_searcher_instance.search_for(
-                    "/".join(exp_dir_list[-(specificity + 1) :]),
+                    PureWindowsPath(*exp_dir_parts[-(specificity + 1) :]),
                     specific_remote=remotelocation,
+                    require_match=True,
                 )
         # }}}
         # {{{ only do a general search if the previous failed
@@ -609,7 +759,9 @@ def rclone_search(fname, exp_type, dirname):
                 f"remote location {exp_type.lower()} not previously stored,"
                 " so search for it!"
             )
-            result = cached_searcher_instance.search_for(exp_type.lower())
+            result = cached_searcher_instance.search_for(
+                exp_type_path, require_match=True
+            )
         # }}}
         if len(result) > 1:
             raise ValueError(
@@ -617,20 +769,11 @@ def rclone_search(fname, exp_type, dirname):
                 ", and could refer to the following remote locations:\n"
                 + str(result)
             )
-        elif len(result) == 0:
-            raise ValueError(
-                "I can't find a remote corresponding to your"
-                f" exp_type {exp_type}.  Note that I only search"
-                "  for a remote if I can't find a file in the"
-                "  local directory, so this might be due to the"
-                "  fact that I can't find the file in the local"
-                "  directory."
-            )
         else:
             remotelocation = result[0]
             logging.debug("about to write to RcloneRemotes")
             pyspec_config.set_setting(
-                "RcloneRemotes", exp_type, remotelocation
+                "RcloneRemotes", exp_type_casefold, str(remotelocation)
             )
     logger.debug(
         f"remote location previously stored {remotelocation} for"
@@ -646,7 +789,7 @@ def rclone_search(fname, exp_type, dirname):
         "rclone copy -v --include '%s' %s %s"
         % (
             fname,
-            remotelocation,
+            str(remotelocation),
             # dirname below needs to be replaced with path relative to current
             # directory
             os.path.normpath(os.path.join(dirname)).replace("\\", "\\\\"),
@@ -729,11 +872,11 @@ def register_directory():
         you installed pyspecdata before that date.
     """
     assert len(sys.argv) == 2, "Only give one argument -- the directory!"
-    exp_directory = sys.argv[1]
-    exp_directory = os.path.normpath(os.path.expanduser(exp_directory))
-    _, exp_type = os.path.split(exp_directory)
+    exp_directory = Path(sys.argv[1]).expanduser().resolve(strict=False)
+    exp_type = exp_directory.name
+    exp_type_key = Path(PureWindowsPath(exp_type)).as_posix()
     logger.debug(
         strm("trying to register directory", exp_directory, "as", exp_type)
     )
-    pyspec_config.set_setting("ExpTypes", exp_type, exp_directory)
+    pyspec_config.set_setting("ExpTypes", exp_type_key, str(exp_directory))
     return
