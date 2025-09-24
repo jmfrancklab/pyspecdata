@@ -239,7 +239,9 @@ def ft_new_startpoint(self, axis, which_domain, value=None, nearest=False):
     elif which_domain == "f":
         which_domain = "freq"
         thisconditional = True
-    other_domain = tuple(set(("freq","time"))-set((which_domain,)))[0]
+    if which_domain not in ("time", "freq"):
+        raise ValueError("select time or frequency domain!")
+    other_domain = tuple(set(("freq", "time")) - set((which_domain,)))[0]
     du = _get_ft_df(self, axis)
     orig_u = self.get_ft_prop(axis, ["start", which_domain])
     if orig_u is None:
@@ -253,8 +255,10 @@ def ft_new_startpoint(self, axis, which_domain, value=None, nearest=False):
                 "that dimension"
             )
     if value is not None:
+        print("trying to set to", value)
         n_du = (orig_u - value) / du  # number of du's shifted by
-        if not n_du==0 and abs((n_du - round(n_du)) / n_du) > 1e-3:
+        if n_du != 0 and abs((n_du - round(n_du)) / n_du) > 1e-3:
+            print("n_du is off by a significant fraction")
             if nearest is None:
                 raise ValueError(
                     strm(
@@ -276,10 +280,22 @@ def ft_new_startpoint(self, axis, which_domain, value=None, nearest=False):
                     )
                 )
             elif nearest:
+                logging.debug("rounding a way that fraction")
                 value = round((value - orig_u) / du) * du + orig_u
-            else:
-                value = orig_u - round(n_du) * du
+    logging.debug(
+        strm(
+            "using this to set",
+            ["start", which_domain],
+            "of",
+            axis,
+            "to",
+            value,
+        )
+    )
     self.set_ft_prop(axis, ["start", which_domain], value)
+    logging.debug(
+        strm("here it is:", self.get_ft_prop(axis, ["start", which_domain]))
+    )
     if nearest is False:
         # assume that if we choose to precisely set the startpoint in
         # one domain, we must be pretty sure we don't have aliases in
