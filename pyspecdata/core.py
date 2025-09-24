@@ -5545,6 +5545,11 @@ class nddata(object):
                 raise ValueError("I don't know how to deal with this type!")
         else:
             raise ValueError("otherargs must be one or two arguments!")
+        if not type(axesout[0]) is str:
+            raise ValueError(
+                "the second argument should give the list of new axes that"
+                f" are created by chunking '{axisin}'"
+            )
         assert not np.any(
             [j in self.dimlabels for j in axesout if j != axisin]
         ), strm(
