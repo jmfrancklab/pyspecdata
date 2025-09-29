@@ -1,10 +1,6 @@
 import numpy as np
 import pytest
-import sys
-import types
 from conftest import load_module
-
-sys.modules.setdefault("_nnls", types.ModuleType("_nnls"))
 
 # Skip if the real Pint library isn't available. ``load_module`` supplies a
 # minimal stub when Pint can't be imported, which lacks the functionality this
