@@ -32,4 +32,4 @@ def test_fourier_transform_updates_time_units_to_frequency():
     d.setaxis("t", np.linspace(0.0, 7.0, 8))
     d.set_units("t", "µs")
     d.ft("t")
-    assert d.get_units("t") == "\\mathrm{MHz}"
+    assert d.get_units("t") == "MHz"

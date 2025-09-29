@@ -31,4 +31,4 @@ def _ft_conj(self, x):
 
     conjugate = conjugate.to_compact()
     assert conjugate.magnitude == 1
-    return f"{conjugate.units:~L}"
+    return f"{conjugate.units:~P}"
