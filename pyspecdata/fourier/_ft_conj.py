@@ -30,5 +30,8 @@ def _ft_conj(self, x):
             conjugate /= rad_to_hz ** (-rad_power)
 
     conjugate = conjugate.to_compact()
-    assert conjugate.magnitude == 1
+    assert conjugate.magnitude == 1, (
+        f"conjugate magnitude of {conjugate} is not 1 when trying"
+        f" to find conjugate units for {base_quantity}"
+    )
     return f"{conjugate.units:~P}"
