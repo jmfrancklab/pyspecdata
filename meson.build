@@ -76,10 +76,18 @@ c_wrappers = custom_target(
     build_by_default: true,
 )
 
+fixed_args = ['-O2','-g','-fopenmp','-std=gnu','-ffixed-form','-ffixed-line-length-none']
+free_args  = ['-O2','-g','-fopenmp','-std=gnu']
+
+if fc.has_argument('-fallow-argument-mismatch')
+  fixed_args += ['-fallow-argument-mismatch']
+  free_args  += ['-fallow-argument-mismatch']
+endif
+
 fixed_lib = static_library(
     'nnls_fixed',
     fixed_sources,
-    fortran_args: ['-O2','-g','-fopenmp','-std=gnu','-ffixed-form','-ffixed-line-length-none','-fallow-argument-mismatch'],
+    fortran_args: fixed_args,
     pic: true,
     install: false,
 )
@@ -87,7 +95,7 @@ fixed_lib = static_library(
 free_lib = static_library(
     'nnls_free',
     free_sources,
-    fortran_args: ['-O2','-g','-fopenmp','-std=gnu','-fallow-argument-mismatch'],
+    fortran_args: free_args,
     pic: true,
     install: false,
 )
@@ -120,10 +128,10 @@ py.extension_module(
     '_nnls',
     [],
     objects: [
-        fixed_lib.extract_all_objects(),
-        free_lib.extract_all_objects(),
-        wrapper_lib.extract_all_objects(),
-        c_lib.extract_all_objects(),
+        fixed_lib.extract_all_objects(recursive: true),
+        free_lib.extract_all_objects(recursive: true),
+        wrapper_lib.extract_all_objects(recursive: true),
+        c_lib.extract_all_objects(recursive: true),
     ],
     c_args: ['-I'+numpy_inc, '-I'+numpy_f2py_src],
     install: true,
@@ -144,7 +152,7 @@ foreach script : scripts
         output: script[0],
         input: 'scripts/entry_point_template',
         configuration: {
-            'python_executable': py.path(),
+            'python_executable': py.full_path(),
             'module': script[1],
             'function': script[2],
         },
