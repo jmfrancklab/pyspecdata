@@ -133,12 +133,20 @@ def search_filename(
         )
     )
 
+    compiled_pattern = re.compile(searchstring)
+
     def look_inside(inp_directory):
         logger.debug(strm("looking inside directory", inp_directory))
         dirlist = os.listdir(inp_directory)
         logger.debug(strm("dirlist inside", inp_directory, "is", dirlist))
         if os.path.isdir(inp_directory):
-            files = re.findall(".*" + searchstring + ".*", "\n".join(dirlist))
+            matches = []
+            for entry in dirlist:
+                # apply the compiled regex directly so anchors like ^ and $
+                # continue to work as expected when scanning the directory
+                if compiled_pattern.search(entry):
+                    matches.append(entry)
+            files = matches
         else:
             raise IOError(
                 "I can't find the directory:\n%s\nin order to get a file that"
@@ -171,15 +179,7 @@ def search_filename(
     if (files is None or len(files) == 0) and zenodo is not None:
         zenodo_download(zenodo, searchstring, exp_type=exp_type)
     elif (files is None or len(files) == 0) and zenodo is None:
-        cmd = rclone_search(
-            searchstring.replace(".*", "*")
-            .replace("(", "{")
-            .replace(")", "}")
-            .replace("|", ",")
-            .replace("\\.", "."),
-            exp_type,
-            directory,
-        )
+        cmd = rclone_search(searchstring, exp_type, directory)
     files = look_inside(directory)
     if files is None or len(files) == 0:
         raise RuntimeError(
