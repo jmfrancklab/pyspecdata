@@ -1,7 +1,13 @@
 import os
+import sys
+import types
 import pytest
 
 from conftest import load_module
+
+# stub out the optional _nnls extension so importing the package under test
+# does not try to load a compiled module that is not built in the CI image
+sys.modules.setdefault("_nnls", types.SimpleNamespace())
 
 # load the modules under test using the shared helper so optional dependencies
 # are stubbed the same way as the rest of the suite

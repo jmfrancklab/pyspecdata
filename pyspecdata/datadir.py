@@ -846,18 +846,11 @@ def rclone_search(fname, exp_type, dirname):
     )
     # the include filter uses rclone's regex mode so that anchors in the
     # original search pattern continue to match exactly what the caller asked
-    regex_filter = "{{" + fname + "}}"
-    cmd = strm(
-        "rclone copy -v --include '%s' %s %s"
-        % (
-            regex_filter,
-            str(remotelocation),
-            # dirname below needs to be replaced with path relative to current
-            # directory
-            os.path.normpath(os.path.join(dirname)).replace("\\", "\\\\"),
-        )
+    destination_path = os.path.normpath(os.path.join(dirname)).replace("\\", "\\\\")
+    cmd = (
+        f'rclone copy -v --include "{{{{{fname}}}}}" '
+        f"{str(remotelocation)} {destination_path}"
     )
-    cmd = cmd.replace("'", '"')
     logger.info(f"I'm about to run\n{cmd}")
     os.system(cmd)
     logger.info("... done")
