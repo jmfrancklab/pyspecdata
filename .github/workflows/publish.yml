@@ -149,6 +149,47 @@ jobs:
             exit 0
           fi
           git commit -m "Bump version to ${NEW_VERSION}"
+
+      - name: Push version bump
+        # Instructions: How to generate a GitHub Personal Access Token (PAT)
+        # ===============================================================
+        # 1. Go to https://github.com/settings/tokens?type=beta
+        #    (This opens the "Fine-grained personal access tokens" page.)
+        #
+        # 2. Click the **Generate new token** button.
+        #
+        # 3. Fill in the following fields:
+        #    - **Token name:** something descriptive, e.g. "GitHub Actions admin push"
+        #    - **Expiration:** choose a reasonable time (90 days or "No expiration" if you rotate manually)
+        #    - **Resource owner:** select your organization if the repository belongs to it
+        #    - **Repository access:** choose *Only select repositories*, then select your target repo
+        #
+        # 4. Under **Repository permissions**, grant:
+        #    - **Contents:** Read and write     ← required for pushing commits
+        #    - **Metadata:** Read-only          ← automatically enabled
+        #    - **Workflows:** Read and write    ← allows GitHub Actions to interact with workflows if needed
+        #
+        # 5. Click **Generate token** at the bottom.
+        #
+        # 6. Copy the token immediately — it will only be shown once!
+        #
+        # 7. Go to your repository → **Settings → Secrets and variables → Actions**.
+        #    - Click **New repository secret**
+        #    - Name it:  `ADMIN_PAT`
+        #    - Paste the token as the value
+        #
+        # 8. In your workflow, authenticate pushes using this token:
+        #      git remote set-url origin https://x-access-token:${ADMIN_PAT}@github.com/<ORG>/<REPO>.git
+        #      git push origin HEAD:master
+        #
+        # 9. This token authenticates as your admin user and bypasses the pull-request requirement
+        #    when branch protection allows admins to push.
+        env:
+          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
+        run: |
+          git config user.name "version-bump"
+          git config user.email "actions@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${ADMIN_PAT}@github.com/<ORG>/<REPO>.git
           git push origin HEAD:master
 
       - name: Expose version output
