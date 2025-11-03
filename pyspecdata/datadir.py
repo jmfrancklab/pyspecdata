@@ -846,7 +846,9 @@ def rclone_search(fname, exp_type, dirname):
     )
     # the include filter uses rclone's regex mode so that anchors in the
     # original search pattern continue to match exactly what the caller asked
-    destination_path = os.path.normpath(os.path.join(dirname)).replace("\\", "\\\\")
+    destination_path = os.path.normpath(os.path.join(dirname)).replace(
+        "\\", "\\\\"
+    )
     cmd = (
         f'rclone copy -v --include "{{{{{fname}}}}}" '
         f"{str(remotelocation)} {destination_path}"

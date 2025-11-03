@@ -38,7 +38,9 @@ def test_search_filename_respects_anchors(tmp_path, monkeypatch):
     monkeypatch.setattr(load_files, "getDATADIR", fake_getdatadir)
     monkeypatch.setattr(load_files, "rclone_search", fake_rclone)
 
-    results = load_files.search_filename(r"gamma\.dat$", "test_exp", print_result=False)
+    results = load_files.search_filename(
+        r"gamma\.dat$", "test_exp", print_result=False
+    )
 
     expected_path = str(base_dir) + os.path.sep + "gamma.dat"
     assert results == [expected_path]
@@ -67,7 +69,9 @@ def test_search_filename_passes_raw_regex_to_rclone(tmp_path, monkeypatch):
     monkeypatch.setattr(load_files, "rclone_search", fake_rclone)
 
     with pytest.raises(RuntimeError):
-        load_files.search_filename(r"delta$", "missing_exp", print_result=False)
+        load_files.search_filename(
+            r"delta$", "missing_exp", print_result=False
+        )
 
     assert recorded["pattern"] == r"delta$"
     assert recorded["exp_type"] == "missing_exp"
@@ -77,7 +81,9 @@ def test_search_filename_passes_raw_regex_to_rclone(tmp_path, monkeypatch):
 def test_rclone_search_uses_regex_mode(monkeypatch, tmp_path):
     exp_type = "remote_exp"
     exp_key = datadir.PureWindowsPath(exp_type).as_posix().casefold()
-    datadir.pyspec_config.config_vars["RcloneRemotes"][exp_key] = "example:remote"
+    datadir.pyspec_config.config_vars["RcloneRemotes"][
+        exp_key
+    ] = "example:remote"
 
     captured = {}
 
