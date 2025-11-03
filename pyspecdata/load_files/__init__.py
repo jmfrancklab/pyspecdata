@@ -154,7 +154,7 @@ def search_filename(
                 " with this exp_type in %s"
                 % (inp_directory, searchstring, pyspec_config.config_location)
             )
-        logger.debug(strm("after running findall, files is", files))
+        logger.debug(strm("after applying the regex search, files is", files))
         if len(files) == 0:
             files = []
             directories_inside = [
