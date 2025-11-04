@@ -151,39 +151,42 @@ jobs:
           git commit -m "Bump version to ${NEW_VERSION}"
 
       - name: Push version bump
-        # Instructions: How to generate a GitHub Personal Access Token (PAT)
-        # ===============================================================
-        # 1. Go to https://github.com/settings/tokens?type=beta
-        #    (This opens the "Fine-grained personal access tokens" page.)
+        # Instructions: Create a GitHub Personal Access Token (PAT) for admin pushes (fine-grained)
+        # =======================================================================================
+        # 1) Go to: https://github.com/settings/personal-access-tokens
+        #    → “Fine-grained tokens” → Generate new token.
         #
-        # 2. Click the **Generate new token** button.
+        # 2) Basic fields:
+        #    - Token name: e.g., "Actions admin push"
+        #    - Expiration: set a reasonable date
+        #    - Resource owner: select your organization
         #
-        # 3. Fill in the following fields:
-        #    - **Token name:** something descriptive, e.g. "GitHub Actions admin push"
-        #    - **Expiration:** choose a reasonable time (90 days or "No expiration" if you rotate manually)
-        #    - **Resource owner:** select your organization if the repository belongs to it
-        #    - **Repository access:** choose *Only select repositories*, then select your target repo
+        # 3) Repository access (IMPORTANT per current UI):
+        #    - Select **All repositories**  (required to expose repo permissions panel in this UI)
+        #    - In the **Permissions** area, click **Repositories (0)** → **Add permissions**
+        #      • Choose **Contents** → then under it select **Read and write**
+        #      • (Optional) Add **Workflows** → **Read and write** if commits touch .github/workflows/*
+        #    - You do **not** need Organization permissions for pushing; leave those empty.
         #
-        # 4. Under **Repository permissions**, grant:
-        #    - **Contents:** Read and write     ← required for pushing commits
-        #    - **Metadata:** Read-only          ← automatically enabled
-        #    - **Workflows:** Read and write    ← allows GitHub Actions to interact with workflows if needed
+        # 4) Click **Generate token**, copy the value immediately.
+        #    - If your org uses SSO, click **Authorize** for this org on the yellow banner.
         #
-        # 5. Click **Generate token** at the bottom.
+        # 5) Add the token as a repo secret:
+        #    Repo → Settings → Secrets and variables → Actions → **New repository secret**
+        #    - Name: ADMIN_PAT
+        #    - Value: <the token from step 4>
         #
-        # 6. Copy the token immediately — it will only be shown once!
+        # 6) Branch protection (classic “Branches” rule) checklist:
+        #    - Require a pull request before merging → **Include administrators = OFF**
+        #    - Restrict who can push to matching branches → add **your admin user** (PAT owner)
         #
-        # 7. Go to your repository → **Settings → Secrets and variables → Actions**.
-        #    - Click **New repository secret**
-        #    - Name it:  `ADMIN_PAT`
-        #    - Paste the token as the value
+        # 7) Workflow push step (uses the secret; no angle brackets):
+        #    git remote set-url origin "https://x-access-token:${ADMIN_PAT}@github.com/${GITHUB_REPOSITORY}.git"
+        #    git push origin HEAD:master
         #
-        # 8. In your workflow, authenticate pushes using this token:
-        #      git remote set-url origin https://x-access-token:${ADMIN_PAT}@github.com/<ORG>/<REPO>.git
-        #      git push origin HEAD:master
-        #
-        # 9. This token authenticates as your admin user and bypasses the pull-request requirement
-        #    when branch protection allows admins to push.
+        # Notes:
+        # - If the push is rejected: verify (a) Contents=Read&Write is set, (b) your admin user is in
+        #   “Restrict who can push…”, (c) Include administrators is OFF, (d) the URL uses ${GITHUB_REPOSITORY}.
         env:
           ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
         run: |
