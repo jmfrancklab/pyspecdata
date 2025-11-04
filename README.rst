@@ -113,7 +113,8 @@ On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edit
 just run:
 
 *   ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython`` 
-*   ``conda install -y m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
+*   ``conda install -y -c conda-forge gcc_win-64 gfortran_win-64 binutils_win-64`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
+    *   If you've installed before, you *might* need to first do ``conda remove -y m2w64-toolchain`` (this is an older toolchain that breaks with numpy 2.0)
 *   ``conda install -y meson meson-python ninja`` (the new build system to replace distutils)
 *   *Note:* ``pip --version`` must be greater than 21.3 (this is what you need for an editable install using meson).
 
