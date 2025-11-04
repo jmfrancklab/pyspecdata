@@ -158,8 +158,10 @@ def genconfig():
             files_tab = qt_widgets.QWidget()
             files_layout = qt_widgets.QVBoxLayout(files_tab)
             path_layout = qt_widgets.QHBoxLayout()
-            path_label = qt_widgets.QLabel('data_directory')
+            # Make it obvious what the base directory represents when the dialog opens.
+            path_label = qt_widgets.QLabel('Main Data Directory:')
             path_layout.addWidget(path_label)
+            self.data_directory_label = path_label
             self.data_directory_edit = qt_widgets.QLineEdit()
             if self.config_parser.has_option('General','data_directory'):
                 self.data_directory_edit.setText(self.config_parser['General']['data_directory'])
@@ -184,25 +186,25 @@ def genconfig():
             self.files_layout.setSpacing(6)
 
             existing_types = []
+            exp_keys = set()
+            # Gather all experiment directories from both sections so we can sort them.
             for key,value in self.config_parser.items('ExpTypes'):
                 existing_types.append((key,value))
-            remote_info = {}
-            for key,value in self.config_parser.items('RcloneRemotes'):
-                remote_info[key] = value
-            exp_keys = [j for j,_ in existing_types]
-            for key in remote_info.keys():
+                exp_keys.add(key)
+            for key,_ in self.config_parser.items('RcloneRemotes'):
                 if key not in exp_keys:
                     existing_types.append((key,''))
+                    exp_keys.add(key)
+            existing_types.sort(key=lambda item: item[0])
             if len(existing_types) == 0:
                 self.add_file_row('','','None','')
             else:
                 for key,value in existing_types:
-                    if key in remote_info:
-                        if ':' in remote_info[key]:
-                            remote_name,remote_path = remote_info[key].split(':',1)
-                        else:
-                            remote_name = remote_info[key]
-                            remote_path = ''
+                    if self.config_parser.has_option('RcloneRemotes',key):
+                        remote_name = self.config_parser['RcloneRemotes'][key]
+                        remote_path = ''
+                        if ':' in remote_name:
+                            remote_name,remote_path = remote_name.split(':',1)
                     else:
                         remote_name = 'None'
                         remote_path = ''
@@ -212,9 +214,9 @@ def genconfig():
             self.files_layout.addWidget(spacer)
             self.files_scroll.setWidget(self.files_container)
             files_layout.addWidget(self.files_scroll)
-            self.add_button = qt_widgets.QPushButton('Add Entry')
-            files_layout.addWidget(self.add_button)
-            self.add_button.clicked.connect(lambda: self.add_file_row('','','None',''))
+            self.files_add_button = qt_widgets.QPushButton('Add Entry')
+            files_layout.addWidget(self.files_add_button)
+            self.files_add_button.clicked.connect(lambda: self.add_file_row('','','None',''))
             self.tab_widget.addTab(files_tab,'Files')
 
         def create_variables_tab(self):
@@ -233,6 +235,10 @@ def genconfig():
                 self.add_general_row(key,value)
             self.variables_scroll.setWidget(self.variables_container)
             variables_layout.addWidget(self.variables_scroll)
+            # Allow new key/value pairs to be added without leaving the dialog.
+            self.variables_add_button = qt_widgets.QPushButton('Add Entry')
+            variables_layout.addWidget(self.variables_add_button)
+            self.variables_add_button.clicked.connect(lambda: self.add_general_row('',''))
             self.tab_widget.addTab(variables_tab,'Variables')
 
         def add_general_row(self,key,value):
@@ -316,17 +322,21 @@ def genconfig():
                 new_config.set('General',key_text,entry['value_edit'].text().strip())
             new_config.add_section('ExpTypes')
             remote_values = {}
+            exp_entries = []
             for row in self.file_rows:
                 name_text = row['name_edit'].text().strip()
                 path_text = row['path_edit'].text().strip()
                 if name_text == '' or path_text == '':
                     continue
-                new_config.set('ExpTypes',name_text,path_text)
                 combo_value = row['remote_combo'].currentText()
-                if combo_value != 'None':
-                    remote_path_text = row['remote_path_edit'].text().strip()
-                    if remote_path_text != '':
-                        remote_values[name_text] = combo_value+':'+remote_path_text
+                remote_path_text = row['remote_path_edit'].text().strip()
+                exp_entries.append((name_text,path_text,combo_value,remote_path_text))
+            # Save the experiment directory table in alphabetical order.
+            exp_entries.sort(key=lambda item: item[0])
+            for name_text,path_text,combo_value,remote_path_text in exp_entries:
+                new_config.set('ExpTypes',name_text,path_text)
+                if combo_value != 'None' and remote_path_text != '':
+                    remote_values[name_text] = combo_value+':'+remote_path_text
             new_config.add_section('RcloneRemotes')
             for key in sorted(remote_values.keys()):
                 new_config.set('RcloneRemotes',key,remote_values[key])

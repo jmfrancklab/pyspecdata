@@ -272,6 +272,12 @@ def test_genconfig_with_qt(monkeypatch, tmp_path):
     latexscripts = load_module('pyspecdata.latexscripts', 'latexscripts.py')
 
     def fake_exec(self):
+        initial_names = [row['name_edit'].text() for row in self.file_rows if row['name_edit'].text()]
+        assert initial_names == sorted(initial_names)
+        assert hasattr(self, 'data_directory_label')
+        assert self.data_directory_label._text == 'Main Data Directory:'
+        assert self.files_add_button.text == 'Add Entry'
+        assert self.variables_add_button.text == 'Add Entry'
         for row in self.file_rows:
             if row['name_edit'].text() == 'ag_processed_data':
                 index = row['remote_combo'].findText('cornell_box')
@@ -282,13 +288,17 @@ def test_genconfig_with_qt(monkeypatch, tmp_path):
                 index = row['remote_combo'].findText('None')
                 assert index != -1
                 row['remote_combo'].setCurrentIndex(index)
-        self.add_button.click()
+        self.files_add_button.click()
         new_row = self.file_rows[-1]
         new_row['name_edit'].setText('new_entry')
         new_row['path_edit'].setText('/tmp/new_entry')
         for entry in self.general_entries:
             if entry['key_edit'].text() == 'qesr conversion':
                 entry['value_edit'].setText('999')
+        self.variables_add_button.click()
+        extra_general = self.general_entries[-1]
+        extra_general['key_edit'].setText('new_variable')
+        extra_general['value_edit'].setText('42')
         self.data_directory_edit.setText('/tmp/data_dir')
         self.save_button.click()
         return 1
@@ -302,8 +312,11 @@ def test_genconfig_with_qt(monkeypatch, tmp_path):
 
     assert config.get('General', 'data_directory') == '/tmp/data_dir'
     assert config.get('General', 'qesr conversion') == '999'
+    assert config.get('General', 'new_variable') == '42'
     assert config.get('ExpTypes', 'new_entry') == '/tmp/new_entry'
     assert config.get('RcloneRemotes', 'ag_processed_data') == 'cornell_box:exp_data/AG_processed_data'
     assert not config.has_option('RcloneRemotes', 'francklab_esr/romana')
     assert config.get('RcloneRemotes', '2deldor') == 'cornell_box:exp_data/2DELDOR'
     assert config.has_section('zenodo'), 'Existing sections outside the editor must remain.'
+    exp_keys = [key for key, _ in config.items('ExpTypes')]
+    assert exp_keys == sorted(exp_keys)
