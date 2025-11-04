@@ -20,7 +20,7 @@ dependencies = [
     #                output parameters that are unchanged, but still
     #                returns a "success" condition
 ]
-version = "0.9.9"
+version = "0.9.10"
 description = "Object-Oriented, Multi-dimensional Spectroscopic Data Processing"
 readme = "README.rst"  # Ensure this matches the README file's name
 readme-content-type = "text/x-rst"  # Change if using Markdown
