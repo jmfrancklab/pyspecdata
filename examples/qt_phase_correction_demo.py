@@ -2,7 +2,8 @@
 import sys
 
 import matplotlib as mpl
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qtagg import new_figure_manager_given_figure
 from matplotlib.figure import Figure
 from numpy import pi
 import numpy as np
@@ -107,23 +108,32 @@ def apply_phase_corrections(base_dataset, diag_corr, anti_corr):
     scm.ft("t1")
     scm *= np.exp(-1j * 2 * pi * offset * scm.fromaxis("t1"))
     scm.ift("t1")
-    time_domain["t1":(None, 0)]["t1", :t1_len] = scm["t1", ::-1]
+    negative_region = time_domain["t1":(None, 0)]
+    mirror_len = min(negative_region.shape["t1"], t1_len)
+    # Copy the mirrored Sc- component into the negative time region.
+    negative_region["t1", :mirror_len] = scm["t1", ::-1]["t1", :mirror_len]
     # Prepare the frequency-domain views used for the two right-hand panels.
     corrected["ph1", 1]["t1", :] = corrected["ph1", 1]["t1", ::-1]
     corrected = corrected["t1":T1_RANGE]["t2":T2_RANGE]
     return time_domain, corrected
 
 
-BASE_DATASET = load_base_dataset()
 # }}}
 
 
 class PhaseCorrectionWidget(QWidget):
-    def __init__(self):
+    def __init__(self, base_dataset=None):
         QWidget.__init__(self)
         self.setWindowTitle("Diagonal and Anti-diagonal Corrections")
+        # Use a pyplot-managed figure so pyspecdata.image can locate it.
         self.figure = Figure(figsize=(10, 8))
-        self.canvas = FigureCanvasQTAgg(self.figure)
+        manager = new_figure_manager_given_figure(id(self), self.figure)
+        self.manager = manager
+        self.canvas = manager.canvas
+        self.canvas.setParent(self)
+        if not hasattr(self.manager, "_cidgcf"):
+            self.manager._cidgcf = None
+        plt.figure(manager.num)
         grid = self.figure.add_gridspec(2, 2, width_ratios=[1, 1], height_ratios=[1, 1])
         self.ax_time = self.figure.add_subplot(grid[:, 0])
         self.ax_scp = self.figure.add_subplot(grid[0, 1])
@@ -160,6 +170,10 @@ class PhaseCorrectionWidget(QWidget):
         layout.addWidget(self.canvas)
         layout.addLayout(slider_layout)
         self.setLayout(layout)
+        if base_dataset is None:
+            # Store the loaded dataset so repeated slider updates avoid disk I/O.
+            base_dataset = load_base_dataset()
+        self.base_dataset = base_dataset
         self.diag_slider.valueChanged.connect(self.slider_changed)
         self.anti_slider.valueChanged.connect(self.slider_changed)
         self.update_plots()
@@ -173,8 +187,10 @@ class PhaseCorrectionWidget(QWidget):
         anti_corr = self.anti_slider.value() / 100.0
         self.diag_label.setText(f"{diag_corr:.2f}")
         self.anti_label.setText(f"{anti_corr:.2f}")
+        # Re-select the figure so pyspecdata.image can find the active canvas.
+        plt.figure(self.manager.num)
         time_domain, corrected = apply_phase_corrections(
-            BASE_DATASET, diag_corr, anti_corr
+            self.base_dataset, diag_corr, anti_corr
         )
         self.ax_time.clear()
         image(abs(time_domain), cmap="single_sided", ax=self.ax_time)
