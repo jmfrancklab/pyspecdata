@@ -13,13 +13,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
-      - name: Install HDF5 development headers
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libhdf5-dev libblosc-dev libblosc2-dev libbz2-dev liblzo2-dev
-        env:
-          DEBIAN_FRONTEND: noninteractive
+          python-version: '3.12'
       - name: Install package
         run: |
           python -m pip install --upgrade pip
