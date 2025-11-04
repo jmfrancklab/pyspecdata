@@ -193,7 +193,8 @@ jobs:
         run: |
           git config user.name "version-bump"
           git config user.email "actions@users.noreply.github.com"
-          git -c http.sslVerify=true push --repo="https://x-access-token:${ADMIN_PAT}@github.com/${GITHUB_REPOSITORY}.git" HEAD:master
+          git remote add patremote "https://x-access-token:${ADMIN_PAT}@github.com/${GITHUB_REPOSITORY}.git"
+          git push patremote HEAD:refs/heads/master
 
       - name: Expose version output
         id: output
