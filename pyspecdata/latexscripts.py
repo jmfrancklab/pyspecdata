@@ -162,7 +162,7 @@ def genconfig():
             path_layout.addWidget(path_label)
             self.data_directory_edit = qt_widgets.QLineEdit()
             if self.config_parser.has_option('General','data_directory'):
-                self.data_directory_edit.setText(self.config_parser.get('General','data_directory'))
+                self.data_directory_edit.setText(self.config_parser['General']['data_directory'])
             else:
                 possible_data = [x for x in next(os.walk(os.path.expanduser('~')))[1] if 'data' in x.lower() and 'app' not in x.lower()]
                 if len(possible_data) > 0:
@@ -198,11 +198,10 @@ def genconfig():
             else:
                 for key,value in existing_types:
                     if key in remote_info:
-                        remote_value = remote_info[key]
-                        if ':' in remote_value:
-                            remote_name,remote_path = remote_value.split(':',1)
+                        if ':' in remote_info[key]:
+                            remote_name,remote_path = remote_info[key].split(':',1)
                         else:
-                            remote_name = remote_value
+                            remote_name = remote_info[key]
                             remote_path = ''
                     else:
                         remote_name = 'None'
