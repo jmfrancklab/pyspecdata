@@ -112,10 +112,13 @@ broaden its applicability!
 On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
 just run:
 
+*   *Remember* that for new installs of anaconda, you need to turn off the python "execution alias" in windows to prevent windows from overriding all the importnat commands!  Also, all of below are tested in the "anaconda prompt" in admin mode.
 *   ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython`` 
-*   ``conda install -y -c conda-forge gcc_win-64 gfortran_win-64 binutils_win-64`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
+*   ``conda install -y -c conda-forge gcc_win-64 gfortran_win-64 binutils_win-64``
 
     *   If you've installed before, you *might* need to first do ``conda remove -y m2w64-toolchain`` (this is an older toolchain that breaks with numpy 2.0)
+    *   (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
+    *   On an ASUS Vivobook, conda looks like it's **completely dead** → just be patient and give it an hour.  (If you look online, you'll find plenty of info about how sloooooow conda is now, especially for conda forge, and can find some advice on using the mamba drivers to speed it up, though on a cheap new computer with windows 11 JMF has had very little luck.)
 
 *   ``conda install -y meson meson-python ninja`` (the new build system to replace distutils)
 *   *Note:* ``pip --version`` must be greater than 21.3 (this is what you need for an editable install using meson).
