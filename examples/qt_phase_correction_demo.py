@@ -79,6 +79,7 @@ DEFAULT_SEARCH = "1500ns\\.DSC"
 # {{{ data preparation helpers
 # Load the dataset once so that slider updates only adjust phase factors.
 def load_base_dataset(exp_type, search_string):
+    print(f"load_base_dataset called with {exp_type} {search_string}")
     d = find_file(search_string, exp_type=exp_type)
     d.chunk("t1", ["t1", "ph1"], [-1, 2]).reorder(["ph1", "t1", "t2"])
     d.set_units("t1", "ns")
@@ -248,7 +249,7 @@ class PhaseCorrectionWidget(QWidget):
         self.setLayout(layout)
         if base_dataset is None:
             base_dataset = load_base_dataset(
-                self.exp_type_dropdown.currentText(), self.search_entry.text()
+                    DEFAULT_EXP_TYPE, DEFAULT_SEARCH
             )
         self.full_dataset = base_dataset
         self.base_dataset = base_dataset
