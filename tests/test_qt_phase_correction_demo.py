@@ -71,14 +71,43 @@ def test_widget_updates_with_fake_data(qapp):
     dataset = generate_fake_dataset()
     widget = PhaseCorrectionWidget(base_dataset=dataset)
     try:
+        initial_time_image = np.array(widget.time_image.get_array())
+        start_axes_count = len(widget.figure.axes)
         widget.diag_slider.setValue(25)
         widget.anti_slider.setValue(-30)
         qapp.processEvents()
-        assert widget.diag_label.text() == "0.25"
-        assert widget.anti_label.text() == "-0.30"
-        # Each axis should contain an image after the update.
+        assert np.array_equal(initial_time_image, np.array(widget.time_image.get_array()))
+        widget.diag_slider.sliderReleased.emit()
+        qapp.processEvents()
+        assert widget.diag_label.text() == "0.25 μs"
+        assert widget.anti_label.text() == "-0.30 μs"
+        updated_time_image = np.array(widget.time_image.get_array())
+        assert not np.array_equal(initial_time_image, updated_time_image)
+        assert len(widget.figure.axes) == start_axes_count
         assert widget.ax_time.images
         assert widget.ax_scp.images
         assert widget.ax_scm.images
+    finally:
+        widget.close()
+
+
+def test_sensitivity_slider_adjusts_phase_ranges(qapp):
+    """The sensitivity slider should expand and contract the phase ranges."""
+    dataset = generate_fake_dataset()
+    widget = PhaseCorrectionWidget(base_dataset=dataset)
+    try:
+        center_before = widget.diag_slider.value()
+        range_before = widget.diag_slider.maximum() - widget.diag_slider.minimum()
+        widget.sensitivity_slider.setValue(widget.sensitivity_slider.value() + 50)
+        widget.sensitivity_slider.sliderReleased.emit()
+        qapp.processEvents()
+        center_after = widget.diag_slider.value()
+        range_after = widget.diag_slider.maximum() - widget.diag_slider.minimum()
+        assert center_after == center_before
+        assert range_after > range_before
+        assert (
+            widget.diag_slider.maximum() - center_after
+            == center_after - widget.diag_slider.minimum()
+        )
     finally:
         widget.close()
