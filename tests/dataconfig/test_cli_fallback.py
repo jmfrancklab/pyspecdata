@@ -43,9 +43,9 @@ def test_genconfig_without_qt(monkeypatch, tmp_path):
         return module
 
     load_module('pyspecdata.datadir', 'datadir.py')
-    latexscripts = load_module('pyspecdata.latexscripts', 'latexscripts.py')
+    datadir = sys.modules['pyspecdata.datadir']
 
-    latexscripts.genconfig()
+    datadir.genconfig()
 
     hide_start = "_" if platform.platform().startswith("Windows") else "."
     config_path = home_dir / f"{hide_start}pyspecdata"

@@ -135,6 +135,12 @@ def test_genconfig_with_qt(monkeypatch, tmp_path):
         def count(self):
             return len(self.items)
 
+        def indexOf(self, widget):
+            try:
+                return self.items.index(widget)
+            except ValueError:
+                return -1
+
     class StubVBoxLayout(StubLayout):
         pass
 
@@ -161,18 +167,27 @@ def test_genconfig_with_qt(monkeypatch, tmp_path):
             super().__init__(*args, **kwargs)
             self._text = ''
             self.enabled = True
+            self.cursor_position = 0
 
         def setText(self, value):
             self._text = str(value)
+            self.cursor_position = len(self._text)
 
         def text(self):
             return self._text
 
         def clear(self):
             self._text = ''
+            self.cursor_position = 0
 
         def setEnabled(self, state):
             self.enabled = state
+
+        def setCursorPosition(self, position):
+            self.cursor_position = position
+
+        def cursorPosition(self):
+            return self.cursor_position
 
     class StubLabel(StubWidget):
         def __init__(self, text='', *args, **kwargs):
@@ -268,16 +283,31 @@ def test_genconfig_with_qt(monkeypatch, tmp_path):
         spec.loader.exec_module(module)
         return module
 
-    load_module('pyspecdata.datadir', 'datadir.py')
-    latexscripts = load_module('pyspecdata.latexscripts', 'latexscripts.py')
+    datadir = load_module('pyspecdata.datadir', 'datadir.py')
+    load_module('pyspecdata.latexscripts', 'latexscripts.py')
 
     def fake_exec(self):
         initial_names = [row['name_edit'].text() for row in self.file_rows if row['name_edit'].text()]
         assert initial_names == sorted(initial_names)
         assert hasattr(self, 'data_directory_label')
         assert self.data_directory_label._text == 'Main Data Directory:'
+        assert self.data_directory_edit.cursor_position == 0
         assert self.files_add_button.text == 'Add Entry'
         assert self.variables_add_button.text == 'Add Entry'
+        header_widget = self.files_layout.items[0]
+        header_labels = [
+            widget._text
+            for widget in header_widget.layout.items
+            if hasattr(widget, '_text')
+        ]
+        assert header_labels == ['exp_type', 'local directory', 'rclone', 'rclone directory']
+        for row in self.file_rows:
+            if row['name_edit'].text():
+                assert row['name_edit'].cursor_position == 0
+            if row['path_edit'].text():
+                assert row['path_edit'].cursor_position == 0
+            if row['remote_path_edit'].text():
+                assert row['remote_path_edit'].cursor_position == 0
         for row in self.file_rows:
             if row['name_edit'].text() == 'ag_processed_data':
                 index = row['remote_combo'].findText('cornell_box')
@@ -305,7 +335,7 @@ def test_genconfig_with_qt(monkeypatch, tmp_path):
 
     monkeypatch.setattr(stub_widgets.QDialog, 'exec_', fake_exec)
 
-    latexscripts.genconfig()
+    datadir.genconfig()
 
     config = configparser.ConfigParser()
     config.read(config_path, encoding='utf-8')
