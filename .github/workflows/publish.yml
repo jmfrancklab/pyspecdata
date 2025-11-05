@@ -134,22 +134,18 @@ jobs:
         env:
           NEW_VERSION: ${{ needs.test.outputs.new_version }}
 
-      - name: Configure git user
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-
       - name: Commit version bump
         env:
           NEW_VERSION: ${{ needs.test.outputs.new_version }}
         run: |
-          git pull --ff-only origin master
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
           git add pyproject.toml
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
           fi
-          git commit -m "Bump version to ${NEW_VERSION}"
+          git commit -m "Bump version to ${NEW_VERSION} [skip ci]"
 
       - name: Push version bump
         # Instructions: Create a GitHub Personal Access Token (PAT) for admin pushes (fine-grained)
