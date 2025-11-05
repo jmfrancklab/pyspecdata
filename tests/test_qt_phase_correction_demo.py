@@ -27,6 +27,7 @@ qt_demo = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(qt_demo)
 PhaseCorrectionWidget = qt_demo.PhaseCorrectionWidget
 apply_phase_corrections = qt_demo.apply_phase_corrections
+DEFAULT_SEARCH = qt_demo.DEFAULT_SEARCH
 
 
 def generate_fake_dataset():
@@ -69,9 +70,12 @@ def test_apply_phase_corrections_returns_expected_shapes():
 def test_widget_updates_with_fake_data(qapp):
     """Changing slider positions should update the labels without errors."""
     dataset = generate_fake_dataset()
-    widget = PhaseCorrectionWidget(base_dataset=dataset)
+    widget = PhaseCorrectionWidget(
+        base_dataset=dataset, exp_types=["TestExp"], search_string=DEFAULT_SEARCH
+    )
     try:
         initial_time_image = np.array(widget.time_image.get_array())
+        initial_ft_image = np.array(widget.hermitian_ft_image.get_array())
         start_axes_count = len(widget.figure.axes)
         widget.diag_slider.setValue(25)
         widget.anti_slider.setValue(-30)
@@ -82,11 +86,14 @@ def test_widget_updates_with_fake_data(qapp):
         assert widget.diag_label.text() == "0.25 μs"
         assert widget.anti_label.text() == "-0.30 μs"
         updated_time_image = np.array(widget.time_image.get_array())
+        updated_ft_image = np.array(widget.hermitian_ft_image.get_array())
         assert not np.array_equal(initial_time_image, updated_time_image)
+        assert not np.array_equal(initial_ft_image, updated_ft_image)
         assert len(widget.figure.axes) == start_axes_count
         assert widget.ax_time.images
         assert widget.ax_scp.images
         assert widget.ax_scm.images
+        assert widget.ax_hermitian_ft.images
     finally:
         widget.close()
 
@@ -94,7 +101,9 @@ def test_widget_updates_with_fake_data(qapp):
 def test_sensitivity_slider_adjusts_phase_ranges(qapp):
     """The sensitivity slider should expand and contract the phase ranges."""
     dataset = generate_fake_dataset()
-    widget = PhaseCorrectionWidget(base_dataset=dataset)
+    widget = PhaseCorrectionWidget(
+        base_dataset=dataset, exp_types=["TestExp"], search_string=DEFAULT_SEARCH
+    )
     try:
         center_before = widget.diag_slider.value()
         range_before = widget.diag_slider.maximum() - widget.diag_slider.minimum()
@@ -109,5 +118,27 @@ def test_sensitivity_slider_adjusts_phase_ranges(qapp):
             widget.diag_slider.maximum() - center_after
             == center_after - widget.diag_slider.minimum()
         )
+    finally:
+        widget.close()
+
+
+def test_truncation_entries_slice_dataset(qapp):
+    """Changing the truncation fields should shorten the processed dataset."""
+    dataset = generate_fake_dataset()
+    widget = PhaseCorrectionWidget(
+        base_dataset=dataset, exp_types=["TestExp"], search_string=DEFAULT_SEARCH
+    )
+    try:
+        widget.t1_entry.setText("100")
+        widget.t2_entry.setText("150")
+        widget.t1_entry.editingFinished.emit()
+        widget.t2_entry.editingFinished.emit()
+        qapp.processEvents()
+        assert widget.base_dataset.shape["t1"] == 100
+        assert widget.base_dataset.shape["t2"] == 150
+        widget.diag_slider.sliderReleased.emit()
+        qapp.processEvents()
+        assert widget.last_time_domain.shape["t1"] >= 100
+        assert widget.last_time_domain.shape["t2"] >= 150
     finally:
         widget.close()
