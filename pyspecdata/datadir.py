@@ -1261,23 +1261,15 @@ def rclone_search(fname, exp_type, dirname):
         f"remote location previously stored {remotelocation} for"
         f"{exp_type} going to be put in {dirname}"
     )
-    if not fname.startswith("*"):
-        fname = "*" + fname
-    if fname.endswith(r"\b"):
-        fname = fname[:-2]
-    elif not fname.endswith("*"):
-        fname = fname + "*"
-    cmd = strm(
-        "rclone copy -v --include '%s' %s %s"
-        % (
-            fname,
-            str(remotelocation),
-            # dirname below needs to be replaced with path relative to current
-            # directory
-            os.path.normpath(os.path.join(dirname)).replace("\\", "\\\\"),
-        )
+    # the include filter uses rclone's regex mode so that anchors in the
+    # original search pattern continue to match exactly what the caller asked
+    destination_path = os.path.normpath(os.path.join(dirname)).replace(
+        "\\", "\\\\"
     )
-    cmd = cmd.replace("'", '"')
+    cmd = (
+        f'rclone copy -v --include "{{{{{fname}}}}}" '
+        f"{str(remotelocation)} {destination_path}"
+    )
     logger.info(f"I'm about to run\n{cmd}")
     os.system(cmd)
     logger.info("... done")
