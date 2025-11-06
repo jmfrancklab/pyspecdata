@@ -67,7 +67,7 @@ History/Roadmap
       preprint.
 0.9.5.5
     - Implement a reader for Cary (Varian) UV-Vis files with examples.
-**0.9.8.0 current version**
+0.9.8.0
     - upgraded to numpy 2.0
     - stable ILT build w/ full implementation of Venkataramanan ILT
       regularization.
@@ -75,6 +75,9 @@ History/Roadmap
       - used to store instrumental constants
       - used in file searching mechanism
     - auto-deployment using github actions
+**0.9.45.3**
+    - added a GUI that handles the pyspecdata configuration (file locations, etc.)
+    - 
 
 Future Plans
 ^^^^^^^^^^^^
