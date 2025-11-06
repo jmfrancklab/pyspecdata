@@ -121,7 +121,13 @@ We believe this is a useful feature.
 Unfortunately,
 while the instructions below work for most cases,
 not everyone's system is set up equally well for Fortran compilation.
-If you experience difficulties, please don't hesitate to reach out to us at jmf356 [at] cornell.edu;
+If you experience difficulties,
+and are interested in messing with the code,
+please don't hesitate to reach out to us at jmf356 [at] cornell.edu.
+We're always happy to test the code for new applications!
+**Fortunately** if you just want to *use* the library, not *develop/tweak* it,
+`pip install pyspecdata` should now satisfy your needs (*i.e.* you don't need the development install).
+
 we would be happy for the opportunity to test distribution on new platforms!
 In all situations, note that this is a development library that works very well
 in our hands -- we are happy to hear from you and work with you to try to
