@@ -4,9 +4,13 @@ even though the location of the raw spectral data might change.
 This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file.
 """
 
-import os, sys, csv
+import os
+import sys
+import csv
 import configparser
 import platform
+import importlib
+import subprocess
 from difflib import get_close_matches
 from .general_functions import process_kwargs, strm
 import logging
@@ -17,6 +21,16 @@ from pathlib import Path, PureWindowsPath
 
 logger = logging.getLogger("pyspecdata.datadir")
 unknown_exp_type_name = "XXX--unknown--XXX"
+
+
+def sort_config_sections(config_parser):
+    """Alphabetize every section in the configuration parser."""
+    for section in list(config_parser.sections()):
+        items = sorted(config_parser.items(section))
+        config_parser.remove_section(section)
+        config_parser.add_section(section)
+        for key, value in items:
+            config_parser.set(section, key, value)
 
 
 class MyConfig(object):
@@ -69,9 +83,11 @@ class MyConfig(object):
                     self.config_location,
                     "so I'm creating one",
                 )
+            sort_config_sections(self._config_parser)
         if not self._config_parser.has_section(this_section):
             self._config_parser.add_section(this_section)
         self._config_parser.set(this_section, this_key, this_value)
+        sort_config_sections(self._config_parser)
         return
 
     def __exit__(self, exception_type, exception_value, traceback):
@@ -79,8 +95,7 @@ class MyConfig(object):
             # {{{ reset to standard figures
             self.set_setting("mode", "figures", "standard")
             # }}}
-            with open(self.config_location, "w") as fp:
-                self._config_parser.write(fp)
+            self.write_sorted_config(self._config_parser)
         return
 
     def get_setting(
@@ -160,6 +175,7 @@ class MyConfig(object):
                         self.config_location,
                         "so I'm creating one",
                     )
+                sort_config_sections(self._config_parser)
             if self._config_parser.has_section(section):
                 try:
                     retval = self._config_parser.get(section, this_key)
@@ -192,6 +208,7 @@ class MyConfig(object):
                 if type(retval) in [int, float]:
                     retval = str(retval)
                 self._config_parser.set(section, this_key, retval)
+                sort_config_sections(self._config_parser)
             if environ is not None:
                 os.environ[environ] = retval
             logger.debug(
@@ -205,8 +222,409 @@ class MyConfig(object):
         self.config_vars[section][this_key] = retval
         return retval
 
+    def write_sorted_config(self, config_parser):
+        """Persist a configuration parser after alphabetizing its sections."""
+        sort_config_sections(config_parser)
+        self._config_parser = config_parser
+        with open(self.config_location, "w", encoding="utf-8") as fp:
+            self._config_parser.write(fp)
+        return
+
 
 pyspec_config = MyConfig()
+
+
+def genconfig():
+    """Create or edit the pyspecdata configuration file."""
+    pyspec_config._config_parser = None
+    filename = pyspec_config.config_location
+    qt_widgets = None
+    for module_name in ["PyQt5", "PySide2", "PyQt6", "PySide6"]:
+        try:
+            qt_widgets = importlib.import_module(module_name + ".QtWidgets")
+            break
+        except ImportError:
+            qt_widgets = None
+            continue
+    if qt_widgets is None:
+        with open(filename, "w", encoding="utf-8") as fp:
+            fp.write("[General]\n")
+            fp.write(
+                "# replace the following with your default data location (this"
+                " is just a suggestion)\n"
+            )
+            possible_data = [
+                entry
+                for entry in next(os.walk(os.path.expanduser("~")))[1]
+                if "data" in entry.lower() and "app" not in entry.lower()
+            ]
+            fp.write("data_directory = ")
+            if len(possible_data) > 0:
+                fp.write(
+                    os.path.join(os.path.expanduser("~"), possible_data[0])
+                    + "\n"
+                )
+            else:
+                fp.write(os.path.join(os.path.expanduser("~"), "???") + "\n")
+            fp.write("\n")
+            fp.write("[ExpTypes]\n")
+            fp.write(
+                "# in this section, you can place specific subdirectories (for"
+                " faster access, or if they live elsewhere\n"
+            )
+        print("now edit " + filename)
+        return
+
+    config_parser = configparser.ConfigParser()
+    if os.path.exists(filename):
+        config_parser.read(filename, encoding="utf-8")
+    for section_name in ["General", "ExpTypes", "RcloneRemotes"]:
+        if not config_parser.has_section(section_name):
+            config_parser.add_section(section_name)
+    sort_config_sections(config_parser)
+    pyspec_config._config_parser = config_parser
+
+    try:
+        remote_output = subprocess.check_output(
+            ["rclone", "listremotes"], stderr=subprocess.STDOUT
+        )
+        remote_candidates = [
+            entry.strip()
+            for entry in remote_output.decode("utf-8").splitlines()
+            if entry.strip() != ""
+        ]
+        rclone_remotes = [
+            entry[:-1] if entry.endswith(":") else entry
+            for entry in remote_candidates
+        ]
+    except Exception:
+        rclone_remotes = []
+
+    class ConfigDialog(qt_widgets.QDialog):
+        def __init__(self, this_config, config_path, remote_names):
+            qt_widgets.QDialog.__init__(self)
+            self.setWindowTitle("pyspecdata data configuration")
+            self.resize(900, 600)
+            self.config_parser = this_config
+            self.config_path = config_path
+            self.remote_names = remote_names
+            self.file_rows = []
+            self.general_entries = []
+            self.build_interface()
+
+        def build_interface(self):
+            "construct the entire dialog"
+            main_layout = qt_widgets.QVBoxLayout(self)
+            self.tab_widget = qt_widgets.QTabWidget()
+            main_layout.addWidget(self.tab_widget)
+            self.create_files_tab()
+            self.create_variables_tab()
+            button_layout = qt_widgets.QHBoxLayout()
+            button_layout.addStretch(1)
+            self.save_button = qt_widgets.QPushButton("Save")
+            self.cancel_button = qt_widgets.QPushButton("Cancel")
+            button_layout.addWidget(self.save_button)
+            button_layout.addWidget(self.cancel_button)
+            main_layout.addLayout(button_layout)
+            self.save_button.clicked.connect(self.handle_save)
+            self.cancel_button.clicked.connect(self.reject)
+
+        def create_files_tab(self):
+            "create the tab that holds data directories and experiment types"
+            files_tab = qt_widgets.QWidget()
+            files_layout = qt_widgets.QVBoxLayout(files_tab)
+            path_layout = qt_widgets.QHBoxLayout()
+            path_label = qt_widgets.QLabel("Main Data Directory:")
+            path_layout.addWidget(path_label)
+            self.data_directory_label = path_label
+            self.data_directory_edit = qt_widgets.QLineEdit()
+            if self.config_parser.has_option("General", "data_directory"):
+                self.data_directory_edit.setText(
+                    self.config_parser["General"]["data_directory"]
+                )
+            else:
+                possible_data = [
+                    entry
+                    for entry in next(os.walk(os.path.expanduser("~")))[1]
+                    if "data" in entry.lower() and "app" not in entry.lower()
+                ]
+                if len(possible_data) > 0:
+                    self.data_directory_edit.setText(
+                        os.path.join(os.path.expanduser("~"), possible_data[0])
+                    )
+                else:
+                    self.data_directory_edit.setText(
+                        os.path.join(os.path.expanduser("~"), "???")
+                    )
+            self.data_directory_edit.setCursorPosition(0)
+            path_layout.addWidget(self.data_directory_edit)
+            browse_button = qt_widgets.QToolButton()
+            browse_button.setIcon(
+                self.style().standardIcon(qt_widgets.QStyle.SP_DirOpenIcon)
+            )
+            path_layout.addWidget(browse_button)
+            browse_button.clicked.connect(self.select_data_directory)
+            files_layout.addLayout(path_layout)
+
+            self.files_scroll = qt_widgets.QScrollArea()
+            self.files_scroll.setWidgetResizable(True)
+            self.files_container = qt_widgets.QWidget()
+            self.files_layout = qt_widgets.QVBoxLayout(self.files_container)
+            self.files_layout.setContentsMargins(0, 0, 0, 0)
+            self.files_layout.setSpacing(6)
+
+            header_widget = qt_widgets.QWidget()
+            header_layout = qt_widgets.QHBoxLayout(header_widget)
+            header_layout.setContentsMargins(0, 0, 0, 0)
+            header_layout.setSpacing(6)
+            for label_text in [
+                "exp_type",
+                "local directory",
+                "rclone",
+                "rclone directory",
+            ]:
+                header_layout.addWidget(qt_widgets.QLabel(label_text))
+            self.files_layout.addWidget(header_widget)
+
+            existing_types = []
+            exp_keys = set()
+            for key, value in self.config_parser.items("ExpTypes"):
+                existing_types.append((key, value))
+                exp_keys.add(key)
+            for key, value in self.config_parser.items("RcloneRemotes"):
+                if key not in exp_keys:
+                    existing_types.append((key, ""))
+                    exp_keys.add(key)
+            existing_types.sort(key=lambda item: item[0])
+            if len(existing_types) == 0:
+                self.add_file_row("", "", "None", "")
+            else:
+                for key, value in existing_types:
+                    if self.config_parser.has_option("RcloneRemotes", key):
+                        remote_name = self.config_parser["RcloneRemotes"][key]
+                        remote_path = ""
+                        if ":" in remote_name:
+                            remote_name, remote_path = remote_name.split(
+                                ":", 1
+                            )
+                    else:
+                        remote_name = "None"
+                        remote_path = ""
+                    self.add_file_row(key, value, remote_name, remote_path)
+            spacer = qt_widgets.QWidget()
+            spacer.setSizePolicy(
+                qt_widgets.QSizePolicy.Minimum,
+                qt_widgets.QSizePolicy.Expanding,
+            )
+            self.files_spacer = spacer
+            self.files_layout.addWidget(spacer)
+            self.files_scroll.setWidget(self.files_container)
+            files_layout.addWidget(self.files_scroll)
+            self.files_add_button = qt_widgets.QPushButton("Add Entry")
+            files_layout.addWidget(self.files_add_button)
+            self.files_add_button.clicked.connect(
+                lambda: self.add_file_row("", "", "None", "")
+            )
+            self.tab_widget.addTab(files_tab, "Files")
+
+        def create_variables_tab(self):
+            "create the tab that holds the general configuration variables"
+            variables_tab = qt_widgets.QWidget()
+            variables_layout = qt_widgets.QVBoxLayout(variables_tab)
+            self.variables_scroll = qt_widgets.QScrollArea()
+            self.variables_scroll.setWidgetResizable(True)
+            self.variables_container = qt_widgets.QWidget()
+            self.variables_layout = qt_widgets.QVBoxLayout(
+                self.variables_container
+            )
+            self.variables_layout.setContentsMargins(0, 0, 0, 0)
+            self.variables_layout.setSpacing(6)
+            for key, value in self.config_parser.items("General"):
+                if key == "data_directory":
+                    continue
+                self.add_general_row(key, value)
+            self.variables_scroll.setWidget(self.variables_container)
+            variables_layout.addWidget(self.variables_scroll)
+            self.variables_add_button = qt_widgets.QPushButton("Add Entry")
+            variables_layout.addWidget(self.variables_add_button)
+            self.variables_add_button.clicked.connect(
+                lambda: self.add_general_row("", "")
+            )
+            self.tab_widget.addTab(variables_tab, "Variables")
+
+        def add_general_row(self, key, value):
+            "add a single general variable row"
+            row_widget = qt_widgets.QWidget()
+            row_layout = qt_widgets.QHBoxLayout(row_widget)
+            row_layout.setContentsMargins(0, 0, 0, 0)
+            key_edit = qt_widgets.QLineEdit()
+            key_edit.setText(key)
+            key_edit.setCursorPosition(0)
+            value_edit = qt_widgets.QLineEdit()
+            value_edit.setText(value)
+            value_edit.setCursorPosition(0)
+            row_layout.addWidget(key_edit)
+            row_layout.addWidget(value_edit)
+            self.variables_layout.addWidget(row_widget)
+            self.general_entries.append(
+                {"key_edit": key_edit, "value_edit": value_edit}
+            )
+
+        def add_file_row(self, name, path, remote_name, remote_path):
+            "add a single experiment type row to the scrolling list"
+            row_widget = qt_widgets.QWidget()
+            row_layout = qt_widgets.QHBoxLayout(row_widget)
+            row_layout.setContentsMargins(0, 0, 0, 0)
+            name_edit = qt_widgets.QLineEdit()
+            name_edit.setText(name)
+            name_edit.setCursorPosition(0)
+            path_edit = qt_widgets.QLineEdit()
+            path_edit.setText(path)
+            path_edit.setCursorPosition(0)
+            path_container = qt_widgets.QWidget()
+            path_container_layout = qt_widgets.QHBoxLayout(path_container)
+            path_container_layout.setContentsMargins(0, 0, 0, 0)
+            path_container_layout.setSpacing(3)
+            browse_button = qt_widgets.QToolButton()
+            browse_button.setIcon(
+                self.style().standardIcon(qt_widgets.QStyle.SP_DirOpenIcon)
+            )
+            path_container_layout.addWidget(path_edit)
+            path_container_layout.addWidget(browse_button)
+            remote_combo = qt_widgets.QComboBox()
+            combo_entries = ["None"]
+            for remote_entry in self.remote_names:
+                if remote_entry not in combo_entries:
+                    combo_entries.append(remote_entry)
+            if remote_name not in combo_entries and remote_name not in [
+                None,
+                "",
+            ]:
+                combo_entries.append(remote_name)
+            for entry in combo_entries:
+                remote_combo.addItem(entry)
+            if remote_name in combo_entries:
+                remote_combo.setCurrentIndex(combo_entries.index(remote_name))
+            remote_path_edit = qt_widgets.QLineEdit()
+            remote_path_edit.setText(remote_path)
+            remote_path_edit.setCursorPosition(0)
+            row_layout.addWidget(name_edit)
+            row_layout.addWidget(path_container)
+            row_layout.addWidget(remote_combo)
+            row_layout.addWidget(remote_path_edit)
+            insert_index = self.files_layout.count()
+            if hasattr(self, "files_spacer"):
+                spacer_index = self.files_layout.indexOf(self.files_spacer)
+                if spacer_index != -1:
+                    insert_index = spacer_index
+            if insert_index < 1:
+                insert_index = 1
+            self.files_layout.insertWidget(insert_index, row_widget)
+            self.file_rows.append(
+                {
+                    "name_edit": name_edit,
+                    "path_edit": path_edit,
+                    "browse_button": browse_button,
+                    "remote_combo": remote_combo,
+                    "remote_path_edit": remote_path_edit,
+                }
+            )
+            browse_button.clicked.connect(lambda: self.select_path(path_edit))
+            remote_combo.currentIndexChanged.connect(
+                lambda _: self.update_remote_state(
+                    remote_combo, remote_path_edit
+                )
+            )
+            self.update_remote_state(remote_combo, remote_path_edit)
+
+        def update_remote_state(self, combo, remote_edit):
+            "enable or disable the remote path field based on the combo box"
+            if combo.currentText() == "None":
+                remote_edit.setEnabled(False)
+                remote_edit.setText("")
+                remote_edit.setCursorPosition(0)
+            else:
+                remote_edit.setEnabled(True)
+                remote_edit.setCursorPosition(0)
+
+        def select_data_directory(self):
+            "browse for the base data directory"
+            chosen = qt_widgets.QFileDialog.getExistingDirectory(
+                self, "Select data directory", self.data_directory_edit.text()
+            )
+            if chosen:
+                self.data_directory_edit.setText(chosen)
+                self.data_directory_edit.setCursorPosition(0)
+
+        def select_path(self, target_edit):
+            "browse for an experiment directory"
+            chosen = qt_widgets.QFileDialog.getExistingDirectory(
+                self, "Select directory", target_edit.text()
+            )
+            if chosen:
+                target_edit.setText(chosen)
+                target_edit.setCursorPosition(0)
+
+        def handle_save(self):
+            """collect the contents of the dialog and write the configuration
+            file"""
+            new_config = configparser.ConfigParser()
+            new_config.add_section("General")
+            new_config.set(
+                "General",
+                "data_directory",
+                self.data_directory_edit.text().strip(),
+            )
+            for entry in self.general_entries:
+                key_text = entry["key_edit"].text().strip()
+                if key_text == "" or key_text == "data_directory":
+                    continue
+                new_config.set(
+                    "General", key_text, entry["value_edit"].text().strip()
+                )
+            new_config.add_section("ExpTypes")
+            remote_values = {}
+            exp_entries = []
+            for row in self.file_rows:
+                name_text = row["name_edit"].text().strip()
+                path_text = row["path_edit"].text().strip()
+                if name_text == "" or path_text == "":
+                    continue
+                combo_value = row["remote_combo"].currentText()
+                remote_path_text = row["remote_path_edit"].text().strip()
+                exp_entries.append(
+                    (name_text, path_text, combo_value, remote_path_text)
+                )
+            exp_entries.sort(key=lambda item: item[0])
+            for (
+                name_text,
+                path_text,
+                combo_value,
+                remote_path_text,
+            ) in exp_entries:
+                new_config.set("ExpTypes", name_text, path_text)
+                if combo_value != "None" and remote_path_text != "":
+                    remote_values[name_text] = (
+                        combo_value + ":" + remote_path_text
+                    )
+            new_config.add_section("RcloneRemotes")
+            for key in sorted(remote_values.keys()):
+                new_config.set("RcloneRemotes", key, remote_values[key])
+            for section in self.config_parser.sections():
+                if section in ["General", "ExpTypes", "RcloneRemotes"]:
+                    continue
+                if not new_config.has_section(section):
+                    new_config.add_section(section)
+                for key, value in self.config_parser.items(section):
+                    new_config.set(section, key, value)
+            pyspec_config.write_sorted_config(new_config)
+            self.accept()
+
+    existing_app = qt_widgets.QApplication.instance()
+    if existing_app is None:
+        existing_app = qt_widgets.QApplication(sys.argv)
+    dialog = ConfigDialog(config_parser, filename, rclone_remotes)
+    dialog.exec_()
 
 
 def get_notebook_dir(*args):
@@ -714,8 +1132,7 @@ class cached_searcher(object):
             )
             raise ValueError(
                 "I can't find a remote directory matching "
-                f"{exp_type_path.as_posix()}{location_hint}."
-                + suggestion_text
+                f"{exp_type_path.as_posix()}{location_hint}." + suggestion_text
             )
 
         logger.debug(
