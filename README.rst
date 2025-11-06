@@ -97,13 +97,30 @@ A public-use version 1.0.0, to be accompanied by useful demonstrations, is plann
 Installation
 ============
 
+We have worked out deployment using github actions.
+This means that you can now just do ``pip install pyspecdata``!
+
+
+Some notes:
+
+- Most likely, you will want to make sure you have pyqt installed so you
+  can run ``pyspecdata_dataconfig`` (a GUI as of Nov 25).  This controls
+  the file-finding mechanism in pyspecdata, which allows you to run the
+  same code on different computers, where you've put the data in different
+  locations.
+- We require numpy 2.0.  This might mean you will need to upgrade ALL
+  packages that depend on numpy, so that they can support numpy 2.0.
+
+Notes for Development install
+-----------------------------
+
 **Important note:**
 the package ships Fortran-based extensions that are used to provide fast ILT methods.
 We believe this is a useful feature.
 Unfortunately,
 while the instructions below work for most cases,
 not everyone's system is set up equally well for Fortran compilation.
-If you experience difficulties, please don't hesitate to reach out to us at jmfranck [at] syr.edu;
+If you experience difficulties, please don't hesitate to reach out to us at jmf356 [at] cornell.edu;
 we would be happy for the opportunity to test distribution on new platforms!
 In all situations, note that this is a development library that works very well
 in our hands -- we are happy to hear from you and work with you to try to
