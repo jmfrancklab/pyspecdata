@@ -13,12 +13,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
-      - name: Install system dependencies
-        run: |
-          # Install the HDF5 headers required to build pytables during pip install
-          sudo apt-get update
-          sudo apt-get install -y libhdf5-dev
+          python-version: '3.12'
       - name: Install package
         run: |
           python -m pip install --upgrade pip

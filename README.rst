@@ -113,7 +113,10 @@ On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edit
 just run:
 
 *   ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython`` 
-*   ``conda install -y m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
+*   ``conda install -y -c conda-forge gcc_win-64 gfortran_win-64 binutils_win-64`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
+
+    *   If you've installed before, you *might* need to first do ``conda remove -y m2w64-toolchain`` (this is an older toolchain that breaks with numpy 2.0)
+
 *   ``conda install -y meson meson-python ninja`` (the new build system to replace distutils)
 *   *Note:* ``pip --version`` must be greater than 21.3 (this is what you need for an editable install using meson).
 
@@ -135,7 +138,7 @@ On **Ubuntu**, we've tested:
 -   If you are not using miniconda or something like that, then do: ``sudo apt install -y python3 python3-venv python3-dev gfortran libhdf5-dev meson ninja-build``
     -   This allows you to: ``python3 -m venv ~/.venv`` to create and environment and then switch to it with ``source ~/.venv/bin/activate`` (b/c more recent versions of python really don't like to distribute packages over apt, and prefer to distribute them over pip)
 -   If you are using miniconda, etc, we'll rely on that, but you still need the modern build tools: ``sudo apt install -y gfortran libhdf5-dev meson ninja-build``
-_   Finally, in either case, make sure you have recent versions of all the packages we need: ``pip install 'numpy>=2.0' matplotlib sympy h5py tables scipy pint meson-python``
+-   Finally, in either case, make sure you have recent versions of all the packages we need: ``pip install 'numpy>=2.0' matplotlib sympy h5py tables scipy pint meson-python``
 
 On **MacOS**, if you want to install as a developer your python distribution needs to have a working Fortran compiler, since some of the modules use Fortran.
 We have tested ``conda install -c conda-forge fortran-compiler``, followed by
