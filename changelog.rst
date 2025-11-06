@@ -75,20 +75,21 @@ History/Roadmap
       - used to store instrumental constants
       - used in file searching mechanism
     - auto-deployment using github actions
-**0.9.45.3**
+**0.9.45.4**
+    - set up github deployment
     - added a GUI that handles the pyspecdata configuration (file locations, etc.)
-    - 
+    - set rclone to actually use regex
 
 Future Plans
 ^^^^^^^^^^^^
 
-0.9.9.0
+0.9.46
     - Get rid of pytables dependency, and use pyhdf along with
       setstate/getstate mechanism for HDF5 storage and retrieval.
 
       - Simplifies ability to deal with other file formats (mat, etc.)
 
-0.9.10.0
+0.9.47
     - Implement an ``nddata_placeholder`` class for quickly loading and
       searching through datasets in *e.g.* UV-Vis files or Bruker directories
       without actually loading all the data from each dataset.
