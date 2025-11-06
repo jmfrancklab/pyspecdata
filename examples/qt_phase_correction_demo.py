@@ -86,7 +86,6 @@ def load_base_dataset(exp_type, search_string):
     for axis in ["t1", "t2"]:
         d[axis] *= d.div_units(axis, "μs")
         d.set_units(axis, "μs")
-    d = d["t2":T2_RANGE]
     d["ph1", 1] *= 1j
     d.setaxis("ph1", np.r_[0, 0.5]).ft("ph1")
     d.ft(["t1", "t2"], shift=True)
