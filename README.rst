@@ -97,13 +97,37 @@ A public-use version 1.0.0, to be accompanied by useful demonstrations, is plann
 Installation
 ============
 
+We have worked out deployment using github actions.
+This means that you can now just do ``pip install pyspecdata``!
+
+
+Some notes:
+
+- Most likely, you will want to make sure you have pyqt installed so you
+  can run ``pyspecdata_dataconfig`` (a GUI as of Nov 25).  This controls
+  the file-finding mechanism in pyspecdata, which allows you to run the
+  same code on different computers, where you've put the data in different
+  locations.
+- We require numpy 2.0.  This might mean you will need to upgrade ALL
+  packages that depend on numpy, so that they can support numpy 2.0.
+  Or, if you enjoy putting off the inevitable, make a separate environment.
+
+Notes for Development install
+-----------------------------
+
 **Important note:**
 the package ships Fortran-based extensions that are used to provide fast ILT methods.
 We believe this is a useful feature.
 Unfortunately,
 while the instructions below work for most cases,
 not everyone's system is set up equally well for Fortran compilation.
-If you experience difficulties, please don't hesitate to reach out to us at jmfranck [at] syr.edu;
+If you experience difficulties,
+and are interested in messing with the code,
+please don't hesitate to reach out to us at jmf356 [at] cornell.edu.
+We're always happy to test the code for new applications!
+**Fortunately** if you just want to *use* the library, not *develop/tweak* it,
+`pip install pyspecdata` should now satisfy your needs (*i.e.* you don't need the development install).
+
 we would be happy for the opportunity to test distribution on new platforms!
 In all situations, note that this is a development library that works very well
 in our hands -- we are happy to hear from you and work with you to try to
@@ -112,8 +136,14 @@ broaden its applicability!
 On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
 just run:
 
+*   *Remember* that for new installs of anaconda, you need to turn off the python "execution alias" in windows to prevent windows from overriding all the importnat commands!  Also, all of below are tested in the "anaconda prompt" in admin mode.
 *   ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython`` 
-*   ``conda install -y m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
+*   ``conda install -y -c conda-forge gcc_win-64 gfortran_win-64 binutils_win-64``
+
+    *   If you've installed before, you *might* need to first do ``conda remove -y m2w64-toolchain`` (this is an older toolchain that breaks with numpy 2.0)
+    *   (the libpython and all the packages on this line are for building compiled extensions such as the ILT).
+    *   On an ASUS Vivobook, conda looks like it's **completely dead**, but it's not → just be patient and give it an hour.  (If you look online, you'll find plenty of info about how sloooooow conda is now, especially for conda forge, and can find some advice on using the mamba drivers to speed it up, though on a cheap new computer with windows 11 JMF has had very little luck.)
+
 *   ``conda install -y meson meson-python ninja`` (the new build system to replace distutils)
 *   *Note:* ``pip --version`` must be greater than 21.3 (this is what you need for an editable install using meson).
 
@@ -135,7 +165,7 @@ On **Ubuntu**, we've tested:
 -   If you are not using miniconda or something like that, then do: ``sudo apt install -y python3 python3-venv python3-dev gfortran libhdf5-dev meson ninja-build``
     -   This allows you to: ``python3 -m venv ~/.venv`` to create and environment and then switch to it with ``source ~/.venv/bin/activate`` (b/c more recent versions of python really don't like to distribute packages over apt, and prefer to distribute them over pip)
 -   If you are using miniconda, etc, we'll rely on that, but you still need the modern build tools: ``sudo apt install -y gfortran libhdf5-dev meson ninja-build``
-_   Finally, in either case, make sure you have recent versions of all the packages we need: ``pip install 'numpy>=2.0' matplotlib sympy h5py tables scipy pint meson-python``
+-   Finally, in either case, make sure you have recent versions of all the packages we need: ``pip install 'numpy>=2.0' matplotlib sympy h5py tables scipy pint meson-python``
 
 On **MacOS**, if you want to install as a developer your python distribution needs to have a working Fortran compiler, since some of the modules use Fortran.
 We have tested ``conda install -c conda-forge fortran-compiler``, followed by
@@ -220,6 +250,9 @@ to find your files.
 Setting up your _pyspecdata configuration file
 ----------------------------------------------
 
+**New 0.9.45 (Nov '25)**: as long as you have pyqt installed, `pyspecdata_dataconfig`
+will now open a GUI that helps manage all the following.
+
 Part of the pySpecData package is the datadir module, allowing the user to run the same code on 
 different machines - even thought the location of the raw spectral data might change. 
 This is controlled by the ``~/.pyspecdata`` (unix-like) or ``~/_pyspecdata`` (windows) config file,
@@ -255,22 +288,17 @@ cloud storage or pointing to the local directory your rclone adds files to.
 So when you call ``odnp_nmr_comp/odnp`` this will point
 to the actual location, ``/home/jmfranck/exp_data/NMR_comp/ODNP``
 
-Note that it's possible to point the different `exp_type` directly to shared drives,
+Note that it's possible to point the different `exp_type` directly to shared drives
+or to synced folders (google drive, onedrive, etc.),
 pySpecData also offers a (we think superior) method that downloads local copies
 of files on-demand using `rclone <https://rclone.org/>`_.
+The new GUI makes it easier to set up different rclone remotes (*e.g.*
+different cloud resources at different schools or shared by different people)
+for different experiment times.
+
 Obviously, you need to install rclone and add it to your path to do this (see next subsection).
 Rclone is an amazing tool that can be configured to talk to virtually any type of cloud storage
 (Google Drive accounts, OneDrive and SharePoint accounts, etc.)
-
-Inside the ``RcloneRemote`` section, each key/variable points to a properly configured remote that
-was set up with `rclone <https://rclone.org/>`_--
-e.g., ``jmf_teams`` here is a properly configured  remote that shows up
-in response to the shell command ``rclone config``.
-*Note:* as you require datasets from other folders you will need to make new folders locally to match
-for Rclone.
-You will receive error messages that guide you to do this, and you should follow them.
-For example, if you required a dataset from ``exp_data/francklab_esr/alex`` you
-will need to go into your local ``exp_data`` folder and add a new folder called ``francklab_esr/alex``
 
 Setting up Rclone
 -----------------
@@ -283,6 +311,22 @@ you through this.
 If you are at an academic institution, we highly recommend asking your IT
 department for a protocol for connecting rclone to your cloud storage of
 choice.
+
+As of Nov 0.9.45 (Nov 2025), the GUI presents all the rclone remotes in columns
+right next to your experiment types.
+Just pick an rclone remote from the drop-down and then give the directory on
+the remote in the text entry box to the right.
+
+But, to explain how this works in the config file:
+Inside the ``RcloneRemote`` section of your config, each key/variable points to a properly configured remote that
+was set up with `rclone <https://rclone.org/>`_--
+e.g., ``jmf_teams`` here is a properly configured  remote that shows up
+in response to the shell command ``rclone config``.
+*Note:* as you require datasets from other folders you will need to make new folders locally to match
+for Rclone.
+You will receive error messages that guide you to do this, and you should follow them.
+For example, if you required a dataset from ``exp_data/francklab_esr/alex`` you
+will need to go into your local ``exp_data`` folder and add a new folder called ``francklab_esr/alex``
 
 Notes on compilation of compiled extensions
 ===========================================
