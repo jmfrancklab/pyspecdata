@@ -110,6 +110,7 @@ Some notes:
   locations.
 - We require numpy 2.0.  This might mean you will need to upgrade ALL
   packages that depend on numpy, so that they can support numpy 2.0.
+  Or, if you enjoy putting off the inevitable, make a separate environment.
 
 Notes for Development install
 -----------------------------
@@ -134,8 +135,8 @@ just run:
 *   ``conda install -y -c conda-forge gcc_win-64 gfortran_win-64 binutils_win-64``
 
     *   If you've installed before, you *might* need to first do ``conda remove -y m2w64-toolchain`` (this is an older toolchain that breaks with numpy 2.0)
-    *   (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
-    *   On an ASUS Vivobook, conda looks like it's **completely dead** → just be patient and give it an hour.  (If you look online, you'll find plenty of info about how sloooooow conda is now, especially for conda forge, and can find some advice on using the mamba drivers to speed it up, though on a cheap new computer with windows 11 JMF has had very little luck.)
+    *   (the libpython and all the packages on this line are for building compiled extensions such as the ILT).
+    *   On an ASUS Vivobook, conda looks like it's **completely dead**, but it's not → just be patient and give it an hour.  (If you look online, you'll find plenty of info about how sloooooow conda is now, especially for conda forge, and can find some advice on using the mamba drivers to speed it up, though on a cheap new computer with windows 11 JMF has had very little luck.)
 
 *   ``conda install -y meson meson-python ninja`` (the new build system to replace distutils)
 *   *Note:* ``pip --version`` must be greater than 21.3 (this is what you need for an editable install using meson).
@@ -243,6 +244,9 @@ to find your files.
 Setting up your _pyspecdata configuration file
 ----------------------------------------------
 
+**New 0.9.45 (Nov '25)**: as long as you have pyqt installed, `pyspecdata_dataconfig`
+will now open a GUI that helps manage all the following.
+
 Part of the pySpecData package is the datadir module, allowing the user to run the same code on 
 different machines - even thought the location of the raw spectral data might change. 
 This is controlled by the ``~/.pyspecdata`` (unix-like) or ``~/_pyspecdata`` (windows) config file,
@@ -278,22 +282,17 @@ cloud storage or pointing to the local directory your rclone adds files to.
 So when you call ``odnp_nmr_comp/odnp`` this will point
 to the actual location, ``/home/jmfranck/exp_data/NMR_comp/ODNP``
 
-Note that it's possible to point the different `exp_type` directly to shared drives,
+Note that it's possible to point the different `exp_type` directly to shared drives
+or to synced folders (google drive, onedrive, etc.),
 pySpecData also offers a (we think superior) method that downloads local copies
 of files on-demand using `rclone <https://rclone.org/>`_.
+The new GUI makes it easier to set up different rclone remotes (*e.g.*
+different cloud resources at different schools or shared by different people)
+for different experiment times.
+
 Obviously, you need to install rclone and add it to your path to do this (see next subsection).
 Rclone is an amazing tool that can be configured to talk to virtually any type of cloud storage
 (Google Drive accounts, OneDrive and SharePoint accounts, etc.)
-
-Inside the ``RcloneRemote`` section, each key/variable points to a properly configured remote that
-was set up with `rclone <https://rclone.org/>`_--
-e.g., ``jmf_teams`` here is a properly configured  remote that shows up
-in response to the shell command ``rclone config``.
-*Note:* as you require datasets from other folders you will need to make new folders locally to match
-for Rclone.
-You will receive error messages that guide you to do this, and you should follow them.
-For example, if you required a dataset from ``exp_data/francklab_esr/alex`` you
-will need to go into your local ``exp_data`` folder and add a new folder called ``francklab_esr/alex``
 
 Setting up Rclone
 -----------------
@@ -306,6 +305,22 @@ you through this.
 If you are at an academic institution, we highly recommend asking your IT
 department for a protocol for connecting rclone to your cloud storage of
 choice.
+
+As of Nov 0.9.45 (Nov 2025), the GUI presents all the rclone remotes in columns
+right next to your experiment types.
+Just pick an rclone remote from the drop-down and then give the directory on
+the remote in the text entry box to the right.
+
+But, to explain how this works in the config file:
+Inside the ``RcloneRemote`` section of your config, each key/variable points to a properly configured remote that
+was set up with `rclone <https://rclone.org/>`_--
+e.g., ``jmf_teams`` here is a properly configured  remote that shows up
+in response to the shell command ``rclone config``.
+*Note:* as you require datasets from other folders you will need to make new folders locally to match
+for Rclone.
+You will receive error messages that guide you to do this, and you should follow them.
+For example, if you required a dataset from ``exp_data/francklab_esr/alex`` you
+will need to go into your local ``exp_data`` folder and add a new folder called ``francklab_esr/alex``
 
 Notes on compilation of compiled extensions
 ===========================================
