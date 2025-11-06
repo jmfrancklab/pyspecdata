@@ -5,17 +5,11 @@ import platform
 import subprocess
 import sys
 from pathlib import Path
+from conftest import load_module
 from types import ModuleType, SimpleNamespace
 
+
 import pytest
-
-
-ROOT_DIR = Path(__file__).resolve().parents[2]
-if str(ROOT_DIR) not in sys.path:
-    sys.path.insert(0, str(ROOT_DIR))
-
-if '_nnls' not in sys.modules:
-    sys.modules['_nnls'] = ModuleType('_nnls')
 
 
 def test_genconfig_with_qt(monkeypatch, tmp_path):
@@ -270,21 +264,8 @@ def test_genconfig_with_qt(monkeypatch, tmp_path):
 
     monkeypatch.setattr(importlib, 'import_module', fake_import_module)
 
-    package_dir = ROOT_DIR / "pyspecdata"
-    if 'pyspecdata' not in sys.modules or not hasattr(sys.modules['pyspecdata'], '__path__'):
-        pkg = ModuleType('pyspecdata')
-        pkg.__path__ = [str(package_dir)]
-        sys.modules['pyspecdata'] = pkg
-
-    def load_module(name, filename):
-        spec = importlib.util.spec_from_file_location(name, package_dir / filename)
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[name] = module
-        spec.loader.exec_module(module)
-        return module
-
-    datadir = load_module('pyspecdata.datadir', 'datadir.py')
-    load_module('pyspecdata.latexscripts', 'latexscripts.py')
+    datadir = load_module('datadir')
+    latexscripts = load_module('latexscripts')
 
     def fake_exec(self):
         initial_names = [row['name_edit'].text() for row in self.file_rows if row['name_edit'].text()]

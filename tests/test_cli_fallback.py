@@ -4,15 +4,7 @@ import platform
 import sys
 from pathlib import Path
 from types import ModuleType
-
-
-ROOT_DIR = Path(__file__).resolve().parents[2]
-if str(ROOT_DIR) not in sys.path:
-    sys.path.insert(0, str(ROOT_DIR))
-
-if '_nnls' not in sys.modules:
-    sys.modules['_nnls'] = ModuleType('_nnls')
-
+from conftest import load_module
 
 def test_genconfig_without_qt(monkeypatch, tmp_path):
     """Verify that the command falls back to the text file template when Qt is missing."""
@@ -29,21 +21,8 @@ def test_genconfig_without_qt(monkeypatch, tmp_path):
 
     monkeypatch.setattr(importlib, "import_module", fake_import_module)
 
-    package_dir = ROOT_DIR / "pyspecdata"
-    if 'pyspecdata' not in sys.modules or not hasattr(sys.modules['pyspecdata'], '__path__'):
-        pkg = ModuleType('pyspecdata')
-        pkg.__path__ = [str(package_dir)]
-        sys.modules['pyspecdata'] = pkg
-
-    def load_module(name, filename):
-        spec = importlib.util.spec_from_file_location(name, package_dir / filename)
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[name] = module
-        spec.loader.exec_module(module)
-        return module
-
-    load_module('pyspecdata.datadir', 'datadir.py')
-    datadir = sys.modules['pyspecdata.datadir']
+    datadir = load_module('datadir')
+    latexscripts = load_module('latexscripts')
 
     datadir.genconfig()
 
