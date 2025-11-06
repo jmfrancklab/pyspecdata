@@ -1,15 +1,10 @@
 import configparser
 import importlib
-import importlib.util
 import platform
 import subprocess
-import sys
 from pathlib import Path
 from conftest import load_module
-from types import ModuleType, SimpleNamespace
-
-
-import pytest
+from types import SimpleNamespace
 
 
 def test_genconfig_with_qt(monkeypatch, tmp_path):
@@ -19,14 +14,21 @@ def test_genconfig_with_qt(monkeypatch, tmp_path):
     sample_path = Path(__file__).parent / "sample.pyspecdata"
     hide_start = "_" if platform.platform().startswith("Windows") else "."
     config_path = home_dir / f"{hide_start}pyspecdata"
-    config_path.write_text(sample_path.read_text(encoding="utf-8"), encoding="utf-8")
+    config_path.write_text(
+        sample_path.read_text(encoding="utf-8"), encoding="utf-8"
+    )
     monkeypatch.setenv("HOME", str(home_dir))
     monkeypatch.setenv("QT_QPA_PLATFORM", "offscreen")
 
     original_check_output = subprocess.check_output
 
     def fake_check_output(cmd, *args, **kwargs):
-        if isinstance(cmd, list) and len(cmd) >= 2 and cmd[0] == "rclone" and cmd[1] == "listremotes":
+        if (
+            isinstance(cmd, list)
+            and len(cmd) >= 2
+            and cmd[0] == "rclone"
+            and cmd[1] == "listremotes"
+        ):
             return "jmf_teams:\ncornell_box:\n".encode("utf-8")
         return original_check_output(cmd, *args, **kwargs)
 
@@ -159,7 +161,7 @@ def test_genconfig_with_qt(monkeypatch, tmp_path):
     class StubLineEdit(StubWidget):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self._text = ''
+            self._text = ""
             self.enabled = True
             self.cursor_position = 0
 
@@ -171,7 +173,7 @@ def test_genconfig_with_qt(monkeypatch, tmp_path):
             return self._text
 
         def clear(self):
-            self._text = ''
+            self._text = ""
             self.cursor_position = 0
 
         def setEnabled(self, state):
@@ -184,12 +186,12 @@ def test_genconfig_with_qt(monkeypatch, tmp_path):
             return self.cursor_position
 
     class StubLabel(StubWidget):
-        def __init__(self, text='', *args, **kwargs):
+        def __init__(self, text="", *args, **kwargs):
             super().__init__(*args, **kwargs)
             self._text = text
 
     class StubButton(StubWidget):
-        def __init__(self, text='', *args, **kwargs):
+        def __init__(self, text="", *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.text = text
             self.clicked = StubSignal()
@@ -219,7 +221,7 @@ def test_genconfig_with_qt(monkeypatch, tmp_path):
 
         def currentText(self):
             if not self.items:
-                return ''
+                return ""
             return self.items[self.index]
 
         def findText(self, text):
@@ -231,7 +233,7 @@ def test_genconfig_with_qt(monkeypatch, tmp_path):
     class StubFileDialog:
         @staticmethod
         def getExistingDirectory(*args, **kwargs):
-            return ''
+            return ""
 
     class StubSizePolicy:
         Minimum = 0
@@ -258,76 +260,92 @@ def test_genconfig_with_qt(monkeypatch, tmp_path):
     original_import_module = importlib.import_module
 
     def fake_import_module(name, package=None):
-        if name == 'PyQt5.QtWidgets':
+        if name == "PyQt5.QtWidgets":
             return stub_widgets
         return original_import_module(name, package)
 
-    monkeypatch.setattr(importlib, 'import_module', fake_import_module)
+    monkeypatch.setattr(importlib, "import_module", fake_import_module)
 
-    datadir = load_module('datadir')
-    latexscripts = load_module('latexscripts')
+    datadir = load_module("datadir")
 
     def fake_exec(self):
-        initial_names = [row['name_edit'].text() for row in self.file_rows if row['name_edit'].text()]
+        initial_names = [
+            row["name_edit"].text()
+            for row in self.file_rows
+            if row["name_edit"].text()
+        ]
         assert initial_names == sorted(initial_names)
-        assert hasattr(self, 'data_directory_label')
-        assert self.data_directory_label._text == 'Main Data Directory:'
+        assert hasattr(self, "data_directory_label")
+        assert self.data_directory_label._text == "Main Data Directory:"
         assert self.data_directory_edit.cursor_position == 0
-        assert self.files_add_button.text == 'Add Entry'
-        assert self.variables_add_button.text == 'Add Entry'
+        assert self.files_add_button.text == "Add Entry"
+        assert self.variables_add_button.text == "Add Entry"
         header_widget = self.files_layout.items[0]
         header_labels = [
             widget._text
             for widget in header_widget.layout.items
-            if hasattr(widget, '_text')
+            if hasattr(widget, "_text")
         ]
-        assert header_labels == ['exp_type', 'local directory', 'rclone', 'rclone directory']
+        assert header_labels == [
+            "exp_type",
+            "local directory",
+            "rclone",
+            "rclone directory",
+        ]
         for row in self.file_rows:
-            if row['name_edit'].text():
-                assert row['name_edit'].cursor_position == 0
-            if row['path_edit'].text():
-                assert row['path_edit'].cursor_position == 0
-            if row['remote_path_edit'].text():
-                assert row['remote_path_edit'].cursor_position == 0
+            if row["name_edit"].text():
+                assert row["name_edit"].cursor_position == 0
+            if row["path_edit"].text():
+                assert row["path_edit"].cursor_position == 0
+            if row["remote_path_edit"].text():
+                assert row["remote_path_edit"].cursor_position == 0
         for row in self.file_rows:
-            if row['name_edit'].text() == 'ag_processed_data':
-                index = row['remote_combo'].findText('cornell_box')
+            if row["name_edit"].text() == "ag_processed_data":
+                index = row["remote_combo"].findText("cornell_box")
                 assert index != -1
-                row['remote_combo'].setCurrentIndex(index)
-                row['remote_path_edit'].setText('exp_data/AG_processed_data')
-            if row['name_edit'].text() == 'francklab_esr/romana':
-                index = row['remote_combo'].findText('None')
+                row["remote_combo"].setCurrentIndex(index)
+                row["remote_path_edit"].setText("exp_data/AG_processed_data")
+            if row["name_edit"].text() == "francklab_esr/romana":
+                index = row["remote_combo"].findText("None")
                 assert index != -1
-                row['remote_combo'].setCurrentIndex(index)
+                row["remote_combo"].setCurrentIndex(index)
         self.files_add_button.click()
         new_row = self.file_rows[-1]
-        new_row['name_edit'].setText('new_entry')
-        new_row['path_edit'].setText('/tmp/new_entry')
+        new_row["name_edit"].setText("new_entry")
+        new_row["path_edit"].setText("/tmp/new_entry")
         for entry in self.general_entries:
-            if entry['key_edit'].text() == 'qesr conversion':
-                entry['value_edit'].setText('999')
+            if entry["key_edit"].text() == "qesr conversion":
+                entry["value_edit"].setText("999")
         self.variables_add_button.click()
         extra_general = self.general_entries[-1]
-        extra_general['key_edit'].setText('new_variable')
-        extra_general['value_edit'].setText('42')
-        self.data_directory_edit.setText('/tmp/data_dir')
+        extra_general["key_edit"].setText("new_variable")
+        extra_general["value_edit"].setText("42")
+        self.data_directory_edit.setText("/tmp/data_dir")
         self.save_button.click()
         return 1
 
-    monkeypatch.setattr(stub_widgets.QDialog, 'exec_', fake_exec)
+    monkeypatch.setattr(stub_widgets.QDialog, "exec_", fake_exec)
 
     datadir.genconfig()
 
     config = configparser.ConfigParser()
-    config.read(config_path, encoding='utf-8')
+    config.read(config_path, encoding="utf-8")
 
-    assert config.get('General', 'data_directory') == '/tmp/data_dir'
-    assert config.get('General', 'qesr conversion') == '999'
-    assert config.get('General', 'new_variable') == '42'
-    assert config.get('ExpTypes', 'new_entry') == '/tmp/new_entry'
-    assert config.get('RcloneRemotes', 'ag_processed_data') == 'cornell_box:exp_data/AG_processed_data'
-    assert not config.has_option('RcloneRemotes', 'francklab_esr/romana')
-    assert config.get('RcloneRemotes', '2deldor') == 'cornell_box:exp_data/2DELDOR'
-    assert config.has_section('zenodo'), 'Existing sections outside the editor must remain.'
-    exp_keys = [key for key, _ in config.items('ExpTypes')]
+    assert config.get("General", "data_directory") == "/tmp/data_dir"
+    assert config.get("General", "qesr conversion") == "999"
+    assert config.get("General", "new_variable") == "42"
+    assert config.get("ExpTypes", "new_entry") == "/tmp/new_entry"
+    assert (
+        config.get("RcloneRemotes", "ag_processed_data")
+        == "cornell_box:exp_data/AG_processed_data"
+    )
+    assert not config.has_option("RcloneRemotes", "francklab_esr/romana")
+    assert (
+        config.get("RcloneRemotes", "2deldor")
+        == "cornell_box:exp_data/2DELDOR"
+    )
+    assert config.has_section("zenodo"), (
+        "Existing sections outside the editor must remain."
+    )
+    exp_keys = [key for key, _ in config.items("ExpTypes")]
     assert exp_keys == sorted(exp_keys)

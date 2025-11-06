@@ -1,13 +1,11 @@
 import importlib
-import importlib.util
 import platform
-import sys
-from pathlib import Path
-from types import ModuleType
 from conftest import load_module
 
+
 def test_genconfig_without_qt(monkeypatch, tmp_path):
-    """Verify that the command falls back to the text file template when Qt is missing."""
+    """Verify that the command falls back to the text file template when Qt is
+    missing."""
     home_dir = tmp_path / "homedir"
     home_dir.mkdir()
     monkeypatch.setenv("HOME", str(home_dir))
@@ -21,14 +19,15 @@ def test_genconfig_without_qt(monkeypatch, tmp_path):
 
     monkeypatch.setattr(importlib, "import_module", fake_import_module)
 
-    datadir = load_module('datadir')
-    latexscripts = load_module('latexscripts')
+    datadir = load_module("datadir")
 
     datadir.genconfig()
 
     hide_start = "_" if platform.platform().startswith("Windows") else "."
     config_path = home_dir / f"{hide_start}pyspecdata"
-    assert config_path.exists(), "The fallback template should be written when Qt is missing."
+    assert config_path.exists(), (
+        "The fallback template should be written when Qt is missing."
+    )
     contents = config_path.read_text(encoding="utf-8")
     assert "[General]" in contents
     assert "data_directory =" in contents

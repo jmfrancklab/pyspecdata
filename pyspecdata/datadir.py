@@ -4,7 +4,9 @@ even though the location of the raw spectral data might change.
 This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file.
 """
 
-import os, sys, csv
+import os
+import sys
+import csv
 import configparser
 import platform
 import importlib
@@ -248,7 +250,8 @@ def genconfig():
         with open(filename, "w", encoding="utf-8") as fp:
             fp.write("[General]\n")
             fp.write(
-                "# replace the following with your default data location (this is just a suggestion)\n"
+                "# replace the following with your default data location (this"
+                " is just a suggestion)\n"
             )
             possible_data = [
                 entry
@@ -266,7 +269,8 @@ def genconfig():
             fp.write("\n")
             fp.write("[ExpTypes]\n")
             fp.write(
-                "# in this section, you can place specific subdirectories (for faster access, or if they live elsewhere\n"
+                "# in this section, you can place specific subdirectories (for"
+                " faster access, or if they live elsewhere\n"
             )
         print("now edit " + filename)
         return
@@ -290,7 +294,8 @@ def genconfig():
             if entry.strip() != ""
         ]
         rclone_remotes = [
-            entry[:-1] if entry.endswith(":") else entry for entry in remote_candidates
+            entry[:-1] if entry.endswith(":") else entry
+            for entry in remote_candidates
         ]
     except Exception:
         rclone_remotes = []
@@ -399,14 +404,17 @@ def genconfig():
                         remote_name = self.config_parser["RcloneRemotes"][key]
                         remote_path = ""
                         if ":" in remote_name:
-                            remote_name, remote_path = remote_name.split(":", 1)
+                            remote_name, remote_path = remote_name.split(
+                                ":", 1
+                            )
                     else:
                         remote_name = "None"
                         remote_path = ""
                     self.add_file_row(key, value, remote_name, remote_path)
             spacer = qt_widgets.QWidget()
             spacer.setSizePolicy(
-                qt_widgets.QSizePolicy.Minimum, qt_widgets.QSizePolicy.Expanding
+                qt_widgets.QSizePolicy.Minimum,
+                qt_widgets.QSizePolicy.Expanding,
             )
             self.files_spacer = spacer
             self.files_layout.addWidget(spacer)
@@ -426,7 +434,9 @@ def genconfig():
             self.variables_scroll = qt_widgets.QScrollArea()
             self.variables_scroll.setWidgetResizable(True)
             self.variables_container = qt_widgets.QWidget()
-            self.variables_layout = qt_widgets.QVBoxLayout(self.variables_container)
+            self.variables_layout = qt_widgets.QVBoxLayout(
+                self.variables_container
+            )
             self.variables_layout.setContentsMargins(0, 0, 0, 0)
             self.variables_layout.setSpacing(6)
             for key, value in self.config_parser.items("General"):
@@ -486,7 +496,10 @@ def genconfig():
             for remote_entry in self.remote_names:
                 if remote_entry not in combo_entries:
                     combo_entries.append(remote_entry)
-            if remote_name not in combo_entries and remote_name not in [None, ""]:
+            if remote_name not in combo_entries and remote_name not in [
+                None,
+                "",
+            ]:
                 combo_entries.append(remote_name)
             for entry in combo_entries:
                 remote_combo.addItem(entry)
@@ -518,7 +531,9 @@ def genconfig():
             )
             browse_button.clicked.connect(lambda: self.select_path(path_edit))
             remote_combo.currentIndexChanged.connect(
-                lambda _: self.update_remote_state(remote_combo, remote_path_edit)
+                lambda _: self.update_remote_state(
+                    remote_combo, remote_path_edit
+                )
             )
             self.update_remote_state(remote_combo, remote_path_edit)
 
@@ -551,11 +566,14 @@ def genconfig():
                 target_edit.setCursorPosition(0)
 
         def handle_save(self):
-            "collect the contents of the dialog and write the configuration file"
+            """collect the contents of the dialog and write the configuration
+            file"""
             new_config = configparser.ConfigParser()
             new_config.add_section("General")
             new_config.set(
-                "General", "data_directory", self.data_directory_edit.text().strip()
+                "General",
+                "data_directory",
+                self.data_directory_edit.text().strip(),
             )
             for entry in self.general_entries:
                 key_text = entry["key_edit"].text().strip()
@@ -578,10 +596,17 @@ def genconfig():
                     (name_text, path_text, combo_value, remote_path_text)
                 )
             exp_entries.sort(key=lambda item: item[0])
-            for name_text, path_text, combo_value, remote_path_text in exp_entries:
+            for (
+                name_text,
+                path_text,
+                combo_value,
+                remote_path_text,
+            ) in exp_entries:
                 new_config.set("ExpTypes", name_text, path_text)
                 if combo_value != "None" and remote_path_text != "":
-                    remote_values[name_text] = combo_value + ":" + remote_path_text
+                    remote_values[name_text] = (
+                        combo_value + ":" + remote_path_text
+                    )
             new_config.add_section("RcloneRemotes")
             for key in sorted(remote_values.keys()):
                 new_config.set("RcloneRemotes", key, remote_values[key])
@@ -600,6 +625,7 @@ def genconfig():
         existing_app = qt_widgets.QApplication(sys.argv)
     dialog = ConfigDialog(config_parser, filename, rclone_remotes)
     dialog.exec_()
+
 
 def get_notebook_dir(*args):
     r"""Returns the notebook directory.  If arguments are passed, it returns
@@ -1106,8 +1132,7 @@ class cached_searcher(object):
             )
             raise ValueError(
                 "I can't find a remote directory matching "
-                f"{exp_type_path.as_posix()}{location_hint}."
-                + suggestion_text
+                f"{exp_type_path.as_posix()}{location_hint}." + suggestion_text
             )
 
         logger.debug(
