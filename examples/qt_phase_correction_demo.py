@@ -88,50 +88,8 @@ def load_base_dataset(exp_type, search_string):
         d.set_units(axis, "μs")
     d["ph1", 1] *= 1j
     d.setaxis("ph1", np.r_[0, 0.5]).ft("ph1")
-    d.ft(["t1", "t2"], shift=True)
     d *= -1
     return d
-
-
-def apply_phase_corrections(base_dataset, diag_corr, anti_corr):
-    corrected = base_dataset.copy()
-    # Apply diagonal phase adjustment shared by both frequency axes.
-    corrected *= np.exp(
-        -1j
-        * 2
-        * pi
-        * diag_corr
-        * (corrected.fromaxis("t1") + corrected.fromaxis("t2"))
-        / 2
-    )
-    # Apply anti-diagonal phase adjustment for the relative phase between axes.
-    corrected *= np.exp(
-        -1j
-        * 2
-        * pi
-        * anti_corr
-        * (corrected.fromaxis("t1") - corrected.fromaxis("t2"))
-        / 2
-    )
-    # Reconstruct the time-domain Hermitian combination.
-    together = corrected.C.ift(["t1", "t2"])
-    scm = together["ph1", 1]
-    t1_len = scm.shape["t1"]
-    time_domain = together["ph1", 0]
-    time_domain.extend("t1", -time_domain["t1"][-1])
-    negative_startpoint = time_domain["t1"][0]
-    offset = negative_startpoint + scm["t1"][-1]
-    scm.ft("t1")
-    scm *= np.exp(-1j * 2 * pi * offset * scm.fromaxis("t1"))
-    scm.ift("t1")
-    negative_region = time_domain["t1":(None, 0)]
-    mirror_len = min(negative_region.shape["t1"], t1_len)
-    # Copy the mirrored Sc- component into the negative time region.
-    negative_region["t1", :mirror_len] = scm["t1", ::-1]["t1", :mirror_len]
-    # Prepare the frequency-domain views used for the two right-hand panels.
-    corrected["ph1", 1]["t1", :] = corrected["ph1", 1]["t1", ::-1]
-    corrected = corrected["t1":T1_RANGE]["t2":T2_RANGE]
-    return time_domain, corrected
 
 
 # }}}
@@ -387,14 +345,52 @@ class PhaseCorrectionWidget(QWidget):
     def handle_slider_release(self):
         self.update_plots()
 
-    def update_plots(self):
-        diag_corr = self.diag_value
-        anti_corr = self.anti_value
-        plt.figure(self.manager.num)
-        truncated = self.base_dataset
-        time_domain, corrected = apply_phase_corrections(
-            truncated, diag_corr, anti_corr
+    def apply_ph_and_ft(self):
+        """Return a phased frequency-domain copy based on the current sliders."""
+        # Start from the truncated time-domain signal so updates always reflect
+        # the raw data seen by the truncation controls.
+        corrected = self.base_dataset.C.ft(["t1", "t2"], shift=True)
+        # Apply the diagonal phase adjustment shared between the two frequency
+        # axes.
+        corrected *= np.exp(
+            -1j
+            * 2
+            * pi
+            * self.diag_value
+            * (corrected.fromaxis("t1") + corrected.fromaxis("t2"))
+            / 2
         )
+        # Apply the anti-diagonal phase adjustment that captures the relative
+        # phase difference between the axes.
+        corrected *= np.exp(
+            -1j
+            * 2
+            * pi
+            * self.anti_value
+            * (corrected.fromaxis("t1") - corrected.fromaxis("t2"))
+            / 2
+        )
+        # The Sc- panel should display the mirrored data along t1.
+        corrected["ph1", 1]["t1", :] = corrected["ph1", 1]["t1", ::-1]
+        corrected = corrected["t1":T1_RANGE]["t2":T2_RANGE]
+        return corrected
+
+    def update_plots(self):
+        plt.figure(self.manager.num)
+        corrected = self.apply_ph_and_ft()
+        together = corrected.C.ift(["t1", "t2"])
+        scm = together["ph1", 1]
+        t1_len = scm.shape["t1"]
+        time_domain = together["ph1", 0]
+        time_domain.extend("t1", -time_domain["t1"][-1])
+        negative_startpoint = time_domain["t1"][0]
+        offset = negative_startpoint + scm["t1"][-1]
+        scm.ft("t1")
+        scm *= np.exp(-1j * 2 * pi * offset * scm.fromaxis("t1"))
+        scm.ift("t1")
+        negative_region = time_domain["t1":(None, 0)]
+        mirror_len = min(negative_region.shape["t1"], t1_len)
+        negative_region["t1", :mirror_len] = scm["t1", ::-1]["t1", :mirror_len]
         self.last_time_domain = time_domain
         time_magnitude_nd = abs(time_domain)
         time_magnitude = time_magnitude_nd.data

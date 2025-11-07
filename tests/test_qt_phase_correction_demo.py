@@ -26,13 +26,13 @@ spec = importlib.util.spec_from_file_location(
 qt_demo = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(qt_demo)
 PhaseCorrectionWidget = qt_demo.PhaseCorrectionWidget
-apply_phase_corrections = qt_demo.apply_phase_corrections
 DEFAULT_SEARCH = qt_demo.DEFAULT_SEARCH
+T1_RANGE = qt_demo.T1_RANGE
+T2_RANGE = qt_demo.T2_RANGE
 
 
-def generate_fake_dataset():
+def generate_fake_dataset(num_points=1000):
     """Create a simple hypercomplex dataset with μs axes for testing."""
-    num_points = 1000
     t_axis = np.linspace(0.0, 4.0, num_points)
     # Construct a smooth complex surface so the plots have meaningful content.
     t1_grid, t2_grid = np.meshgrid(t_axis, t_axis, indexing="ij")
@@ -57,14 +57,28 @@ def qapp():
     yield app
 
 
-def test_apply_phase_corrections_returns_expected_shapes():
-    """The helper should keep axis dimensions intact after corrections."""
+def test_apply_ph_and_ft_returns_expected_shapes(qapp):
+    """The widget method should keep the phased copy within the target ranges."""
     dataset = generate_fake_dataset()
-    time_domain, corrected = apply_phase_corrections(dataset, 0.1, -0.15)
-    assert time_domain.shape["t1"] >= dataset.shape["t1"]
-    assert corrected.dimlabels == dataset.dimlabels
-    for axis in dataset.dimlabels:
-        assert corrected.shape[axis] == dataset.shape[axis]
+    widget = PhaseCorrectionWidget(
+        base_dataset=dataset, exp_types=["TestExp"], search_string=DEFAULT_SEARCH
+    )
+    try:
+        corrected = widget.apply_ph_and_ft()
+        assert corrected.dimlabels == dataset.dimlabels
+        for axis in dataset.dimlabels:
+            assert corrected.shape[axis] > 0
+            assert corrected.shape[axis] <= dataset.shape[axis]
+        assert corrected.getaxis("t1")[0] >= T1_RANGE[0]
+        assert corrected.getaxis("t1")[-1] <= T1_RANGE[1]
+        assert corrected.getaxis("t2")[0] >= T2_RANGE[0]
+        assert corrected.getaxis("t2")[-1] <= T2_RANGE[1]
+        together = corrected.C.ift(["t1", "t2"])
+        assert together.dimlabels == dataset.dimlabels
+        assert together.shape["t1"] == corrected.shape["t1"]
+        assert together.shape["t2"] == corrected.shape["t2"]
+    finally:
+        widget.close()
 
 
 def test_widget_updates_with_fake_data(qapp):
@@ -138,7 +152,30 @@ def test_truncation_entries_slice_dataset(qapp):
         assert widget.base_dataset.shape["t2"] == 150
         widget.diag_slider.sliderReleased.emit()
         qapp.processEvents()
-        assert widget.last_time_domain.shape["t1"] >= 100
-        assert widget.last_time_domain.shape["t2"] >= 150
+        assert widget.last_time_domain is not None
+        assert widget.last_time_domain.shape["t1"] > 0
+        assert widget.last_time_domain.shape["t2"] > 0
+        assert widget.last_time_domain.getaxis("t1")[0] < 0
+    finally:
+        widget.close()
+
+
+def test_t2_truncation_handles_large_reduction(qapp):
+    """Reducing t2 from 2048 to 512 should not trigger slicing errors."""
+    dataset = generate_fake_dataset(2048)
+    widget = PhaseCorrectionWidget(
+        base_dataset=dataset, exp_types=["TestExp"], search_string=DEFAULT_SEARCH
+    )
+    try:
+        widget.t2_entry.setText("512")
+        widget.t2_entry.editingFinished.emit()
+        qapp.processEvents()
+        widget.update_plots()
+        assert widget.base_dataset.shape["t2"] == 512
+        phased = widget.apply_ph_and_ft()
+        assert phased.shape["t2"] > 0
+        assert phased.shape["t2"] <= 512
+        assert phased.getaxis("t2")[0] >= T2_RANGE[0]
+        assert phased.getaxis("t2")[-1] <= T2_RANGE[1]
     finally:
         widget.close()
