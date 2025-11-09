@@ -350,7 +350,15 @@ class PhaseCorrectionWidget(QWidget):
         """Return a phased frequency-domain copy based on the current sliders."""
         # Start from the truncated time-domain signal so updates always reflect
         # the raw data seen by the truncation controls.
-        corrected = self.base_dataset.C.ft(["t1", "t2"], shift=True)
+        corrected = self.base_dataset.C
+        t2_axis = corrected.getaxis("t2")
+        if t2_axis.size > 1:
+            padded_stop = t2_axis[0] + 1.2 * (t2_axis[-1] - t2_axis[0])
+            if padded_stop > t2_axis[-1]:
+                # Zero-pad the positive time side so right shifts keep data inside
+                # the array instead of rolling off the end of the axis.
+                corrected.extend("t2", padded_stop)
+        corrected = corrected.ft(["t1", "t2"], shift=True)
         # Apply the diagonal phase adjustment shared between the two frequency
         # axes.
         corrected *= np.exp(
@@ -371,7 +379,6 @@ class PhaseCorrectionWidget(QWidget):
             * (corrected.fromaxis("t1") - corrected.fromaxis("t2"))
             / 2
         )
-        corrected = corrected["t1":T1_RANGE]["t2":T2_RANGE]
         return corrected
 
     def update_plots(self):
@@ -393,12 +400,13 @@ class PhaseCorrectionWidget(QWidget):
         self.last_time_domain = time_domain
         time_magnitude_nd = abs(time_domain)
         time_magnitude = time_magnitude_nd.data
-        scp_display = corrected["ph1", 0]
-        scm_display = corrected["ph1", 1].copy()
+        freq_window = corrected["t1":T1_RANGE]["t2":T2_RANGE]
+        scp_display = freq_window["ph1", 0]
+        scm_display = freq_window["ph1", 1].copy()
         # Mirror the Sc- trace for the right-hand panel without disturbing the
         # frequency-domain data used for the Hermitian reconstruction above.
         scm_display["t1", :] = scm_display["t1", ::-1]
-        scale = abs(corrected).max()
+        scale = abs(freq_window).max()
         hermitian_source = time_domain.copy()
         # Reset Fourier bookkeeping before transforming the Hermitian data again.
         for axis in ["t1", "t2"]:

@@ -68,11 +68,11 @@ def test_apply_ph_and_ft_returns_expected_shapes(qapp):
         assert corrected.dimlabels == dataset.dimlabels
         for axis in dataset.dimlabels:
             assert corrected.shape[axis] > 0
-            assert corrected.shape[axis] <= dataset.shape[axis]
-        assert corrected.getaxis("t1")[0] >= T1_RANGE[0]
-        assert corrected.getaxis("t1")[-1] <= T1_RANGE[1]
-        assert corrected.getaxis("t2")[0] >= T2_RANGE[0]
-        assert corrected.getaxis("t2")[-1] <= T2_RANGE[1]
+        window = corrected["t1":T1_RANGE]["t2":T2_RANGE]
+        assert window.getaxis("t1")[0] >= T1_RANGE[0]
+        assert window.getaxis("t1")[-1] <= T1_RANGE[1]
+        assert window.getaxis("t2")[0] >= T2_RANGE[0]
+        assert window.getaxis("t2")[-1] <= T2_RANGE[1]
         together = corrected.C.ift(["t1", "t2"])
         assert together.dimlabels == dataset.dimlabels
         assert together.shape["t1"] == corrected.shape["t1"]
@@ -168,9 +168,10 @@ def test_t2_truncation_handles_large_reduction(qapp):
         widget.update_plots()
         assert widget.base_dataset.shape["t2"] == 512
         phased = widget.apply_ph_and_ft()
-        assert phased.shape["t2"] > 0
-        assert phased.shape["t2"] <= 512
-        assert phased.getaxis("t2")[0] >= T2_RANGE[0]
-        assert phased.getaxis("t2")[-1] <= T2_RANGE[1]
+        assert phased.shape["t2"] >= 512
+        window = phased["t2":T2_RANGE]
+        assert window.shape["t2"] > 0
+        assert window.getaxis("t2")[0] >= T2_RANGE[0]
+        assert window.getaxis("t2")[-1] <= T2_RANGE[1]
     finally:
         widget.close()
