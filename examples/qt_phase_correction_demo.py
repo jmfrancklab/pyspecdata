@@ -238,9 +238,7 @@ class PhaseCorrectionWidget(QWidget):
         self.anti_slider_moved(self.anti_slider.value())
         self.sensitivity_slider_moved(self.sensitivity_slider.value())
         self.diag_slider.valueChanged.connect(self.diag_slider_moved)
-        self.diag_slider.sliderReleased.connect(self.handle_slider_release)
         self.anti_slider.valueChanged.connect(self.anti_slider_moved)
-        self.anti_slider.sliderReleased.connect(self.handle_slider_release)
         self.sensitivity_slider.valueChanged.connect(self.sensitivity_slider_moved)
         self.sensitivity_slider.sliderReleased.connect(self.update_phase_slider_limits)
         self.update_phase_slider_limits()
@@ -316,10 +314,16 @@ class PhaseCorrectionWidget(QWidget):
     def diag_slider_moved(self, value):
         self.diag_value = value / self.slider_scale
         self.diag_label.setText(f"{self.diag_value:.2f} μs")
+        if not self.diag_slider.signalsBlocked():
+            # Update immediately so the plots track the slider while it moves.
+            self.update_plots()
 
     def anti_slider_moved(self, value):
         self.anti_value = value / self.slider_scale
         self.anti_label.setText(f"{self.anti_value:.2f} μs")
+        if not self.anti_slider.signalsBlocked():
+            # Update immediately so the plots track the slider while it moves.
+            self.update_plots()
 
     def sensitivity_slider_moved(self, value):
         self.sensitivity_value = value / self.sensitivity_scale
@@ -341,9 +345,6 @@ class PhaseCorrectionWidget(QWidget):
             slider.blockSignals(False)
         self.diag_slider_moved(self.diag_slider.value())
         self.anti_slider_moved(self.anti_slider.value())
-
-    def handle_slider_release(self):
-        self.update_plots()
 
     def apply_ph_and_ft(self):
         """Return a phased frequency-domain copy based on the current sliders."""
@@ -370,8 +371,6 @@ class PhaseCorrectionWidget(QWidget):
             * (corrected.fromaxis("t1") - corrected.fromaxis("t2"))
             / 2
         )
-        # The Sc- panel should display the mirrored data along t1.
-        corrected["ph1", 1]["t1", :] = corrected["ph1", 1]["t1", ::-1]
         corrected = corrected["t1":T1_RANGE]["t2":T2_RANGE]
         return corrected
 
@@ -379,23 +378,26 @@ class PhaseCorrectionWidget(QWidget):
         plt.figure(self.manager.num)
         corrected = self.apply_ph_and_ft()
         together = corrected.C.ift(["t1", "t2"])
-        scm = together["ph1", 1]
-        t1_len = scm.shape["t1"]
+        scm_time = together["ph1", 1]
+        t1_len = scm_time.shape["t1"]
         time_domain = together["ph1", 0]
         time_domain.extend("t1", -time_domain["t1"][-1])
         negative_startpoint = time_domain["t1"][0]
-        offset = negative_startpoint + scm["t1"][-1]
-        scm.ft("t1")
-        scm *= np.exp(-1j * 2 * pi * offset * scm.fromaxis("t1"))
-        scm.ift("t1")
+        offset = negative_startpoint + scm_time["t1"][-1]
+        scm_time.ft("t1")
+        scm_time *= np.exp(-1j * 2 * pi * offset * scm_time.fromaxis("t1"))
+        scm_time.ift("t1")
         negative_region = time_domain["t1":(None, 0)]
         mirror_len = min(negative_region.shape["t1"], t1_len)
-        negative_region["t1", :mirror_len] = scm["t1", ::-1]["t1", :mirror_len]
+        negative_region["t1", :mirror_len] = scm_time["t1", ::-1]["t1", :mirror_len]
         self.last_time_domain = time_domain
         time_magnitude_nd = abs(time_domain)
         time_magnitude = time_magnitude_nd.data
-        scp = corrected["ph1", 0]
-        scm = corrected["ph1", 1]
+        scp_display = corrected["ph1", 0]
+        scm_display = corrected["ph1", 1].copy()
+        # Mirror the Sc- trace for the right-hand panel without disturbing the
+        # frequency-domain data used for the Hermitian reconstruction above.
+        scm_display["t1", :] = scm_display["t1", ::-1]
         scale = abs(corrected).max()
         hermitian_source = time_domain.copy()
         # Reset Fourier bookkeeping before transforming the Hermitian data again.
@@ -406,7 +408,7 @@ class PhaseCorrectionWidget(QWidget):
         hermitian_magnitude_nd = abs(hermitian_ft)
         hermitian_magnitude = hermitian_magnitude_nd.data
         time_shape = time_magnitude.shape
-        freq_shape = scp.data.shape
+        freq_shape = scp_display.data.shape
         if self.current_time_shape != time_shape or self.current_freq_shape != freq_shape:
             self.reset_images()
         if self.time_image is None:
@@ -418,8 +420,8 @@ class PhaseCorrectionWidget(QWidget):
             )
             self.hermitian_ft_colorbar = self.hermitian_ft_image.colorbar
             self.ax_hermitian_ft.set_aspect("equal")
-            self.scp_image = image(scp, scaling=scale, ax=self.ax_scp)
-            self.scm_image = image(scm, scaling=scale, ax=self.ax_scm)
+            self.scp_image = image(scp_display, scaling=scale, ax=self.ax_scp)
+            self.scm_image = image(scm_display, scaling=scale, ax=self.ax_scm)
             self.current_time_shape = time_shape
             self.current_freq_shape = freq_shape
             self.canvas.draw_idle()
@@ -439,8 +441,8 @@ class PhaseCorrectionWidget(QWidget):
             self.hermitian_ft_image.set_clim(0, hermitian_vmax)
             if self.hermitian_ft_colorbar is not None:
                 self.hermitian_ft_colorbar.update_normal(self.hermitian_ft_image)
-        scp_colors = imagehsv(scp.data, scaling=scale)
-        scm_colors = imagehsv(scm.data, scaling=scale)
+        scp_colors = imagehsv(scp_display.data, scaling=scale)
+        scm_colors = imagehsv(scm_display.data, scaling=scale)
         self.scp_image.set_data(scp_colors)
         self.scm_image.set_data(scm_colors)
         self.current_time_shape = time_shape

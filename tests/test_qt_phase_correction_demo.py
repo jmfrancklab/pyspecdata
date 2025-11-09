@@ -94,9 +94,6 @@ def test_widget_updates_with_fake_data(qapp):
         widget.diag_slider.setValue(25)
         widget.anti_slider.setValue(-30)
         qapp.processEvents()
-        assert np.array_equal(initial_time_image, np.array(widget.time_image.get_array()))
-        widget.diag_slider.sliderReleased.emit()
-        qapp.processEvents()
         assert widget.diag_label.text() == "0.25 μs"
         assert widget.anti_label.text() == "-0.30 μs"
         updated_time_image = np.array(widget.time_image.get_array())
@@ -150,8 +147,6 @@ def test_truncation_entries_slice_dataset(qapp):
         qapp.processEvents()
         assert widget.base_dataset.shape["t1"] == 100
         assert widget.base_dataset.shape["t2"] == 150
-        widget.diag_slider.sliderReleased.emit()
-        qapp.processEvents()
         assert widget.last_time_domain is not None
         assert widget.last_time_domain.shape["t1"] > 0
         assert widget.last_time_domain.shape["t2"] > 0
