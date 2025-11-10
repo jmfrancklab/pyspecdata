@@ -76,41 +76,6 @@ DEFAULT_EXP_TYPE = "2DELDOR/251027_DiPhNO_500uM/Hypercomplex"
 DEFAULT_SEARCH = "1500ns\\.DSC"
 
 
-# {{{ data preparation helpers
-# Load the dataset once so that slider updates only adjust phase factors.
-def extend_t2_for_shifts(dataset):
-    """Pad the t2 axis so a right shift has room to move into."""
-    t2_axis = dataset.getaxis("t2")
-    original_points = len(t2_axis)
-    start = t2_axis[0]
-    stop = t2_axis[-1]
-    pad_stop = start + 1.2 * (stop - start)
-    dataset.extend("t2", pad_stop)
-    # Zero the new region immediately so the padding is always blank.
-    dataset["t2", original_points:] = 0
-    return dataset
-
-
-def load_base_dataset(exp_type, search_string):
-    print(f"load_base_dataset called with {exp_type} {search_string}")
-    d = find_file(search_string, exp_type=exp_type)
-    d.chunk("t1", ["t1", "ph1"], [-1, 2]).reorder(["ph1", "t1", "t2"])
-    # Pad immediately so any later phase shifts that move points to the right
-    # have room to do so without wrapping around the array.
-    extend_t2_for_shifts(d)
-    d.set_units("t1", "ns")
-    for axis in ["t1", "t2"]:
-        d[axis] *= d.div_units(axis, "μs")
-        d.set_units(axis, "μs")
-    d["ph1", 1] *= 1j
-    d.setaxis("ph1", np.r_[0, 0.5]).ft("ph1")
-    d *= -1
-    return d
-
-
-# }}}
-
-
 class PhaseCorrectionWidget(QWidget):
     def __init__(self, base_dataset=None, exp_types=None, search_string=None):
         QWidget.__init__(self)
@@ -220,15 +185,15 @@ class PhaseCorrectionWidget(QWidget):
         layout.addWidget(self.toolbar)
         layout.addLayout(slider_layout)
         self.setLayout(layout)
+        self.loaded_from_file = False
         if base_dataset is None:
-            base_dataset = load_base_dataset(DEFAULT_EXP_TYPE, DEFAULT_SEARCH)
+            self.load_chunked_dataset(DEFAULT_EXP_TYPE, DEFAULT_SEARCH)
         else:
-            base_dataset = base_dataset.C
-            extend_t2_for_shifts(base_dataset)
-        self.full_dataset = base_dataset
-        self.current_t1_points = self.full_dataset.shape["t1"]
-        self.current_t2_points = self.full_dataset.shape["t2"]
-        self.rebuild_base_dataset()
+            # External callers can supply a prepared dataset for testing.
+            self.unmanipulated_dataset = base_dataset.C
+            self.current_t1_points = self.unmanipulated_dataset.shape["t1"]
+            self.current_t2_points = self.unmanipulated_dataset.shape["t2"]
+        self.prepare_base_dataset()
         self.t1_entry.setText(str(self.current_t1_points))
         self.t2_entry.setText(str(self.current_t2_points))
         self.time_image = None
@@ -261,19 +226,47 @@ class PhaseCorrectionWidget(QWidget):
         self.update_phase_slider_limits()
         self.update_plots()
 
+    def load_chunked_dataset(self, exp_type, search_string):
+        """Load and chunk the raw dataset while keeping a clean copy."""
+        print(f"load_chunked_dataset called with {exp_type} {search_string}")
+        dataset = find_file(search_string, exp_type=exp_type)
+        dataset.chunk("t1", ["t1", "ph1"], [-1, 2]).reorder(["ph1", "t1", "t2"])
+        self.unmanipulated_dataset = dataset.C
+        self.loaded_from_file = True
+        self.current_t1_points = self.unmanipulated_dataset.shape["t1"]
+        self.current_t2_points = self.unmanipulated_dataset.shape["t2"]
+
+    def prepare_base_dataset(self):
+        """Process the stored chunked data into the padded time-domain base."""
+        truncated = self.unmanipulated_dataset["t1", : self.current_t1_points]
+        truncated = truncated["t2", : self.current_t2_points].C
+        original_t2_points = truncated.shape["t2"]
+        if original_t2_points > 0:
+            t2_axis = truncated.getaxis("t2")
+            pad_stop = t2_axis[0] + 1.2 * (t2_axis[-1] - t2_axis[0])
+            # Extend first so rightward phase shifts move into an empty region.
+            truncated.extend("t2", pad_stop)
+            truncated["t2", original_t2_points:] = 0
+        if self.loaded_from_file:
+            truncated.set_units("t1", "ns")
+            for axis in ["t1", "t2"]:
+                truncated[axis] *= truncated.div_units(axis, "μs")
+                truncated.set_units(axis, "μs")
+            truncated["ph1", 1] *= 1j
+            truncated.setaxis("ph1", np.r_[0, 0.5]).ft("ph1")
+            truncated *= -1
+        self.base_dataset = truncated
+
     def load_new_dataset(self):
         """Reload the raw data using the search controls."""
         exp_type = self.exp_type_dropdown.currentText()
         search_string = self.search_entry.text()
         try:
-            dataset = load_base_dataset(exp_type, search_string)
+            self.load_chunked_dataset(exp_type, search_string)
         except Exception as error:  # noqa: BLE001
             print("Failed to load dataset:", error)
             return
-        self.full_dataset = dataset
-        self.current_t1_points = self.full_dataset.shape["t1"]
-        self.current_t2_points = self.full_dataset.shape["t2"]
-        self.rebuild_base_dataset()
+        self.prepare_base_dataset()
         self.t1_entry.setText(str(self.current_t1_points))
         self.t2_entry.setText(str(self.current_t2_points))
         self.reset_images()
@@ -281,8 +274,8 @@ class PhaseCorrectionWidget(QWidget):
 
     def update_truncation(self):
         """Slice the dataset before corrections when the limits change."""
-        max_t1 = self.full_dataset.shape["t1"]
-        max_t2 = self.full_dataset.shape["t2"]
+        max_t1 = self.unmanipulated_dataset.shape["t1"]
+        max_t2 = self.unmanipulated_dataset.shape["t2"]
         try:
             requested_t1 = int(self.t1_entry.text())
         except ValueError:
@@ -297,16 +290,9 @@ class PhaseCorrectionWidget(QWidget):
         self.current_t2_points = requested_t2
         self.t1_entry.setText(str(self.current_t1_points))
         self.t2_entry.setText(str(self.current_t2_points))
-        self.rebuild_base_dataset()
+        self.prepare_base_dataset()
         self.reset_images()
         self.update_plots()
-
-    def rebuild_base_dataset(self):
-        """Copy the padded data and zero anything beyond the truncation."""
-        truncated = self.full_dataset["t1", :self.current_t1_points].C
-        if self.current_t2_points < truncated.shape["t2"]:
-            truncated["t2", self.current_t2_points:] = 0
-        self.base_dataset = truncated
 
     def reset_images(self):
         """Clear cached images when the dataset shape changes."""
