@@ -78,6 +78,14 @@ DEFAULT_SEARCH = "1500ns\\.DSC"
 
 # {{{ data preparation helpers
 # Load the dataset once so that slider updates only adjust phase factors.
+def extend_t2_for_shifts(dataset):
+    """Pad the t2 axis so right shifts stay within the array."""
+    t2_axis = dataset.getaxis("t2")
+    pad_stop = t2_axis[0] + 1.2 * (t2_axis[-1] - t2_axis[0])
+    dataset.extend("t2", pad_stop)
+    return dataset
+
+
 def load_base_dataset(exp_type, search_string):
     print(f"load_base_dataset called with {exp_type} {search_string}")
     d = find_file(search_string, exp_type=exp_type)
@@ -89,6 +97,10 @@ def load_base_dataset(exp_type, search_string):
     d["ph1", 1] *= 1j
     d.setaxis("ph1", np.r_[0, 0.5]).ft("ph1")
     d *= -1
+    d.other_info["unpadded_t2_points"] = d.shape["t2"]
+    # Add zeros beyond the original end of t2 so phase shifts to the right
+    # have room to move without wrapping the signal.
+    extend_t2_for_shifts(d)
     return d
 
 
@@ -206,12 +218,21 @@ class PhaseCorrectionWidget(QWidget):
         self.setLayout(layout)
         if base_dataset is None:
             base_dataset = load_base_dataset(
-                    DEFAULT_EXP_TYPE, DEFAULT_SEARCH
+                DEFAULT_EXP_TYPE, DEFAULT_SEARCH
             )
         self.full_dataset = base_dataset
-        self.base_dataset = base_dataset
-        self.current_t1_points = self.base_dataset.shape["t1"]
-        self.current_t2_points = self.base_dataset.shape["t2"]
+        self.current_t1_points = self.full_dataset.shape["t1"]
+        if "unpadded_t2_points" in self.full_dataset.other_info:
+            self.current_t2_points = self.full_dataset.other_info["unpadded_t2_points"]
+        else:
+            self.current_t2_points = self.full_dataset.shape["t2"]
+            self.full_dataset.other_info["unpadded_t2_points"] = self.current_t2_points
+        if self.full_dataset.shape["t2"] == self.current_t2_points:
+            extend_t2_for_shifts(self.full_dataset)
+        self.base_dataset = self.full_dataset["t1", :self.current_t1_points][
+            "t2", :self.current_t2_points
+        ].C
+        extend_t2_for_shifts(self.base_dataset)
         self.t1_entry.setText(str(self.current_t1_points))
         self.t2_entry.setText(str(self.current_t2_points))
         self.time_image = None
@@ -254,9 +275,18 @@ class PhaseCorrectionWidget(QWidget):
             print("Failed to load dataset:", error)
             return
         self.full_dataset = dataset
-        self.base_dataset = dataset
-        self.current_t1_points = self.base_dataset.shape["t1"]
-        self.current_t2_points = self.base_dataset.shape["t2"]
+        self.current_t1_points = self.full_dataset.shape["t1"]
+        if "unpadded_t2_points" in self.full_dataset.other_info:
+            self.current_t2_points = self.full_dataset.other_info["unpadded_t2_points"]
+        else:
+            self.current_t2_points = self.full_dataset.shape["t2"]
+            self.full_dataset.other_info["unpadded_t2_points"] = self.current_t2_points
+        if self.full_dataset.shape["t2"] == self.current_t2_points:
+            extend_t2_for_shifts(self.full_dataset)
+        self.base_dataset = self.full_dataset["t1", :self.current_t1_points][
+            "t2", :self.current_t2_points
+        ].C
+        extend_t2_for_shifts(self.base_dataset)
         self.t1_entry.setText(str(self.current_t1_points))
         self.t2_entry.setText(str(self.current_t2_points))
         self.reset_images()
@@ -282,7 +312,10 @@ class PhaseCorrectionWidget(QWidget):
         self.t2_entry.setText(str(self.current_t2_points))
         self.base_dataset = self.full_dataset["t1", :self.current_t1_points][
             "t2", :self.current_t2_points
-        ]
+        ].C
+        # Extend the truncated copy so the sliders can shift the data into the
+        # zero-padded region without losing points at the edge.
+        extend_t2_for_shifts(self.base_dataset)
         self.reset_images()
         self.update_plots()
 
@@ -350,15 +383,7 @@ class PhaseCorrectionWidget(QWidget):
         """Return a phased frequency-domain copy based on the current sliders."""
         # Start from the truncated time-domain signal so updates always reflect
         # the raw data seen by the truncation controls.
-        corrected = self.base_dataset.C
-        t2_axis = corrected.getaxis("t2")
-        if t2_axis.size > 1:
-            padded_stop = t2_axis[0] + 1.2 * (t2_axis[-1] - t2_axis[0])
-            if padded_stop > t2_axis[-1]:
-                # Zero-pad the positive time side so right shifts keep data inside
-                # the array instead of rolling off the end of the axis.
-                corrected.extend("t2", padded_stop)
-        corrected = corrected.ft(["t1", "t2"], shift=True)
+        corrected = self.base_dataset.C.ft(["t1", "t2"], shift=True)
         # Apply the diagonal phase adjustment shared between the two frequency
         # axes.
         corrected *= np.exp(

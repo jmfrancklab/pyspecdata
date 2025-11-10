@@ -146,7 +146,14 @@ def test_truncation_entries_slice_dataset(qapp):
         widget.t2_entry.editingFinished.emit()
         qapp.processEvents()
         assert widget.base_dataset.shape["t1"] == 100
-        assert widget.base_dataset.shape["t2"] == 150
+        assert widget.current_t2_points == 150
+        assert widget.base_dataset.shape["t2"] > widget.current_t2_points
+        padded_axis = widget.base_dataset.getaxis("t2")
+        last_data_point = dataset.getaxis("t2")[widget.current_t2_points - 1]
+        assert padded_axis[-1] > last_data_point
+        assert np.allclose(
+            widget.base_dataset.data[..., widget.current_t2_points :], 0
+        )
         assert widget.last_time_domain is not None
         assert widget.last_time_domain.shape["t1"] > 0
         assert widget.last_time_domain.shape["t2"] > 0
@@ -166,9 +173,10 @@ def test_t2_truncation_handles_large_reduction(qapp):
         widget.t2_entry.editingFinished.emit()
         qapp.processEvents()
         widget.update_plots()
-        assert widget.base_dataset.shape["t2"] == 512
+        assert widget.current_t2_points == 512
+        assert widget.base_dataset.shape["t2"] > widget.current_t2_points
         phased = widget.apply_ph_and_ft()
-        assert phased.shape["t2"] >= 512
+        assert phased.shape["t2"] > widget.current_t2_points
         window = phased["t2":T2_RANGE]
         assert window.shape["t2"] > 0
         assert window.getaxis("t2")[0] >= T2_RANGE[0]
