@@ -79,11 +79,15 @@ DEFAULT_SEARCH = "1500ns\\.DSC"
 # {{{ data preparation helpers
 # Load the dataset once so that slider updates only adjust phase factors.
 def extend_t2_for_shifts(dataset):
-    """Pad the t2 axis so right shifts stay within the array."""
-    start = dataset.getaxis("t2")[0]
-    stop = dataset.getaxis("t2")[-1]
+    """Pad the t2 axis so a right shift has room to move into."""
+    t2_axis = dataset.getaxis("t2")
+    original_points = len(t2_axis)
+    start = t2_axis[0]
+    stop = t2_axis[-1]
     pad_stop = start + 1.2 * (stop - start)
     dataset.extend("t2", pad_stop)
+    # Zero the new region immediately so the padding is always blank.
+    dataset["t2", original_points:] = 0
     return dataset
 
 
@@ -91,7 +95,6 @@ def load_base_dataset(exp_type, search_string):
     print(f"load_base_dataset called with {exp_type} {search_string}")
     d = find_file(search_string, exp_type=exp_type)
     d.chunk("t1", ["t1", "ph1"], [-1, 2]).reorder(["ph1", "t1", "t2"])
-    original_t2_points = d.shape["t2"]
     # Pad immediately so any later phase shifts that move points to the right
     # have room to do so without wrapping around the array.
     extend_t2_for_shifts(d)
@@ -102,7 +105,7 @@ def load_base_dataset(exp_type, search_string):
     d["ph1", 1] *= 1j
     d.setaxis("ph1", np.r_[0, 0.5]).ft("ph1")
     d *= -1
-    return d, original_t2_points
+    return d
 
 
 # }}}
@@ -218,17 +221,13 @@ class PhaseCorrectionWidget(QWidget):
         layout.addLayout(slider_layout)
         self.setLayout(layout)
         if base_dataset is None:
-            base_dataset, original_t2_points = load_base_dataset(
-                DEFAULT_EXP_TYPE, DEFAULT_SEARCH
-            )
+            base_dataset = load_base_dataset(DEFAULT_EXP_TYPE, DEFAULT_SEARCH)
         else:
-            original_t2_points = base_dataset.shape["t2"]
             base_dataset = base_dataset.C
             extend_t2_for_shifts(base_dataset)
         self.full_dataset = base_dataset
-        self.original_t2_points = original_t2_points
         self.current_t1_points = self.full_dataset.shape["t1"]
-        self.current_t2_points = self.original_t2_points
+        self.current_t2_points = self.full_dataset.shape["t2"]
         self.rebuild_base_dataset()
         self.t1_entry.setText(str(self.current_t1_points))
         self.t2_entry.setText(str(self.current_t2_points))
@@ -267,14 +266,13 @@ class PhaseCorrectionWidget(QWidget):
         exp_type = self.exp_type_dropdown.currentText()
         search_string = self.search_entry.text()
         try:
-            dataset, original_t2_points = load_base_dataset(exp_type, search_string)
+            dataset = load_base_dataset(exp_type, search_string)
         except Exception as error:  # noqa: BLE001
             print("Failed to load dataset:", error)
             return
         self.full_dataset = dataset
-        self.original_t2_points = original_t2_points
         self.current_t1_points = self.full_dataset.shape["t1"]
-        self.current_t2_points = self.original_t2_points
+        self.current_t2_points = self.full_dataset.shape["t2"]
         self.rebuild_base_dataset()
         self.t1_entry.setText(str(self.current_t1_points))
         self.t2_entry.setText(str(self.current_t2_points))
@@ -284,7 +282,7 @@ class PhaseCorrectionWidget(QWidget):
     def update_truncation(self):
         """Slice the dataset before corrections when the limits change."""
         max_t1 = self.full_dataset.shape["t1"]
-        max_t2 = self.original_t2_points
+        max_t2 = self.full_dataset.shape["t2"]
         try:
             requested_t1 = int(self.t1_entry.text())
         except ValueError:
