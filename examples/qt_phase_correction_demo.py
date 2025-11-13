@@ -76,67 +76,6 @@ DEFAULT_EXP_TYPE = "2DELDOR/251027_DiPhNO_500uM/Hypercomplex"
 DEFAULT_SEARCH = "1500ns\\.DSC"
 
 
-# {{{ data preparation helpers
-# Load the dataset once so that slider updates only adjust phase factors.
-def load_base_dataset(exp_type, search_string):
-    print(f"load_base_dataset called with {exp_type} {search_string}")
-    d = find_file(search_string, exp_type=exp_type)
-    d.chunk("t1", ["t1", "ph1"], [-1, 2]).reorder(["ph1", "t1", "t2"])
-    d.set_units("t1", "ns")
-    for axis in ["t1", "t2"]:
-        d[axis] *= d.div_units(axis, "μs")
-        d.set_units(axis, "μs")
-    d["ph1", 1] *= 1j
-    d.setaxis("ph1", np.r_[0, 0.5]).ft("ph1")
-    d.ft(["t1", "t2"], shift=True)
-    d *= -1
-    return d
-
-
-def apply_phase_corrections(base_dataset, diag_corr, anti_corr):
-    corrected = base_dataset.copy()
-    # Apply diagonal phase adjustment shared by both frequency axes.
-    corrected *= np.exp(
-        -1j
-        * 2
-        * pi
-        * diag_corr
-        * (corrected.fromaxis("t1") + corrected.fromaxis("t2"))
-        / 2
-    )
-    # Apply anti-diagonal phase adjustment for the relative phase between axes.
-    corrected *= np.exp(
-        -1j
-        * 2
-        * pi
-        * anti_corr
-        * (corrected.fromaxis("t1") - corrected.fromaxis("t2"))
-        / 2
-    )
-    # Reconstruct the time-domain Hermitian combination.
-    together = corrected.C.ift(["t1", "t2"])
-    scm = together["ph1", 1]
-    t1_len = scm.shape["t1"]
-    time_domain = together["ph1", 0]
-    time_domain.extend("t1", -time_domain["t1"][-1])
-    negative_startpoint = time_domain["t1"][0]
-    offset = negative_startpoint + scm["t1"][-1]
-    scm.ft("t1")
-    scm *= np.exp(-1j * 2 * pi * offset * scm.fromaxis("t1"))
-    scm.ift("t1")
-    negative_region = time_domain["t1":(None, 0)]
-    mirror_len = min(negative_region.shape["t1"], t1_len)
-    # Copy the mirrored Sc- component into the negative time region.
-    negative_region["t1", :mirror_len] = scm["t1", ::-1]["t1", :mirror_len]
-    # Prepare the frequency-domain views used for the two right-hand panels.
-    corrected["ph1", 1]["t1", :] = corrected["ph1", 1]["t1", ::-1]
-    corrected = corrected["t1":T1_RANGE]["t2":T2_RANGE]
-    return time_domain, corrected
-
-
-# }}}
-
-
 class PhaseCorrectionWidget(QWidget):
     def __init__(self, base_dataset=None, exp_types=None, search_string=None):
         QWidget.__init__(self)
@@ -204,6 +143,8 @@ class PhaseCorrectionWidget(QWidget):
         sensitivity_layout.addWidget(self.sensitivity_label)
         slider_layout.addLayout(sensitivity_layout)
         slider_layout.addWidget(self.sensitivity_slider)
+        self.recompute_button = QPushButton("Recompute Hermitian")
+        slider_layout.addWidget(self.recompute_button)
         # Build the data-loading controls so the user can switch datasets.
         top_layout = QHBoxLayout()
         top_layout.addWidget(QLabel("Experiment type"))
@@ -246,14 +187,18 @@ class PhaseCorrectionWidget(QWidget):
         layout.addWidget(self.toolbar)
         layout.addLayout(slider_layout)
         self.setLayout(layout)
+        self.loaded_from_file = False
+        self.cached_frequency = None
+        self.last_corrected_frequency = None
+        self.needs_time_refresh = False
         if base_dataset is None:
-            base_dataset = load_base_dataset(
-                    DEFAULT_EXP_TYPE, DEFAULT_SEARCH
-            )
-        self.full_dataset = base_dataset
-        self.base_dataset = base_dataset
-        self.current_t1_points = self.base_dataset.shape["t1"]
-        self.current_t2_points = self.base_dataset.shape["t2"]
+            self.load_chunked_dataset(DEFAULT_EXP_TYPE, DEFAULT_SEARCH)
+        else:
+            # External callers can supply a prepared dataset for testing.
+            self.unmanipulated_dataset = base_dataset.C
+            self.current_t1_points = self.unmanipulated_dataset.shape["t1"]
+            self.current_t2_points = self.unmanipulated_dataset.shape["t2"]
+        self.prepare_base_dataset()
         self.t1_entry.setText(str(self.current_t1_points))
         self.t2_entry.setText(str(self.current_t2_points))
         self.time_image = None
@@ -264,6 +209,7 @@ class PhaseCorrectionWidget(QWidget):
         self.current_time_shape = None
         self.current_freq_shape = None
         self.last_time_domain = None
+        self.recompute_button.clicked.connect(self.recompute_time_domain_plots)
         self.go_button.clicked.connect(self.load_new_dataset)
         self.t1_entry.editingFinished.connect(self.update_truncation)
         self.t2_entry.editingFinished.connect(self.update_truncation)
@@ -280,36 +226,69 @@ class PhaseCorrectionWidget(QWidget):
         self.anti_slider_moved(self.anti_slider.value())
         self.sensitivity_slider_moved(self.sensitivity_slider.value())
         self.diag_slider.valueChanged.connect(self.diag_slider_moved)
-        self.diag_slider.sliderReleased.connect(self.handle_slider_release)
         self.anti_slider.valueChanged.connect(self.anti_slider_moved)
-        self.anti_slider.sliderReleased.connect(self.handle_slider_release)
         self.sensitivity_slider.valueChanged.connect(self.sensitivity_slider_moved)
         self.sensitivity_slider.sliderReleased.connect(self.update_phase_slider_limits)
         self.update_phase_slider_limits()
+        self.reset_images()
         self.update_plots()
+        self.recompute_time_domain_plots()
+
+    def load_chunked_dataset(self, exp_type, search_string):
+        """Load and chunk the raw dataset while keeping a clean copy."""
+        print(f"load_chunked_dataset called with {exp_type} {search_string}")
+        dataset = find_file(search_string, exp_type=exp_type)
+        dataset.chunk("t1", ["t1", "ph1"], [-1, 2]).reorder(["ph1", "t1", "t2"])
+        self.unmanipulated_dataset = dataset.C
+        self.loaded_from_file = True
+        self.current_t1_points = self.unmanipulated_dataset.shape["t1"]
+        self.current_t2_points = self.unmanipulated_dataset.shape["t2"]
+
+    def prepare_base_dataset(self):
+        """Process the stored chunked data into the padded time-domain base."""
+        truncated = self.unmanipulated_dataset["t1", : self.current_t1_points]
+        truncated = truncated["t2", : self.current_t2_points].C
+        original_t2_points = truncated.shape["t2"]
+        if original_t2_points > 0:
+            t2_axis = truncated.getaxis("t2")
+            pad_stop = t2_axis[0] + 1.2 * (t2_axis[-1] - t2_axis[0])
+            # Extend first so rightward phase shifts move into an empty region.
+            truncated.extend("t2", pad_stop)
+            truncated["t2", original_t2_points:] = 0
+        if self.loaded_from_file:
+            truncated.set_units("t1", "ns")
+            for axis in ["t1", "t2"]:
+                truncated[axis] *= truncated.div_units(axis, "μs")
+                truncated.set_units(axis, "μs")
+            truncated["ph1", 1] *= 1j
+            truncated.setaxis("ph1", np.r_[0, 0.5]).ft("ph1")
+            truncated *= -1
+        self.base_dataset = truncated
+        # Cache the zero-phase frequency data so slider updates only need to
+        # multiply in the phase factors.
+        self.cached_frequency = self.base_dataset.C.ft(["t1", "t2"], shift=True)
+        self.last_corrected_frequency = None
 
     def load_new_dataset(self):
         """Reload the raw data using the search controls."""
         exp_type = self.exp_type_dropdown.currentText()
         search_string = self.search_entry.text()
         try:
-            dataset = load_base_dataset(exp_type, search_string)
+            self.load_chunked_dataset(exp_type, search_string)
         except Exception as error:  # noqa: BLE001
             print("Failed to load dataset:", error)
             return
-        self.full_dataset = dataset
-        self.base_dataset = dataset
-        self.current_t1_points = self.base_dataset.shape["t1"]
-        self.current_t2_points = self.base_dataset.shape["t2"]
+        self.prepare_base_dataset()
         self.t1_entry.setText(str(self.current_t1_points))
         self.t2_entry.setText(str(self.current_t2_points))
         self.reset_images()
         self.update_plots()
+        self.recompute_time_domain_plots()
 
     def update_truncation(self):
         """Slice the dataset before corrections when the limits change."""
-        max_t1 = self.full_dataset.shape["t1"]
-        max_t2 = self.full_dataset.shape["t2"]
+        max_t1 = self.unmanipulated_dataset.shape["t1"]
+        max_t2 = self.unmanipulated_dataset.shape["t2"]
         try:
             requested_t1 = int(self.t1_entry.text())
         except ValueError:
@@ -324,14 +303,27 @@ class PhaseCorrectionWidget(QWidget):
         self.current_t2_points = requested_t2
         self.t1_entry.setText(str(self.current_t1_points))
         self.t2_entry.setText(str(self.current_t2_points))
-        self.base_dataset = self.full_dataset["t1", :self.current_t1_points][
-            "t2", :self.current_t2_points
-        ]
+        self.prepare_base_dataset()
         self.reset_images()
         self.update_plots()
+        self.recompute_time_domain_plots()
 
     def reset_images(self):
         """Clear cached images when the dataset shape changes."""
+        self.clear_time_domain_plots()
+        self.ax_scp.cla()
+        self.ax_scp.set_title("$S_{c+}$")
+        self.ax_scm.cla()
+        self.ax_scm.set_title("$S_{c-}$")
+        for axis in [self.ax_hermitian_ft, self.ax_time, self.ax_scp, self.ax_scm]:
+            axis.set_facecolor((1.0, 1.0, 1.0, 0.0))
+        self.scp_image = None
+        self.scm_image = None
+        self.current_freq_shape = None
+        self.needs_time_refresh = True
+
+    def clear_time_domain_plots(self):
+        """Remove the Hermitian plots so they can be recomputed on demand."""
         if self.time_colorbar is not None:
             self.time_colorbar.remove()
             self.time_colorbar = None
@@ -342,26 +334,27 @@ class PhaseCorrectionWidget(QWidget):
         self.ax_time.set_title("Time Domain Hermitian Time, no apo")
         self.ax_hermitian_ft.cla()
         self.ax_hermitian_ft.set_title("FT of Hermitian Time")
-        self.ax_scp.cla()
-        self.ax_scp.set_title("$S_{c+}$")
-        self.ax_scm.cla()
-        self.ax_scm.set_title("$S_{c-}$")
-        for axis in [self.ax_hermitian_ft, self.ax_time, self.ax_scp, self.ax_scm]:
-            axis.set_facecolor((1.0, 1.0, 1.0, 0.0))
         self.time_image = None
-        self.scp_image = None
-        self.scm_image = None
         self.hermitian_ft_image = None
         self.current_time_shape = None
-        self.current_freq_shape = None
+        self.last_time_domain = None
+        self.needs_time_refresh = True
 
     def diag_slider_moved(self, value):
         self.diag_value = value / self.slider_scale
         self.diag_label.setText(f"{self.diag_value:.2f} μs")
+        if not self.diag_slider.signalsBlocked():
+            if not self.needs_time_refresh:
+                self.clear_time_domain_plots()
+            self.update_plots()
 
     def anti_slider_moved(self, value):
         self.anti_value = value / self.slider_scale
         self.anti_label.setText(f"{self.anti_value:.2f} μs")
+        if not self.anti_slider.signalsBlocked():
+            if not self.needs_time_refresh:
+                self.clear_time_domain_plots()
+            self.update_plots()
 
     def sensitivity_slider_moved(self, value):
         self.sensitivity_value = value / self.sensitivity_scale
@@ -384,35 +377,97 @@ class PhaseCorrectionWidget(QWidget):
         self.diag_slider_moved(self.diag_slider.value())
         self.anti_slider_moved(self.anti_slider.value())
 
-    def handle_slider_release(self):
-        self.update_plots()
+    def apply_ph_and_ft(self):
+        """Return a phased frequency-domain copy based on the current sliders."""
+        if self.cached_frequency is None:
+            self.cached_frequency = self.base_dataset.C.ft(["t1", "t2"], shift=True)
+        corrected = self.cached_frequency.C
+        # Apply the diagonal phase adjustment shared between the two frequency
+        # axes.
+        corrected *= np.exp(
+            -1j
+            * 2
+            * pi
+            * self.diag_value
+            * (corrected.fromaxis("t1") + corrected.fromaxis("t2"))
+            / 2
+        )
+        # Apply the anti-diagonal phase adjustment that captures the relative
+        # phase difference between the axes.
+        corrected *= np.exp(
+            -1j
+            * 2
+            * pi
+            * self.anti_value
+            * (corrected.fromaxis("t1") - corrected.fromaxis("t2"))
+            / 2
+        )
+        return corrected
 
     def update_plots(self):
-        diag_corr = self.diag_value
-        anti_corr = self.anti_value
         plt.figure(self.manager.num)
-        truncated = self.base_dataset
-        time_domain, corrected = apply_phase_corrections(
-            truncated, diag_corr, anti_corr
-        )
+        corrected = self.apply_ph_and_ft()
+        self.last_corrected_frequency = corrected
+        freq_window = corrected["t1":T1_RANGE]["t2":T2_RANGE]
+        scp_display = freq_window["ph1", 0]
+        scm_display = freq_window["ph1", 1].copy()
+        # Mirror the Sc- trace for the right-hand panel without disturbing the
+        # frequency-domain data used for the Hermitian reconstruction above.
+        scm_display["t1", :] = scm_display["t1", ::-1]
+        scale = abs(freq_window).max()
+        freq_shape = scp_display.data.shape
+        if self.current_freq_shape != freq_shape:
+            self.reset_images()
+            # reset_images clears the frequency axes, so recreate the slices.
+            freq_window = corrected["t1":T1_RANGE]["t2":T2_RANGE]
+            scp_display = freq_window["ph1", 0]
+            scm_display = freq_window["ph1", 1].copy()
+            scm_display["t1", :] = scm_display["t1", ::-1]
+            scale = abs(freq_window).max()
+        if self.scp_image is None:
+            self.scp_image = image(scp_display, scaling=scale, ax=self.ax_scp)
+            self.scm_image = image(scm_display, scaling=scale, ax=self.ax_scm)
+        else:
+            scp_colors = imagehsv(scp_display.data, scaling=scale)
+            scm_colors = imagehsv(scm_display.data, scaling=scale)
+            self.scp_image.set_data(scp_colors)
+            self.scm_image.set_data(scm_colors)
+        self.current_freq_shape = freq_shape
+        self.canvas.draw_idle()
+
+    def recompute_time_domain_plots(self):
+        """Rebuild the Hermitian time-domain panels from the phased data."""
+        if self.last_corrected_frequency is None:
+            self.update_plots()
+        if self.last_corrected_frequency is None:
+            return
+        corrected = self.last_corrected_frequency.C
+        together = corrected.ift(["t1", "t2"])
+        scm_time = together["ph1", 1]
+        t1_len = scm_time.shape["t1"]
+        time_domain = together["ph1", 0]
+        time_domain.extend("t1", -time_domain["t1"][-1])
+        negative_startpoint = time_domain["t1"][0]
+        offset = negative_startpoint + scm_time["t1"][-1]
+        scm_time.ft("t1")
+        scm_time *= np.exp(-1j * 2 * pi * offset * scm_time.fromaxis("t1"))
+        scm_time.ift("t1")
+        negative_region = time_domain["t1":(None, 0)]
+        mirror_len = min(negative_region.shape["t1"], t1_len)
+        negative_region["t1", :mirror_len] = scm_time["t1", ::-1]["t1", :mirror_len]
         self.last_time_domain = time_domain
         time_magnitude_nd = abs(time_domain)
         time_magnitude = time_magnitude_nd.data
-        scp = corrected["ph1", 0]
-        scm = corrected["ph1", 1]
-        scale = abs(corrected).max()
+        # {{{ Hermitian time-domain reconstruction
         hermitian_source = time_domain.copy()
-        # Reset Fourier bookkeeping before transforming the Hermitian data again.
         for axis in ["t1", "t2"]:
             hermitian_source.set_ft_prop(axis, None, None)
             hermitian_source.set_ft_prop(axis, ["start", "freq"], None)
         hermitian_ft = hermitian_source.ft(["t1", "t2"], shift=True)
+        # }}}
         hermitian_magnitude_nd = abs(hermitian_ft)
         hermitian_magnitude = hermitian_magnitude_nd.data
         time_shape = time_magnitude.shape
-        freq_shape = scp.data.shape
-        if self.current_time_shape != time_shape or self.current_freq_shape != freq_shape:
-            self.reset_images()
         if self.time_image is None:
             self.time_image = image(time_magnitude_nd, cmap="single_sided", ax=self.ax_time)
             self.time_colorbar = self.time_image.colorbar
@@ -422,33 +477,24 @@ class PhaseCorrectionWidget(QWidget):
             )
             self.hermitian_ft_colorbar = self.hermitian_ft_image.colorbar
             self.ax_hermitian_ft.set_aspect("equal")
-            self.scp_image = image(scp, scaling=scale, ax=self.ax_scp)
-            self.scm_image = image(scm, scaling=scale, ax=self.ax_scm)
-            self.current_time_shape = time_shape
-            self.current_freq_shape = freq_shape
-            self.canvas.draw_idle()
-            return
-        self.time_image.set_data(time_magnitude)
-        if self.time_colorbar is not None:
-            vmax = float(np.nanmax(time_magnitude))
-            if vmax <= 0:
-                vmax = 1.0
-            self.time_image.set_clim(0, vmax)
-            self.time_colorbar.update_normal(self.time_image)
-        if self.hermitian_ft_image is not None:
-            hermitian_vmax = float(np.nanmax(hermitian_magnitude))
-            if hermitian_vmax <= 0:
-                hermitian_vmax = 1.0
-            self.hermitian_ft_image.set_data(hermitian_magnitude)
-            self.hermitian_ft_image.set_clim(0, hermitian_vmax)
-            if self.hermitian_ft_colorbar is not None:
-                self.hermitian_ft_colorbar.update_normal(self.hermitian_ft_image)
-        scp_colors = imagehsv(scp.data, scaling=scale)
-        scm_colors = imagehsv(scm.data, scaling=scale)
-        self.scp_image.set_data(scp_colors)
-        self.scm_image.set_data(scm_colors)
+        else:
+            self.time_image.set_data(time_magnitude)
+            if self.time_colorbar is not None:
+                vmax = float(np.nanmax(time_magnitude))
+                if vmax <= 0:
+                    vmax = 1.0
+                self.time_image.set_clim(0, vmax)
+                self.time_colorbar.update_normal(self.time_image)
+            if self.hermitian_ft_image is not None:
+                hermitian_vmax = float(np.nanmax(hermitian_magnitude))
+                if hermitian_vmax <= 0:
+                    hermitian_vmax = 1.0
+                self.hermitian_ft_image.set_data(hermitian_magnitude)
+                self.hermitian_ft_image.set_clim(0, hermitian_vmax)
+                if self.hermitian_ft_colorbar is not None:
+                    self.hermitian_ft_colorbar.update_normal(self.hermitian_ft_image)
         self.current_time_shape = time_shape
-        self.current_freq_shape = freq_shape
+        self.needs_time_refresh = False
         self.canvas.draw_idle()
 
 

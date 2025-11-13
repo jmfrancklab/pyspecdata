@@ -26,13 +26,13 @@ spec = importlib.util.spec_from_file_location(
 qt_demo = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(qt_demo)
 PhaseCorrectionWidget = qt_demo.PhaseCorrectionWidget
-apply_phase_corrections = qt_demo.apply_phase_corrections
 DEFAULT_SEARCH = qt_demo.DEFAULT_SEARCH
+T1_RANGE = qt_demo.T1_RANGE
+T2_RANGE = qt_demo.T2_RANGE
 
 
-def generate_fake_dataset():
+def generate_fake_dataset(num_points=1000):
     """Create a simple hypercomplex dataset with μs axes for testing."""
-    num_points = 1000
     t_axis = np.linspace(0.0, 4.0, num_points)
     # Construct a smooth complex surface so the plots have meaningful content.
     t1_grid, t2_grid = np.meshgrid(t_axis, t_axis, indexing="ij")
@@ -57,14 +57,28 @@ def qapp():
     yield app
 
 
-def test_apply_phase_corrections_returns_expected_shapes():
-    """The helper should keep axis dimensions intact after corrections."""
+def test_apply_ph_and_ft_returns_expected_shapes(qapp):
+    """The widget method should keep the phased copy within the target ranges."""
     dataset = generate_fake_dataset()
-    time_domain, corrected = apply_phase_corrections(dataset, 0.1, -0.15)
-    assert time_domain.shape["t1"] >= dataset.shape["t1"]
-    assert corrected.dimlabels == dataset.dimlabels
-    for axis in dataset.dimlabels:
-        assert corrected.shape[axis] == dataset.shape[axis]
+    widget = PhaseCorrectionWidget(
+        base_dataset=dataset, exp_types=["TestExp"], search_string=DEFAULT_SEARCH
+    )
+    try:
+        corrected = widget.apply_ph_and_ft()
+        assert corrected.dimlabels == dataset.dimlabels
+        for axis in dataset.dimlabels:
+            assert corrected.shape[axis] > 0
+        window = corrected["t1":T1_RANGE]["t2":T2_RANGE]
+        assert window.getaxis("t1")[0] >= T1_RANGE[0]
+        assert window.getaxis("t1")[-1] <= T1_RANGE[1]
+        assert window.getaxis("t2")[0] >= T2_RANGE[0]
+        assert window.getaxis("t2")[-1] <= T2_RANGE[1]
+        together = corrected.C.ift(["t1", "t2"])
+        assert together.dimlabels == dataset.dimlabels
+        assert together.shape["t1"] == corrected.shape["t1"]
+        assert together.shape["t2"] == corrected.shape["t2"]
+    finally:
+        widget.close()
 
 
 def test_widget_updates_with_fake_data(qapp):
@@ -76,19 +90,25 @@ def test_widget_updates_with_fake_data(qapp):
     try:
         initial_time_image = np.array(widget.time_image.get_array())
         initial_ft_image = np.array(widget.hermitian_ft_image.get_array())
+        initial_scp = np.array(widget.scp_image.get_array())
         start_axes_count = len(widget.figure.axes)
         widget.diag_slider.setValue(25)
         widget.anti_slider.setValue(-30)
         qapp.processEvents()
-        assert np.array_equal(initial_time_image, np.array(widget.time_image.get_array()))
-        widget.diag_slider.sliderReleased.emit()
-        qapp.processEvents()
         assert widget.diag_label.text() == "0.25 μs"
         assert widget.anti_label.text() == "-0.30 μs"
-        updated_time_image = np.array(widget.time_image.get_array())
-        updated_ft_image = np.array(widget.hermitian_ft_image.get_array())
-        assert not np.array_equal(initial_time_image, updated_time_image)
-        assert not np.array_equal(initial_ft_image, updated_ft_image)
+        assert widget.time_image is None
+        assert widget.hermitian_ft_image is None
+        updated_scp = np.array(widget.scp_image.get_array())
+        assert not np.array_equal(initial_scp, updated_scp)
+        widget.recompute_button.click()
+        qapp.processEvents()
+        assert widget.time_image is not None
+        assert widget.hermitian_ft_image is not None
+        refreshed_time = np.array(widget.time_image.get_array())
+        refreshed_ft = np.array(widget.hermitian_ft_image.get_array())
+        assert not np.array_equal(initial_time_image, refreshed_time)
+        assert not np.array_equal(initial_ft_image, refreshed_ft)
         assert len(widget.figure.axes) == start_axes_count
         assert widget.ax_time.images
         assert widget.ax_scp.images
@@ -135,10 +155,40 @@ def test_truncation_entries_slice_dataset(qapp):
         widget.t2_entry.editingFinished.emit()
         qapp.processEvents()
         assert widget.base_dataset.shape["t1"] == 100
-        assert widget.base_dataset.shape["t2"] == 150
-        widget.diag_slider.sliderReleased.emit()
+        assert widget.current_t2_points == 150
+        assert widget.base_dataset.shape["t2"] > widget.current_t2_points
+        padded_axis = widget.base_dataset.getaxis("t2")
+        last_data_point = dataset.getaxis("t2")[widget.current_t2_points - 1]
+        assert padded_axis[-1] > last_data_point
+        assert np.allclose(
+            widget.base_dataset.data[..., widget.current_t2_points :], 0
+        )
+        assert widget.last_time_domain is not None
+        assert widget.last_time_domain.shape["t1"] > 0
+        assert widget.last_time_domain.shape["t2"] > 0
+        assert widget.last_time_domain.getaxis("t1")[0] < 0
+    finally:
+        widget.close()
+
+
+def test_t2_truncation_handles_large_reduction(qapp):
+    """Reducing t2 from 2048 to 512 should not trigger slicing errors."""
+    dataset = generate_fake_dataset(2048)
+    widget = PhaseCorrectionWidget(
+        base_dataset=dataset, exp_types=["TestExp"], search_string=DEFAULT_SEARCH
+    )
+    try:
+        widget.t2_entry.setText("512")
+        widget.t2_entry.editingFinished.emit()
         qapp.processEvents()
-        assert widget.last_time_domain.shape["t1"] >= 100
-        assert widget.last_time_domain.shape["t2"] >= 150
+        widget.update_plots()
+        assert widget.current_t2_points == 512
+        assert widget.base_dataset.shape["t2"] > widget.current_t2_points
+        phased = widget.apply_ph_and_ft()
+        assert phased.shape["t2"] > widget.current_t2_points
+        window = phased["t2":T2_RANGE]
+        assert window.shape["t2"] > 0
+        assert window.getaxis("t2")[0] >= T2_RANGE[0]
+        assert window.getaxis("t2")[-1] <= T2_RANGE[1]
     finally:
         widget.close()
