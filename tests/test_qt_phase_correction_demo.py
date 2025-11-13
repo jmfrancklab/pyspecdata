@@ -90,16 +90,25 @@ def test_widget_updates_with_fake_data(qapp):
     try:
         initial_time_image = np.array(widget.time_image.get_array())
         initial_ft_image = np.array(widget.hermitian_ft_image.get_array())
+        initial_scp = np.array(widget.scp_image.get_array())
         start_axes_count = len(widget.figure.axes)
         widget.diag_slider.setValue(25)
         widget.anti_slider.setValue(-30)
         qapp.processEvents()
         assert widget.diag_label.text() == "0.25 μs"
         assert widget.anti_label.text() == "-0.30 μs"
-        updated_time_image = np.array(widget.time_image.get_array())
-        updated_ft_image = np.array(widget.hermitian_ft_image.get_array())
-        assert not np.array_equal(initial_time_image, updated_time_image)
-        assert not np.array_equal(initial_ft_image, updated_ft_image)
+        assert widget.time_image is None
+        assert widget.hermitian_ft_image is None
+        updated_scp = np.array(widget.scp_image.get_array())
+        assert not np.array_equal(initial_scp, updated_scp)
+        widget.recompute_button.click()
+        qapp.processEvents()
+        assert widget.time_image is not None
+        assert widget.hermitian_ft_image is not None
+        refreshed_time = np.array(widget.time_image.get_array())
+        refreshed_ft = np.array(widget.hermitian_ft_image.get_array())
+        assert not np.array_equal(initial_time_image, refreshed_time)
+        assert not np.array_equal(initial_ft_image, refreshed_ft)
         assert len(widget.figure.axes) == start_axes_count
         assert widget.ax_time.images
         assert widget.ax_scp.images
