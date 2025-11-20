@@ -3316,9 +3316,9 @@ class nddata(object):
         # }}}
 
     def argmax(self, *axes, **kwargs):
-        r"""If `.argmax('dimname')` find the max along a particular dimension, and
-        get rid of that dimension, replacing it with the index number of the max
-        value.
+        r"""If `.argmax('dimname')` find the max along a particular dimension,
+        and get rid of that dimension, replacing it with the index number of
+        the max value.
 
         If `.argmax()`: return a dictionary giving the coordinates of the
         overall maximum point.
@@ -3367,9 +3367,9 @@ class nddata(object):
         return self
 
     def argmin(self, *axes, **kwargs):
-        r"""If `.argmin('dimname')` find the min along a particular dimension, and
-        get rid of that dimension, replacing it with the index number of the max
-        value.
+        r"""If `.argmin('dimname')` find the min along a particular dimension,
+        and get rid of that dimension, replacing it with the index number of
+        the max value.
 
         If `.argmin()`: return a dictionary giving the coordinates of the
         overall minimum point.
@@ -7107,9 +7107,7 @@ class nddata(object):
                     )
                     mydataattrs.remove("data_error")
                 else:
-                    thistable = np.rec.fromarrays(
-                        [self.data], names="data"
-                    )
+                    thistable = np.rec.fromarrays([self.data], names="data")
                 mydataattrs.remove("data")
                 datatable = h5table(bottomnode, "data", thistable)
                 # print 'DEBUG 2: bottomnode is',bottomnode
