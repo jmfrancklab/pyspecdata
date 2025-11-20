@@ -371,7 +371,7 @@ def h5table(bottomnode, tablename, tabledata):
             )
     else:
         if tabledata is not None:
-            raise ValueError(
+            raise FileExistsError(
                 strm(
                     "You're passing data to create the table,",
                     tablename,
