@@ -3316,9 +3316,9 @@ class nddata(object):
         # }}}
 
     def argmax(self, *axes, **kwargs):
-        r"""If `.argmax('dimname')` find the max along a particular dimension, and
-        get rid of that dimension, replacing it with the index number of the max
-        value.
+        r"""If `.argmax('dimname')` find the max along a particular dimension,
+        and get rid of that dimension, replacing it with the index number of
+        the max value.
 
         If `.argmax()`: return a dictionary giving the coordinates of the
         overall maximum point.
@@ -3367,9 +3367,9 @@ class nddata(object):
         return self
 
     def argmin(self, *axes, **kwargs):
-        r"""If `.argmin('dimname')` find the min along a particular dimension, and
-        get rid of that dimension, replacing it with the index number of the max
-        value.
+        r"""If `.argmin('dimname')` find the min along a particular dimension,
+        and get rid of that dimension, replacing it with the index number of
+        the max value.
 
         If `.argmin()`: return a dictionary giving the coordinates of the
         overall minimum point.
@@ -7102,14 +7102,12 @@ class nddata(object):
                     and self.get_error() is not None
                     and len(self.get_error()) > 0
                 ):
-                    thistable = np.core.rec.fromarrays(
+                    thistable = np.rec.fromarrays(
                         [self.data, self.get_error()], names="data,error"
                     )
                     mydataattrs.remove("data_error")
                 else:
-                    thistable = np.core.rec.fromarrays(
-                        [self.data], names="data"
-                    )
+                    thistable = np.rec.fromarrays([self.data], names="data")
                 mydataattrs.remove("data")
                 datatable = h5table(bottomnode, "data", thistable)
                 # print 'DEBUG 2: bottomnode is',bottomnode
@@ -7168,7 +7166,7 @@ class nddata(object):
                                 > 0
                             ):  # this is needed to avoid all errors, though I
                                 # guess I could use try/except
-                                thistable = np.core.rec.fromarrays(
+                                thistable = np.rec.fromarrays(
                                     [
                                         myaxisattrsforthisdim["axis_coords"],
                                         myaxisattrsforthisdim[
@@ -7179,7 +7177,7 @@ class nddata(object):
                                 )
                                 myaxisattrsforthisdim.pop("axis_coords_error")
                             else:
-                                thistable = np.core.rec.fromarrays(
+                                thistable = np.rec.fromarrays(
                                     [myaxisattrsforthisdim["axis_coords"]],
                                     names="data",
                                 )

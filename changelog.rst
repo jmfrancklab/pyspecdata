@@ -71,14 +71,17 @@ History/Roadmap
     - upgraded to numpy 2.0
     - stable ILT build w/ full implementation of Venkataramanan ILT
       regularization.
-    - "vibe-coded" interface to configuration interface
+    - "vibe-coded" interface to configuration file
+
       - used to store instrumental constants
       - used in file searching mechanism
+0.9.45
     - auto-deployment using github actions
-**0.9.45.4**
-    - set up github deployment
-    - added a GUI that handles the pyspecdata configuration (file locations, etc.)
-    - set rclone to actually use regex
+
+    - 0.9.45.4 **CURRENT**
+
+        - added a GUI that handles the pyspecdata configuration (file locations, etc.)
+        - set rclone to actually use regex
 
 Future Plans
 ^^^^^^^^^^^^

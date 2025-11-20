@@ -270,11 +270,11 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
                         )
                 with open(filename_ygf, "rb") as fp:
                     y_axis = fp.read()
-                y_axis = np.fromstring(y_axis, ">f8")
+                y_axis = np.frombuffer(y_axis, ">f8")
                 assert (
                     len(y_axis) == y_points_calcd
                 ), "Length of the power axis doesn't seem to match!"
-            if v["YTYP"] == "IDX":
+            elif v["YTYP"] == "IDX":
                 temp = v.pop("YMIN")
                 y_axis = np.linspace(temp, temp + v.pop("YWID"), v.pop("YPTS"))
                 y_dim_name = v.pop("YNAM")
@@ -445,7 +445,7 @@ def winepr(filename, dimname="", exp_type=None):
         )
     with open(filename_spc, "rb") as fp:
         data = fp.read()
-    data = np.fromstring(data, "<f4")
+    data = np.frombuffer(data, "<f4")
     # }}}
     # load the parameters
     v = winepr_load_acqu(filename_par)
