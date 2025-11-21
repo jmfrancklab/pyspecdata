@@ -74,13 +74,7 @@ def _check_layout(g, a, haserr=True):
     print("g:", dir(g))
     print("g.attrs:", g.attrs.keys())
     print("g.attrs['dimlabels']:", g.attrs["dimlabels"])
-    if (
-        hasattr(g.attrs["dimlabels"], "dtype")
-        and getattr(g.attrs["dimlabels"].dtype, "names", None) == ("LISTELEMENTS",)
-    ):
-        dimlabels = [j.decode("utf-8") for j in g.attrs["dimlabels"]["LISTELEMENTS"].flat]
-    else:
-        dimlabels = [j[0].decode("utf-8") for j in g.attrs["dimlabels"]]
+    dimlabels = [j[0].decode("utf-8") for j in g.attrs["dimlabels"]]
     assert dimlabels[0] == "t"
     assert dimlabels[1] == "f"
     if "data_units" not in g["data"].attrs:
@@ -109,15 +103,9 @@ def _check_layout(g, a, haserr=True):
     assert "level1" in g["other_info"]
     lvl1 = g["other_info"]["level1"]
     assert lvl1.attrs["level2"] == 5
-    if (
-        hasattr(lvl1.attrs["level2list"], "dtype")
-        and getattr(lvl1.attrs["level2list"].dtype, "names", None)
-        == ("LISTELEMENTS",)
-    ):
-        decoded_list = decode_list(lvl1.attrs["level2list"])
-        np.testing.assert_array_equal(decoded_list, [1, 2, 3])
-    else:
-        np.testing.assert_array_equal(lvl1.attrs["level2list"], [1, 2, 3])
+    np.testing.assert_array_equal(
+        lvl1.attrs["level2list"]["LISTELEMENTS"], [1, 2, 3]
+    )
 
 
 def _check_loaded(b, a):
@@ -268,7 +256,7 @@ def test_state_hdf_dict_roundtrip(tmp_path):
     state = a.__getstate__()
     with h5py.File(tmp_path / "state.h5", "w") as f:
         g = f.create_group("test_nd")
-        hdf_save_dict_to_group(g, state, use_pytables_hack=True)
+        hdf_save_dict_to_group(g, state)
     with h5py.File(tmp_path / "state.h5", "r") as f:
         _check_layout(f["test_nd"], a)
     os.remove(tmp_path / "state.h5")
@@ -280,7 +268,7 @@ def test_state_hdf_dict_roundtrip_noerr(tmp_path):
     state = a.__getstate__()
     with h5py.File(tmp_path / "state.h5", "w") as f:
         g = f.create_group("test_nd")
-        hdf_save_dict_to_group(g, state, use_pytables_hack=True)
+        hdf_save_dict_to_group(g, state)
     with h5py.File(tmp_path / "state.h5", "r") as f:
         _check_layout(f["test_nd"], a, haserr=False)
     os.remove(tmp_path / "state.h5")

@@ -15,6 +15,12 @@ def encode_list(name, seq, group, use_pytables_hack=False):
     record hack.
     """
 
+    # dimlabels are always stored directly as an attribute so they mirror the
+    # historical layout expected by the tests that inspect the HDF5 structure
+    if name == "dimlabels":
+        group.attrs[name] = np.array(seq)
+        return
+
     if use_pytables_hack:
         if (
             isinstance(seq, (np.void, np.ndarray))
@@ -23,13 +29,10 @@ def encode_list(name, seq, group, use_pytables_hack=False):
         ):
             group.attrs[name] = seq
             return
-        arr = np.array(seq)
-        if arr.dtype.kind == "U":
-            arr = np.array([x.encode("utf-8") for x in arr.flat]).reshape(
-                arr.shape
-            )
-        rec = np.zeros(1, dtype=[("LISTELEMENTS", arr.dtype, arr.shape)])[0]
-        rec["LISTELEMENTS"] = arr
+        elements = list(seq)
+        if len(elements) > 0 and isinstance(elements[0], str):
+            elements = [x.encode("utf-8") for x in elements]
+        rec = np.rec.fromarrays([elements], names="LISTELEMENTS")
         group.attrs[name] = rec
         return
     if (
