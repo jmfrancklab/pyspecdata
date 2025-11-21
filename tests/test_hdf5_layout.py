@@ -41,6 +41,44 @@ class DummyGroup(dict):
                 self[k] = [v.encode("utf-8") for v in self[k]]
 
 
+def _decode_list_node(node):
+    """Return a python sequence from an HDF5 LIST_NODE."""
+
+    indices = set()
+    for name in node.attrs.keys():
+        if name.startswith("ITEM"):
+            indices.add(int(name[4:]))
+    for name in node.keys():
+        if name.startswith("ITEM"):
+            indices.add(int(name[4:]))
+    decoded = []
+    for idx in sorted(indices):
+        item_name = "ITEM" + str(idx)
+        if item_name in node:
+            if isinstance(node[item_name], h5py.Dataset):
+                decoded.append(node[item_name][()])
+            else:
+                decoded.append(_decode_list_node(node[item_name]))
+        else:
+            if isinstance(node.attrs[item_name], bytes):
+                decoded.append(node.attrs[item_name].decode("utf-8"))
+            elif hasattr(node.attrs[item_name], "__len__") and not np.isscalar(node.attrs[item_name]):
+                inner = []
+                for element in node.attrs[item_name]:
+                    if isinstance(element, bytes):
+                        inner.append(element.decode("utf-8"))
+                    else:
+                        inner.append(element)
+                decoded.append(inner)
+            else:
+                decoded.append(node.attrs[item_name])
+    if "LISTCLASS" in node.attrs and (
+        node.attrs["LISTCLASS"] == b"tuple" or node.attrs["LISTCLASS"] == "tuple"
+    ):
+        return tuple(decoded)
+    return decoded
+
+
 def _generate_nddata():
     data = np.arange(6).reshape(2, 3) + 1j * np.arange(1, 7).reshape(2, 3)
     a = nddata(data, ["t", "f"])
@@ -72,8 +110,27 @@ def _check_layout(g, a, haserr=True):
     assert "data" in g
     print("g:", dir(g))
     print("g.attrs:", g.attrs.keys())
-    print("g.attrs['dimlabels']:", g.attrs["dimlabels"])
-    dimlabels = [j[0].decode("utf-8") for j in g.attrs["dimlabels"]]
+    dimlabels_source = None
+    if "dimlabels" in g.attrs:
+        dimlabels_source = []
+        for entry in g.attrs["dimlabels"]:
+            label_value = entry[0]
+            if isinstance(label_value, (bytes, np.bytes_)):
+                label_value = label_value.decode("utf-8")
+            dimlabels_source.append((label_value,))
+    else:
+        assert "dimlabels" in g
+        assert (
+            "LIST_NODE" in g["dimlabels"].attrs
+            and g["dimlabels"].attrs["LIST_NODE"]
+        )
+        dimlabels_source = _decode_list_node(g["dimlabels"])
+    dimlabels = []
+    for (lbl,) in dimlabels_source:
+        if isinstance(lbl, (bytes, np.bytes_)):
+            dimlabels.append(lbl.decode("utf-8"))
+        else:
+            dimlabels.append(lbl)
     assert dimlabels[0] == "t"
     assert dimlabels[1] == "f"
     if "data_units" not in g["data"].attrs:
@@ -102,9 +159,27 @@ def _check_layout(g, a, haserr=True):
     assert "level1" in g["other_info"]
     lvl1 = g["other_info"]["level1"]
     assert lvl1.attrs["level2"] == 5
-    np.testing.assert_array_equal(
-        lvl1.attrs["level2list"]["LISTELEMENTS"], [1, 2, 3]
-    )
+    if "level2list" in lvl1.attrs:
+        if isinstance(lvl1.attrs["level2list"], dict):
+            np.testing.assert_array_equal(
+                lvl1.attrs["level2list"]["LISTELEMENTS"], [1, 2, 3]
+            )
+        elif hasattr(lvl1.attrs["level2list"], "dtype") and getattr(
+            lvl1.attrs["level2list"].dtype, "names", None
+        ) is not None:
+            np.testing.assert_array_equal(
+                lvl1.attrs["level2list"]["LISTELEMENTS"], [1, 2, 3]
+            )
+        else:
+            np.testing.assert_array_equal(lvl1.attrs["level2list"], [1, 2, 3])
+    else:
+        assert "level2list" in lvl1
+        assert (
+            "LIST_NODE" in lvl1["level2list"].attrs
+            and lvl1["level2list"].attrs["LIST_NODE"]
+        )
+        reconstructed = _decode_list_node(lvl1["level2list"])
+        np.testing.assert_array_equal(reconstructed, [1, 2, 3])
 
 
 def _check_loaded(b, a):
@@ -170,12 +245,39 @@ def test_nddata_hdf5_roundtrip_noerr(tmp_path):
     os.remove(os.path.join(str(tmp_path), "sample.h5"))
 
 
+def test_nddata_hdf5_roundtrip_pytables_hack(tmp_path):
+    a = _generate_nddata()
+    a._pytables_hack = True
+    a.hdf5_write("sample.h5", directory=str(tmp_path))
+    b = nddata_hdf5("sample.h5/test_nd", directory=str(tmp_path))
+    _check_loaded(b, a)
+    os.remove(os.path.join(str(tmp_path), "sample.h5"))
+
+
 def test_nddata_hdf5_roundtrip_ikkf(tmp_path):
     a = _generate_nddata()
     a.set_prop("IKKF", ["REAL", "REAL", "REAL"])
     a.hdf5_write("sample.h5", directory=str(tmp_path))
     b = nddata_hdf5("sample.h5/test_nd", directory=str(tmp_path))
     _check_loaded(b, a)
+    os.remove(os.path.join(str(tmp_path), "sample.h5"))
+
+
+def test_nddata_hdf5_prop_tuple_roundtrip(tmp_path):
+    a = _generate_nddata_noerr()
+    # ensure tuple properties retain numeric types through HDF5 round trips
+    a.set_prop("testprop", (3.0, "T"))
+    a.set_prop("strint_mixture", ("05", 7))
+    a.hdf5_write("sample.h5", directory=str(tmp_path))
+    b = nddata_hdf5("sample.h5/test_nd", directory=str(tmp_path))
+    prop_val = b.get_prop("testprop")
+    assert isinstance(prop_val[0], float)
+    assert prop_val[0] == 3.0
+    assert prop_val[1] == "T"
+    mixed_val = b.get_prop("strint_mixture")
+    assert mixed_val[0] == "05"
+    assert isinstance(mixed_val[1], int)
+    assert mixed_val[1] == 7
     os.remove(os.path.join(str(tmp_path), "sample.h5"))
 
 

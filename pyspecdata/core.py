@@ -1359,24 +1359,32 @@ class nddata(object):
             if err is not None:
                 axes[lbl]["error"] = err
 
+        use_pytables_hack = getattr(self, "_pytables_hack", False)
+
         def serialize_other_info(obj):
             if isinstance(obj, dict):
                 return {k: serialize_other_info(v) for k, v in obj.items()}
             elif isinstance(obj, (list, tuple)):
-                elements = [serialize_other_info(v) for v in obj]
-                arr = np.array(elements)
-                if arr.dtype.kind == "U":
-                    arr = np.array(
-                        [x.encode("utf-8") for x in arr.flat]
-                    ).reshape(arr.shape)
-                # wrap lists as LISTELEMENTS to preserve compatibility
-                # with legacy pytables storage while ensuring the
-                # elements are safe for h5py attributes
-                rec = np.zeros(
-                    1, dtype=[("LISTELEMENTS", arr.dtype, arr.shape)]
-                )[0]
-                rec["LISTELEMENTS"] = arr
-                return rec
+                if use_pytables_hack:
+                    # retain the legacy LISTELEMENTS wrapping for
+                    # compatibility with older pytables-based files
+                    elements = [serialize_other_info(v) for v in obj]
+                    arr = np.array(elements)
+                    if arr.dtype.kind == "U":
+                        arr = np.array(
+                            [x.encode("utf-8") for x in arr.flat]
+                        ).reshape(arr.shape)
+                    rec = np.zeros(
+                        1, dtype=[("LISTELEMENTS", arr.dtype, arr.shape)]
+                    )[0]
+                    rec["LISTELEMENTS"] = arr
+                    return rec
+                # leave native sequence types intact so they can be
+                # stored without the numpy record hack
+                serialized_list = [serialize_other_info(v) for v in obj]
+                if isinstance(obj, tuple):
+                    return tuple(serialized_list)
+                return serialized_list
             return obj
 
         data_state = {"data": self.data}
@@ -1469,14 +1477,29 @@ class nddata(object):
             if (
                 isinstance(obj, (np.void, np.ndarray))
                 and getattr(obj, "dtype", None) is not None
-                and obj.dtype.names == ("LISTELEMENTS",)
+                and getattr(obj.dtype, "names", None) is not None
+                and "LISTELEMENTS" in obj.dtype.names
             ):
-                return [deserialize_other_info(v) for v in obj["LISTELEMENTS"]]
+                decoded_list = []
+                for idx, v in enumerate(obj["LISTELEMENTS"].flat):
+                    entry = deserialize_other_info(v)
+                    decoded_list.append(entry)
+                decoded_array = np.array(decoded_list, dtype=object).reshape(
+                    obj["LISTELEMENTS"].shape
+                )
+                return decoded_array.tolist()
             if isinstance(obj, dict):
+                if "LISTELEMENTS" in obj:
+                    elements = [deserialize_other_info(v) for v in obj["LISTELEMENTS"]]
+                    if "LISTCLASS" in obj and obj["LISTCLASS"] == "tuple":
+                        return tuple(elements)
+                    return elements
                 return {
                     decode_if_bytes(k): deserialize_other_info(v)
                     for k, v in obj.items()
                 }
+            elif isinstance(obj, tuple):
+                return tuple(deserialize_other_info(v) for v in obj)
             elif isinstance(obj, list):
                 return [deserialize_other_info(v) for v in obj]
             else:
