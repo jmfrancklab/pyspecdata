@@ -22,6 +22,7 @@ hmod = load_module(
 )
 hdf_save_dict_to_group = hmod.hdf_save_dict_to_group
 decode_list = hmod.decode_list
+encode_list = hmod.encode_list
 
 
 class DummyGroup(dict):
@@ -33,13 +34,51 @@ class DummyGroup(dict):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.attrs = self
-        for k, v in self.items():
-            if type(v) is dict:
-                self[k] = DummyGroup(v)
-            elif isinstance(v, str):
-                self[k] = v.encode("utf-8")
-            elif isinstance(v, list) and isinstance(v[0], str):
-                self[k] = [v.encode("utf-8") for v in self[k]]
+        # walk the tree to convert nested dicts to DummyGroup instances and
+        # encode any lists or tuples using the same helper as the real HDF5
+        # writer so layout checks see LISTELEMENTS records
+        stack = [self]
+        while stack:
+            current = stack.pop()
+            for key in list(current.keys()):
+                if type(current[key]) is dict:
+                    current[key] = DummyGroup(current[key])
+                    stack.append(current[key])
+                elif isinstance(current[key], (list, tuple)):
+                    encode_list(key, current.pop(key), current, True)
+                elif isinstance(current[key], str):
+                    current[key] = current[key].encode("utf-8")
+                elif (
+                    isinstance(current[key], list)
+                    and len(current[key]) > 0
+                    and isinstance(current[key][0], str)
+                ):
+                    current[key] = [x.encode("utf-8") for x in current[key]]
+
+    def create_group(self, name):
+        # create a subgroup to mimic h5py behavior for encode_list
+        self[name] = DummyGroup()
+        return self[name]
+
+    def create_dataset(self, name, data=None, dtype=None):
+        # minimal dataset object that stores raw data and attribute dict
+        dataset = DummyDataset(data)
+        self[name] = dataset
+        return dataset
+
+
+class DummyDataset(dict):
+    """Minimal dataset stand-in storing data and attrs."""
+
+    def __init__(self, data=None):
+        super().__init__()
+        self.data = data
+        self.attrs = {}
+
+    def __getitem__(self, key):
+        if key == ():
+            return self.data
+        return super().__getitem__(key)
 
 
 def _generate_nddata():
