@@ -150,23 +150,11 @@ def hdf_save_dict_to_group(group, data, use_pytables_hack=False):
             logger.debug("Dataset type %s" % str(v.dtype))
             logger.debug("Adding %s=%s as dataset" % (k, v))
             group.create_dataset(k, data=v, dtype=v.dtype)
-        elif isinstance(v, (list, tuple)) or (
-            isinstance(v, (np.void, np.ndarray))
-            and getattr(v, "dtype", None) is not None
-            and getattr(v.dtype, "names", None) == ("LISTELEMENTS",)
-        ):
+        elif isinstance(v, (list, tuple)):
             encode_list(k, v, group, use_pytables_hack)
         elif issubclass(type(v), dict):
-            if set(v.keys()) == {"LISTELEMENTS"}:
-                encode_list(
-                    k,
-                    np.rec.fromarrays([v["LISTELEMENTS"]], names="LISTELEMENTS")[0],
-                    group,
-                    use_pytables_hack,
-                )
-            else:
-                subgroup = group.create_group(k)
-                hdf_save_dict_to_group(subgroup, v, use_pytables_hack)
+            subgroup = group.create_group(k)
+            hdf_save_dict_to_group(subgroup, v, use_pytables_hack)
         else:
             if v is None:
                 continue

@@ -23,6 +23,7 @@ hmod = load_module(
 hdf_save_dict_to_group = hmod.hdf_save_dict_to_group
 decode_list = hmod.decode_list
 encode_list = hmod.encode_list
+hdf_load_dict_from_group = hmod.hdf_load_dict_from_group
 
 
 class DummyGroup(dict):
@@ -54,31 +55,6 @@ class DummyGroup(dict):
                     and isinstance(current[key][0], str)
                 ):
                     current[key] = [x.encode("utf-8") for x in current[key]]
-
-    def create_group(self, name):
-        # create a subgroup to mimic h5py behavior for encode_list
-        self[name] = DummyGroup()
-        return self[name]
-
-    def create_dataset(self, name, data=None, dtype=None):
-        # minimal dataset object that stores raw data and attribute dict
-        dataset = DummyDataset(data)
-        self[name] = dataset
-        return dataset
-
-
-class DummyDataset(dict):
-    """Minimal dataset stand-in storing data and attrs."""
-
-    def __init__(self, data=None):
-        super().__init__()
-        self.data = data
-        self.attrs = {}
-
-    def __getitem__(self, key):
-        if key == ():
-            return self.data
-        return super().__getitem__(key)
 
 
 def _generate_nddata():
@@ -209,7 +185,6 @@ def test_nddata_hdf5_roundtrip(tmp_path):
 
 def test_nddata_hdf5_roundtrip_noerr(tmp_path):
     a = _generate_nddata_noerr()
-    a._pytables_hack = True
     a.hdf5_write("sample.h5", directory=str(tmp_path))
     b = nddata_hdf5("sample.h5/test_nd", directory=str(tmp_path))
     _check_loaded(b, a)
@@ -277,6 +252,48 @@ def test_nddata_hdf5_prop_complex_structures(tmp_path):
     b = nddata_hdf5("sample.h5/test_nd", directory=str(tmp_path))
     assert b.get_prop("complex_prop") == complex_prop
     os.remove(os.path.join(str(tmp_path), "sample.h5"))
+
+
+def test_encode_decode_list_invertible_no_hack(tmp_path):
+    seq = [1, "two", (3.5, "u"), {"inner": 4}]
+    with h5py.File(tmp_path / "seq.h5", "w") as f:
+        grp = f.create_group("root")
+        encode_list("seq", seq, grp, False)
+    with h5py.File(tmp_path / "seq.h5", "r") as f:
+        reconstructed = decode_list(f["root"]["seq"])
+    assert reconstructed == seq
+
+
+def test_encode_decode_list_invertible_with_hack(tmp_path):
+    seq = [1, 2, 3]
+    with h5py.File(tmp_path / "seq_hack.h5", "w") as f:
+        grp = f.create_group("root")
+        encode_list("seq", seq, grp, True)
+    with h5py.File(tmp_path / "seq_hack.h5", "r") as f:
+        reconstructed = decode_list(f["root"].attrs["seq"])
+    assert reconstructed == seq
+
+
+def test_hdf_dict_preserves_lists_no_hack(tmp_path):
+    data = {"mixed_list": [1, "two", (3.0, "u")], "scalar": 5}
+    with h5py.File(tmp_path / "dict_no_hack.h5", "w") as f:
+        grp = f.create_group("root")
+        hdf_save_dict_to_group(grp, data, use_pytables_hack=False)
+    with h5py.File(tmp_path / "dict_no_hack.h5", "r") as f:
+        loaded = hdf_load_dict_from_group(f["root"])
+    assert loaded["mixed_list"] == data["mixed_list"]
+    assert loaded["scalar"] == data["scalar"]
+
+
+def test_hdf_dict_preserves_lists_pytables_hack(tmp_path):
+    data = {"uniform_list": [10, 20, 30], "scalar": 8}
+    with h5py.File(tmp_path / "dict_hack.h5", "w") as f:
+        grp = f.create_group("root")
+        hdf_save_dict_to_group(grp, data, use_pytables_hack=True)
+    with h5py.File(tmp_path / "dict_hack.h5", "r") as f:
+        loaded = hdf_load_dict_from_group(f["root"])
+    assert loaded["uniform_list"] == data["uniform_list"]
+    assert loaded["scalar"] == data["scalar"]
 
 
 def test_nddata_pickle_roundtrip(tmp_path):
