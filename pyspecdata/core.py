@@ -1359,28 +1359,10 @@ class nddata(object):
             if err is not None:
                 axes[lbl]["error"] = err
 
-        use_pytables_hack = getattr(self, "_pytables_hack", False)
-
         def serialize_other_info(obj):
             if isinstance(obj, dict):
                 return {k: serialize_other_info(v) for k, v in obj.items()}
             elif isinstance(obj, (list, tuple)):
-                if use_pytables_hack:
-                    # retain the legacy LISTELEMENTS wrapping for
-                    # compatibility with older pytables-based files
-                    elements = [serialize_other_info(v) for v in obj]
-                    arr = np.array(elements)
-                    if arr.dtype.kind == "U":
-                        arr = np.array(
-                            [x.encode("utf-8") for x in arr.flat]
-                        ).reshape(arr.shape)
-                    rec = np.zeros(
-                        1, dtype=[("LISTELEMENTS", arr.dtype, arr.shape)]
-                    )[0]
-                    rec["LISTELEMENTS"] = arr
-                    return rec
-                # leave native sequence types intact so they can be
-                # stored without the numpy record hack
                 serialized_list = [serialize_other_info(v) for v in obj]
                 if isinstance(obj, tuple):
                     return tuple(serialized_list)

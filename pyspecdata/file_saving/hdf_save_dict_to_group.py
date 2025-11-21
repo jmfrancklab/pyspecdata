@@ -22,17 +22,19 @@ def encode_list(name, seq, group, use_pytables_hack=False):
         return
 
     if use_pytables_hack:
-        if (
-            isinstance(seq, (np.void, np.ndarray))
-            and getattr(seq, "dtype", None) is not None
-            and getattr(seq.dtype, "names", None) == ("LISTELEMENTS",)
-        ):
-            group.attrs[name] = seq
-            return
-        elements = list(seq)
-        if len(elements) > 0 and isinstance(elements[0], str):
-            elements = [x.encode("utf-8") for x in elements]
-        rec = np.rec.fromarrays([elements], names="LISTELEMENTS")
+        # store a numpy record with LISTELEMENTS so legacy readers see the
+        # familiar attribute layout when the hack is requested
+        serialized_elements = []
+        for entry in seq:
+            if isinstance(entry, str):
+                serialized_elements.append(entry.encode("utf-8"))
+            else:
+                serialized_elements.append(entry)
+        arr = np.array(serialized_elements)
+        if arr.dtype.kind == "U":
+            arr = np.array([x.encode("utf-8") for x in arr.flat]).reshape(arr.shape)
+        rec = np.zeros(1, dtype=[("LISTELEMENTS", arr.dtype, arr.shape)])[0]
+        rec["LISTELEMENTS"] = arr
         group.attrs[name] = rec
         return
     if (
