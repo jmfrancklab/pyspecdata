@@ -283,6 +283,15 @@ def dot(self, arg):
 
 # @profile
 def matmul(self, arg):
+    from ..axis_class import nddata_axis, axis_collection
+
+    if isinstance(arg, nddata_axis):
+        axis = self.axes[arg.name]
+        data = np.interp(arg.to_array(), axis.to_array(), self.data)
+        result = type(self)(data, [arg.name])
+        result.axes = axis_collection()
+        result.axes += arg
+        return result
     cls1, cls2 = type(arg), type(self)
     assert cls1 is cls2 or issubclass(cls1, cls2) or issubclass(cls2, cls1), (
         "currently matrix multiplication only allowed if both are nddata"

@@ -25,6 +25,13 @@ def load_module(name: str, *, use_real_pint: bool = False):
     # provide dummy replacements for optional compiled dependencies
     sys.modules.setdefault("tables", types.ModuleType("tables"))
     sys.modules.setdefault("h5py", types.ModuleType("h5py"))
+    if "_nnls" not in sys.modules:
+        nnls_stub = types.ModuleType("_nnls")
+        def _stub(*_a, **_k):
+            raise RuntimeError("_nnls extension is not available")
+        nnls_stub.venk_brd = _stub
+        nnls_stub.venk_nnls = _stub
+        sys.modules["_nnls"] = nnls_stub
 
     if not use_real_pint:
         try:
@@ -198,7 +205,8 @@ def load_module(name: str, *, use_real_pint: bool = False):
         pylab_stub.rcParams = {
             "axes.prop_cycle": types.SimpleNamespace(
                 by_key=lambda: {"color": ["k"]}
-            )
+            ),
+            "figure.figsize": (8, 6),
         }
         pylab_stub.pi = np.pi
         pylab_stub.r_ = np.r_

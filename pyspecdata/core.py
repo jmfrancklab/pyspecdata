@@ -1269,6 +1269,13 @@ class nddata(object):
         else:
             logger.debug("only one argument")
             self.__my_init__(args[0], [-1], ["INDEX"], **kwargs)
+        from .axis_class import axis_collection, nddata_axis
+
+        self.axes = axis_collection()
+        for i, name in enumerate(self.dimlabels):
+            ax = nddata_axis(np.arange(self.data.shape[i]))
+            ax.name = name
+            self.axes += ax
         return
 
     def __my_init__(
@@ -4642,10 +4649,8 @@ class nddata(object):
         return self
 
     def axis(self, axisname):
-        "returns a 1-D axis for further manipulation"
-        return nddata(self.getaxis(axisname).copy(), [-1], [axisname]).labels(
-            axisname, self.getaxis(axisname).copy()
-        )
+        """Return the :class:`nddata_axis` for ``axisname``."""
+        return self.axes[axisname]
 
     def _axis_inshape(self, axisname):
         newshape = np.ones(len(self.data.shape), dtype="uint")

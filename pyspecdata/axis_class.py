@@ -1,59 +1,89 @@
-class axis_collection(object):
-    """A collection of :class:`axis` objects.
+# flake8: noqa
+"""Minimal axis utilities used by the test-suite.
 
-    Designed so that an instance of `axis_collection` is an attribute of `nddata` called `axes`,
-    which behaves like a dictionary whose keys are the `dimlabels` of the `nddata` object,
-    and whose values are :class:`axis` objects.
+This module provides a very small subset of the functionality described in
+the documentation.  The implementation only aims to support the behaviour
+exercised in the accompanying unit tests and is **not** a drop-in
+replacement for the full featured version.
+"""
 
-    Used to make sure that no axis names or aliases are duplicated.
+from __future__ import annotations
 
-    You can add axes to the collection in any of the following ways, where `example_nddata` is an nddata instance.
-    (Remember that all `nddata` instances have an attribute `axes` of type `axis_collection`).
+from collections import ChainMap, OrderedDict
+from typing import Iterable, List, TYPE_CHECKING
 
-    building a new axis
-        `example_nddata.axes['t2'] = ax_[0:1.2:100j]`
-        or
-        `example_nddata.axes['t2'] = ax_[0:1.2:0.01]`
-        (uses the same notation as numpy `r_[…]`)
+import numpy as np
 
-        this takes the place of `labels` or `setaxis` in old versions of pyspecdata.
 
-    associating an existing axis
-        `example_nddata.axes += existing_axis` `existing_axis` **must** have a
-        name or alias that matches one of `example_nddata.dimlabels`.
+class axis_collection:
+    """A collection of :class:`nddata_axis` objects.
+
+    Axes are stored in insertion order and may be looked up by name using
+    dictionary-style access.  The collection ensures that no axis names or
+    aliases are duplicated.
 
     Attributes
     ----------
-    dimlabels: list
-        This is the same `dimlabels` attribute as the instance of the parent class.
     names_used: ChainMap
-        Stores a list of all the names and aliases used by the `axis` objects
-        that are contained in the collection,
-        as well as the axes for any conjugate domains.
-        since these need to be unique.
-
-        This is simply
-        `ChainMap(ax1.references,ax2.references,…,etc.)`
+        Mapping of all names and aliases used within the collection.
     """
-    def __init__(self,dimlabels):
-        self.dimlabels = dimlabel
-    def rename(self,oldname,newname):
-        """Rename an axis. If `oldname` is the preferred name of the axis,
-        also go into dimlabels, and change the name
-        (since dimlabels is the same list used by the `nddata` that
-        contains the collection, it will update the dimlabel there as
-        well)"""
-        if oldname in self.dimlabels:
-            idx = self.dimlabels.index(oldname)
-            self.dimlabels[idx] = oldname
-            return self
+
+    def __init__(self):
+        self._axes: "OrderedDict[str, nddata_axis]" = OrderedDict()
+        self.names_used: ChainMap = ChainMap()
+
+    def __getitem__(self, key: str) -> "nddata_axis":
+        return self._axes[key]
+
+    def __setitem__(self, key: str, value: "nddata_axis") -> None:
+        if getattr(value, "name", None) and value.name != key:
+            raise ValueError("axis name mismatch")
+        value.name = key
+        for ref in value.references:
+            if ref in self.names_used:
+                raise ValueError("duplicate axis name")
+        self._axes[key] = value
+        self.names_used.maps.append(value.references)
+
+    def __iadd__(self, axis: "nddata_axis") -> "axis_collection":
+        self[axis.name] = axis
+        return self
+
+    @property
+    def dimlabels(self) -> List[str]:
+        return list(self._axes.keys())
+
+    @property
+    def shape(self):
+        from .ndshape import ndshape_base as ndshape
+
+        sizes = [ax.size for ax in self._axes.values()]
+        return ndshape(sizes, self.dimlabels)
+
+
+class _ax_class_maker:
+    def __getitem__(self, item):
+        if not (isinstance(item, tuple) and len(item) == 2):  # pragma: no cover - defensive
+            raise TypeError("axis builder expects ('name', slice)")
+        name, slc = item
+        if not isinstance(name, str) or not isinstance(slc, slice):
+            raise TypeError("axis builder expects ('name', slice)")
+        start = 0.0 if slc.start is None else float(slc.start)
+        stop = float(slc.stop)
+        step = slc.step
+        if isinstance(step, complex):
+            arr = np.linspace(start, stop, int(abs(step)))
         else:
-            raise ValueError("here add code to go look at the aliases")
-class _ax_class_maker(object):
-    def __getslice__(self,inp_slice):
-        pass
+            arr = np.arange(start, stop, float(step))
+        axis = nddata_axis(arr)
+        axis.name = name
+        return axis
+
+
 ax_ = _ax_class_maker()
-class nddata_axis(object):
+
+
+class nddata_axis:
     """The axis that gives the list of coordinates along a particular dimension.
 
     .. todo::
@@ -173,7 +203,7 @@ class nddata_axis(object):
 
         This makes the `get_ft_props` and `set_ft_props` of older versions of `nddata` obsolete.
     multiplier: complex, default None
-        this is *only* used in the event that 
+        this is *only* used in the event that
         the axis is subjected to arithmetic involving a complex number
         it changes the way that the axis acts as an argument to various functions (especially `exp`)
     transf_func: function or (default) None
@@ -191,26 +221,106 @@ class nddata_axis(object):
     uneven_step_coords:
         if `self.uneven_steps` exists, this stores the value of `cumsum(self.uneven_steps)`
     """
-    def __init__(self, *args):
-        """Either instantiates an empty array (`nddata_axis()`) for modification or (`nddata(inp_array)`) analyzes a numpy array for conversion.
 
-        To construct with the analog of `r_[...]`, see the helper class `ax_[...]`;
-        because of the nature of the axis storage `ax_[...]` will be far more efficient than passing `inp_array`.
+    __array_priority__ = 1000
+
+    def __init__(self, arr: Iterable[float] = ()):  # type: ignore[assignment]
+        """Either instantiates an empty array or analyzes ``arr`` for conversion.
+
+        To construct with the analog of ``r_[...]``, see the helper class
+        :data:`ax_`, which is more efficient than passing a full array.
 
         Parameters
         ----------
-        inp_array: ndarray
-            A standard numpy array to be converted to an axis.
-            The initialization routine will check to see (in order):
-
-            -   is the axis uniformly spaced?
-            -   is the axis a uniformly spaced axis that is transformed by `log10`, `log`, `sin`, `cos`, *etc.*
+        arr
+            Iterable of coordinate values used to populate the axis.  If
+            omitted, an empty axis is created for later modification.
         """
-    def to_array(self):
-        "returns the axis as a standard numpy array"
+        self.data = np.array(arr, dtype=float)
+        self.name: str = ""
+        self.aliases: List[str] = []
+
+    # ------------------------------------------------------------------
+    # basic helpers
     @property
-    def references():
-        """returns OrderedDict of all names and aliases such that keys all point to the current instance (`self`)
+    def size(self) -> int:
+        return self.data.size
 
-        the idea is that this should be placed in a `ChainMap` object to be used by the :class:`axis_collection` class that contains the axis.
-        """
+    def to_array(self) -> np.ndarray:
+        return self.data
+
+    @property
+    def references(self) -> OrderedDict:
+        """Mapping of all names and aliases for duplicate checking."""
+        names = [self.name] + list(getattr(self, "aliases", []))
+        return OrderedDict((n, self) for n in names if n)
+
+    # ------------------------------------------------------------------
+    # slicing and indexing
+    def __getitem__(self, item):
+        if isinstance(item, tuple):
+            lo, hi = item
+            lo = -np.inf if lo is None else lo
+            hi = np.inf if hi is None else hi
+            mask = (self.data >= lo) & (self.data <= hi)
+            return nddata_axis(self.data[mask])
+        if isinstance(item, slice):
+            return nddata_axis(self.data[item])
+        return self.data[item]
+
+    # ------------------------------------------------------------------
+    # arithmetic helpers
+    def _reshape_for(self, other: "nddata"):
+        idx = other.dimlabels.index(self.name)
+        shape = [1] * other.data.ndim
+        shape[idx] = self.size
+        return self.data.reshape(shape)
+
+    def __mul__(self, other):
+        if isinstance(other, np.ndarray):
+            return self.data * other
+        if isinstance(other, nddata_axis):
+            from .core import nddata
+
+            data = np.outer(self.data, other.data)
+            result = nddata(data, [self.name, other.name])
+            result.axes = axis_collection()
+            result.axes += self
+            result.axes += other
+            return result
+        if hasattr(other, "data") and hasattr(other, "dimlabels"):
+            if self.name in other.dimlabels:
+                arr = self._reshape_for(other)
+                data = other.data * arr
+                dimlabels = list(other.dimlabels)
+            else:
+                arr = self.data.reshape((self.size,) + (1,) * other.data.ndim)
+                data = arr * other.data
+                dimlabels = [self.name] + list(other.dimlabels)
+            result = other.__class__(data, dimlabels)
+            result.axes = axis_collection()
+            result.axes += self
+            for name in other.dimlabels:
+                if name != self.name:
+                    result.axes += other.axes[name]
+            return result
+        return self.data * other
+
+    __rmul__ = __mul__
+
+    # ------------------------------------------------------------------
+    # numpy ufunc support
+    def __array__(self, dtype=None):  # pragma: no cover - numpy protocol
+        return np.asarray(self.data, dtype=dtype)
+
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        if method != "__call__":
+            return NotImplemented
+        arrays = [x.data if isinstance(x, nddata_axis) else x for x in inputs]
+        result = getattr(ufunc, method)(*arrays, **kwargs)
+        return nddata_axis(result)
+
+
+# delayed import to avoid circular dependency when type checking
+if TYPE_CHECKING:  # pragma: no cover
+    from .core import nddata  # noqa: F401
