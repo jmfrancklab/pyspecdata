@@ -32,10 +32,18 @@ def hdf_save_dict_to_group(group, data):
                 logger.debug("Adding %s=%s as string attribute" % (k, v))
                 group.attrs[k] = v.encode("utf-8")
             elif np.isscalar(v):
-                logger.debug("Adding %s=%s as scalar attribute" % (k, v))
+                logger.debug(
+                    "Adding "
+                    + repr(k)
+                    + "="
+                    + repr(v)
+                    + " as scalar attribute"
+                )
                 group.attrs[k] = v
             elif hasattr(v, "__len__") and len(v) > 0:
-                logger.debug("Adding %s=%s as list attribute" % (k, v))
+                logger.debug(
+                    "Adding " + repr(k) + "=" + repr(v) + " as list attribute"
+                )
                 # added encoding in following
                 group.attrs[k] = [
                     x.encode("utf-8") if isinstance(x, str) else x for x in v
