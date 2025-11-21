@@ -1375,7 +1375,7 @@ class nddata(object):
         def serialize_other_info(obj):
             if isinstance(obj, dict):
                 return {k: serialize_other_info(v) for k, v in obj.items()}
-            if isinstance(obj, (list, tuple)):
+            elif isinstance(obj, (list, tuple)):
                 elements = [serialize_other_info(v) for v in obj]
                 arr = np.array(elements)
                 rec = np.zeros(
