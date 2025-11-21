@@ -1363,20 +1363,10 @@ class nddata(object):
             if isinstance(obj, dict):
                 return {k: serialize_other_info(v) for k, v in obj.items()}
             elif isinstance(obj, (list, tuple)):
-                elements = [serialize_other_info(v) for v in obj]
-                arr = np.array(elements)
-                if arr.dtype.kind == "U":
-                    arr = np.array(
-                        [x.encode("utf-8") for x in arr.flat]
-                    ).reshape(arr.shape)
-                # wrap lists as LISTELEMENTS to preserve compatibility
-                # with legacy pytables storage while ensuring the
-                # elements are safe for h5py attributes
-                rec = np.zeros(
-                    1, dtype=[("LISTELEMENTS", arr.dtype, arr.shape)]
-                )[0]
-                rec["LISTELEMENTS"] = arr
-                return rec
+                serialized_list = [serialize_other_info(v) for v in obj]
+                if isinstance(obj, tuple):
+                    return tuple(serialized_list)
+                return serialized_list
             return obj
 
         data_state = {"data": self.data}
@@ -1477,6 +1467,8 @@ class nddata(object):
                     decode_if_bytes(k): deserialize_other_info(v)
                     for k, v in obj.items()
                 }
+            elif isinstance(obj, tuple):
+                return tuple(deserialize_other_info(v) for v in obj)
             elif isinstance(obj, list):
                 return [deserialize_other_info(v) for v in obj]
             else:
@@ -7113,7 +7105,9 @@ class nddata(object):
             if fullpath in f:
                 del f[fullpath]
             g = f.create_group(fullpath)
-            hdf_save_dict_to_group(g, state)
+            hdf_save_dict_to_group(
+                g, state, use_pytables_hack=getattr(self, "_pytables_hack", False)
+            )
 
     # }}}
 

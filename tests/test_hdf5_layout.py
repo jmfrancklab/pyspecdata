@@ -1,6 +1,7 @@
 import sys
 import types
 import numpy as np
+import pytest
 import h5py
 import pickle
 import os
@@ -21,6 +22,20 @@ hmod = load_module(
     use_real_h5py=True,
 )
 hdf_save_dict_to_group = hmod.hdf_save_dict_to_group
+decode_list = hmod.decode_list
+encode_list = hmod.encode_list
+hdf_load_dict_from_group = hmod.hdf_load_dict_from_group
+
+
+class DummyDataset:
+    def __init__(self, data):
+        self.data = data
+        self.attrs = {}
+
+    def __getitem__(self, key):
+        if key == ():
+            return self.data
+        return self.data[key]
 
 
 class DummyGroup(dict):
@@ -32,13 +47,70 @@ class DummyGroup(dict):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.attrs = self
-        for k, v in self.items():
-            if type(v) is dict:
-                self[k] = DummyGroup(v)
-            elif isinstance(v, str):
-                self[k] = v.encode("utf-8")
-            elif isinstance(v, list) and isinstance(v[0], str):
-                self[k] = [v.encode("utf-8") for v in self[k]]
+        # walk the tree to convert nested dicts to DummyGroup instances and
+        # encode any lists or tuples using the same helper as the real HDF5
+        # writer so layout checks see LISTELEMENTS records
+        stack = [self]
+        while stack:
+            current = stack.pop()
+            for key in list(current.keys()):
+                if type(current[key]) is dict:
+                    current[key] = DummyGroup(current[key])
+                    stack.append(current[key])
+                elif isinstance(current[key], (list, tuple)):
+                    encode_list(key, current.pop(key), current, True)
+                elif isinstance(current[key], str):
+                    current[key] = current[key].encode("utf-8")
+                elif (
+                    isinstance(current[key], list)
+                    and len(current[key]) > 0
+                    and isinstance(current[key][0], str)
+                ):
+                    current[key] = [x.encode("utf-8") for x in current[key]]
+
+    def create_group(self, name):
+        subgroup = DummyGroup()
+        self[name] = subgroup
+        return subgroup
+
+    def create_dataset(self, name, data=None, dtype=None):
+        dataset = DummyDataset(data)
+        self[name] = dataset
+        return dataset
+
+
+class SimpleGroup:
+    """In-memory stand-in for the parts of h5py used by encode_list.
+
+    Attributes live in ``attrs`` and children are stored separately so they
+    do not collide, matching the behavior of real HDF5 groups.
+    """
+
+    def __init__(self):
+        self.attrs = {}
+        self.children = {}
+
+    def __getitem__(self, key):
+        return self.children[key]
+
+    def __contains__(self, key):
+        return key in self.children
+
+    def keys(self):
+        return self.children.keys()
+
+    def items(self):
+        return self.children.items()
+
+    def create_group(self, name):
+        subgroup = SimpleGroup()
+        self.children[name] = subgroup
+        return subgroup
+
+    def create_dataset(self, name, data=None, dtype=None):
+        dataset = DummyDataset(data)
+        self.children[name] = dataset
+        return dataset
 
 
 def _generate_nddata():
@@ -126,6 +198,7 @@ def _check_loaded(b, a):
 
 def test_hdf5_layout(tmp_path):
     a = _generate_nddata()
+    a._pytables_hack = True
     a.hdf5_write("sample.h5", directory=str(tmp_path))
     with h5py.File(tmp_path / "sample.h5", "r") as f:
         assert "test_nd" in f
@@ -135,6 +208,7 @@ def test_hdf5_layout(tmp_path):
 
 def test_hdf5_layout_noerr(tmp_path):
     a = _generate_nddata_noerr()
+    a._pytables_hack = True
     a.hdf5_write("sample.h5", directory=str(tmp_path))
     with h5py.File(tmp_path / "sample.h5", "r") as f:
         assert "test_nd" in f
@@ -144,39 +218,132 @@ def test_hdf5_layout_noerr(tmp_path):
 
 def test_state_layout():
     a = _generate_nddata()
+    a._pytables_hack = True
     g = DummyGroup(a.__getstate__())
     _check_layout(g, a)
 
 
 def test_state_layout_noerr():
     a = _generate_nddata_noerr()
+    a._pytables_hack = True
     g = DummyGroup(a.__getstate__())
     _check_layout(g, a, haserr=False)
 
 
-def test_nddata_hdf5_roundtrip(tmp_path):
+@pytest.mark.parametrize("use_pytables_hack", [False, True])
+def test_nddata_hdf5_roundtrip(tmp_path, use_pytables_hack):
     a = _generate_nddata()
+    if use_pytables_hack:
+        a._pytables_hack = True
     a.hdf5_write("sample.h5", directory=str(tmp_path))
     b = nddata_hdf5("sample.h5/test_nd", directory=str(tmp_path))
     _check_loaded(b, a)
     os.remove(os.path.join(str(tmp_path), "sample.h5"))
 
 
-def test_nddata_hdf5_roundtrip_noerr(tmp_path):
+@pytest.mark.parametrize("use_pytables_hack", [False, True])
+def test_nddata_hdf5_roundtrip_noerr(tmp_path, use_pytables_hack):
     a = _generate_nddata_noerr()
+    if use_pytables_hack:
+        a._pytables_hack = True
     a.hdf5_write("sample.h5", directory=str(tmp_path))
     b = nddata_hdf5("sample.h5/test_nd", directory=str(tmp_path))
     _check_loaded(b, a)
     os.remove(os.path.join(str(tmp_path), "sample.h5"))
 
 
-def test_nddata_hdf5_roundtrip_ikkf(tmp_path):
+@pytest.mark.parametrize("use_pytables_hack", [False, True])
+def test_nddata_hdf5_roundtrip_ikkf(tmp_path, use_pytables_hack):
     a = _generate_nddata()
+    if use_pytables_hack:
+        a._pytables_hack = True
     a.set_prop("IKKF", ["REAL", "REAL", "REAL"])
     a.hdf5_write("sample.h5", directory=str(tmp_path))
     b = nddata_hdf5("sample.h5/test_nd", directory=str(tmp_path))
     _check_loaded(b, a)
     os.remove(os.path.join(str(tmp_path), "sample.h5"))
+
+
+def test_nddata_hdf5_prop_tuple_roundtrip(tmp_path):
+    a = _generate_nddata_noerr()
+    # ensure tuple properties retain numeric types through HDF5 round trips
+    a.set_prop("testprop", (3.0, "T"))
+    a.set_prop("strint_mixture", ("05", 7))
+    a.hdf5_write("sample.h5", directory=str(tmp_path))
+    b = nddata_hdf5("sample.h5/test_nd", directory=str(tmp_path))
+    prop_val = b.get_prop("testprop")
+    assert isinstance(prop_val[0], float)
+    assert prop_val[0] == 3.0
+    assert prop_val[1] == "T"
+    mixed_val = b.get_prop("strint_mixture")
+    assert mixed_val[0] == "05"
+    assert isinstance(mixed_val[1], int)
+    assert mixed_val[1] == 7
+    os.remove(os.path.join(str(tmp_path), "sample.h5"))
+
+
+def test_nddata_hdf5_prop_complex_structures(tmp_path):
+    a = _generate_nddata_noerr()
+    complex_prop = {
+        "mixed_list": [1, "two", {"inner_dict": {"label": "val"}}, (3.5, "units")],
+        "tuple_wrapping": (["zero", 0], {"deep_list": [("keep", 1), "str"]}),
+    }
+    a.set_prop("complex_prop", complex_prop)
+    a.hdf5_write("sample.h5", directory=str(tmp_path))
+    with h5py.File(tmp_path / "sample.h5", "r") as f:
+        assert "mixed_list" in f["test_nd"]["other_info"]["complex_prop"]
+        assert (
+            f["test_nd"]["other_info"]["complex_prop"]["mixed_list"].attrs[
+                "LIST_NODE"
+            ]
+        )
+        decoded_list = decode_list(
+            f["test_nd"]["other_info"]["complex_prop"]["mixed_list"]
+        )
+        assert isinstance(decoded_list[3], tuple)
+        assert decoded_list[3][0] == 3.5
+        assert decoded_list[3][1] == "units"
+    b = nddata_hdf5("sample.h5/test_nd", directory=str(tmp_path))
+    assert b.get_prop("complex_prop") == complex_prop
+    os.remove(os.path.join(str(tmp_path), "sample.h5"))
+
+
+def test_encode_decode_list_invertible_no_hack():
+    seq = [1, "two", (3.5, "u"), {"inner": 4}]
+    root = SimpleGroup()
+    encode_list("seq", seq, root, False)
+    reconstructed = decode_list(root["seq"])
+    assert reconstructed == seq
+
+
+def test_encode_decode_list_invertible_with_hack():
+    seq = [1, 2, 3]
+    root = SimpleGroup()
+    encode_list("seq", seq, root, True)
+    reconstructed = decode_list(root.attrs["seq"])
+    assert reconstructed == seq
+
+
+def test_hdf_dict_preserves_lists_no_hack(tmp_path):
+    data = {"mixed_list": [1, "two", (3.0, "u")], "scalar": 5}
+    with h5py.File(tmp_path / "dict_no_hack.h5", "w") as f:
+        grp = f.create_group("root")
+        hdf_save_dict_to_group(grp, data, use_pytables_hack=False)
+    with h5py.File(tmp_path / "dict_no_hack.h5", "r") as f:
+        loaded = hdf_load_dict_from_group(f["root"])
+    assert loaded["mixed_list"] == data["mixed_list"]
+    assert loaded["scalar"] == data["scalar"]
+
+
+def test_hdf_dict_preserves_lists_pytables_hack(tmp_path):
+    data = {"uniform_list": [10, 20, 30], "scalar": 8}
+    with h5py.File(tmp_path / "dict_hack.h5", "w") as f:
+        grp = f.create_group("root")
+        hdf_save_dict_to_group(grp, data, use_pytables_hack=True)
+    with h5py.File(tmp_path / "dict_hack.h5", "r") as f:
+        loaded = hdf_load_dict_from_group(f["root"])
+    assert loaded["uniform_list"] == data["uniform_list"]
+    assert loaded["scalar"] == data["scalar"]
 
 
 def test_nddata_pickle_roundtrip(tmp_path):
@@ -191,10 +358,11 @@ def test_nddata_pickle_roundtrip(tmp_path):
 
 def test_state_hdf_dict_roundtrip(tmp_path):
     a = _generate_nddata()
+    a._pytables_hack = True
     state = a.__getstate__()
     with h5py.File(tmp_path / "state.h5", "w") as f:
         g = f.create_group("test_nd")
-        hdf_save_dict_to_group(g, state)
+        hdf_save_dict_to_group(g, state, use_pytables_hack=True)
     with h5py.File(tmp_path / "state.h5", "r") as f:
         _check_layout(f["test_nd"], a)
     os.remove(tmp_path / "state.h5")
@@ -202,10 +370,11 @@ def test_state_hdf_dict_roundtrip(tmp_path):
 
 def test_state_hdf_dict_roundtrip_noerr(tmp_path):
     a = _generate_nddata_noerr()
+    a._pytables_hack = True
     state = a.__getstate__()
     with h5py.File(tmp_path / "state.h5", "w") as f:
         g = f.create_group("test_nd")
-        hdf_save_dict_to_group(g, state)
+        hdf_save_dict_to_group(g, state, use_pytables_hack=True)
     with h5py.File(tmp_path / "state.h5", "r") as f:
         _check_layout(f["test_nd"], a, haserr=False)
     os.remove(tmp_path / "state.h5")
