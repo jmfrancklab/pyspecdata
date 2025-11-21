@@ -15,22 +15,6 @@ def hdf_save_dict_to_group(group, data):
             logger.debug("Dataset type %s" % str(v.dtype))
             logger.debug("Adding %s=%s as dataset" % (k, v))
             group.create_dataset(k, data=v, dtype=v.dtype)
-        elif isinstance(v, np.void) and v.dtype.names == ("LISTELEMENTS",):
-            # When lists are serialized, they become structured scalars
-            # with a LISTELEMENTS field.  The elements might be unicode,
-            # which h5py cannot store directly, so convert them to bytes
-            # while preserving the structured dtype expected by older
-            # pytables-based files.
-            elements = np.array(v["LISTELEMENTS"])
-            if elements.dtype.kind == "U":
-                elements = np.array(
-                    [x.encode("utf-8") for x in elements.flat]
-                ).reshape(elements.shape)
-            rec = np.zeros(
-                1, dtype=[("LISTELEMENTS", elements.dtype, elements.shape)]
-            )[0]
-            rec["LISTELEMENTS"] = elements
-            group.attrs[k] = rec
         elif issubclass(type(v), dict):
             if set(v.keys()) == {"LISTELEMENTS"}:
                 elements = v["LISTELEMENTS"]
