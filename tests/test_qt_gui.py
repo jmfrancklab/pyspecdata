@@ -1,4 +1,5 @@
 import configparser
+import shutil
 import importlib
 import platform
 import subprocess
@@ -7,7 +8,7 @@ from conftest import load_module
 from types import SimpleNamespace
 
 
-def test_genconfig_with_qt(monkeypatch, tmp_path):
+def test_genconfig_with_qt(monkeypatch, tmp_path, request):
     """Exercise the Qt configuration editor and verify the resulting file."""
     home_dir = tmp_path / "homedir"
     home_dir.mkdir()
@@ -17,6 +18,19 @@ def test_genconfig_with_qt(monkeypatch, tmp_path):
     config_path.write_text(
         sample_path.read_text(encoding="utf-8"), encoding="utf-8"
     )
+    backup_path = config_path.with_name(config_path.name + ".bak.test")
+    # preserve the original config in case the test fails before restoration
+    if backup_path.exists():
+        backup_path.unlink()
+    shutil.copyfile(config_path, backup_path)
+
+    def restore_original_config():
+        # ensure the pre-test configuration is put back even if assertions fail
+        if backup_path.exists():
+            shutil.copyfile(backup_path, config_path)
+            backup_path.unlink()
+
+    request.addfinalizer(restore_original_config)
     monkeypatch.setenv("HOME", str(home_dir))
     monkeypatch.setenv("QT_QPA_PLATFORM", "offscreen")
 
