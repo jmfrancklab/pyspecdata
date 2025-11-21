@@ -1382,9 +1382,9 @@ class nddata(object):
                     arr = np.array(
                         [x.encode("utf-8") for x in arr.flat]
                     ).reshape(arr.shape)
-                # wrap lists as LISTELEMENTS to preserve compatibility with
-                # legacy pytables storage while ensuring the elements are safe
-                # for h5py attributes
+                # wrap lists as LISTELEMENTS to preserve compatibility
+                # with legacy pytables storage while ensuring the
+                # elements are safe for h5py attributes
                 rec = np.zeros(
                     1, dtype=[("LISTELEMENTS", arr.dtype, arr.shape)]
                 )[0]
