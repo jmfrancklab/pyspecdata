@@ -4,6 +4,7 @@ import numpy as np
 import h5py
 import pickle
 import os
+
 # tests/conftest.py
 from conftest import load_module
 
@@ -14,7 +15,11 @@ sys.modules.setdefault("_nnls", types.ModuleType("_nnls"))
 core = load_module("core", use_real_pint=True, use_real_h5py=True)
 nddata = core.nddata
 nddata_hdf5 = core.nddata_hdf5
-hmod = load_module("file_saving.hdf_save_dict_to_group", use_real_pint=True, use_real_h5py=True)
+hmod = load_module(
+    "file_saving.hdf_save_dict_to_group",
+    use_real_pint=True,
+    use_real_h5py=True,
+)
 hdf_save_dict_to_group = hmod.hdf_save_dict_to_group
 
 
@@ -65,9 +70,9 @@ def _generate_nddata_noerr():
 
 def _check_layout(g, a, haserr=True):
     assert "data" in g
-    print("g:",dir(g))
-    print("g.attrs:",g.attrs.keys())
-    print("g.attrs['dimlabels']:",g.attrs['dimlabels'])
+    print("g:", dir(g))
+    print("g.attrs:", g.attrs.keys())
+    print("g.attrs['dimlabels']:", g.attrs["dimlabels"])
     dimlabels = [j[0].decode("utf-8") for j in g.attrs["dimlabels"]]
     assert dimlabels[0] == "t"
     assert dimlabels[1] == "f"

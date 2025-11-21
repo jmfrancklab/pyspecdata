@@ -1429,29 +1429,43 @@ class nddata(object):
         dimlabels = [decode_if_bytes(lbl) for (lbl,) in state["dimlabels"]]
         self.dimlabels = list(dimlabels)
 
-        axes_state = state.get("axes", {})
         self.axis_coords = []
         self.axis_coords_units = []
         self.axis_coords_error = []
-        for lbl in dimlabels:
-            axinfo = axes_state.get(lbl, {})
-            coords = np.array(axinfo.get("data", []))
-            self.axis_coords.append(coords)
-            unit = decode_if_bytes(axinfo.get("axis_coords_units"))
-            self.axis_coords_units.append(unit)
-            err = axinfo.get("error")
-            self.axis_coords_error.append(
-                np.array(err) if err is not None else None
-            )
+        for lbl in self.dimlabels:
+            if lbl in state["axes"]:
+                self.axis_coords.append(state["axes"][lbl]["data"])
+                temp = state["axes"][lbl]["axis_coords_units"]
+                self.axis_coords_units.append(
+                    None if temp is None else decode_if_bytes(temp)
+                )
+                temp = state["axes"][lbl]
+                if "error" in state["axes"][lbl]:
+                    temp = temp["error"]
+                    self.axis_coords_error.append(
+                        None if temp is None else decode_if_bytes(temp)
+                    )
+                else:
+                    self.axis_coords_error.append(None)
+            else:
+                raise ValueError(
+                    f"No axis coords for {lbl}, which is not allowed, because"
+                    " that's how I determine the size!!"
+                )
 
         shape = tuple(len(ax) for ax in self.axis_coords)
-
-        data_state = state["data"]
-        self.data = data_state.get("data").reshape(shape)
-        err = data_state.get("error")
-        self.data_error = err.reshape(shape) if err is not None else None
-
-        self.data_units = decode_if_bytes(data_state.get("data_units"))
+        self.data = state["data"]["data"].reshape(shape)
+        temp = state["data"]
+        if "error" in temp:
+            temp = temp["error"]
+            self.data_error = None if temp is None else temp.reshape(shape)
+        else:
+            self.data_error = None
+        temp = state["data"]
+        if "data_units" in temp:
+            self.data_units = decode_if_bytes(state["data"]["data_units"])
+        else:
+            self.data_units = None
 
         def deserialize_other_info(obj):
             if (
@@ -1470,7 +1484,7 @@ class nddata(object):
             else:
                 return decode_if_bytes(obj)
 
-        self.other_info = deserialize_other_info(state.get("other_info", {}))
+        self.other_info = deserialize_other_info(state["other_info"])
         self.genftpairs = False
         return
 
@@ -4659,9 +4673,6 @@ class nddata(object):
             raise ValueError(
                 strm("I can't figure out how to deal with the arguments", args)
             )
-        for j in range(0, len(listofaxes)):
-            if isinstance(listofaxes[j], list):
-                listofaxes[j] = np.array(listofaxes[j])
         listofstrings = autostringconvert(listofstrings)
         if isinstance(listofstrings, str):
             listofstrings = [listofstrings]
@@ -4687,7 +4698,7 @@ class nddata(object):
                     listofaxes[j] = (
                         listofaxes[j] * r_[0 : ndshape(self)[listofstrings[j]]]
                     )
-                if type(listofaxes[j]) not in [np.ndarray, list]:
+                elif type(listofaxes[j]) not in [np.ndarray, list]:
                     raise TypeError(
                         "You passed an axis label of type "
                         + repr(type(listofaxes[j]))
@@ -4696,9 +4707,9 @@ class nddata(object):
                         + " to the labels method, which you can't do --> it"
                         " must be an nddata"
                     )
-                if (
-                    len(listofaxes[j]) != ndshape(self)[listofstrings[j]]
-                ) and (len(listofaxes[j]) != 0):
+                elif (len(listofaxes[j]) != self.shape[listofstrings[j]]) and (
+                    len(listofaxes[j]) != 0
+                ):
                     raise IndexError(
                         "You're trying to attach an axis of len %d to the '%s'"
                         " dimension, which has %d data points (shape of self"
@@ -5163,13 +5174,13 @@ class nddata(object):
                 "Axes that are called INDEX are special, and you are not"
                 " allowed to label them!"
             )
-        if isinstance(value, type(emptyfunction)):
+        elif isinstance(value, type(emptyfunction)):
             x = self.getaxis(axis)
             x[:] = value(x.copy())
             return self
-        if type(value) in [float, int, np.double, np.float64]:
+        elif type(value) in [float, int, np.double, np.float64]:
             value = np.linspace(0.0, value, self.axlen(axis))
-        if isinstance(value, list):
+        elif isinstance(value, list):
             value = np.array(value)
         if self.axis_coords is None or len(self.axis_coords) == 0:
             self.axis_coords = [None] * len(self.dimlabels)
