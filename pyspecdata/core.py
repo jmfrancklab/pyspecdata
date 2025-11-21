@@ -1477,28 +1477,10 @@ class nddata(object):
             if (
                 isinstance(obj, (np.void, np.ndarray))
                 and getattr(obj, "dtype", None) is not None
-                and getattr(obj.dtype, "names", None) is not None
-                and "LISTELEMENTS" in obj.dtype.names
+                and obj.dtype.names == ("LISTELEMENTS",)
             ):
-                decoded_list = []
-                for idx, v in enumerate(obj["LISTELEMENTS"].flat):
-                    entry = deserialize_other_info(v)
-                    decoded_list.append(entry)
-                decoded_array = np.array(decoded_list, dtype=object).reshape(
-                    obj["LISTELEMENTS"].shape
-                )
-                return decoded_array.tolist()
+                return [deserialize_other_info(v) for v in obj["LISTELEMENTS"]]
             if isinstance(obj, dict):
-                if "LISTELEMENTS" in obj:
-                    elements = [deserialize_other_info(v) for v in obj["LISTELEMENTS"]]
-                    # allow both the updated LIST_CLASS marker and the legacy
-                    # LISTCLASS label when reconstructing tuple metadata
-                    if (
-                        "LIST_CLASS" in obj
-                        and obj["LIST_CLASS"] == "tuple"
-                    ) or ("LISTCLASS" in obj and obj["LISTCLASS"] == "tuple"):
-                        return tuple(elements)
-                    return elements
                 return {
                     decode_if_bytes(k): deserialize_other_info(v)
                     for k, v in obj.items()

@@ -21,6 +21,7 @@ hmod = load_module(
     use_real_h5py=True,
 )
 hdf_save_dict_to_group = hmod.hdf_save_dict_to_group
+decode_list = hmod.decode_list
 
 
 class DummyGroup(dict):
@@ -44,48 +45,7 @@ class DummyGroup(dict):
 def _decode_list_node(node):
     """Return a python sequence from an HDF5 LIST_NODE."""
 
-    indices = set()
-    for name in node.attrs.keys():
-        if name.startswith("ITEM"):
-            indices.add(int(name[4:]))
-    for name in node.keys():
-        if name.startswith("ITEM"):
-            indices.add(int(name[4:]))
-    decoded = []
-    for idx in sorted(indices):
-        item_name = "ITEM" + str(idx)
-        if item_name in node:
-            if isinstance(node[item_name], h5py.Dataset):
-                decoded.append(node[item_name][()])
-            else:
-                decoded.append(_decode_list_node(node[item_name]))
-        else:
-            if isinstance(node.attrs[item_name], bytes):
-                decoded.append(node.attrs[item_name].decode("utf-8"))
-            elif hasattr(node.attrs[item_name], "__len__") and not np.isscalar(node.attrs[item_name]):
-                inner = []
-                for element in node.attrs[item_name]:
-                    if isinstance(element, bytes):
-                        inner.append(element.decode("utf-8"))
-                    else:
-                        inner.append(element)
-                decoded.append(inner)
-            else:
-                decoded.append(node.attrs[item_name])
-    if (
-        "LIST_CLASS" in node.attrs
-        and (
-            node.attrs["LIST_CLASS"] == b"tuple"
-            or node.attrs["LIST_CLASS"] == "tuple"
-        )
-    ) or (
-        "LISTCLASS" in node.attrs
-        and (
-            node.attrs["LISTCLASS"] == b"tuple" or node.attrs["LISTCLASS"] == "tuple"
-        )
-    ):
-        return tuple(decoded)
-    return decoded
+    return decode_list(node)
 
 
 def _generate_nddata():
@@ -287,6 +247,32 @@ def test_nddata_hdf5_prop_tuple_roundtrip(tmp_path):
     assert mixed_val[0] == "05"
     assert isinstance(mixed_val[1], int)
     assert mixed_val[1] == 7
+    os.remove(os.path.join(str(tmp_path), "sample.h5"))
+
+
+def test_nddata_hdf5_prop_complex_structures(tmp_path):
+    a = _generate_nddata_noerr()
+    complex_prop = {
+        "mixed_list": [1, "two", {"inner_dict": {"label": "val"}}, (3.5, "units")],
+        "tuple_wrapping": (["zero", 0], {"deep_list": [("keep", 1), "str"]}),
+    }
+    a.set_prop("complex_prop", complex_prop)
+    a.hdf5_write("sample.h5", directory=str(tmp_path))
+    with h5py.File(tmp_path / "sample.h5", "r") as f:
+        assert "mixed_list" in f["test_nd"]["other_info"]["complex_prop"]
+        assert (
+            f["test_nd"]["other_info"]["complex_prop"]["mixed_list"].attrs[
+                "LIST_NODE"
+            ]
+        )
+        decoded_list = _decode_list_node(
+            f["test_nd"]["other_info"]["complex_prop"]["mixed_list"]
+        )
+        assert isinstance(decoded_list[3], tuple)
+        assert decoded_list[3][0] == 3.5
+        assert decoded_list[3][1] == "units"
+    b = nddata_hdf5("sample.h5/test_nd", directory=str(tmp_path))
+    assert b.get_prop("complex_prop") == complex_prop
     os.remove(os.path.join(str(tmp_path), "sample.h5"))
 
 
