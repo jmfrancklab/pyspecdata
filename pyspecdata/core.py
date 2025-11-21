@@ -1442,14 +1442,17 @@ class nddata(object):
         self.axis_coords_error = []
         for lbl in self.dimlabels:
             if lbl in state["axes"]:
-                self.axis_coords.append(state["axes"][lbl]["data"])
-                temp = state["axes"][lbl]["axis_coords_units"]
-                self.axis_coords_units.append(
-                    None if temp is None else decode_if_bytes(temp)
-                )
-                temp = state["axes"][lbl]
-                if "error" in state["axes"][lbl]:
-                    temp = temp["error"]
+                state_of_this_axis = state["axes"][lbl]
+                self.axis_coords.append(state_of_this_axis["data"])
+                if "axis_coords_units" in state_of_this_axis:
+                    temp = state_of_this_axis["axis_coords_units"]
+                    self.axis_coords_units.append(
+                        None if temp is None else decode_if_bytes(temp)
+                    )
+                else:
+                    self.axis_coords_units.append(None)
+                if "error" in state_of_this_axis:
+                    temp = state_of_this_axis["error"]
                     self.axis_coords_error.append(
                         None if temp is None else decode_if_bytes(temp)
                     )
