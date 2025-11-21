@@ -5,15 +5,33 @@ import h5py
 logger = logging.getLogger("pyspecdata.hdf_save_dict_to_group")
 
 
-def encode_list(name, seq, group):
+def encode_list(name, seq, group, use_pytables_hack=False):
     """Write a Python sequence to HDF5.
 
-    Lists and tuples are stored as subgroups marked with ``LIST_NODE`` so that
-    ordering is preserved without relying on the pytables ``LISTELEMENTS``
-    record hack.  Legacy ``LISTELEMENTS`` records are still written directly as
-    attributes when present to maintain backward compatibility.
+    When ``use_pytables_hack`` is true, lists are written using the legacy
+    ``LISTELEMENTS`` record attribute for compatibility with older layout
+    expectations.  Otherwise, the sequence is expanded into a subgroup marked
+    with ``LIST_NODE`` so the order can be reconstructed without the numpy
+    record hack.
     """
 
+    if use_pytables_hack:
+        if (
+            isinstance(seq, (np.void, np.ndarray))
+            and getattr(seq, "dtype", None) is not None
+            and getattr(seq.dtype, "names", None) == ("LISTELEMENTS",)
+        ):
+            group.attrs[name] = seq
+            return
+        arr = np.array(seq)
+        if arr.dtype.kind == "U":
+            arr = np.array([x.encode("utf-8") for x in arr.flat]).reshape(
+                arr.shape
+            )
+        rec = np.zeros(1, dtype=[("LISTELEMENTS", arr.dtype, arr.shape)])[0]
+        rec["LISTELEMENTS"] = arr
+        group.attrs[name] = rec
+        return
     if (
         isinstance(seq, (np.void, np.ndarray))
         and getattr(seq, "dtype", None) is not None
@@ -32,12 +50,12 @@ def encode_list(name, seq, group):
             and getattr(entry, "dtype", None) is not None
             and getattr(entry.dtype, "names", None) == ("LISTELEMENTS",)
         ):
-            encode_list(item_name, entry, target_group)
+            encode_list(item_name, entry, target_group, use_pytables_hack)
         elif issubclass(type(entry), np.ndarray):
             target_group.create_dataset(item_name, data=entry, dtype=entry.dtype)
         elif issubclass(type(entry), dict):
             subgroup = target_group.create_group(item_name)
-            hdf_save_dict_to_group(subgroup, entry)
+            hdf_save_dict_to_group(subgroup, entry, use_pytables_hack)
         else:
             if entry is None:
                 continue
@@ -51,63 +69,73 @@ def encode_list(name, seq, group):
                 ]
 
 
-def decode_list(group):
-    """Return a Python sequence from an HDF5 group marked ``LIST_NODE``.
+def decode_list(source):
+    """Return a Python sequence from either list representation.
 
-    This reverses :func:`encode_list` by reading ``ITEM`` entries in order and
-    honoring the stored ``LIST_CLASS`` or legacy ``LISTCLASS`` markers for
-    tuples.
+    ``source`` may be a subgroup marked with ``LIST_NODE`` or a legacy
+    ``LISTELEMENTS`` numpy record.  Both forms are converted back to standard
+    Python lists or tuples.
     """
 
-    indices = sorted(
-        {
-            int(name[4:])
-            for name in list(group.keys()) + list(group.attrs.keys())
-            if name.startswith("ITEM")
-        }
-    )
-    reconstructed = []
-    for idx in indices:
-        item_name = "ITEM" + str(idx)
-        if item_name in group:
-            if isinstance(group[item_name], h5py.Dataset):
-                reconstructed.append(group[item_name][()])
-            elif "LIST_NODE" in group[item_name].attrs and group[item_name].attrs[
-                "LIST_NODE"
-            ]:
-                reconstructed.append(decode_list(group[item_name]))
-            else:
-                reconstructed.append(hdf_load_dict_from_group(group[item_name]))
-        else:
-            if isinstance(group.attrs[item_name], bytes):
-                reconstructed.append(group.attrs[item_name].decode("utf-8"))
-            elif hasattr(group.attrs[item_name], "__len__") and not np.isscalar(
-                group.attrs[item_name]
-            ):
-                decoded_attr = []
-                for element in group.attrs[item_name]:
-                    if isinstance(element, bytes):
-                        decoded_attr.append(element.decode("utf-8"))
-                    else:
-                        decoded_attr.append(element)
-                reconstructed.append(decoded_attr)
-            else:
-                if isinstance(group.attrs[item_name], np.generic):
-                    reconstructed.append(group.attrs[item_name].item())
+    if isinstance(source, (np.void, np.ndarray)) and getattr(source, "dtype", None) is not None:
+        if source.dtype.names == ("LISTELEMENTS",):
+            decoded_attr = []
+            for element in source["LISTELEMENTS"].flat:
+                if isinstance(element, bytes):
+                    decoded_attr.append(element.decode("utf-8"))
                 else:
-                    reconstructed.append(group.attrs[item_name])
-    if (
-        "LIST_CLASS" in group.attrs
-        and (group.attrs["LIST_CLASS"] == b"tuple" or group.attrs["LIST_CLASS"] == "tuple")
-    ) or (
-        "LISTCLASS" in group.attrs
-        and (group.attrs["LISTCLASS"] == b"tuple" or group.attrs["LISTCLASS"] == "tuple")
-    ):
-        return tuple(reconstructed)
-    return reconstructed
+                    decoded_attr.append(element)
+            return np.array(decoded_attr, dtype=object).reshape(
+                source["LISTELEMENTS"].shape
+            ).tolist()
+    if hasattr(source, "attrs") and "LIST_NODE" in source.attrs and source.attrs["LIST_NODE"]:
+        indices = sorted(
+            {
+                int(name[4:])
+                for name in list(source.keys()) + list(source.attrs.keys())
+                if name.startswith("ITEM")
+            }
+        )
+        reconstructed = []
+        for idx in indices:
+            item_name = "ITEM" + str(idx)
+            if item_name in source:
+                if isinstance(source[item_name], h5py.Dataset):
+                    reconstructed.append(source[item_name][()])
+                elif hasattr(source[item_name], "attrs") and "LIST_NODE" in source[
+                    item_name
+                ].attrs and source[item_name].attrs["LIST_NODE"]:
+                    reconstructed.append(decode_list(source[item_name]))
+                else:
+                    reconstructed.append(hdf_load_dict_from_group(source[item_name]))
+            else:
+                if isinstance(source.attrs[item_name], bytes):
+                    reconstructed.append(source.attrs[item_name].decode("utf-8"))
+                elif hasattr(source.attrs[item_name], "__len__") and not np.isscalar(
+                    source.attrs[item_name]
+                ):
+                    decoded_attr = []
+                    for element in source.attrs[item_name]:
+                        if isinstance(element, bytes):
+                            decoded_attr.append(element.decode("utf-8"))
+                        else:
+                            decoded_attr.append(element)
+                    reconstructed.append(decoded_attr)
+                else:
+                    if isinstance(source.attrs[item_name], np.generic):
+                        reconstructed.append(source.attrs[item_name].item())
+                    else:
+                        reconstructed.append(source.attrs[item_name])
+        if "LIST_CLASS" in source.attrs and (
+            source.attrs["LIST_CLASS"] == b"tuple"
+            or source.attrs["LIST_CLASS"] == "tuple"
+        ):
+            return tuple(reconstructed)
+        return reconstructed
+    return source
 
 
-def hdf_save_dict_to_group(group, data):
+def hdf_save_dict_to_group(group, data, use_pytables_hack=False):
     """
     Copied as-is from ACERT hfesr code
     All numpy arrays are datasets.
@@ -122,13 +150,18 @@ def hdf_save_dict_to_group(group, data):
             and getattr(v, "dtype", None) is not None
             and getattr(v.dtype, "names", None) == ("LISTELEMENTS",)
         ):
-            encode_list(k, v, group)
+            encode_list(k, v, group, use_pytables_hack)
         elif issubclass(type(v), dict):
             if set(v.keys()) == {"LISTELEMENTS"}:
-                encode_list(k, np.rec.fromarrays([v["LISTELEMENTS"]], names="LISTELEMENTS")[0], group)
+                encode_list(
+                    k,
+                    np.rec.fromarrays([v["LISTELEMENTS"]], names="LISTELEMENTS")[0],
+                    group,
+                    use_pytables_hack,
+                )
             else:
                 subgroup = group.create_group(k)
-                hdf_save_dict_to_group(subgroup, v)
+                hdf_save_dict_to_group(subgroup, v, use_pytables_hack)
         else:
             if v is None:
                 continue
@@ -165,6 +198,8 @@ def hdf_load_dict_from_group(group):
     for k, v in group.items():
         if isinstance(v, h5py.Dataset):
             retval[k] = v[()]
+        elif "LIST_NODE" in v.attrs and v.attrs["LIST_NODE"]:
+            retval[k] = decode_list(v)
         else:
             retval[k] = hdf_load_dict_from_group(v)
     for k in group.attrs.keys():
@@ -172,15 +207,7 @@ def hdf_load_dict_from_group(group):
             hasattr(group.attrs[k], "dtype")
             and getattr(group.attrs[k].dtype, "names", None) == ("LISTELEMENTS",)
         ):
-            decoded_attr = []
-            for element in group.attrs[k]["LISTELEMENTS"].flat:
-                if isinstance(element, bytes):
-                    decoded_attr.append(element.decode("utf-8"))
-                else:
-                    decoded_attr.append(element)
-            retval[k] = np.array(decoded_attr, dtype=object).reshape(
-                group.attrs[k]["LISTELEMENTS"].shape
-            ).tolist()
+            retval[k] = decode_list(group.attrs[k])
         elif isinstance(group.attrs[k], bytes):
             retval[k] = group.attrs[k].decode("utf-8")
         elif hasattr(group.attrs[k], "__len__") and not np.isscalar(group.attrs[k]):

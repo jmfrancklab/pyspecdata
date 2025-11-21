@@ -42,12 +42,6 @@ class DummyGroup(dict):
                 self[k] = [v.encode("utf-8") for v in self[k]]
 
 
-def _decode_list_node(node):
-    """Return a python sequence from an HDF5 LIST_NODE."""
-
-    return decode_list(node)
-
-
 def _generate_nddata():
     data = np.arange(6).reshape(2, 3) + 1j * np.arange(1, 7).reshape(2, 3)
     a = nddata(data, ["t", "f"])
@@ -79,27 +73,14 @@ def _check_layout(g, a, haserr=True):
     assert "data" in g
     print("g:", dir(g))
     print("g.attrs:", g.attrs.keys())
-    dimlabels_source = None
-    if "dimlabels" in g.attrs:
-        dimlabels_source = []
-        for entry in g.attrs["dimlabels"]:
-            label_value = entry[0]
-            if isinstance(label_value, (bytes, np.bytes_)):
-                label_value = label_value.decode("utf-8")
-            dimlabels_source.append((label_value,))
+    print("g.attrs['dimlabels']:", g.attrs["dimlabels"])
+    if (
+        hasattr(g.attrs["dimlabels"], "dtype")
+        and getattr(g.attrs["dimlabels"].dtype, "names", None) == ("LISTELEMENTS",)
+    ):
+        dimlabels = [j.decode("utf-8") for j in g.attrs["dimlabels"]["LISTELEMENTS"].flat]
     else:
-        assert "dimlabels" in g
-        assert (
-            "LIST_NODE" in g["dimlabels"].attrs
-            and g["dimlabels"].attrs["LIST_NODE"]
-        )
-        dimlabels_source = _decode_list_node(g["dimlabels"])
-    dimlabels = []
-    for (lbl,) in dimlabels_source:
-        if isinstance(lbl, (bytes, np.bytes_)):
-            dimlabels.append(lbl.decode("utf-8"))
-        else:
-            dimlabels.append(lbl)
+        dimlabels = [j[0].decode("utf-8") for j in g.attrs["dimlabels"]]
     assert dimlabels[0] == "t"
     assert dimlabels[1] == "f"
     if "data_units" not in g["data"].attrs:
@@ -128,27 +109,15 @@ def _check_layout(g, a, haserr=True):
     assert "level1" in g["other_info"]
     lvl1 = g["other_info"]["level1"]
     assert lvl1.attrs["level2"] == 5
-    if "level2list" in lvl1.attrs:
-        if isinstance(lvl1.attrs["level2list"], dict):
-            np.testing.assert_array_equal(
-                lvl1.attrs["level2list"]["LISTELEMENTS"], [1, 2, 3]
-            )
-        elif hasattr(lvl1.attrs["level2list"], "dtype") and getattr(
-            lvl1.attrs["level2list"].dtype, "names", None
-        ) is not None:
-            np.testing.assert_array_equal(
-                lvl1.attrs["level2list"]["LISTELEMENTS"], [1, 2, 3]
-            )
-        else:
-            np.testing.assert_array_equal(lvl1.attrs["level2list"], [1, 2, 3])
+    if (
+        hasattr(lvl1.attrs["level2list"], "dtype")
+        and getattr(lvl1.attrs["level2list"].dtype, "names", None)
+        == ("LISTELEMENTS",)
+    ):
+        decoded_list = decode_list(lvl1.attrs["level2list"])
+        np.testing.assert_array_equal(decoded_list, [1, 2, 3])
     else:
-        assert "level2list" in lvl1
-        assert (
-            "LIST_NODE" in lvl1["level2list"].attrs
-            and lvl1["level2list"].attrs["LIST_NODE"]
-        )
-        reconstructed = _decode_list_node(lvl1["level2list"])
-        np.testing.assert_array_equal(reconstructed, [1, 2, 3])
+        np.testing.assert_array_equal(lvl1.attrs["level2list"], [1, 2, 3])
 
 
 def _check_loaded(b, a):
@@ -170,6 +139,7 @@ def _check_loaded(b, a):
 
 def test_hdf5_layout(tmp_path):
     a = _generate_nddata()
+    a._pytables_hack = True
     a.hdf5_write("sample.h5", directory=str(tmp_path))
     with h5py.File(tmp_path / "sample.h5", "r") as f:
         assert "test_nd" in f
@@ -179,6 +149,7 @@ def test_hdf5_layout(tmp_path):
 
 def test_hdf5_layout_noerr(tmp_path):
     a = _generate_nddata_noerr()
+    a._pytables_hack = True
     a.hdf5_write("sample.h5", directory=str(tmp_path))
     with h5py.File(tmp_path / "sample.h5", "r") as f:
         assert "test_nd" in f
@@ -188,18 +159,21 @@ def test_hdf5_layout_noerr(tmp_path):
 
 def test_state_layout():
     a = _generate_nddata()
+    a._pytables_hack = True
     g = DummyGroup(a.__getstate__())
     _check_layout(g, a)
 
 
 def test_state_layout_noerr():
     a = _generate_nddata_noerr()
+    a._pytables_hack = True
     g = DummyGroup(a.__getstate__())
     _check_layout(g, a, haserr=False)
 
 
 def test_nddata_hdf5_roundtrip(tmp_path):
     a = _generate_nddata()
+    a._pytables_hack = True
     a.hdf5_write("sample.h5", directory=str(tmp_path))
     b = nddata_hdf5("sample.h5/test_nd", directory=str(tmp_path))
     _check_loaded(b, a)
@@ -208,6 +182,7 @@ def test_nddata_hdf5_roundtrip(tmp_path):
 
 def test_nddata_hdf5_roundtrip_noerr(tmp_path):
     a = _generate_nddata_noerr()
+    a._pytables_hack = True
     a.hdf5_write("sample.h5", directory=str(tmp_path))
     b = nddata_hdf5("sample.h5/test_nd", directory=str(tmp_path))
     _check_loaded(b, a)
@@ -225,6 +200,7 @@ def test_nddata_hdf5_roundtrip_pytables_hack(tmp_path):
 
 def test_nddata_hdf5_roundtrip_ikkf(tmp_path):
     a = _generate_nddata()
+    a._pytables_hack = True
     a.set_prop("IKKF", ["REAL", "REAL", "REAL"])
     a.hdf5_write("sample.h5", directory=str(tmp_path))
     b = nddata_hdf5("sample.h5/test_nd", directory=str(tmp_path))
@@ -265,7 +241,7 @@ def test_nddata_hdf5_prop_complex_structures(tmp_path):
                 "LIST_NODE"
             ]
         )
-        decoded_list = _decode_list_node(
+        decoded_list = decode_list(
             f["test_nd"]["other_info"]["complex_prop"]["mixed_list"]
         )
         assert isinstance(decoded_list[3], tuple)
@@ -288,10 +264,11 @@ def test_nddata_pickle_roundtrip(tmp_path):
 
 def test_state_hdf_dict_roundtrip(tmp_path):
     a = _generate_nddata()
+    a._pytables_hack = True
     state = a.__getstate__()
     with h5py.File(tmp_path / "state.h5", "w") as f:
         g = f.create_group("test_nd")
-        hdf_save_dict_to_group(g, state)
+        hdf_save_dict_to_group(g, state, use_pytables_hack=True)
     with h5py.File(tmp_path / "state.h5", "r") as f:
         _check_layout(f["test_nd"], a)
     os.remove(tmp_path / "state.h5")
@@ -299,10 +276,11 @@ def test_state_hdf_dict_roundtrip(tmp_path):
 
 def test_state_hdf_dict_roundtrip_noerr(tmp_path):
     a = _generate_nddata_noerr()
+    a._pytables_hack = True
     state = a.__getstate__()
     with h5py.File(tmp_path / "state.h5", "w") as f:
         g = f.create_group("test_nd")
-        hdf_save_dict_to_group(g, state)
+        hdf_save_dict_to_group(g, state, use_pytables_hack=True)
     with h5py.File(tmp_path / "state.h5", "r") as f:
         _check_layout(f["test_nd"], a, haserr=False)
     os.remove(tmp_path / "state.h5")

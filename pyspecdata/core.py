@@ -7123,7 +7123,9 @@ class nddata(object):
             if fullpath in f:
                 del f[fullpath]
             g = f.create_group(fullpath)
-            hdf_save_dict_to_group(g, state)
+            hdf_save_dict_to_group(
+                g, state, use_pytables_hack=getattr(self, "_pytables_hack", False)
+            )
 
     # }}}
 
