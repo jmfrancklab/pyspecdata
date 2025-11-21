@@ -42,7 +42,7 @@ import numpy as np
 import sympy as sp
 from numpy import r_, c_, nan, inf, pi
 from mpl_toolkits.mplot3d import axes3d
-import textwrap, atexit, scipy, warnings, inspect, re
+import textwrap, scipy, warnings, inspect, re
 from copy import deepcopy
 from sympy.functions.elementary.miscellaneous import sqrt as sympy_sqrt
 import scipy.sparse as sparse
@@ -1378,6 +1378,13 @@ class nddata(object):
             elif isinstance(obj, (list, tuple)):
                 elements = [serialize_other_info(v) for v in obj]
                 arr = np.array(elements)
+                if arr.dtype.kind == "U":
+                    arr = np.array(
+                        [x.encode("utf-8") for x in arr.flat]
+                    ).reshape(arr.shape)
+                # wrap lists as LISTELEMENTS to preserve compatibility
+                # with legacy pytables storage while ensuring the
+                # elements are safe for h5py attributes
                 rec = np.zeros(
                     1, dtype=[("LISTELEMENTS", arr.dtype, arr.shape)]
                 )[0]
@@ -1435,14 +1442,17 @@ class nddata(object):
         self.axis_coords_error = []
         for lbl in self.dimlabels:
             if lbl in state["axes"]:
-                self.axis_coords.append(state["axes"][lbl]["data"])
-                temp = state["axes"][lbl]["axis_coords_units"]
-                self.axis_coords_units.append(
-                    None if temp is None else decode_if_bytes(temp)
-                )
-                temp = state["axes"][lbl]
-                if "error" in state["axes"][lbl]:
-                    temp = temp["error"]
+                state_of_this_axis = state["axes"][lbl]
+                self.axis_coords.append(state_of_this_axis["data"])
+                if "axis_coords_units" in state_of_this_axis:
+                    temp = state_of_this_axis["axis_coords_units"]
+                    self.axis_coords_units.append(
+                        None if temp is None else decode_if_bytes(temp)
+                    )
+                else:
+                    self.axis_coords_units.append(None)
+                if "error" in state_of_this_axis:
+                    temp = state_of_this_axis["error"]
                     self.axis_coords_error.append(
                         None if temp is None else decode_if_bytes(temp)
                     )

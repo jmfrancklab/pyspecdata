@@ -170,6 +170,15 @@ def test_nddata_hdf5_roundtrip_noerr(tmp_path):
     os.remove(os.path.join(str(tmp_path), "sample.h5"))
 
 
+def test_nddata_hdf5_roundtrip_ikkf(tmp_path):
+    a = _generate_nddata()
+    a.set_prop("IKKF", ["REAL", "REAL", "REAL"])
+    a.hdf5_write("sample.h5", directory=str(tmp_path))
+    b = nddata_hdf5("sample.h5/test_nd", directory=str(tmp_path))
+    _check_loaded(b, a)
+    os.remove(os.path.join(str(tmp_path), "sample.h5"))
+
+
 def test_nddata_pickle_roundtrip(tmp_path):
     a = _generate_nddata()
     with open(tmp_path / "sample.pkl", "wb") as f:
