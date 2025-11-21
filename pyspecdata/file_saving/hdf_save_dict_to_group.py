@@ -22,7 +22,7 @@ def hdf_save_dict_to_group(group, data):
 
         target_group.attrs["LIST_NODE"] = True
         if isinstance(seq, tuple):
-            target_group.attrs["LISTCLASS"] = "tuple"
+            target_group.attrs["LIST_CLASS"] = "tuple"
         for idx, entry in enumerate(seq):
             item_name = "ITEM" + str(idx)
             if issubclass(type(entry), np.ndarray):
@@ -128,9 +128,19 @@ def hdf_load_dict_from_group(group):
                         items.append(group.attrs[item_name].item())
                     else:
                         items.append(group.attrs[item_name])
-        if "LISTCLASS" in group.attrs and (
-            group.attrs["LISTCLASS"] == b"tuple"
-            or group.attrs["LISTCLASS"] == "tuple"
+        # accept both the new LIST_CLASS marker and the older LISTCLASS label
+        if (
+            "LIST_CLASS" in group.attrs
+            and (
+                group.attrs["LIST_CLASS"] == b"tuple"
+                or group.attrs["LIST_CLASS"] == "tuple"
+            )
+        ) or (
+            "LISTCLASS" in group.attrs
+            and (
+                group.attrs["LISTCLASS"] == b"tuple"
+                or group.attrs["LISTCLASS"] == "tuple"
+            )
         ):
             return tuple(items)
         return items

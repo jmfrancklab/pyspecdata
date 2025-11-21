@@ -1491,7 +1491,12 @@ class nddata(object):
             if isinstance(obj, dict):
                 if "LISTELEMENTS" in obj:
                     elements = [deserialize_other_info(v) for v in obj["LISTELEMENTS"]]
-                    if "LISTCLASS" in obj and obj["LISTCLASS"] == "tuple":
+                    # allow both the updated LIST_CLASS marker and the legacy
+                    # LISTCLASS label when reconstructing tuple metadata
+                    if (
+                        "LIST_CLASS" in obj
+                        and obj["LIST_CLASS"] == "tuple"
+                    ) or ("LISTCLASS" in obj and obj["LISTCLASS"] == "tuple"):
                         return tuple(elements)
                     return elements
                 return {

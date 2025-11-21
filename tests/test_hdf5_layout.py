@@ -72,8 +72,17 @@ def _decode_list_node(node):
                 decoded.append(inner)
             else:
                 decoded.append(node.attrs[item_name])
-    if "LISTCLASS" in node.attrs and (
-        node.attrs["LISTCLASS"] == b"tuple" or node.attrs["LISTCLASS"] == "tuple"
+    if (
+        "LIST_CLASS" in node.attrs
+        and (
+            node.attrs["LIST_CLASS"] == b"tuple"
+            or node.attrs["LIST_CLASS"] == "tuple"
+        )
+    ) or (
+        "LISTCLASS" in node.attrs
+        and (
+            node.attrs["LISTCLASS"] == b"tuple" or node.attrs["LISTCLASS"] == "tuple"
+        )
     ):
         return tuple(decoded)
     return decoded
