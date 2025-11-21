@@ -1,4 +1,4 @@
-from numpy import pi
+from numpy import pi, log10, round
 
 from ..general_functions import Q_
 
@@ -30,8 +30,11 @@ def _ft_conj(self, x):
             conjugate /= rad_to_hz ** (-rad_power)
 
     conjugate = conjugate.to_compact()
+    to_round = 10**(round(log10(conjugate.magnitude)*1e5)/1e5)/conjugate.magnitude
+    conjugate *= to_round
+    conjugate = conjugate.to_compact()
     assert conjugate.magnitude == 1, (
-        f"conjugate magnitude of {conjugate} is not 1 when trying"
+        f"conjugate magnitude of {conjugate.magnitude} {log10(conjugate.magnitude)} is not 1 when trying"
         f" to find conjugate units for {base_quantity}"
     )
     return f"{conjugate.units:~P}"

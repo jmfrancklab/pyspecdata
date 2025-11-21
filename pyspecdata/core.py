@@ -197,24 +197,11 @@ def apply_oom(average_oom, numbers, prev_label=""):
     new_label: str
         prev_label is prefixed by the appropriate SI prefix
     """
-    oom_names = ["T", "G", "M", "k", "", "m", "μ", "n", "p"]
-    oom_values = r_[12, 9, 6, 3, 0, -3, -6, -9, -12]
-    eq = oom_values == average_oom
-    if not np.any(eq):
-        if all(average_oom < oom_values):
-            oom_index = len(oom_values) - 1
-        elif all(average_oom > oom_values):
-            oom_index = 0
-        else:
-            raise ValueError(
-                strm(
-                    "you passed",
-                    average_oom,
-                    "which I can't find a prefix for",
-                )
-            )
-    else:
-        oom_index = np.nonzero(eq)[0][0]
+    prev_quant = Q_(10**average_oom,prev_label)
+    new_quant = prev_quant.to_base_units().to_compact()
+    # multiply by 1/1000 to convert g → kg
+    scaling = new_quant.magnitude/prev_quant.magnitude
+
     if numbers.dtype in ["int32", "int64"]:
         # this is not necessary unless we have an integer type
         logger.warning(
@@ -222,11 +209,11 @@ def apply_oom(average_oom, numbers, prev_label=""):
             "set of numbers that are described by integers.  This is"
             "probably not a good idea!!"
         )
-        new_values = numbers / 10.0 ** oom_values[oom_index]
+        new_values = numbers * scaling
         numbers[:] = new_values.astype(numbers.dtype)
     else:
-        numbers[:] /= 10.0 ** oom_values[oom_index]
-    return oom_names[oom_index] + prev_label
+        numbers[:] *= scaling
+    return f"{new_quant.units:~P}"
 
 
 def issympy(x):
