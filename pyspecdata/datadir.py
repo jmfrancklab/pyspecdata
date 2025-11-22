@@ -237,6 +237,10 @@ pyspec_config = MyConfig()
 def genconfig():
     """Create or edit the pyspecdata configuration file."""
     pyspec_config._config_parser = None
+    # recompute the config path in case the HOME environment variable changed
+    pyspec_config.config_location = os.path.join(
+        os.path.expanduser("~"), pyspec_config.hide_start + "pyspecdata"
+    )
     filename = pyspec_config.config_location
     qt_widgets = None
     for module_name in ["PyQt5", "PySide2", "PyQt6", "PySide6"]:

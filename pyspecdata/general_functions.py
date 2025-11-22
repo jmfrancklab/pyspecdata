@@ -6,7 +6,7 @@ them."""
 import os
 import sys
 from matplotlib.pylab import gci
-from numpy import pi
+from numpy import pi, sqrt
 import numpy as np
 import logging
 import re
@@ -26,7 +26,8 @@ try:
 except Exception:
     print(
         "**Warning!** I'm hacking the sqrt behavior of pint.  Consider using"
-        " the jmfranck/pint fork, which you can find at https://github.com/jmfranck/pint"
+        " the jmfranck/pint fork, which you can find at"
+        " https://github.com/jmfranck/pint"
     )
 
     def Q_(*args):
@@ -43,6 +44,10 @@ except Exception:
             b = g1 + f" {g2}" + "^{0.5} " + g3
             print(b)
         return ureg.Quantity(a, b)
+
+
+# the following is equivalent to √(μ₀/4π)
+T_per_G = (Q_("kg**0.5*m**0.5/s/A") / sqrt(1e7)).to_base_units()
 
 
 def inside_sphinx():
