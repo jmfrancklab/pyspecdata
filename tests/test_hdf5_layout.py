@@ -42,37 +42,11 @@ class DummyDataset:
 
 
 class DummyGroup(dict):
-    """Minimal dict subclass mimicking an h5py group/dataset.
-
-    Attributes live in a separate ``attrs`` dictionary, while group members
-    remain standard mapping entries to mirror ``h5py`` behavior.
-    """
+    """Minimal dict subclass mimicking an h5py group/dataset."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.attrs = {}
-        # walk the keys to convert nested dicts to DummyGroup instances and
-        # encode any lists or tuples using the same helper as the real HDF5
-        # writer so layout checks see LISTELEMENTS records
-        for key in list(self.keys()):
-            if isinstance(self[key], dict):
-                self[key] = DummyGroup(self[key])
-            elif isinstance(self[key], (list, tuple)):
-                encode_list(key, self.pop(key), self, True)
-            elif isinstance(self[key], np.ndarray):
-                self[key] = DummyDataset(self[key])
-            elif isinstance(self[key], (np.generic, bytes)):
-                self.attrs[key] = self.pop(key)
-            elif isinstance(self[key], str):
-                self.attrs[key] = self.pop(key).encode("utf-8")
-            elif (
-                isinstance(self[key], list)
-                and len(self[key]) > 0
-                and isinstance(self[key][0], str)
-            ):
-                self.attrs[key] = [x.encode("utf-8") for x in self.pop(key)]
-            else:
-                self.attrs[key] = self.pop(key)
 
 
 def _add_group_creators(target):
@@ -203,14 +177,18 @@ def test_hdf5_layout_noerr(tmp_path):
 def test_state_layout():
     a = _generate_nddata()
     a._pytables_hack = True
-    g = DummyGroup(a.__getstate__())
+    g = DummyGroup()
+    _add_group_creators(g)
+    hdf_save_dict_to_group(g, a.__getstate__(), use_pytables_hack=True)
     _check_layout(g, a)
 
 
 def test_state_layout_noerr():
     a = _generate_nddata_noerr()
     a._pytables_hack = True
-    g = DummyGroup(a.__getstate__())
+    g = DummyGroup()
+    _add_group_creators(g)
+    hdf_save_dict_to_group(g, a.__getstate__(), use_pytables_hack=True)
     _check_layout(g, a, haserr=False)
 
 
@@ -296,7 +274,8 @@ def test_encode_decode_list_invertible_no_hack():
     seq = [1, "two", (3.5, "u"), {"inner": 4}]
     root = DummyGroup()
     _add_group_creators(root)
-    encode_list("seq", seq, root, False)
+    encoded = encode_list("seq", seq, False)
+    hdf_save_dict_to_group(root, encoded, use_pytables_hack=False)
     reconstructed = decode_list(root["seq"])
     assert reconstructed == seq
 
@@ -305,7 +284,8 @@ def test_encode_decode_list_invertible_with_hack():
     seq = [1, 2, 3]
     root = DummyGroup()
     _add_group_creators(root)
-    encode_list("seq", seq, root, True)
+    encoded = encode_list("seq", seq, True)
+    hdf_save_dict_to_group(root, encoded, use_pytables_hack=True)
     reconstructed = decode_list(root.attrs["seq"])
     assert reconstructed == seq
 
