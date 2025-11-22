@@ -197,10 +197,10 @@ def apply_oom(average_oom, numbers, prev_label=""):
     new_label: str
         prev_label is prefixed by the appropriate SI prefix
     """
-    prev_quant = Q_(10**average_oom,prev_label)
+    prev_quant = Q_(10**average_oom, prev_label)
     new_quant = prev_quant.to_base_units().to_compact()
     # multiply by 1/1000 to convert g → kg
-    scaling = new_quant.magnitude/prev_quant.magnitude
+    scaling = new_quant.magnitude / prev_quant.magnitude
 
     if numbers.dtype in ["int32", "int64"]:
         # this is not necessary unless we have an integer type
@@ -7106,7 +7106,9 @@ class nddata(object):
                 del f[fullpath]
             g = f.create_group(fullpath)
             hdf_save_dict_to_group(
-                g, state, use_pytables_hack=getattr(self, "_pytables_hack", False)
+                g,
+                state,
+                use_pytables_hack=getattr(self, "_pytables_hack", False),
             )
 
     # }}}

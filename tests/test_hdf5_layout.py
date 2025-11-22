@@ -151,7 +151,11 @@ def _check_state(state, a, haserr=True):
     assert set(state.keys()) == {"data", "dimlabels", "axes", "other_info"}
 
     dimlabels = [
-        lbl[0].decode("utf-8") if isinstance(lbl[0], (bytes, np.bytes_)) else lbl[0]
+        (
+            lbl[0].decode("utf-8")
+            if isinstance(lbl[0], (bytes, np.bytes_))
+            else lbl[0]
+        )
         for lbl in state["dimlabels"]
     ]
     assert dimlabels == list(a.dimlabels)
@@ -165,10 +169,7 @@ def _check_state(state, a, haserr=True):
     if a.get_units() is None:
         assert state["data"]["data_units"] is None
     else:
-        assert (
-            state["data"]["data_units"].decode("utf-8")
-            == a.get_units()
-        )
+        assert state["data"]["data_units"].decode("utf-8") == a.get_units()
 
     # check each axis entry
     for lbl in dimlabels:
@@ -181,10 +182,9 @@ def _check_state(state, a, haserr=True):
         if state["axes"][lbl]["axis_coords_units"] is None:
             assert a.get_units(lbl) is None
         else:
-            assert (
-                state["axes"][lbl]["axis_coords_units"].decode("utf-8")
-                == a.get_units(lbl)
-            )
+            assert state["axes"][lbl]["axis_coords_units"].decode(
+                "utf-8"
+            ) == a.get_units(lbl)
 
     # ensure other_info survived unchanged and lists remain native lists
     assert state["other_info"] == a.other_info
@@ -278,18 +278,21 @@ def test_nddata_hdf5_prop_tuple_roundtrip(tmp_path):
 def test_nddata_hdf5_prop_complex_structures(tmp_path):
     a = _generate_nddata_noerr()
     complex_prop = {
-        "mixed_list": [1, "two", {"inner_dict": {"label": "val"}}, (3.5, "units")],
+        "mixed_list": [
+            1,
+            "two",
+            {"inner_dict": {"label": "val"}},
+            (3.5, "units"),
+        ],
         "tuple_wrapping": (["zero", 0], {"deep_list": [("keep", 1), "str"]}),
     }
     a.set_prop("complex_prop", complex_prop)
     a.hdf5_write("sample.h5", directory=str(tmp_path))
     with h5py.File(tmp_path / "sample.h5", "r") as f:
         assert "mixed_list" in f["test_nd"]["other_info"]["complex_prop"]
-        assert (
-            f["test_nd"]["other_info"]["complex_prop"]["mixed_list"].attrs[
-                "LIST_NODE"
-            ]
-        )
+        assert f["test_nd"]["other_info"]["complex_prop"]["mixed_list"].attrs[
+            "LIST_NODE"
+        ]
         decoded_list = decode_list(
             f["test_nd"]["other_info"]["complex_prop"]["mixed_list"]
         )
