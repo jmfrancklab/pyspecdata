@@ -1,5 +1,6 @@
 from .general_functions import (
     CustomError,
+    T_per_G,
     autostringconvert,
     balance_clims,
     box_muller,

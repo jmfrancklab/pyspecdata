@@ -197,10 +197,10 @@ def apply_oom(average_oom, numbers, prev_label=""):
     new_label: str
         prev_label is prefixed by the appropriate SI prefix
     """
-    prev_quant = Q_(10**average_oom,prev_label)
+    prev_quant = Q_(10**average_oom, prev_label)
     new_quant = prev_quant.to_base_units().to_compact()
     # multiply by 1/1000 to convert g → kg
-    scaling = new_quant.magnitude/prev_quant.magnitude
+    scaling = new_quant.magnitude / prev_quant.magnitude
 
     if numbers.dtype in ["int32", "int64"]:
         # this is not necessary unless we have an integer type
@@ -2197,10 +2197,16 @@ class nddata(object):
             self.set_units(other.get_units(thisaxis))
         return self
 
-    def div_units(self, arg1, arg2=None):
-        """divide units of the data (or axis)
+    def div_units(self, *args, **kwargs):
+        """
+        divide units of the data (or axis)
         by the units that are given, and
         return the multiplier as a number.
+
+        In other words, if you pass "a" and
+        the units of your data are in "b",
+        then this returns x, such that (x
+        a)/(b) = 1.
 
         If the result is not dimensionless,
         an error will be generated.
@@ -2211,9 +2217,6 @@ class nddata(object):
         or `d.div_units("s")` to divide the
         data units by seconds.
 
-        In other words, if you pass "a" and the units of your data are
-        in "b", then this returns x, such that (x a)/(b) = 1.
-
         e.g. to convert a variable from seconds
         to the units of `axisname`, do
         `var_s/d.div_units("axisname","s")`
@@ -2221,18 +2224,26 @@ class nddata(object):
         e.g. to convert `axisname` to μs, do
         `d["axisname"] *= d.div_units("axisname","μs")`
         """
-        if arg2 is not None:
-            denom_units = Q_(arg2)
-            numer_units = Q_(self.get_units(arg1))
+        if len(args) > 1:
+            denom_units = Q_(args[1])
+            numer_units = Q_(self.get_units(args[0]))
         else:
-            denom_units = Q_(arg1)
+            denom_units = Q_(arg[0])
             numer_units = Q_(self.get_units())
         retval = (numer_units / denom_units).to_base_units()
-        assert retval.check(""), (
-            "the quotient you're asking for is not unitless -- it has units"
-            f" of {retval.dimensionality}"
-        )
-        return retval.magnitude
+        if len(kwargs) > 0:
+            assert len(kwargs) == 1
+            return_quant = kwargs["Q"]
+        else:
+            return_quant = False
+        if return_quant:
+            return retval
+        else:
+            assert retval.check(""), (
+                "the quotient you're asking for is not unitless -- it has"
+                f" units of {retval.dimensionality}"
+            )
+            return retval.magnitude
 
     def get_units(self, *args):
         if len(args) == 1:
@@ -6475,7 +6486,10 @@ class nddata(object):
         # }}}
         if len(self.axis_coords) > 0:
             if errordict is not None:
-                axis_coords_error = [errordict[x] for x in newlabels]
+                axis_coords_error = [
+                    errordict[x].copy() if errordict[x] is not None else None
+                    for x in newlabels
+                ]
             else:
                 axis_coords_error = None
             if unitsdict is not None:
@@ -6504,7 +6518,10 @@ class nddata(object):
                     sliced_data,
                     sliced_data.shape,
                     newlabels,
-                    axis_coords=[axesdict[x] for x in newlabels],
+                    # even though we might want a view of the data, we
+                    # always want coords to be independent -- so copy
+                    # them.
+                    axis_coords=[axesdict[x].copy() for x in newlabels],
                     axis_coords_error=axis_coords_error,
                     data_error=newerror,
                     other_info=self.other_info,
