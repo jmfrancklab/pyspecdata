@@ -25,16 +25,20 @@ def _ft_conj(self, x):
     if rad_power:
         rad_to_hz = Q_(2 * pi, "Hz") / Q_(1, "rad/s")
         if rad_power > 0:
-            conjugate *= rad_to_hz ** rad_power
+            conjugate *= rad_to_hz**rad_power
         else:
             conjugate /= rad_to_hz ** (-rad_power)
 
     conjugate = conjugate.to_compact()
-    to_round = 10**(round(log10(conjugate.magnitude)*1e5)/1e5)/conjugate.magnitude
+    to_round = (
+        10 ** (round(log10(conjugate.magnitude) * 1e5) / 1e5)
+        / conjugate.magnitude
+    )
     conjugate *= to_round
     conjugate = conjugate.to_compact()
     assert conjugate.magnitude == 1, (
-        f"conjugate magnitude of {conjugate.magnitude} {log10(conjugate.magnitude)} is not 1 when trying"
-        f" to find conjugate units for {base_quantity}"
+        "conjugate magnitude of"
+        f" {conjugate.magnitude} {log10(conjugate.magnitude)} is not 1 when"
+        f" trying to find conjugate units for {base_quantity}"
     )
     return f"{conjugate.units:~P}"

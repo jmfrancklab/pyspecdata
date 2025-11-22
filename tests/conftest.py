@@ -30,7 +30,11 @@ def load_module(
         existing_file = getattr(existing, "__file__", None)
         if existing_file:
             try:
-                if pathlib.Path(existing_file).resolve().is_relative_to(PACKAGE_ROOT):
+                if (
+                    pathlib.Path(existing_file)
+                    .resolve()
+                    .is_relative_to(PACKAGE_ROOT)
+                ):
                     return existing
             except Exception:
                 if str(PACKAGE_ROOT) in str(existing_file):
