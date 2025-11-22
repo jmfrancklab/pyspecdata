@@ -14,10 +14,22 @@ import pint
 import textwrap
 
 ureg = pint.UnitRegistry()
-
-ureg.define("cyc = rad/2/pi")  # 'cycle' is a new dimension
+ureg.define("cycle = [cyc] = cyc")  # 'cycle' is a new dimension
+ureg.define("rad = cyc*2*pi")  # 'cycle' is a new dimension
 ureg.define("Hz = cyc / s")  # Redefine 'Hz' to be cycles per second
 Q_ = ureg.Quantity
+
+
+def nicedef(self):
+    retval = self.to_base_units()
+    unit_list = ["Hz", "T", "W", "J", "cyc/T", "cyc/m"]
+    candidates = [u for u in [Q_(j) for j in unit_list] if retval.check(u)]
+    if len(candidates) > 0:
+        retval = retval.to(candidates[0])
+    return retval.to_compact()
+
+
+Q_.to_nice = nicedef
 try:
     if "√" in str(Q_("√W")):
         pass
