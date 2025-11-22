@@ -146,6 +146,51 @@ def _check_loaded(b, a):
     assert b.other_info == a.other_info
 
 
+def _check_state(state, a, haserr=True):
+    # confirm top-level keys are present and properly typed
+    assert set(state.keys()) == {"data", "dimlabels", "axes", "other_info"}
+
+    dimlabels = [
+        lbl[0].decode("utf-8") if isinstance(lbl[0], (bytes, np.bytes_)) else lbl[0]
+        for lbl in state["dimlabels"]
+    ]
+    assert dimlabels == list(a.dimlabels)
+
+    # verify data block contents
+    assert "data" in state["data"]
+    np.testing.assert_allclose(state["data"]["data"], a.data)
+    if haserr:
+        assert "error" in state["data"]
+        np.testing.assert_allclose(state["data"]["error"], a.get_error())
+    if a.get_units() is None:
+        assert state["data"]["data_units"] is None
+    else:
+        assert (
+            state["data"]["data_units"].decode("utf-8")
+            == a.get_units()
+        )
+
+    # check each axis entry
+    for lbl in dimlabels:
+        assert lbl in state["axes"]
+        np.testing.assert_allclose(state["axes"][lbl]["data"], a.getaxis(lbl))
+        if haserr and "error" in state["axes"][lbl]:
+            np.testing.assert_allclose(
+                state["axes"][lbl]["error"], a.get_error(lbl)
+            )
+        if state["axes"][lbl]["axis_coords_units"] is None:
+            assert a.get_units(lbl) is None
+        else:
+            assert (
+                state["axes"][lbl]["axis_coords_units"].decode("utf-8")
+                == a.get_units(lbl)
+            )
+
+    # ensure other_info survived unchanged and lists remain native lists
+    assert state["other_info"] == a.other_info
+    assert isinstance(state["other_info"]["level1"]["level2list"], list)
+
+
 def test_hdf5_layout(tmp_path):
     a = _generate_nddata()
     a._pytables_hack = True
@@ -168,18 +213,14 @@ def test_hdf5_layout_noerr(tmp_path):
 
 def test_state_layout():
     a = _generate_nddata()
-    a._pytables_hack = True
-    g = DummyGroup()
-    hdf_save_dict_to_group(g, a.__getstate__(), use_pytables_hack=True)
-    _check_layout(g, a)
+    state = a.__getstate__()
+    _check_state(state, a)
 
 
 def test_state_layout_noerr():
     a = _generate_nddata_noerr()
-    a._pytables_hack = True
-    g = DummyGroup()
-    hdf_save_dict_to_group(g, a.__getstate__(), use_pytables_hack=True)
-    _check_layout(g, a, haserr=False)
+    state = a.__getstate__()
+    _check_state(state, a, haserr=False)
 
 
 @pytest.mark.parametrize("use_pytables_hack", [False, True])
