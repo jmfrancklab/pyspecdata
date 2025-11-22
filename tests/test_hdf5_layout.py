@@ -48,27 +48,19 @@ class DummyGroup(dict):
         super().__init__(*args, **kwargs)
         self.attrs = {}
 
+    def create_group(self, name):
+        """Create a nested :class:`DummyGroup` and attach it under *name*."""
 
-def _add_group_creators(target):
-    """Attach minimal creation helpers to a :class:`DummyGroup` instance.
-
-    These helpers mimic the ``h5py`` API closely enough for ``encode_list`` to
-    build list nodes without requiring a full HDF5 file.
-    """
-
-    def create_group(name):
         subgroup = DummyGroup()
-        _add_group_creators(subgroup)
-        target[name] = subgroup
+        self[name] = subgroup
         return subgroup
 
-    def create_dataset(name, data=None, dtype=None):
-        dataset = DummyDataset(data)
-        target[name] = dataset
-        return dataset
+    def create_dataset(self, name, data=None, dtype=None):
+        """Create a :class:`DummyDataset` and attach it under *name*."""
 
-    target.create_group = create_group
-    target.create_dataset = create_dataset
+        dataset = DummyDataset(data)
+        self[name] = dataset
+        return dataset
 
 
 def _generate_nddata():
@@ -178,7 +170,6 @@ def test_state_layout():
     a = _generate_nddata()
     a._pytables_hack = True
     g = DummyGroup()
-    _add_group_creators(g)
     hdf_save_dict_to_group(g, a.__getstate__(), use_pytables_hack=True)
     _check_layout(g, a)
 
@@ -187,7 +178,6 @@ def test_state_layout_noerr():
     a = _generate_nddata_noerr()
     a._pytables_hack = True
     g = DummyGroup()
-    _add_group_creators(g)
     hdf_save_dict_to_group(g, a.__getstate__(), use_pytables_hack=True)
     _check_layout(g, a, haserr=False)
 
@@ -273,7 +263,6 @@ def test_nddata_hdf5_prop_complex_structures(tmp_path):
 def test_encode_decode_list_invertible_no_hack():
     seq = [1, "two", (3.5, "u"), {"inner": 4}]
     root = DummyGroup()
-    _add_group_creators(root)
     encoded = encode_list("seq", seq, False)
     hdf_save_dict_to_group(root, encoded, use_pytables_hack=False)
     reconstructed = decode_list(root["seq"])
@@ -283,7 +272,6 @@ def test_encode_decode_list_invertible_no_hack():
 def test_encode_decode_list_invertible_with_hack():
     seq = [1, 2, 3]
     root = DummyGroup()
-    _add_group_creators(root)
     encoded = encode_list("seq", seq, True)
     hdf_save_dict_to_group(root, encoded, use_pytables_hack=True)
     reconstructed = decode_list(root.attrs["seq"])
