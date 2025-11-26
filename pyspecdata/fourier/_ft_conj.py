@@ -29,13 +29,13 @@ def _ft_conj(self, x):
         else:
             conjugate /= rad_to_hz ** (-rad_power)
 
-    conjugate = conjugate.to_compact()
+    conjugate = conjugate.to_nice()
     to_round = (
         10 ** (round(log10(conjugate.magnitude) * 1e5) / 1e5)
         / conjugate.magnitude
     )
     conjugate *= to_round
-    conjugate = conjugate.to_compact()
+    conjugate = conjugate.to_nice()
     assert conjugate.magnitude == 1, (
         "conjugate magnitude of"
         f" {conjugate.magnitude} {log10(conjugate.magnitude)} is not 1 when"
