@@ -1420,6 +1420,7 @@ class nddata(object):
         for lbl in self.dimlabels:
             if lbl in state["axes"]:
                 state_of_this_axis = state["axes"][lbl]
+                print("type of state_of_this_axis for debug",type(state_of_this_axis))
                 self.axis_coords.append(state_of_this_axis["data"])
                 if "axis_coords_units" in state_of_this_axis:
                     temp = state_of_this_axis["axis_coords_units"]
