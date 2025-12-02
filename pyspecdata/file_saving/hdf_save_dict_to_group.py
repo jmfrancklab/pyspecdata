@@ -8,23 +8,15 @@ logger = logging.getLogger("pyspecdata.hdf_save_dict_to_group")
 def encode_list(name, input_list, use_pytables_hack=False):
     """Return a dictionary description of a Python sequence.
 
-    The returned dictionary may include ``ATTRIBUTES_OF_MAIN_TREE`` entries to
-    describe attributes that must be attached after the primary HDF tree is
-    built.  This keeps the encoding logic independent from any particular HDF
-    API while still conveying the desired layout.
+    Lists are stored as subgroups marked with ``LIST_NODE`` and numbered
+    ``ITEM`` entries.  Tuples are preserved by a ``LIST_CLASS`` attribute.  If
+    ``use_pytables_hack`` is requested, the legacy ``LISTELEMENTS`` attribute is
+    emitted instead.
     """
 
-    attr_values = []
-    attr_locations = []
     tree = {}
 
-    # dimlabels must remain attributes, so they are requested via the special
-    # post-tree metadata list
-    if name == "dimlabels":
-        attr_values.append({name: np.array(input_list)})
-        attr_locations.append([])
-    elif use_pytables_hack:
-        # request the legacy LISTELEMENTS attribute on the current node
+    if use_pytables_hack:
         serialized_elements = []
         for entry in input_list:
             if isinstance(entry, str):
@@ -38,68 +30,50 @@ def encode_list(name, input_list, use_pytables_hack=False):
             )
         rec = np.zeros(1, dtype=[("LISTELEMENTS", arr.dtype, arr.shape)])[0]
         rec["LISTELEMENTS"] = arr
-        attr_values.append({name: rec})
-        attr_locations.append([])
-    elif (
+        tree[name] = rec
+        return tree
+
+    if (
         isinstance(input_list, (np.void, np.ndarray))
         and getattr(input_list, "dtype", None) is not None
         and getattr(input_list.dtype, "names", None) == ("LISTELEMENTS",)
     ):
-        attr_values.append({name: input_list})
-        attr_locations.append([])
-    else:
-        list_group = {"LIST_NODE": True}
-        if isinstance(input_list, tuple):
-            list_group["LIST_CLASS"] = "tuple"
-        for idx, entry in enumerate(input_list):
-            item_name = "ITEM" + str(idx)
-            if isinstance(entry, (list, tuple)) or (
-                isinstance(entry, (np.void, np.ndarray))
-                and getattr(entry, "dtype", None) is not None
-                and getattr(entry.dtype, "names", None) == ("LISTELEMENTS",)
-            ):
-                encoded_entry = encode_list(
-                    item_name, entry, use_pytables_hack
-                )
-                if item_name in encoded_entry:
-                    list_group[item_name] = encoded_entry[item_name]
-                if "ATTRIBUTES_OF_MAIN_TREE" in encoded_entry:
-                    for idx_attr in range(
-                        len(encoded_entry["ATTRIBUTES_OF_MAIN_TREE"])
-                    ):
-                        attr_values.append(
-                            encoded_entry["ATTRIBUTES_OF_MAIN_TREE"][idx_attr]
-                        )
-                        attr_locations.append(
-                            [name]
-                            + encoded_entry[
-                                "ATTRIBUTES_OF_MAIN_TREE_LOCATIONS"
-                            ][idx_attr]
-                        )
-            elif issubclass(type(entry), np.ndarray):
-                list_group[item_name] = entry
-            elif issubclass(type(entry), dict):
-                list_group[item_name] = entry
-            else:
-                if entry is None:
-                    continue
-                if isinstance(entry, str):
-                    list_group[item_name] = entry
-                elif np.isscalar(entry):
-                    list_group[item_name] = entry
-                elif hasattr(entry, "__len__") and len(entry) > 0:
-                    converted = []
-                    for element in entry:
-                        if isinstance(element, str):
-                            converted.append(element.encode("utf-8"))
-                        else:
-                            converted.append(element)
-                    list_group[item_name] = converted
-        tree[name] = list_group
+        tree[name] = input_list
+        return tree
 
-    if len(attr_values) > 0:
-        tree["ATTRIBUTES_OF_MAIN_TREE"] = attr_values
-        tree["ATTRIBUTES_OF_MAIN_TREE_LOCATIONS"] = attr_locations
+    list_group = {"LIST_NODE": True}
+    if isinstance(input_list, tuple):
+        list_group["LIST_CLASS"] = "tuple"
+    for idx, entry in enumerate(input_list):
+        item_name = "ITEM" + str(idx)
+        if isinstance(entry, (list, tuple)) or (
+            isinstance(entry, (np.void, np.ndarray))
+            and getattr(entry, "dtype", None) is not None
+            and getattr(entry.dtype, "names", None) == ("LISTELEMENTS",)
+        ):
+            encoded_entry = encode_list(item_name, entry, use_pytables_hack)
+            if item_name in encoded_entry:
+                list_group[item_name] = encoded_entry[item_name]
+        elif issubclass(type(entry), np.ndarray):
+            list_group[item_name] = entry
+        elif issubclass(type(entry), dict):
+            list_group[item_name] = entry
+        else:
+            if entry is None:
+                continue
+            if isinstance(entry, str):
+                list_group[item_name] = entry
+            elif np.isscalar(entry):
+                list_group[item_name] = entry
+            elif hasattr(entry, "__len__") and len(entry) > 0:
+                converted = []
+                for element in entry:
+                    if isinstance(element, str):
+                        converted.append(element.encode("utf-8"))
+                    else:
+                        converted.append(element)
+                list_group[item_name] = converted
+    tree[name] = list_group
     return tree
 
 
@@ -153,7 +127,9 @@ def decode_list(source):
                     reconstructed.append(decode_list(source[item_name]))
                 else:
                     reconstructed.append(
-                        hdf_load_dict_from_group(source[item_name])
+                        hdf_load_dict_from_group(
+                            source[item_name], include_attrs=False
+                        )
                     )
             else:
                 if isinstance(source.attrs[item_name], bytes):
@@ -188,34 +164,29 @@ def hdf_save_dict_to_group(
     group,
     data,
     use_pytables_hack=False,
-    base_path=None,
-    attr_values=None,
-    attr_locations=None,
 ):
     """
     Copied as-is from ACERT hfesr code
     All numpy arrays are datasets.
     """
 
-    if base_path is None:
-        base_path = []
-    top_call = attr_values is None and attr_locations is None
-    if top_call:
-        attr_values = []
-        attr_locations = []
-
-    if "ATTRIBUTES_OF_MAIN_TREE" in data:
-        for idx in range(len(data["ATTRIBUTES_OF_MAIN_TREE"])):
-            attr_values.append(data["ATTRIBUTES_OF_MAIN_TREE"][idx])
-            attr_locations.append(
-                base_path + data["ATTRIBUTES_OF_MAIN_TREE_LOCATIONS"][idx]
-            )
+    if (
+        isinstance(data, (np.void, np.ndarray))
+        and getattr(data, "dtype", None) is not None
+        and getattr(data.dtype, "names", None) == ("LISTELEMENTS",)
+    ):
+        group.attrs["LISTELEMENTS"] = data["LISTELEMENTS"]
+        return
 
     for k, v in data.items():
-        if (
-            k == "ATTRIBUTES_OF_MAIN_TREE"
-            or k == "ATTRIBUTES_OF_MAIN_TREE_LOCATIONS"
-        ):
+        if k == "dimlabels":
+            encoded_labels = []
+            for lbl in v:
+                if isinstance(lbl, str):
+                    encoded_labels.append((lbl.encode("utf-8"),))
+                else:
+                    encoded_labels.append((lbl,))
+            group.attrs[k] = np.array(encoded_labels)
             continue
         if issubclass(type(v), np.ndarray):
             logger.debug("Dataset type %s" % str(v.dtype))
@@ -224,38 +195,90 @@ def hdf_save_dict_to_group(
         elif isinstance(v, (list, tuple)):
             encoded = encode_list(k, v, use_pytables_hack)
             if k in encoded:
+                if (
+                    isinstance(encoded[k], (np.void, np.ndarray))
+                    and getattr(encoded[k], "dtype", None) is not None
+                    and getattr(encoded[k].dtype, "names", None)
+                    == ("LISTELEMENTS",)
+                ):
+                    group.attrs[k] = encoded[k]
+                else:
+                    subgroup = group.create_group(k)
+                    hdf_save_dict_to_group(
+                        subgroup,
+                        encoded[k],
+                        use_pytables_hack,
+                    )
+        elif issubclass(type(v), dict):
+            if "NUMPY_DATA" in v:
+                if use_pytables_hack:
+                    subgroup = group.create_group(k)
+                    if getattr(v["NUMPY_DATA"], "dtype", None) is not None and getattr(
+                        v["NUMPY_DATA"].dtype, "names", None
+                    ) is not None:
+                        for field_name in v["NUMPY_DATA"].dtype.names:
+                            subgroup.create_dataset(
+                                field_name,
+                                data=v["NUMPY_DATA"][field_name],
+                                dtype=v["NUMPY_DATA"][field_name].dtype,
+                            )
+                    else:
+                        subgroup.create_dataset(
+                            "data",
+                            data=v["NUMPY_DATA"],
+                            dtype=v["NUMPY_DATA"].dtype,
+                        )
+                    for attr_name in v:
+                        if attr_name == "NUMPY_DATA":
+                            continue
+                        if v[attr_name] is None:
+                            continue
+                        if isinstance(v[attr_name], str):
+                            subgroup.attrs[attr_name] = np.bytes_(v[attr_name])
+                        elif np.isscalar(v[attr_name]):
+                            subgroup.attrs[attr_name] = v[attr_name]
+                        elif hasattr(v[attr_name], "__len__"):
+                            converted = []
+                            for element in v[attr_name]:
+                                if isinstance(element, str):
+                                    converted.append(np.bytes_(element))
+                                else:
+                                    converted.append(element)
+                            subgroup.attrs[attr_name] = converted
+                else:
+                    dataset = group.create_dataset(
+                        k, data=v["NUMPY_DATA"], dtype=v["NUMPY_DATA"].dtype
+                    )
+                    for attr_name in v:
+                        if attr_name == "NUMPY_DATA":
+                            continue
+                        if v[attr_name] is None:
+                            continue
+                        if isinstance(v[attr_name], str):
+                            dataset.attrs[attr_name] = np.bytes_(v[attr_name])
+                        elif np.isscalar(v[attr_name]):
+                            dataset.attrs[attr_name] = v[attr_name]
+                        elif hasattr(v[attr_name], "__len__"):
+                            converted = []
+                            for element in v[attr_name]:
+                                if isinstance(element, str):
+                                    converted.append(np.bytes_(element))
+                                else:
+                                    converted.append(element)
+                            dataset.attrs[attr_name] = converted
+            else:
                 subgroup = group.create_group(k)
                 hdf_save_dict_to_group(
                     subgroup,
-                    encoded[k],
+                    v,
                     use_pytables_hack,
-                    base_path + [k],
-                    attr_values,
-                    attr_locations,
                 )
-            if "ATTRIBUTES_OF_MAIN_TREE" in encoded:
-                for idx in range(len(encoded["ATTRIBUTES_OF_MAIN_TREE"])):
-                    attr_values.append(encoded["ATTRIBUTES_OF_MAIN_TREE"][idx])
-                    attr_locations.append(
-                        base_path
-                        + encoded["ATTRIBUTES_OF_MAIN_TREE_LOCATIONS"][idx]
-                    )
-        elif issubclass(type(v), dict):
-            subgroup = group.create_group(k)
-            hdf_save_dict_to_group(
-                subgroup,
-                v,
-                use_pytables_hack,
-                base_path + [k],
-                attr_values,
-                attr_locations,
-            )
         else:
             if v is None:
                 continue
             if isinstance(v, str):
                 logger.debug("Adding %s=%s as string attribute" % (k, v))
-                group.attrs[k] = v.encode("utf-8")
+                group.attrs[k] = np.bytes_(v)
             elif np.isscalar(v):
                 logger.debug(
                     "Adding "
@@ -270,54 +293,70 @@ def hdf_save_dict_to_group(
                     "Adding " + repr(k) + "=" + repr(v) + " as list attribute"
                 )
                 group.attrs[k] = [
-                    x.encode("utf-8") if isinstance(x, str) else x for x in v
+                    np.bytes_(x) if isinstance(x, str) else x for x in v
                 ]
 
-    if top_call:
-        for idx in range(len(attr_values)):
-            target = group
-            for path_item in attr_locations[idx]:
-                target = target[path_item]
-            for attr_name in attr_values[idx]:
-                if isinstance(attr_values[idx][attr_name], str):
-                    target.attrs[attr_name] = attr_values[idx][
-                        attr_name
-                    ].encode("utf-8")
-                elif (
-                    hasattr(attr_values[idx][attr_name], "__len__")
-                    and not np.isscalar(attr_values[idx][attr_name])
-                    and not isinstance(
-                        attr_values[idx][attr_name], (np.void, np.ndarray)
-                    )
-                ):
-                    converted = []
-                    for element in attr_values[idx][attr_name]:
-                        if isinstance(element, str):
-                            converted.append(element.encode("utf-8"))
-                        else:
-                            converted.append(element)
-                    target.attrs[attr_name] = converted
-                else:
-                    target.attrs[attr_name] = attr_values[idx][attr_name]
 
-
-def hdf_load_dict_from_group(group):
-    """Recursively load an HDF5 group into a plain ``dict``.
-
-    This mirrors :func:`hdf_save_dict_to_group` and returns a dictionary
-    representation of ``group`` suitable for :meth:`nddata.__setstate__`.
-    """
+def hdf_load_dict_from_group(
+    group, base_path=None, attr_values=None, attr_locations=None, include_attrs=True
+):
+    """Recursively load an HDF5 group into a plain ``dict``."""
+    if base_path is None:
+        base_path = []
     if "LIST_NODE" in group.attrs and group.attrs["LIST_NODE"]:
         return decode_list(group)
     retval = {}
     for k, v in group.items():
         if isinstance(v, h5py.Dataset):
-            retval[k] = v[()]
+            retval[k] = {"NUMPY_DATA": v[()]}
+            for attr_name in v.attrs:
+                if hasattr(v.attrs[attr_name], "dtype") and getattr(
+                    v.attrs[attr_name].dtype, "names", None
+                ) == ("LISTELEMENTS",):
+                    retval[k][attr_name] = decode_list(v.attrs[attr_name])
+                elif isinstance(v.attrs[attr_name], bytes):
+                    retval[k][attr_name] = v.attrs[attr_name].decode("utf-8")
+                elif hasattr(v.attrs[attr_name], "__len__") and not np.isscalar(
+                    v.attrs[attr_name]
+                ):
+                    decoded_attr = []
+                    for element in v.attrs[attr_name]:
+                        if isinstance(element, bytes):
+                            decoded_attr.append(element.decode("utf-8"))
+                        else:
+                            decoded_attr.append(element)
+                    retval[k][attr_name] = decoded_attr
+                else:
+                    if isinstance(v.attrs[attr_name], np.generic):
+                        retval[k][attr_name] = v.attrs[attr_name].item()
+                    else:
+                        retval[k][attr_name] = v.attrs[attr_name]
         elif "LIST_NODE" in v.attrs and v.attrs["LIST_NODE"]:
             retval[k] = decode_list(v)
         else:
-            retval[k] = hdf_load_dict_from_group(v)
+            retval[k] = hdf_load_dict_from_group(
+                v, base_path + [k], attr_values, attr_locations, include_attrs
+            )
+    attr_dict = {}
     for k in group.attrs.keys():
+        if k == "dimlabels":
+            decoded_labels = []
+            for entry in group.attrs[k]:
+                value = entry
+                if isinstance(entry, np.ndarray):
+                    if entry.size == 0:
+                        continue
+                    value = entry.flat[0]
+                elif isinstance(entry, (list, tuple)):
+                    if len(entry) == 0:
+                        continue
+                    value = entry[0]
+                if isinstance(value, bytes):
+                    value = value.decode("utf-8")
+                decoded_labels.append((value,))
+            retval[k] = decoded_labels
+            attr_dict[k] = retval[k]
+            continue
         if hasattr(group.attrs[k], "dtype") and getattr(
             group.attrs[k].dtype, "names", None
         ) == ("LISTELEMENTS",):
@@ -339,4 +378,5 @@ def hdf_load_dict_from_group(group):
                 retval[k] = group.attrs[k].item()
             else:
                 retval[k] = group.attrs[k]
+        attr_dict[k] = retval[k]
     return retval
