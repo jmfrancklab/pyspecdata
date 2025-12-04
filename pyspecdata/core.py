@@ -1484,6 +1484,19 @@ class nddata(object):
             self.axis_coords_error.append(axis_error)
 
         shape = tuple(len(ax) for ax in self.axis_coords)
+        if "data" not in state["data"]:
+            # support files where the data node was written directly as a
+            # dataset, so only a NUMPY_DATA payload comes back from the HDF5
+            # loader instead of a nested "data" key
+            if "NUMPY_DATA" in state["data"]:
+                reconstructed = {"data": {"NUMPY_DATA": state["data"]["NUMPY_DATA"]}}
+                if "error" in state["data"]:
+                    reconstructed["error"] = state["data"]["error"]
+                if "data_units" in state["data"]:
+                    reconstructed["data_units"] = state["data"]["data_units"]
+                state["data"] = reconstructed
+            else:
+                raise ValueError("state['data'] is missing the data array")
         if (
             isinstance(state["data"]["data"], dict)
             and "NUMPY_DATA" in state["data"]["data"]
