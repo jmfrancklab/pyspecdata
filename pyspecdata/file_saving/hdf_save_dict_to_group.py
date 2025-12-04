@@ -307,6 +307,7 @@ def hdf_load_dict_from_group(
     """Recursively load an HDF5 group into a plain ``dict``."""
     if base_path is None:
         base_path = []
+    pytables_meta_keys = {"CLASS", "TITLE", "VERSION"}
     if "LIST_NODE" in group.attrs and group.attrs["LIST_NODE"]:
         return decode_list(group)
     retval = {}
@@ -324,6 +325,12 @@ def hdf_load_dict_from_group(
 
             retval[k] = {"NUMPY_DATA": dataset_value}
             for attr_name in v.attrs:
+                if attr_name in pytables_meta_keys:
+                    # PyTables adds metadata attributes (CLASS, TITLE, VERSION)
+                    # that don't represent user data.  Skip these so they don't
+                    # leak into the restored state and confuse downstream logic
+                    # that expects only actual content keys.
+                    continue
                 if hasattr(v.attrs[attr_name], "dtype") and getattr(
                     v.attrs[attr_name].dtype, "names", None
                 ) == ("LISTELEMENTS",):
@@ -353,6 +360,10 @@ def hdf_load_dict_from_group(
             )
     attr_dict = {}
     for k in group.attrs.keys():
+        if k in pytables_meta_keys:
+            # same metadata keys appear on PyTables groups, and they don't hold
+            # user-visible information, so ignore them while decoding
+            continue
         if k == "dimlabels":
             decoded_labels = []
             for entry in group.attrs[k]:

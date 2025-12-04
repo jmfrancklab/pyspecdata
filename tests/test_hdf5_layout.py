@@ -479,6 +479,50 @@ def test_structured_dataset_data_unwrap(tmp_path):
     os.remove(tmp_path / "structured_data.h5")
 
 
+def test_pytables_metadata_attributes_ignored(tmp_path):
+    data = np.arange(4.0).reshape(2, 2)
+    with h5py.File(tmp_path / "pytables_meta.h5", "w") as f:
+        g = f.create_group("test_nd")
+        g.attrs["dimlabels"] = np.array([(b"t",), (b"f",)])
+        axes_group = g.create_group("axes")
+        t_ds = axes_group.create_dataset("t", data=np.linspace(0.0, 1.0, 2))
+        t_ds.attrs["CLASS"] = b"ARRAY"
+        t_ds.attrs["TITLE"] = b"time axis"
+        t_ds.attrs["VERSION"] = b"1.0"
+        f_ds = axes_group.create_dataset("f", data=np.array([10, 20]))
+        f_ds.attrs["CLASS"] = b"ARRAY"
+        data_group = g.create_group("data")
+        main_ds = data_group.create_dataset("data", data=data)
+        main_ds.attrs["CLASS"] = b"ARRAY"
+        main_ds.attrs["TITLE"] = b"data"
+        main_ds.attrs["VERSION"] = b"2.0"
+        data_group.attrs["data_units"] = b"V"
+        other_info_group = g.create_group("other_info")
+        cp_ds = other_info_group.create_dataset("coherence_pathway", data=np.array([1, -1]))
+        cp_ds.attrs["CLASS"] = b"ARRAY"
+        cp_ds.attrs["TITLE"] = b"pathway"
+        cp_ds.attrs["VERSION"] = b"1.0"
+
+    with h5py.File(tmp_path / "pytables_meta.h5", "r") as f:
+        loaded_state = hdf_load_dict_from_group(f["test_nd"])
+    assert "CLASS" not in loaded_state["axes"]["t"]
+    assert "TITLE" not in loaded_state["axes"]["t"]
+    assert "VERSION" not in loaded_state["axes"]["t"]
+    assert "CLASS" not in loaded_state["axes"]["f"]
+    assert "CLASS" not in loaded_state["data"]["data"]
+    assert "TITLE" not in loaded_state["data"]["data"]
+    assert "VERSION" not in loaded_state["data"]["data"]
+    assert set(loaded_state["other_info"]["coherence_pathway"].keys()) == {"NUMPY_DATA"}
+
+    loaded = nddata_hdf5("pytables_meta.h5/test_nd", directory=str(tmp_path))
+    assert "coherence_pathway" in loaded.other_info
+    assert "CLASS" not in loaded.other_info["coherence_pathway"]
+    assert loaded.data.shape == (2, 2)
+    np.testing.assert_allclose(loaded.getaxis("t"), np.linspace(0.0, 1.0, 2))
+    np.testing.assert_allclose(loaded.getaxis("f"), np.array([10, 20]))
+    os.remove(tmp_path / "pytables_meta.h5")
+
+
 def test_attributes_of_main_tree_roundtrip(tmp_path):
     a = _generate_nddata_noerr()
     state = a.__getstate__()
