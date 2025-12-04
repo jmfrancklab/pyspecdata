@@ -317,10 +317,9 @@ def hdf_load_dict_from_group(
             # unwrap structured arrays that only contain a 'data' field so the
             # main data node loads as a plain numpy array rather than a record
             # array with a single field
-            if (
-                hasattr(dataset_value, "dtype")
-                and getattr(dataset_value.dtype, "names", None) == ("data",)
-            ):
+            if hasattr(dataset_value, "dtype") and getattr(
+                dataset_value.dtype, "names", None
+            ) == ("data",):
                 dataset_value = np.array(dataset_value["data"])
 
             retval[k] = {"NUMPY_DATA": dataset_value}
@@ -377,10 +376,14 @@ def hdf_load_dict_from_group(
                         continue
                     value = entry[0]
                 elif isinstance(entry, np.void):
-                    # pytables may store the dimlabels attribute as a structured
-                    # void scalar; make sure we recover the contained value so it
-                    # can be used as a plain Python key later on
-                    if entry.dtype.names is not None and len(entry.dtype.names) > 0:
+                    # pytables may store the dimlabels attribute as a
+                    # structured void scalar; make sure we recover the
+                    # contained value so it can be used as a plain Python key
+                    # later on
+                    if (
+                        entry.dtype.names is not None
+                        and len(entry.dtype.names) > 0
+                    ):
                         value = entry[entry.dtype.names[0]]
                     else:
                         value = entry.item()

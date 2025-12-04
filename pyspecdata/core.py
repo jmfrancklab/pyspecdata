@@ -1489,7 +1489,9 @@ class nddata(object):
             # dataset, so only a NUMPY_DATA payload comes back from the HDF5
             # loader instead of a nested "data" key
             if "NUMPY_DATA" in state["data"]:
-                reconstructed = {"data": {"NUMPY_DATA": state["data"]["NUMPY_DATA"]}}
+                reconstructed = {
+                    "data": {"NUMPY_DATA": state["data"]["NUMPY_DATA"]}
+                }
                 if "error" in state["data"]:
                     reconstructed["error"] = state["data"]["error"]
                 if "data_units" in state["data"]:
@@ -3948,6 +3950,7 @@ class nddata(object):
                 logger.debug("popping axis info")
             return self
         else:
+            print("type of data", self.data.dtype)
             retval = func(self.data)
             if self.data.size == retval.size:
                 self.data = retval

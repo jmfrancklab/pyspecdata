@@ -498,7 +498,9 @@ def test_pytables_metadata_attributes_ignored(tmp_path):
         main_ds.attrs["VERSION"] = b"2.0"
         data_group.attrs["data_units"] = b"V"
         other_info_group = g.create_group("other_info")
-        cp_ds = other_info_group.create_dataset("coherence_pathway", data=np.array([1, -1]))
+        cp_ds = other_info_group.create_dataset(
+            "coherence_pathway", data=np.array([1, -1])
+        )
         cp_ds.attrs["CLASS"] = b"ARRAY"
         cp_ds.attrs["TITLE"] = b"pathway"
         cp_ds.attrs["VERSION"] = b"1.0"
@@ -512,7 +514,9 @@ def test_pytables_metadata_attributes_ignored(tmp_path):
     assert "CLASS" not in loaded_state["data"]["data"]
     assert "TITLE" not in loaded_state["data"]["data"]
     assert "VERSION" not in loaded_state["data"]["data"]
-    assert set(loaded_state["other_info"]["coherence_pathway"].keys()) == {"NUMPY_DATA"}
+    assert set(loaded_state["other_info"]["coherence_pathway"].keys()) == {
+        "NUMPY_DATA"
+    }
 
     loaded = nddata_hdf5("pytables_meta.h5/test_nd", directory=str(tmp_path))
     assert "coherence_pathway" in loaded.other_info
@@ -566,7 +570,11 @@ def test_pytables_hack_dimlabels_loading(tmp_path):
         axes_group.create_dataset("time", data=np.array([0.0, 1.0, 2.0]))
         data_group = g.create_group("data")
         data_group.create_dataset("data", data=data)
-    loaded = nddata_hdf5("pytables_dimlabels.h5/test_nd", directory=str(tmp_path))
+    loaded = nddata_hdf5(
+        "pytables_dimlabels.h5/test_nd", directory=str(tmp_path)
+    )
     assert list(loaded.dimlabels) == ["time"]
     np.testing.assert_allclose(loaded.data.real, data)
-    np.testing.assert_allclose(loaded.getaxis("time"), np.array([0.0, 1.0, 2.0]))
+    np.testing.assert_allclose(
+        loaded.getaxis("time"), np.array([0.0, 1.0, 2.0])
+    )
