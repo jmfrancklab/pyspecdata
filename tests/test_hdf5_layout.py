@@ -450,6 +450,35 @@ def test_dataset_node_for_data_loading(tmp_path):
     os.remove(tmp_path / "dataset_data.h5")
 
 
+def test_structured_dataset_data_unwrap(tmp_path):
+    data = np.arange(6).reshape(2, 3) + 1j * np.arange(1, 7).reshape(2, 3)
+    structured_data = np.zeros(data.shape, dtype=[("data", "<c16")])
+    structured_data["data"] = data
+
+    with h5py.File(tmp_path / "structured_data.h5", "w") as f:
+        g = f.create_group("test_nd")
+        g.attrs["dimlabels"] = np.array([(b"t",), (b"f",)])
+        axes_group = g.create_group("axes")
+        axes_group.create_dataset("t", data=np.linspace(0.0, 1.0, 2))
+        axes_group["t"].attrs["axis_coords_units"] = b"s"
+        axes_group.create_dataset("f", data=np.array([10, 20, 30]))
+        axes_group["f"].attrs["axis_coords_units"] = b"Hz"
+        data_group = g.create_group("data")
+        data_group.create_dataset("data", data=structured_data)
+        data_group.attrs["data_units"] = b"V"
+
+    loaded = nddata_hdf5("structured_data.h5/test_nd", directory=str(tmp_path))
+    assert list(loaded.dimlabels) == ["t", "f"]
+    assert loaded.data.dtype.names is None
+    np.testing.assert_allclose(loaded.data, data)
+    np.testing.assert_allclose(loaded.getaxis("t"), np.linspace(0.0, 1.0, 2))
+    np.testing.assert_allclose(loaded.getaxis("f"), np.array([10, 20, 30]))
+    assert loaded.get_units("t") == "s"
+    assert loaded.get_units("f") == "Hz"
+    assert loaded.get_units() == "V"
+    os.remove(tmp_path / "structured_data.h5")
+
+
 def test_attributes_of_main_tree_roundtrip(tmp_path):
     a = _generate_nddata_noerr()
     state = a.__getstate__()

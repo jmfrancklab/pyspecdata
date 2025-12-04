@@ -312,7 +312,17 @@ def hdf_load_dict_from_group(
     retval = {}
     for k, v in group.items():
         if isinstance(v, h5py.Dataset):
-            retval[k] = {"NUMPY_DATA": v[()]}
+            dataset_value = v[()]
+            # unwrap structured arrays that only contain a 'data' field so the
+            # main data node loads as a plain numpy array rather than a record
+            # array with a single field
+            if (
+                hasattr(dataset_value, "dtype")
+                and getattr(dataset_value.dtype, "names", None) == ("data",)
+            ):
+                dataset_value = np.array(dataset_value["data"])
+
+            retval[k] = {"NUMPY_DATA": dataset_value}
             for attr_name in v.attrs:
                 if hasattr(v.attrs[attr_name], "dtype") and getattr(
                     v.attrs[attr_name].dtype, "names", None
