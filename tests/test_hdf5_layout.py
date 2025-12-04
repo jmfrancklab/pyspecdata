@@ -427,6 +427,106 @@ def test_legacy_axis_loading(tmp_path):
     os.remove(tmp_path / "legacy.h5")
 
 
+def test_dataset_node_for_data_loading(tmp_path):
+    data = np.arange(6).reshape(2, 3)
+    with h5py.File(tmp_path / "dataset_data.h5", "w") as f:
+        g = f.create_group("test_nd")
+        g.attrs["dimlabels"] = np.array([(b"t",), (b"f",)])
+        axes_group = g.create_group("axes")
+        axes_group.create_dataset("t", data=np.linspace(0.0, 1.0, 2))
+        axes_group["t"].attrs["axis_coords_units"] = b"s"
+        axes_group.create_dataset("f", data=np.array([10, 20, 30]))
+        axes_group["f"].attrs["axis_coords_units"] = b"Hz"
+        g.create_dataset("data", data=data)
+        g["data"].attrs["data_units"] = b"V"
+    loaded = nddata_hdf5("dataset_data.h5/test_nd", directory=str(tmp_path))
+    assert list(loaded.dimlabels) == ["t", "f"]
+    np.testing.assert_allclose(loaded.data.real, data)
+    np.testing.assert_allclose(loaded.getaxis("t"), np.linspace(0.0, 1.0, 2))
+    np.testing.assert_allclose(loaded.getaxis("f"), np.array([10, 20, 30]))
+    assert loaded.get_units("t") == "s"
+    assert loaded.get_units("f") == "Hz"
+    assert loaded.get_units() == "V"
+    os.remove(tmp_path / "dataset_data.h5")
+
+
+def test_structured_dataset_data_unwrap(tmp_path):
+    data = np.arange(6).reshape(2, 3) + 1j * np.arange(1, 7).reshape(2, 3)
+    structured_data = np.zeros(data.shape, dtype=[("data", "<c16")])
+    structured_data["data"] = data
+
+    with h5py.File(tmp_path / "structured_data.h5", "w") as f:
+        g = f.create_group("test_nd")
+        g.attrs["dimlabels"] = np.array([(b"t",), (b"f",)])
+        axes_group = g.create_group("axes")
+        axes_group.create_dataset("t", data=np.linspace(0.0, 1.0, 2))
+        axes_group["t"].attrs["axis_coords_units"] = b"s"
+        axes_group.create_dataset("f", data=np.array([10, 20, 30]))
+        axes_group["f"].attrs["axis_coords_units"] = b"Hz"
+        data_group = g.create_group("data")
+        data_group.create_dataset("data", data=structured_data)
+        data_group.attrs["data_units"] = b"V"
+
+    loaded = nddata_hdf5("structured_data.h5/test_nd", directory=str(tmp_path))
+    assert list(loaded.dimlabels) == ["t", "f"]
+    assert loaded.data.dtype.names is None
+    np.testing.assert_allclose(loaded.data, data)
+    np.testing.assert_allclose(loaded.getaxis("t"), np.linspace(0.0, 1.0, 2))
+    np.testing.assert_allclose(loaded.getaxis("f"), np.array([10, 20, 30]))
+    assert loaded.get_units("t") == "s"
+    assert loaded.get_units("f") == "Hz"
+    assert loaded.get_units() == "V"
+    os.remove(tmp_path / "structured_data.h5")
+
+
+def test_pytables_metadata_attributes_ignored(tmp_path):
+    data = np.arange(4.0).reshape(2, 2)
+    with h5py.File(tmp_path / "pytables_meta.h5", "w") as f:
+        g = f.create_group("test_nd")
+        g.attrs["dimlabels"] = np.array([(b"t",), (b"f",)])
+        axes_group = g.create_group("axes")
+        t_ds = axes_group.create_dataset("t", data=np.linspace(0.0, 1.0, 2))
+        t_ds.attrs["CLASS"] = b"ARRAY"
+        t_ds.attrs["TITLE"] = b"time axis"
+        t_ds.attrs["VERSION"] = b"1.0"
+        f_ds = axes_group.create_dataset("f", data=np.array([10, 20]))
+        f_ds.attrs["CLASS"] = b"ARRAY"
+        data_group = g.create_group("data")
+        main_ds = data_group.create_dataset("data", data=data)
+        main_ds.attrs["CLASS"] = b"ARRAY"
+        main_ds.attrs["TITLE"] = b"data"
+        main_ds.attrs["VERSION"] = b"2.0"
+        data_group.attrs["data_units"] = b"V"
+        other_info_group = g.create_group("other_info")
+        cp_ds = other_info_group.create_dataset(
+            "coherence_pathway", data=np.array([1, -1])
+        )
+        cp_ds.attrs["CLASS"] = b"ARRAY"
+        cp_ds.attrs["TITLE"] = b"pathway"
+        cp_ds.attrs["VERSION"] = b"1.0"
+
+    with h5py.File(tmp_path / "pytables_meta.h5", "r") as f:
+        loaded_state = hdf_load_dict_from_group(f["test_nd"])
+    assert "CLASS" not in loaded_state["axes"]["t"]
+    assert "TITLE" not in loaded_state["axes"]["t"]
+    assert "VERSION" not in loaded_state["axes"]["t"]
+    assert "CLASS" not in loaded_state["axes"]["f"]
+    assert "CLASS" not in loaded_state["data"]["data"]
+    assert "TITLE" not in loaded_state["data"]["data"]
+    assert "VERSION" not in loaded_state["data"]["data"]
+    assert set(loaded_state["other_info"]["coherence_pathway"].keys()) == {
+        "NUMPY_DATA"
+    }
+
+    loaded = nddata_hdf5("pytables_meta.h5/test_nd", directory=str(tmp_path))
+    assert "coherence_pathway" in loaded.other_info
+    assert "CLASS" not in loaded.other_info["coherence_pathway"]
+    assert loaded.data.shape == (2, 2)
+    np.testing.assert_allclose(loaded.getaxis("t"), np.linspace(0.0, 1.0, 2))
+    np.testing.assert_allclose(loaded.getaxis("f"), np.array([10, 20]))
+    os.remove(tmp_path / "pytables_meta.h5")
+
+
 def test_attributes_of_main_tree_roundtrip(tmp_path):
     a = _generate_nddata_noerr()
     state = a.__getstate__()
@@ -455,3 +555,26 @@ def test_attributes_of_main_tree_roundtrip(tmp_path):
     assert loaded_state["axes"]["f"]["axis_coords_units"] == "Hz"
     assert loaded_state["data"]["data_units"] == "V"
     os.remove(tmp_path / "attrs.h5")
+
+
+def test_pytables_hack_dimlabels_loading(tmp_path):
+    # construct a dimlabels attribute that matches the PyTables structured
+    # array style so we can confirm it decodes to plain strings
+    structured_labels = np.zeros(1, dtype=[("LISTELEMENTS", "S5")])
+    structured_labels["LISTELEMENTS"][0] = np.bytes_("time")
+    data = np.arange(3.0)
+    with h5py.File(tmp_path / "pytables_dimlabels.h5", "w") as f:
+        g = f.create_group("test_nd")
+        g.attrs["dimlabels"] = structured_labels
+        axes_group = g.create_group("axes")
+        axes_group.create_dataset("time", data=np.array([0.0, 1.0, 2.0]))
+        data_group = g.create_group("data")
+        data_group.create_dataset("data", data=data)
+    loaded = nddata_hdf5(
+        "pytables_dimlabels.h5/test_nd", directory=str(tmp_path)
+    )
+    assert list(loaded.dimlabels) == ["time"]
+    np.testing.assert_allclose(loaded.data.real, data)
+    np.testing.assert_allclose(
+        loaded.getaxis("time"), np.array([0.0, 1.0, 2.0])
+    )

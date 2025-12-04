@@ -307,13 +307,29 @@ def hdf_load_dict_from_group(
     """Recursively load an HDF5 group into a plain ``dict``."""
     if base_path is None:
         base_path = []
+    pytables_meta_keys = {"CLASS", "TITLE", "VERSION"}
     if "LIST_NODE" in group.attrs and group.attrs["LIST_NODE"]:
         return decode_list(group)
     retval = {}
     for k, v in group.items():
         if isinstance(v, h5py.Dataset):
-            retval[k] = {"NUMPY_DATA": v[()]}
+            dataset_value = v[()]
+            # unwrap structured arrays that only contain a 'data' field so the
+            # main data node loads as a plain numpy array rather than a record
+            # array with a single field
+            if hasattr(dataset_value, "dtype") and getattr(
+                dataset_value.dtype, "names", None
+            ) == ("data",):
+                dataset_value = np.array(dataset_value["data"])
+
+            retval[k] = {"NUMPY_DATA": dataset_value}
             for attr_name in v.attrs:
+                if attr_name in pytables_meta_keys:
+                    # PyTables adds metadata attributes (CLASS, TITLE, VERSION)
+                    # that don't represent user data.  Skip these so they don't
+                    # leak into the restored state and confuse downstream logic
+                    # that expects only actual content keys.
+                    continue
                 if hasattr(v.attrs[attr_name], "dtype") and getattr(
                     v.attrs[attr_name].dtype, "names", None
                 ) == ("LISTELEMENTS",):
@@ -343,6 +359,10 @@ def hdf_load_dict_from_group(
             )
     attr_dict = {}
     for k in group.attrs.keys():
+        if k in pytables_meta_keys:
+            # same metadata keys appear on PyTables groups, and they don't hold
+            # user-visible information, so ignore them while decoding
+            continue
         if k == "dimlabels":
             decoded_labels = []
             for entry in group.attrs[k]:
@@ -355,8 +375,22 @@ def hdf_load_dict_from_group(
                     if len(entry) == 0:
                         continue
                     value = entry[0]
+                elif isinstance(entry, np.void):
+                    # pytables may store the dimlabels attribute as a
+                    # structured void scalar; make sure we recover the
+                    # contained value so it can be used as a plain Python key
+                    # later on
+                    if (
+                        entry.dtype.names is not None
+                        and len(entry.dtype.names) > 0
+                    ):
+                        value = entry[entry.dtype.names[0]]
+                    else:
+                        value = entry.item()
                 if isinstance(value, bytes):
                     value = value.decode("utf-8")
+                elif isinstance(value, np.generic):
+                    value = value.item()
                 decoded_labels.append((value,))
             retval[k] = decoded_labels
             attr_dict[k] = retval[k]
