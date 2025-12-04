@@ -147,46 +147,36 @@ def _check_loaded(b, a):
 
 
 def _check_state(state, a, haserr=True):
-    # confirm top-level keys are present and properly typed
-    assert set(state.keys()) == {"data", "dimlabels", "axes", "other_info"}
+    expected_keys = {"data", "dimlabels", "axes", "other_info"}
+    assert expected_keys.issubset(set(state.keys()))
 
-    dimlabels = [
-        (
-            lbl[0].decode("utf-8")
-            if isinstance(lbl[0], (bytes, np.bytes_))
-            else lbl[0]
-        )
-        for lbl in state["dimlabels"]
-    ]
+    dimlabels = list(state["dimlabels"])
     assert dimlabels == list(a.dimlabels)
 
-    # verify data block contents
-    assert "data" in state["data"]
     np.testing.assert_allclose(state["data"]["data"], a.data)
     if haserr:
-        assert "error" in state["data"]
         np.testing.assert_allclose(state["data"]["error"], a.get_error())
     if a.get_units() is None:
         assert state["data"]["data_units"] is None
     else:
-        assert state["data"]["data_units"].decode("utf-8") == a.get_units()
+        assert state["data"]["data_units"] == a.get_units()
 
-    # check each axis entry
     for lbl in dimlabels:
-        assert lbl in state["axes"]
-        np.testing.assert_allclose(state["axes"][lbl]["data"], a.getaxis(lbl))
-        if haserr and "error" in state["axes"][lbl]:
-            np.testing.assert_allclose(
-                state["axes"][lbl]["error"], a.get_error(lbl)
-            )
-        if state["axes"][lbl]["axis_coords_units"] is None:
-            assert a.get_units(lbl) is None
+        assert "NUMPY_DATA" in state["axes"][lbl]
+        axis_array = state["axes"][lbl]["NUMPY_DATA"]
+        if axis_array.dtype.names is None:
+            np.testing.assert_allclose(axis_array, a.getaxis(lbl))
         else:
-            assert state["axes"][lbl]["axis_coords_units"].decode(
-                "utf-8"
-            ) == a.get_units(lbl)
+            np.testing.assert_allclose(axis_array["data"], a.getaxis(lbl))
+            if haserr:
+                np.testing.assert_allclose(
+                    axis_array["error"], a.get_error(lbl)
+                )
+        if a.get_units(lbl) is None:
+            assert "axis_coords_units" not in state["axes"][lbl]
+        else:
+            assert state["axes"][lbl]["axis_coords_units"] == a.get_units(lbl)
 
-    # ensure other_info survived unchanged and lists remain native lists
     assert state["other_info"] == a.other_info
     assert isinstance(state["other_info"]["level1"]["level2list"], list)
 
@@ -221,6 +211,39 @@ def test_state_layout_noerr():
     a = _generate_nddata_noerr()
     state = a.__getstate__()
     _check_state(state, a, haserr=False)
+
+
+def test_state_axis_error_structured_merge():
+    a = _generate_nddata_noerr()
+    structured_axis = np.core.records.fromarrays(
+        [a.getaxis("t")], names="data"
+    )
+    a.axis_coords[0] = structured_axis
+    a.set_error("t", np.array([0.01, 0.02]))
+    state = a.__getstate__()
+    assert state["axes"]["t"]["NUMPY_DATA"].dtype.names == ("data", "error")
+    np.testing.assert_allclose(
+        state["axes"]["t"]["NUMPY_DATA"]["data"], a.getaxis("t")["data"]
+    )
+    np.testing.assert_allclose(
+        state["axes"]["t"]["NUMPY_DATA"]["error"], a.get_error("t")
+    )
+
+
+def test_state_axis_error_plain_to_structured():
+    a = _generate_nddata()
+    state = a.__getstate__()
+    for lbl in a.dimlabels:
+        assert state["axes"][lbl]["NUMPY_DATA"].dtype.names == (
+            "data",
+            "error",
+        )
+        np.testing.assert_allclose(
+            state["axes"][lbl]["NUMPY_DATA"]["data"], a.getaxis(lbl)
+        )
+        np.testing.assert_allclose(
+            state["axes"][lbl]["NUMPY_DATA"]["error"], a.get_error(lbl)
+        )
 
 
 @pytest.mark.parametrize("use_pytables_hack", [False, True])
@@ -376,3 +399,59 @@ def test_state_hdf_dict_roundtrip_noerr(tmp_path):
     with h5py.File(tmp_path / "state.h5", "r") as f:
         _check_layout(f["test_nd"], a, haserr=False)
     os.remove(tmp_path / "state.h5")
+
+
+def test_legacy_axis_loading(tmp_path):
+    data = np.arange(6).reshape(2, 3)
+    with h5py.File(tmp_path / "legacy.h5", "w") as f:
+        g = f.create_group("test_nd")
+        g.attrs["dimlabels"] = np.array([(b"t",), (b"f",)])
+        axes_group = g.create_group("axes")
+        legacy_t = np.core.records.fromarrays(
+            [np.linspace(0.0, 1.0, 2)], names="data"
+        )
+        axes_group.create_dataset("t", data=legacy_t)
+        axes_group["t"].attrs["axis_coords_units"] = b"s"
+        axes_group.create_dataset("f", data=np.array([10, 20, 30]))
+        axes_group["f"].attrs["axis_coords_units"] = b"Hz"
+        data_group = g.create_group("data")
+        data_group.create_dataset("data", data=data)
+        data_group.attrs["data_units"] = b"V"
+    loaded = nddata_hdf5("legacy.h5/test_nd", directory=str(tmp_path))
+    np.testing.assert_allclose(loaded.getaxis("t"), np.linspace(0.0, 1.0, 2))
+    np.testing.assert_allclose(loaded.getaxis("f"), np.array([10, 20, 30]))
+    assert loaded.get_units("t") == "s"
+    assert loaded.get_units("f") == "Hz"
+    assert loaded.get_units() == "V"
+    np.testing.assert_allclose(loaded.data.real, data)
+    os.remove(tmp_path / "legacy.h5")
+
+
+def test_attributes_of_main_tree_roundtrip(tmp_path):
+    a = _generate_nddata_noerr()
+    state = a.__getstate__()
+    with h5py.File(tmp_path / "attrs.h5", "w") as f:
+        g = f.create_group("test_nd")
+        hdf_save_dict_to_group(g, state, use_pytables_hack=False)
+    with h5py.File(tmp_path / "attrs.h5", "r") as f:
+        axis_t_units = f["test_nd"]["axes"]["t"].attrs["axis_coords_units"]
+        axis_f_units = f["test_nd"]["axes"]["f"].attrs["axis_coords_units"]
+        data_units_attr = f["test_nd"]["data"].attrs["data_units"]
+        if isinstance(axis_t_units, (bytes, np.bytes_)):
+            assert axis_t_units == b"s"
+        else:
+            assert axis_t_units == "s"
+        if isinstance(axis_f_units, (bytes, np.bytes_)):
+            assert axis_f_units == b"Hz"
+        else:
+            assert axis_f_units == "Hz"
+        if isinstance(data_units_attr, (bytes, np.bytes_)):
+            assert data_units_attr == b"V"
+        else:
+            assert data_units_attr == "V"
+    with h5py.File(tmp_path / "attrs.h5", "r") as f:
+        loaded_state = hdf_load_dict_from_group(f["test_nd"])
+    assert loaded_state["axes"]["t"]["axis_coords_units"] == "s"
+    assert loaded_state["axes"]["f"]["axis_coords_units"] == "Hz"
+    assert loaded_state["data"]["data_units"] == "V"
+    os.remove(tmp_path / "attrs.h5")

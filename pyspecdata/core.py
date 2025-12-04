@@ -1344,20 +1344,46 @@ class nddata(object):
         return string[:9] == "symbolic_" and hasattr(self, string)
 
     def __getstate__(self):
-        """Return a plain ``dict`` describing the ``nddata`` state."""
+        """Return a plain ``dict`` describing the ``nddata`` state.
+
+        Any sub-dictionary that contains a ``"NUMPY_DATA"`` key is treated as
+        a dataset-plus-attributes bundle when the state is saved to a format
+        that supports attributes (for example, the HDF5 helpers).  The value of
+        ``"NUMPY_DATA"`` is the array to be written, and the remaining keys in
+        that sub-dictionary become attributes on the dataset.  The lowercase
+        ``data`` sub-dictionary is not special and continues to hold the main
+        data array and its companions.
+        """
 
         axes = {}
         for lbl in self.dimlabels:
-            units = self.get_units(lbl)
-            axes[lbl] = {
-                "data": self.getaxis(lbl),
-                "axis_coords_units": (
-                    np.bytes_(units) if units is not None else None
-                ),
-            }
+            coords = self.getaxis(lbl)
             err = self.get_error(lbl)
-            if err is not None:
-                axes[lbl]["error"] = err
+            if err is None:
+                axes[lbl] = {"NUMPY_DATA": coords}
+            else:
+                if coords.dtype.names is None:
+                    structured_axis = np.core.records.fromarrays(
+                        [coords, err], names="data,error"
+                    )
+                else:
+                    if "error" in coords.dtype.names:
+                        structured_axis = coords.copy()
+                        structured_axis["error"] = err
+                    else:
+                        new_dtype = list(coords.dtype.descr) + [
+                            ("error", err.dtype)
+                        ]
+                        structured_axis = np.empty(
+                            coords.shape, dtype=new_dtype
+                        )
+                        for field_name in coords.dtype.names:
+                            structured_axis[field_name] = coords[field_name]
+                        structured_axis["error"] = err
+                axes[lbl] = {"NUMPY_DATA": structured_axis}
+            units = self.get_units(lbl)
+            if units is not None:
+                axes[lbl]["axis_coords_units"] = units
 
         def serialize_other_info(obj):
             if isinstance(obj, dict):
@@ -1373,14 +1399,9 @@ class nddata(object):
         if getattr(self, "data_error", None) is not None:
             data_state["error"] = self.data_error
         units = self.get_units()
-        data_state["data_units"] = (
-            np.bytes_(units) if units is not None else None
-        )
+        data_state["data_units"] = units
 
-        dimlabels = [
-            (np.bytes_(lbl),) if isinstance(lbl, str) else (lbl,)
-            for lbl in self.dimlabels
-        ]
+        dimlabels = list(self.dimlabels)
 
         return {
             "data": data_state,
@@ -1400,82 +1421,99 @@ class nddata(object):
     def __setstate__(self, state):
         """Restore object state from a dictionary."""
 
-        def decode_if_bytes(x):
-            if isinstance(x, (bytes, np.bytes_)):
-                return x.decode("utf-8")
-            return x
-
         missing = [k for k in ("dimlabels", "data") if k not in state]
         if missing:
             raise ValueError(
                 "state is missing required keys: " + ", ".join(missing)
             )
 
-        dimlabels = [decode_if_bytes(lbl) for (lbl,) in state["dimlabels"]]
+        dimlabels = []
+        for lbl in state["dimlabels"]:
+            if isinstance(lbl, (tuple, list)):
+                dimlabels.append(lbl[0])
+            elif isinstance(lbl, np.ndarray):
+                if lbl.size == 0:
+                    continue
+                dimlabels.append(lbl.flat[0])
+            else:
+                dimlabels.append(lbl)
         self.dimlabels = list(dimlabels)
 
         self.axis_coords = []
         self.axis_coords_units = []
         self.axis_coords_error = []
         for lbl in self.dimlabels:
-            if lbl in state["axes"]:
-                state_of_this_axis = state["axes"][lbl]
-                print("type of state_of_this_axis for debug",type(state_of_this_axis))
-                self.axis_coords.append(state_of_this_axis["data"])
-                if "axis_coords_units" in state_of_this_axis:
-                    temp = state_of_this_axis["axis_coords_units"]
-                    self.axis_coords_units.append(
-                        None if temp is None else decode_if_bytes(temp)
-                    )
-                else:
-                    self.axis_coords_units.append(None)
-                if "error" in state_of_this_axis:
-                    temp = state_of_this_axis["error"]
-                    self.axis_coords_error.append(
-                        None if temp is None else decode_if_bytes(temp)
-                    )
-                else:
-                    self.axis_coords_error.append(None)
-            else:
+            if lbl not in state["axes"]:
                 raise ValueError(
                     f"No axis coords for {lbl}, which is not allowed, because"
                     " that's how I determine the size!!"
                 )
+            axis_units = None
+            axis_error = None
+            if isinstance(state["axes"][lbl], dict):
+                if "axis_coords_units" in state["axes"][lbl]:
+                    axis_units = state["axes"][lbl]["axis_coords_units"]
+                if "error" in state["axes"][lbl]:
+                    axis_error = state["axes"][lbl]["error"]
+                if "data" in state["axes"][lbl]:
+                    axis_array = state["axes"][lbl]["data"]
+                elif "NUMPY_DATA" in state["axes"][lbl]:
+                    axis_array = state["axes"][lbl]["NUMPY_DATA"]
+                else:
+                    axis_array = state["axes"][lbl]
+            else:
+                axis_array = state["axes"][lbl]
+            if isinstance(axis_array, dict) and "NUMPY_DATA" in axis_array:
+                axis_array = axis_array["NUMPY_DATA"]
+            if isinstance(axis_error, dict) and "NUMPY_DATA" in axis_error:
+                axis_error = axis_error["NUMPY_DATA"]
+            if (
+                isinstance(axis_array, np.ndarray)
+                and axis_array.dtype.names is not None
+            ):
+                if "data" in axis_array.dtype.names:
+                    axis_coords = axis_array["data"]
+                else:
+                    axis_coords = axis_array
+                if "error" in axis_array.dtype.names:
+                    axis_error = axis_array["error"]
+            else:
+                axis_coords = axis_array
+            self.axis_coords.append(axis_coords)
+            self.axis_coords_units.append(axis_units)
+            self.axis_coords_error.append(axis_error)
 
         shape = tuple(len(ax) for ax in self.axis_coords)
-        self.data = state["data"]["data"].reshape(shape)
-        temp = state["data"]
-        if "error" in temp:
-            temp = temp["error"]
-            self.data_error = None if temp is None else temp.reshape(shape)
+        if (
+            isinstance(state["data"]["data"], dict)
+            and "NUMPY_DATA" in state["data"]["data"]
+        ):
+            self.data = state["data"]["data"]["NUMPY_DATA"].reshape(shape)
+        else:
+            self.data = state["data"]["data"].reshape(shape)
+        if "error" in state["data"]:
+            if state["data"]["error"] is None:
+                self.data_error = None
+            elif (
+                isinstance(state["data"]["error"], dict)
+                and "NUMPY_DATA" in state["data"]["error"]
+            ):
+                self.data_error = state["data"]["error"]["NUMPY_DATA"].reshape(
+                    shape
+                )
+            else:
+                self.data_error = state["data"]["error"].reshape(shape)
         else:
             self.data_error = None
-        temp = state["data"]
-        if "data_units" in temp:
-            self.data_units = decode_if_bytes(state["data"]["data_units"])
+        if "data_units" in state["data"]:
+            self.data_units = state["data"]["data_units"]
         else:
             self.data_units = None
 
-        def deserialize_other_info(obj):
-            if (
-                isinstance(obj, (np.void, np.ndarray))
-                and getattr(obj, "dtype", None) is not None
-                and obj.dtype.names == ("LISTELEMENTS",)
-            ):
-                return [deserialize_other_info(v) for v in obj["LISTELEMENTS"]]
-            if isinstance(obj, dict):
-                return {
-                    decode_if_bytes(k): deserialize_other_info(v)
-                    for k, v in obj.items()
-                }
-            elif isinstance(obj, tuple):
-                return tuple(deserialize_other_info(v) for v in obj)
-            elif isinstance(obj, list):
-                return [deserialize_other_info(v) for v in obj]
-            else:
-                return decode_if_bytes(obj)
-
-        self.other_info = deserialize_other_info(state["other_info"])
+        if "other_info" in state:
+            self.other_info = state["other_info"]
+        else:
+            self.other_info = {}
         self.genftpairs = False
         return
 
@@ -3449,8 +3487,8 @@ class nddata(object):
 
     def argmax(self, *axes, **kwargs):
         r"""If `.argmax('dimname')` find the max along a particular dimension,
-        and get rid of that dimension, replacing it with the index number of
-        the max value.
+        and get rid of that dimension, replacing it with the coordinate where
+        the max value is found.
 
         If `.argmax()`: return a dictionary giving the coordinates of the
         overall maximum point.
@@ -3500,8 +3538,8 @@ class nddata(object):
 
     def argmin(self, *axes, **kwargs):
         r"""If `.argmin('dimname')` find the min along a particular dimension,
-        and get rid of that dimension, replacing it with the index number of
-        the max value.
+        and get rid of that dimension, replacing it with the coordinate where
+        the min value is found.
 
         If `.argmin()`: return a dictionary giving the coordinates of the
         overall minimum point.
@@ -7164,6 +7202,7 @@ class nddata(object):
                 state,
                 use_pytables_hack=getattr(self, "_pytables_hack", False),
             )
+
     # }}}
 
 
@@ -7181,7 +7220,13 @@ class nddata_hdf5(nddata):
         import h5py
 
         with h5py.File(filepath, "r") as f:
-            g = f[internal]
+            try:
+                g = f[internal]
+            except KeyError:
+                raise KeyError(
+                    f"looking for {internal} inside {f}, and couldn't find it"
+                    f" -- are you looking for one of these? {f.keys()}"
+                )
             state = hdf_load_dict_from_group(g)
         self.__setstate__(state)
 
