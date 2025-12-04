@@ -1374,7 +1374,9 @@ class nddata(object):
                         new_dtype = list(coords.dtype.descr) + [
                             ("error", err.dtype)
                         ]
-                        structured_axis = np.empty(coords.shape, dtype=new_dtype)
+                        structured_axis = np.empty(
+                            coords.shape, dtype=new_dtype
+                        )
                         for field_name in coords.dtype.names:
                             structured_axis[field_name] = coords[field_name]
                         structured_axis["error"] = err
@@ -1482,14 +1484,20 @@ class nddata(object):
             self.axis_coords_error.append(axis_error)
 
         shape = tuple(len(ax) for ax in self.axis_coords)
-        if isinstance(state["data"]["data"], dict) and "NUMPY_DATA" in state["data"]["data"]:
+        if (
+            isinstance(state["data"]["data"], dict)
+            and "NUMPY_DATA" in state["data"]["data"]
+        ):
             self.data = state["data"]["data"]["NUMPY_DATA"].reshape(shape)
         else:
             self.data = state["data"]["data"].reshape(shape)
         if "error" in state["data"]:
             if state["data"]["error"] is None:
                 self.data_error = None
-            elif isinstance(state["data"]["error"], dict) and "NUMPY_DATA" in state["data"]["error"]:
+            elif (
+                isinstance(state["data"]["error"], dict)
+                and "NUMPY_DATA" in state["data"]["error"]
+            ):
                 self.data_error = state["data"]["error"]["NUMPY_DATA"].reshape(
                     shape
                 )
@@ -3479,8 +3487,8 @@ class nddata(object):
 
     def argmax(self, *axes, **kwargs):
         r"""If `.argmax('dimname')` find the max along a particular dimension,
-        and get rid of that dimension, replacing it with the index number of
-        the max value.
+        and get rid of that dimension, replacing it with the coordinate where
+        the max value is found.
 
         If `.argmax()`: return a dictionary giving the coordinates of the
         overall maximum point.
@@ -3530,8 +3538,8 @@ class nddata(object):
 
     def argmin(self, *axes, **kwargs):
         r"""If `.argmin('dimname')` find the min along a particular dimension,
-        and get rid of that dimension, replacing it with the index number of
-        the max value.
+        and get rid of that dimension, replacing it with the coordinate where
+        the min value is found.
 
         If `.argmin()`: return a dictionary giving the coordinates of the
         overall minimum point.
@@ -7194,6 +7202,7 @@ class nddata(object):
                 state,
                 use_pytables_hack=getattr(self, "_pytables_hack", False),
             )
+
     # }}}
 
 
@@ -7211,7 +7220,13 @@ class nddata_hdf5(nddata):
         import h5py
 
         with h5py.File(filepath, "r") as f:
-            g = f[internal]
+            try:
+                g = f[internal]
+            except KeyError:
+                raise KeyError(
+                    f"looking for {internal} inside {f}, and couldn't find it"
+                    f" -- are you looking for one of these? {f.keys()}"
+                )
             state = hdf_load_dict_from_group(g)
         self.__setstate__(state)
 

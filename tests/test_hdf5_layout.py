@@ -169,7 +169,9 @@ def _check_state(state, a, haserr=True):
         else:
             np.testing.assert_allclose(axis_array["data"], a.getaxis(lbl))
             if haserr:
-                np.testing.assert_allclose(axis_array["error"], a.get_error(lbl))
+                np.testing.assert_allclose(
+                    axis_array["error"], a.get_error(lbl)
+                )
         if a.get_units(lbl) is None:
             assert "axis_coords_units" not in state["axes"][lbl]
         else:
@@ -232,7 +234,10 @@ def test_state_axis_error_plain_to_structured():
     a = _generate_nddata()
     state = a.__getstate__()
     for lbl in a.dimlabels:
-        assert state["axes"][lbl]["NUMPY_DATA"].dtype.names == ("data", "error")
+        assert state["axes"][lbl]["NUMPY_DATA"].dtype.names == (
+            "data",
+            "error",
+        )
         np.testing.assert_allclose(
             state["axes"][lbl]["NUMPY_DATA"]["data"], a.getaxis(lbl)
         )
@@ -402,7 +407,9 @@ def test_legacy_axis_loading(tmp_path):
         g = f.create_group("test_nd")
         g.attrs["dimlabels"] = np.array([(b"t",), (b"f",)])
         axes_group = g.create_group("axes")
-        legacy_t = np.core.records.fromarrays([np.linspace(0.0, 1.0, 2)], names="data")
+        legacy_t = np.core.records.fromarrays(
+            [np.linspace(0.0, 1.0, 2)], names="data"
+        )
         axes_group.create_dataset("t", data=legacy_t)
         axes_group["t"].attrs["axis_coords_units"] = b"s"
         axes_group.create_dataset("f", data=np.array([10, 20, 30]))

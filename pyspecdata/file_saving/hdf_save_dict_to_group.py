@@ -10,8 +10,8 @@ def encode_list(name, input_list, use_pytables_hack=False):
 
     Lists are stored as subgroups marked with ``LIST_NODE`` and numbered
     ``ITEM`` entries.  Tuples are preserved by a ``LIST_CLASS`` attribute.  If
-    ``use_pytables_hack`` is requested, the legacy ``LISTELEMENTS`` attribute is
-    emitted instead.
+    ``use_pytables_hack`` is requested, the legacy ``LISTELEMENTS`` attribute
+    is emitted instead.
     """
 
     tree = {}
@@ -106,13 +106,11 @@ def decode_list(source):
         and "LIST_NODE" in source.attrs
         and source.attrs["LIST_NODE"]
     ):
-        indices = sorted(
-            {
-                int(name[4:])
-                for name in list(source.keys()) + list(source.attrs.keys())
-                if name.startswith("ITEM")
-            }
-        )
+        indices = sorted({
+            int(name[4:])
+            for name in list(source.keys()) + list(source.attrs.keys())
+            if name.startswith("ITEM")
+        })
         reconstructed = []
         for idx in indices:
             item_name = "ITEM" + str(idx)
@@ -213,9 +211,11 @@ def hdf_save_dict_to_group(
             if "NUMPY_DATA" in v:
                 if use_pytables_hack:
                     subgroup = group.create_group(k)
-                    if getattr(v["NUMPY_DATA"], "dtype", None) is not None and getattr(
-                        v["NUMPY_DATA"].dtype, "names", None
-                    ) is not None:
+                    if (
+                        getattr(v["NUMPY_DATA"], "dtype", None) is not None
+                        and getattr(v["NUMPY_DATA"].dtype, "names", None)
+                        is not None
+                    ):
                         for field_name in v["NUMPY_DATA"].dtype.names:
                             subgroup.create_dataset(
                                 field_name,
@@ -298,7 +298,11 @@ def hdf_save_dict_to_group(
 
 
 def hdf_load_dict_from_group(
-    group, base_path=None, attr_values=None, attr_locations=None, include_attrs=True
+    group,
+    base_path=None,
+    attr_values=None,
+    attr_locations=None,
+    include_attrs=True,
 ):
     """Recursively load an HDF5 group into a plain ``dict``."""
     if base_path is None:
@@ -316,9 +320,9 @@ def hdf_load_dict_from_group(
                     retval[k][attr_name] = decode_list(v.attrs[attr_name])
                 elif isinstance(v.attrs[attr_name], bytes):
                     retval[k][attr_name] = v.attrs[attr_name].decode("utf-8")
-                elif hasattr(v.attrs[attr_name], "__len__") and not np.isscalar(
-                    v.attrs[attr_name]
-                ):
+                elif hasattr(
+                    v.attrs[attr_name], "__len__"
+                ) and not np.isscalar(v.attrs[attr_name]):
                     decoded_attr = []
                     for element in v.attrs[attr_name]:
                         if isinstance(element, bytes):
