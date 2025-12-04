@@ -355,8 +355,18 @@ def hdf_load_dict_from_group(
                     if len(entry) == 0:
                         continue
                     value = entry[0]
+                elif isinstance(entry, np.void):
+                    # pytables may store the dimlabels attribute as a structured
+                    # void scalar; make sure we recover the contained value so it
+                    # can be used as a plain Python key later on
+                    if entry.dtype.names is not None and len(entry.dtype.names) > 0:
+                        value = entry[entry.dtype.names[0]]
+                    else:
+                        value = entry.item()
                 if isinstance(value, bytes):
                     value = value.decode("utf-8")
+                elif isinstance(value, np.generic):
+                    value = value.item()
                 decoded_labels.append((value,))
             retval[k] = decoded_labels
             attr_dict[k] = retval[k]

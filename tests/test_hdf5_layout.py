@@ -455,3 +455,22 @@ def test_attributes_of_main_tree_roundtrip(tmp_path):
     assert loaded_state["axes"]["f"]["axis_coords_units"] == "Hz"
     assert loaded_state["data"]["data_units"] == "V"
     os.remove(tmp_path / "attrs.h5")
+
+
+def test_pytables_hack_dimlabels_loading(tmp_path):
+    # construct a dimlabels attribute that matches the PyTables structured
+    # array style so we can confirm it decodes to plain strings
+    structured_labels = np.zeros(1, dtype=[("LISTELEMENTS", "S5")])
+    structured_labels["LISTELEMENTS"][0] = np.bytes_("time")
+    data = np.arange(3.0)
+    with h5py.File(tmp_path / "pytables_dimlabels.h5", "w") as f:
+        g = f.create_group("test_nd")
+        g.attrs["dimlabels"] = structured_labels
+        axes_group = g.create_group("axes")
+        axes_group.create_dataset("time", data=np.array([0.0, 1.0, 2.0]))
+        data_group = g.create_group("data")
+        data_group.create_dataset("data", data=data)
+    loaded = nddata_hdf5("pytables_dimlabels.h5/test_nd", directory=str(tmp_path))
+    assert list(loaded.dimlabels) == ["time"]
+    np.testing.assert_allclose(loaded.data.real, data)
+    np.testing.assert_allclose(loaded.getaxis("time"), np.array([0.0, 1.0, 2.0]))
