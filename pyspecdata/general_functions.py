@@ -22,7 +22,7 @@ Q_ = ureg.Quantity
 
 def nicedef(self):
     retval = self.to_base_units()
-    unit_list = ["Hz", "T", "W", "J", "cyc/T", "cyc/m"]
+    unit_list = ["Hz", "T", "W", "J", "G", "cyc/T", "cyc/m", "cyc/G"]
     candidates = [u for u in [Q_(j) for j in unit_list] if retval.check(u)]
     if len(candidates) > 0:
         retval = retval.to(candidates[0])
