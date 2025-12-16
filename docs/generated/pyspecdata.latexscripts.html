@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pyspecdata.latexscripts &#8212; pySpecData 0.9.5.5.2 documentation</title>
+    <title>pyspecdata.latexscripts &#8212; pySpecData 0.9.6 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=832af5b0" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css?v=7f9a90b1" />
@@ -14,7 +14,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=2b30a6e6" />
-    <script src="../_static/documentation_options.js?v=a4fd5d96"></script>
+    <script src="../_static/documentation_options.js?v=564a08b9"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="icon" href="../_static/favicon.ico"/>
@@ -41,8 +41,8 @@
 <span id="pyspecdata-latexscripts"></span><h1>pyspecdata.latexscripts<a class="headerlink" href="#module-pyspecdata.latexscripts" title="Link to this heading">¶</a></h1>
 <p>Provides the <code class="docutils literal notranslate"><span class="pre">pdflatex_notebook_wrapper</span></code> shell/dos command, which you run
 instead of your normal Latex command to build a lab notebook.
-The results of python environments are <strong>cached</strong> and <strong>only re-run if the code changes</strong>,
-even if the python environments are moved around.
+The results of python environments are <strong>cached</strong> and <strong>only re-run if the code
+changes</strong>, even if the python environments are moved around.
 This makes the compilation of a Latex lab notebook extremely efficient.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
@@ -62,28 +62,25 @@ This makes the compilation of a Latex lab notebook extremely efficient.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.latexscripts.flush_script" title="pyspecdata.latexscripts.flush_script"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flush_script</span></code></a>(number)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.latexscripts.genconfig" title="pyspecdata.latexscripts.genconfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">genconfig</span></code></a>()</p></td>
-<td><p>creates a template configuration directory</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.latexscripts.get_scripts_dir" title="pyspecdata.latexscripts.get_scripts_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_scripts_dir</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.latexscripts.get_scripts_dir" title="pyspecdata.latexscripts.get_scripts_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_scripts_dir</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.latexscripts.grab_script_string" title="pyspecdata.latexscripts.grab_script_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grab_script_string</span></code></a>(scriptnum_as_str)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.latexscripts.grab_script_string" title="pyspecdata.latexscripts.grab_script_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grab_script_string</span></code></a>(scriptnum_as_str)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.latexscripts.main" title="pyspecdata.latexscripts.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.latexscripts.main" title="pyspecdata.latexscripts.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>()</p></td>
 <td><p>This looks for <cite>scripts/scriptsUsed.csv</cite> inside the notebook directory, and checks whether or not it should be run if a command line argument of &quot;flush&quot; is passed, it flushes that script number from the cache</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.latexscripts.script_filename" title="pyspecdata.latexscripts.script_filename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">script_filename</span></code></a>(scriptnum_as_str)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.latexscripts.script_filename" title="pyspecdata.latexscripts.script_filename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">script_filename</span></code></a>(scriptnum_as_str)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.latexscripts.sha_string" title="pyspecdata.latexscripts.sha_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sha_string</span></code></a>(script)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.latexscripts.sha_string" title="pyspecdata.latexscripts.sha_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sha_string</span></code></a>(script)</p></td>
 <td><p>convert the sha hash to a string</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wraplatex</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wraplatex</span></code></a>()</p></td>
 <td><p>runs the python scripts after running latex also creates a copy of latex without the final portion under the underscore This prevents the viewer from hanging while it's waiting for a refresh.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.latexscripts.wrapviewer" title="pyspecdata.latexscripts.wrapviewer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wrapviewer</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.latexscripts.wrapviewer" title="pyspecdata.latexscripts.wrapviewer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wrapviewer</span></code></a>()</p></td>
 <td><p>see <a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal notranslate"><span class="pre">wraplatex</span></code></a></p></td>
 </tr>
 </tbody>

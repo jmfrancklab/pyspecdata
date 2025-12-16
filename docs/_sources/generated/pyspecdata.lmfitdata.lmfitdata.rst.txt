@@ -36,6 +36,7 @@
       ~lmfitdata.copyaxes
       ~lmfitdata.cov_mat
       ~lmfitdata.cropped_log
+      ~lmfitdata.define_data_transform
       ~lmfitdata.define_residual_transform
       ~lmfitdata.diff
       ~lmfitdata.div_units

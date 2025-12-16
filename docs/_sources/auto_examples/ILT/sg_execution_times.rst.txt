@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**02:14.289** total execution time for 2 files **from auto_examples/ILT**:
+**00:07.653** total execution time for 2 files **from auto_examples/ILT**:
 
 .. container::
 
@@ -32,9 +32,9 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_auto_examples_ILT_2DILT.py` (``2DILT.py``)
-     - 02:14.289
-     - 0.0
    * - :ref:`sphx_glr_auto_examples_ILT_BRD_test.py` (``BRD_test.py``)
+     - 00:07.653
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_ILT_2DILT.py` (``2DILT.py``)
      - 00:00.000
      - 0.0

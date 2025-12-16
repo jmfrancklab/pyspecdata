@@ -14,6 +14,8 @@
    .. autosummary::
    
       dirformat
+      find_registered_prefix_match
+      genconfig
       getDATADIR
       get_notebook_dir
       grab_data_directory
@@ -21,6 +23,7 @@
       proc_data_target_dir
       rclone_search
       register_directory
+      sort_config_sections
    
    
 

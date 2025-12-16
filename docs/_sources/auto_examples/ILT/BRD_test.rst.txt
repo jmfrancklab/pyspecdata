@@ -28,7 +28,7 @@ that uses Lawson-Hansen.
 Note that one of the unit tests essentially tests that this example
 behaves as expected.
 
-.. GENERATED FROM PYTHON SOURCE LINES 12-141
+.. GENERATED FROM PYTHON SOURCE LINES 12-154
 
 
 
@@ -62,42 +62,10 @@ behaves as expected.
     [(25, 'vd')]
     [(100, '$\\log(T_1)$')]
     *** *** ***
-    --> nnls.py(172):pyspecdata.matrix_math                 nnls 2025-07-08 15:37:33,408
-    INFO: argcheck done
-    --> nnls.py(291):pyspecdata.matrix_math                 nnls 2025-07-08 15:37:33,416
-    INFO: S1 is [4.32594139e+01 1.14067699e+01 5.27410398e+00 2.31565579e+00
-     6.82140197e-01 2.07917079e-01 5.68093757e-02 1.53070136e-02
-     3.75635882e-03 8.94520237e-04 1.95762142e-04 4.11592621e-05
-     7.98652315e-06 1.47596130e-06 2.51772342e-07 4.05185112e-08
-     5.99364462e-09 8.26213697e-10 1.03618610e-10 1.18847096e-11
-     1.21391608e-12 1.09570779e-13 8.58076129e-15 1.58097699e-15
-     7.13572588e-16] so I'm going to 6 based on default_cut of 0.001
-    --> nnls.py(370):pyspecdata.matrix_math                 nnls 2025-07-08 15:37:33,417
-    INFO: about to run venk(6, 100) (6,)
-    --> nnls.py(172):pyspecdata.matrix_math                 nnls 2025-07-08 15:37:33,418
-    INFO: argcheck done
-    --> nnls.py(291):pyspecdata.matrix_math                 nnls 2025-07-08 15:37:33,425
-    INFO: S1 is [4.32594139e+01 1.14067699e+01 5.27410398e+00 2.31565579e+00
-     6.82140197e-01 2.07917079e-01 5.68093757e-02 1.53070136e-02
-     3.75635882e-03 8.94520237e-04 1.95762142e-04 4.11592621e-05
-     7.98652315e-06 1.47596130e-06 2.51772342e-07 4.05185112e-08
-     5.99364462e-09 8.26213697e-10 1.03618610e-10 1.18847096e-11
-     1.21391608e-12 1.09570779e-13 8.58076129e-15 1.58097699e-15
-     7.13572588e-16] so I'm going to 6 based on default_cut of 0.001
-    --> nnls.py(172):pyspecdata.matrix_math                 nnls 2025-07-08 15:37:33,428
-    INFO: argcheck done
-    --> nnls.py(291):pyspecdata.matrix_math                 nnls 2025-07-08 15:37:33,435
-    INFO: S1 is [4.32594139e+01 1.14067699e+01 5.27410398e+00 2.31565579e+00
-     6.82140197e-01 2.07917079e-01 5.68093757e-02 1.53070136e-02
-     3.75635882e-03 8.94520237e-04 1.95762142e-04 4.11592621e-05
-     7.98652315e-06 1.47596130e-06 2.51772342e-07 4.05185112e-08
-     5.99364462e-09 8.26213697e-10 1.03618610e-10 1.18847096e-11
-     1.21391608e-12 1.09570779e-13 8.58076129e-15 1.58097699e-15
-     7.13572588e-16] so I'm going to 6 based on default_cut of 0.001
     [(25, 'vd'), (100, '$\\log(T_1)$')]
     true mean: 0.16499997337102065 ± 0.3576690429197919
-    opt. λ mean: 0.9013864830113146 ± 1.709683940073894
-    BRD mean: 0.9318763536449894 ± 1.5859823021148707
+    opt. λ mean: 0.9013864830113104 ± 1.709683940073883
+    BRD mean: 0.9318745167839427 ± 1.585986579308082
 
 
 
@@ -113,6 +81,7 @@ behaves as expected.
     from numpy import linspace, exp, zeros, eye, logspace, r_, sqrt, pi, std
     from pylab import linalg
     from pyspecdata import nddata, init_logging, plot
+    from pyspecdata.matrix_math.nnls import venk_nnls
     from scipy.optimize import nnls
     from numpy.random import seed
 
@@ -160,6 +129,13 @@ behaves as expected.
         logT1,
         lambda x, y: 1 - 2 * exp(-x / 10 ** (y)),
         l=sqrt(solution.get_prop("opt_alpha")),
+    )
+    solution_venk = M.C.nnls(
+        "vd",
+        logT1,
+        lambda x, y: 1 - 2 * exp(-x / 10 ** (y)),
+        l=sqrt(solution.get_prop("opt_alpha")),
+        method=venk_nnls,
     )
 
 
@@ -226,7 +202,12 @@ behaves as expected.
     plot(
         solution_confirm,
         "--",
-        label=rf"manual BRD $\alpha={solution.get_prop('opt_alpha'):#0.2g}$",
+        label=rf"stacked, $\alpha={solution.get_prop('opt_alpha'):#0.2g}$",
+        alpha=0.5,
+    )
+    plot(
+        solution_venk,
+        label=rf"venk_nnls, $\alpha={solution.get_prop('opt_alpha'):#0.2g}$",
         alpha=0.5,
     )
     print(
@@ -241,7 +222,7 @@ behaves as expected.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 7.029 seconds)
+   **Total running time of the script:** (0 minutes 7.653 seconds)
 
 
 .. _sphx_glr_download_auto_examples_ILT_BRD_test.py:
