@@ -1398,8 +1398,7 @@ class nddata(object):
         data_state = {"data": self.data}
         if getattr(self, "data_error", None) is not None:
             data_state["error"] = self.data_error
-        units = self.get_units()
-        data_state["data_units"] = units
+        data_state["data_units"] = self.get_units()
 
         dimlabels = list(self.dimlabels)
 
@@ -1450,18 +1449,13 @@ class nddata(object):
                 )
             axis_units = None
             axis_error = None
+            axis_array = None
             if isinstance(state["axes"][lbl], dict):
-                if "axis_coords_units" in state["axes"][lbl]:
-                    axis_units = state["axes"][lbl]["axis_coords_units"]
-                if "error" in state["axes"][lbl]:
-                    axis_error = state["axes"][lbl]["error"]
-                if "data" in state["axes"][lbl]:
-                    axis_array = state["axes"][lbl]["data"]
-                elif "NUMPY_DATA" in state["axes"][lbl]:
-                    axis_array = state["axes"][lbl]["NUMPY_DATA"]
-                else:
-                    axis_array = state["axes"][lbl]
-            else:
+                axis_units = state["axes"][lbl].get("axis_coords_units")
+                axis_error = state["axes"][lbl].get("error")
+                axis_array = state["axes"][lbl].get("data")
+                axis_array = state["axes"][lbl].get("NUMPY_DATA")
+            if axis_array is None:
                 axis_array = state["axes"][lbl]
             if isinstance(axis_array, dict) and "NUMPY_DATA" in axis_array:
                 axis_array = axis_array["NUMPY_DATA"]
@@ -1471,6 +1465,7 @@ class nddata(object):
                 isinstance(axis_array, np.ndarray)
                 and axis_array.dtype.names is not None
             ):
+                # this is a strucctured array
                 if "data" in axis_array.dtype.names:
                     axis_coords = axis_array["data"]
                 else:
@@ -3950,7 +3945,6 @@ class nddata(object):
                 logger.debug("popping axis info")
             return self
         else:
-            print("type of data", self.data.dtype)
             retval = func(self.data)
             if self.data.size == retval.size:
                 self.data = retval
@@ -7218,7 +7212,6 @@ class nddata(object):
                 state,
                 use_pytables_hack=getattr(self, "_pytables_hack", False),
             )
-
     # }}}
 
 
