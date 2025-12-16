@@ -1449,13 +1449,16 @@ class nddata(object):
                 )
             axis_units = None
             axis_error = None
-            axis_array = None
             if isinstance(state["axes"][lbl], dict):
                 axis_units = state["axes"][lbl].get("axis_coords_units")
                 axis_error = state["axes"][lbl].get("error")
-                axis_array = state["axes"][lbl].get("data")
-                axis_array = state["axes"][lbl].get("NUMPY_DATA")
-            if axis_array is None:
+                if "data" in state["axes"][lbl]:
+                    axis_array = state["axes"][lbl]["data"]
+                elif "NUMPY_DATA" in state["axes"][lbl]:
+                    axis_array = state["axes"][lbl]["NUMPY_DATA"]
+                else:
+                    axis_array = state["axes"][lbl]
+            else:
                 axis_array = state["axes"][lbl]
             if isinstance(axis_array, dict) and "NUMPY_DATA" in axis_array:
                 axis_array = axis_array["NUMPY_DATA"]
