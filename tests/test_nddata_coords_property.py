@@ -60,7 +60,8 @@ def test_coords_units_reference_axis_units_object():
 
 
 def test_axis_coords_error_replaced_by_coords_property():
-    # explicit axis_coords_error should be unnecessary once coords stores axis objects
+    # explicit axis_coords_error should be unnecessary once coords stores axis
+    # objects
     data = core_mod.nddata(np.zeros(3), ["x"])
     data.coords = {"x": np.arange(3)}
     with pytest.raises(AttributeError):

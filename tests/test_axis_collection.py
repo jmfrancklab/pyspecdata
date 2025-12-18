@@ -6,7 +6,8 @@ axis_mod = load_module("axis_class")
 
 
 def test_axis_collection_allows_slice_notation_assignment():
-    # adding an axis with numpy r_ style notation should populate the collection
+    # adding an axis with numpy r_ style notation should populate the
+    # collection
     axes = axis_mod.axis_collection()
     axes += axis_mod.ax_["t2", 0:1.2:5j]
     assert axes.dimlabels == ["t2"]
@@ -26,7 +27,8 @@ def test_axis_collection_rejects_duplicate_aliases():
 
 
 def test_axis_collection_requires_matching_dimlabel_on_add():
-    # adding an existing axis should require one of its names to match a dimlabel
+    # adding an existing axis should require one of its names to match a
+    # dimlabel
     axes = axis_mod.axis_collection()
     axes.dimlabels = ["t", "f"]
     existing_axis = axis_mod.ax_["t", 0:2:5j]

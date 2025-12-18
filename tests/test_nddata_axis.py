@@ -39,7 +39,8 @@ def test_nddata_axis_slice_by_coordinate_range():
 
 
 def test_nddata_axis_multiplies_numpy_arrays():
-    # arithmetic with numpy arrays should behave like elementwise coordinate scaling
+    # arithmetic with numpy arrays should behave like elementwise coordinate
+    # scaling
     axis = axis_mod.ax_["x", 1:5:1]
     doubled = axis * 2
     assert np.allclose(doubled, np.array([2, 4, 6, 8]))
@@ -51,7 +52,8 @@ def test_nddata_axis_multiplies_numpy_arrays():
 
 
 def test_nddata_axis_multiplies_nddata_by_axis_coordinates():
-    # multiplying an nddata by an axis should scale along the matching dimension
+    # multiplying an nddata by an axis should scale along the matching
+    # dimension
     data = core_mod.nddata(np.ones(4), "time")
     axis = axis_mod.ax_["time", 10:14]
     axis.names = ["time"]
@@ -84,7 +86,8 @@ def test_function_application_stores_transformation_on_axis():
 
 
 def test_axis_arithmetic_two_names_yields_grid_ndarray():
-    # combining two differently named axes should form a 2D grid (x first, y second) matching fromaxis behavior
+    # combining two differently named axes should form a 2D grid (x first, y
+    # second) matching fromaxis behavior
     x_axis = axis_mod.ax_["x", 0:2:3j]
     y_axis = axis_mod.ax_["y", 1:3:3j]
     product = x_axis * y_axis
@@ -92,18 +95,26 @@ def test_axis_arithmetic_two_names_yields_grid_ndarray():
     assert isinstance(product, np.ndarray)
     assert product.shape == expected.shape
     assert np.allclose(product, expected)
-    quad_expr = x_axis ** 2 + 2 * y_axis + 1
+    quad_expr = x_axis**2 + 2 * y_axis + 1
     quad_expected = (x_axis.data[:, None] ** 2) + 2 * y_axis.data[None, :] + 1
     assert np.allclose(quad_expr, quad_expected)
     data = core_mod.nddata(np.zeros(expected.shape), ["x", "y"])
     data.setaxis("x", x_axis.data)
     data.setaxis("y", y_axis.data)
-    assert np.allclose(product, data.fromaxis(["x", "y"], lambda x, y: x * y, as_array=True))
-    assert np.allclose(quad_expr, data.fromaxis(["x", "y"], lambda x, y: x ** 2 + 2 * y + 1, as_array=True))
+    assert np.allclose(
+        product, data.fromaxis(["x", "y"], lambda x, y: x * y, as_array=True)
+    )
+    assert np.allclose(
+        quad_expr,
+        data.fromaxis(
+            ["x", "y"], lambda x, y: x**2 + 2 * y + 1, as_array=True
+        ),
+    )
 
 
 def test_axis_arithmetic_same_name_returns_axis_object():
-    # combining axes with the same name should return a new axis coordinate object
+    # combining axes with the same name should return a new axis coordinate
+    # object
     first = axis_mod.ax_["t", 0:1:4j]
     second = axis_mod.ax_["t", 1:2:4j]
     summed = first + second
