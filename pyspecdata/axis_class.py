@@ -1,43 +1,46 @@
 class axis_collection(object):
     """A collection of :class:`axis` objects.
 
-    Designed so that an instance of `axis_collection` is an attribute of `nddata` called `axes`,
-    which behaves like a dictionary whose keys are the `dimlabels` of the `nddata` object,
-    and whose values are :class:`axis` objects.
+    Designed so that an instance of `axis_collection` is an attribute of
+    `nddata` called `coords` (short for "coordinate axis collection"), which
+    behaves like a dictionary whose keys are the `dimlabels` of the `nddata`
+    object, and whose values are :class:`axis` objects.
 
     Used to make sure that no axis names or aliases are duplicated.
 
-    You can add axes to the collection in any of the following ways, where `example_nddata` is an nddata instance.
-    (Remember that all `nddata` instances have an attribute `axes` of type `axis_collection`).
+    You can add axes to the collection in any of the following ways, where
+    `example_nddata` is an nddata instance.  (Remember that all `nddata`
+    instances have an attribute `coords` of type `axis_collection`).
 
     building a new axis
-        `example_nddata.axes['t2'] = ax_[0:1.2:100j]`
+        `example_nddata.coords += ax_['t2',0:1.2:100j]`
         or
-        `example_nddata.axes['t2'] = ax_[0:1.2:0.01]`
-        (uses the same notation as numpy `r_[…]`)
+        `example_nddata.coords += ax_['t2',0:1.2:0.01]`
+        (or replace with
+        ``example_nddata.coords['t2'] = ax_['t2',0:1.2:0.01]``;
+        replacement can also use ``example_nddata.coords ^=
+        ax_['t2',0:1.2:0.01]``) (uses the same notation as numpy `r_[…]`) the
+        first argument to ``ax_`` must always be the axis name
 
-        this takes the place of `labels` or `setaxis` in old versions of pyspecdata.
+        this takes the place of `labels` or `setaxis` in old versions of
+        pyspecdata.
 
     associating an existing axis
-        `example_nddata.axes += existing_axis` `existing_axis` **must** have a
-        name or alias that matches one of `example_nddata.dimlabels`.
+        `example_nddata.coords ^= existing_axis` `existing_axis` **must** have
+        a name or alias that matches one of `example_nddata.dimlabels`.
 
     Attributes
     ----------
     dimlabels: list
-        This is the same `dimlabels` attribute as the instance of the parent class.
-    names_used: ChainMap
-        Stores a list of all the names and aliases used by the `axis` objects
-        that are contained in the collection,
-        as well as the axes for any conjugate domains.
-        since these need to be unique.
-
-        This is simply
-        `ChainMap(ax1.references,ax2.references,…,etc.)`
+        This is the same `dimlabels` attribute as the instance of the parent
+        class.  Axis names and aliases live on each axis object (where a
+        ChainMap is used internally to resolve preferred names and aliases).
     """
-    def __init__(self,dimlabels):
-        self.dimlabels = dimlabel
-    def rename(self,oldname,newname):
+
+    def __init__(self, dimlabels):
+        self.dimlabels = dimlabels
+
+    def rename(self, oldname, newname):
         """Rename an axis. If `oldname` is the preferred name of the axis,
         also go into dimlabels, and change the name
         (since dimlabels is the same list used by the `nddata` that
@@ -49,24 +52,34 @@ class axis_collection(object):
             return self
         else:
             raise ValueError("here add code to go look at the aliases")
+
+
 class _ax_class_maker(object):
-    def __getslice__(self,inp_slice):
+    def __getslice__(self, inp_slice):
         pass
+
+
 ax_ = _ax_class_maker()
+
+
 class nddata_axis(object):
-    """The axis that gives the list of coordinates along a particular dimension.
+    """The axis that gives the list of coordinates along a particular
+    dimension.
 
     .. todo::
-        There is no actual code here -- this is a proposal for the new axis class
+        There is no actual code here -- this is a proposal for the new axis
+        class
 
-    Internally uses the minimum number of variables to store information about the axis.
+    Internally uses the minimum number of variables to store information about
+    the axis.
 
-    Also includes information about the chosen location (alias) in infinitely periodic domains.
-    This is analogous to the concept of using `fftshift` in matlab or traditional numpy,
-    but more general.
+    Also includes information about the chosen location (alias) in infinitely
+    periodic domains.  This is analogous to the concept of using `fftshift` in
+    matlab or traditional numpy, but more general.
 
-    The `nddata_axis` has overloading routines to deal with the following operations like a standard numpy array
-    (`example_axis` below is an instance of `nddata_axis`)
+    The `nddata_axis` has overloading routines to deal with the following
+    operations like a standard numpy array (`example_axis` below is an instance
+    of `nddata_axis`)
 
     indexing
         >>> retval = example_axis[1]
@@ -81,11 +94,13 @@ class nddata_axis(object):
     nddata-like slicing
         >>> retval = example_axis[(0,5.5)]
 
-        returns everything where the values of the axis coordinates are between 0 and 5.5 (inclusive)
+        returns everything where the values of the axis coordinates are between
+        0 and 5.5 (inclusive)
 
         >>> retval = example_axis[(0,None)]
 
-        returns everything where the values of the axis coordinates are 0 (inclusive) or above
+        returns everything where the values of the axis coordinates are 0
+        (inclusive) or above
 
     multiplication
         >>> retval = example_axis * b
@@ -109,7 +124,8 @@ class nddata_axis(object):
 
         (or ``sin``, ``cos``, *etc.*)
         returns another axis object.
-        Note that this just amounts to setting the transf_func attribute, below.
+        Note that this just amounts to setting the transf_func attribute,
+        below.
 
         If ``self.multiplier`` is set to a complex number,
         specialized routines are always used
@@ -119,7 +135,8 @@ class nddata_axis(object):
         >>> retval = b @ example_axis
 
         Here, ``b`` must be an nddata,
-        and ``example_axis`` must have a ``name`` matching one of the dimension labels of ``b``.
+        and ``example_axis`` must have a ``name`` matching one of the dimension
+        labels of ``b``.
 
         ``retval`` will consist of ``b`` interpolated onto the new axis.
 
@@ -136,51 +153,58 @@ class nddata_axis(object):
         if possible,
         divide by the smallest step size,
         then multiply by a number that will
-        `convert the resulting floats to integers <https://stackoverflow.com/questions/44587875/find-common-factor-to-convert-list-of-floats-to-list-of-integers>`_.
+        `convert the resulting floats to integers
+        <https://stackoverflow.com/questions/44587875/find-common-factor-to-\
+                convert-list-of-floats-to-list-of-integers>`_.
     start: float
         determines the starting value of the axis:
         >>> self.start+self.dx*r_[0:self.size]
 
     names: list of strings or sympy variables
-        Names for this dimension that this axis is used to label, in order of preference.
-        The first name is the "preferred" name,
-        and all subsequent names are "aliases".
-        For example,
+        Names for this dimension that this axis is used to label, in order of
+        preference.  The first name is the "preferred" name, and all subsequent
+        names are "aliases".  For example,
         you might want to have a nicely named
         :math:`B_0` (stored as ``$B_0$`` or a sympy variable)
         to describe your axis
     domains: OrderedDict
         The keys correspond to a list of allowed transformations.
-        Currently these are (future plans for ``(I)LT``, ``(I)NUS``, ``(I)Wavelet``)
+        Currently these are (future plans for ``(I)LT``, ``(I)NUS``,
+        ``(I)Wavelet``)
 
         - ``'FT'``
         - ``'IFT'``
 
-        These are the names of transformations that have previously been applied
-        (or can be applied, though the list doesn't need to be comprehensive in that case)
-        to the ``nddata`` object that the ``nddata_axis`` is being used to label.
-        ``I...`` must **always** stand for "inverse"; on application of a transformation,
-        the new ``axis`` object that is generated must have a `domains` attribute
-        with the opposite (``I`` removed or added) transformation listed.
+        These are the names of transformations that have previously been
+        applied (or can be applied, though the list doesn't need to be
+        comprehensive in that case) to the ``nddata`` object that the
+        ``nddata_axis`` is being used to label.  ``I...`` must **always** stand
+        for "inverse"; on application of a transformation, the new ``axis``
+        object that is generated must have a `domains` attribute with the
+        opposite (``I`` removed or added) transformation listed.
 
-        The values are `axis` objects that label the data in the conjugate domains (after the transformation has been applied).
+        The values are `axis` objects that label the data in the conjugate
+        domains (after the transformation has been applied).
 
         For example,
-        on application of the `nddata` :func:`nddata.ft` method,
-        the data will be labeled with an axis that has a `domains` attribute with a key containing `IFT`.
-        The value of that key will point to the `axis` object of the data *before* transformation,
-        and will be used in the even of a call to :func:`nddata.ift`.
+        on application of the `nddata` :func:`nddata.ft` method, the data will
+        be labeled with an axis that has a `domains` attribute with a key
+        containing `IFT`.  The value of that key will point to the `axis`
+        object of the data *before* transformation, and will be used in the
+        even of a call to :func:`nddata.ift`.
 
-        This makes the `get_ft_props` and `set_ft_props` of older versions of `nddata` obsolete.
+        This makes the `get_ft_props` and `set_ft_props` of older versions of
+        `nddata` obsolete.
     multiplier: complex, default None
-        this is *only* used in the event that 
+        this is *only* used in the event that
         the axis is subjected to arithmetic involving a complex number
-        it changes the way that the axis acts as an argument to various functions (especially `exp`)
+        it changes the way that the axis acts as an argument to various
+        functions (especially `exp`)
     transf_func: function or (default) None
-        **this and following attributes pertain only to non-uniform (non-linear) axes**
-        a function that is applied to a uniformly spaced axis to achieve non-uniform spacing
-        (for example, an axis with `log10` spacing).
-        If this is set, the axis is constructed as
+        **this and following attributes pertain only to non-uniform
+        (non-linear) *axes** a function that is applied to a uniformly spaced
+        axis to achieve non-uniform spacing (for example, an axis with `log10`
+        spacing).  If this is set, the axis is constructed as
 
         >>> self.transf_func(self.start+self.dx*r_[0:self.size])
 
@@ -189,13 +213,18 @@ class nddata_axis(object):
         and determines the axis values as follows:
         `self.offset+self.dx*cumsum(self.uneven_steps)`
     uneven_step_coords:
-        if `self.uneven_steps` exists, this stores the value of `cumsum(self.uneven_steps)`
+        if `self.uneven_steps` exists, this stores the value of
+        `cumsum(self.uneven_steps)`
     """
-    def __init__(self, *args):
-        """Either instantiates an empty array (`nddata_axis()`) for modification or (`nddata(inp_array)`) analyzes a numpy array for conversion.
 
-        To construct with the analog of `r_[...]`, see the helper class `ax_[...]`;
-        because of the nature of the axis storage `ax_[...]` will be far more efficient than passing `inp_array`.
+    def __init__(self, *args):
+        """Either instantiates an empty array (`nddata_axis()`) for
+        modification or (`nddata(inp_array)`) analyzes a numpy array for
+        conversion.
+
+        To construct with the analog of `r_[...]`, see the helper class
+        `ax_[...]`; because of the nature of the axis storage `ax_[...]` will
+        be far more efficient than passing `inp_array`.
 
         Parameters
         ----------
@@ -204,13 +233,18 @@ class nddata_axis(object):
             The initialization routine will check to see (in order):
 
             -   is the axis uniformly spaced?
-            -   is the axis a uniformly spaced axis that is transformed by `log10`, `log`, `sin`, `cos`, *etc.*
+            -   is the axis a uniformly spaced axis that is transformed by
+                `log10`, `log`, `sin`, `cos`, *etc.*
         """
+
     def to_array(self):
         "returns the axis as a standard numpy array"
+
     @property
     def references():
-        """returns OrderedDict of all names and aliases such that keys all point to the current instance (`self`)
+        """returns OrderedDict of all names and aliases such that keys all
+        point to the current instance (`self`)
 
-        the idea is that this should be placed in a `ChainMap` object to be used by the :class:`axis_collection` class that contains the axis.
+        the idea is that this should be placed in a `ChainMap` object to be
+        used by the :class:`axis_collection` class that contains the axis.
         """
