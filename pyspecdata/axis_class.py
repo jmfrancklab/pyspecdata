@@ -1,39 +1,37 @@
 class axis_collection(object):
     """A collection of :class:`axis` objects.
 
-    Designed so that an instance of `axis_collection` is an attribute of `nddata` called `axes`,
+    Designed so that an instance of `axis_collection` is an attribute of `nddata`
+    called `coords` (short for "coordinate axis collection"),
     which behaves like a dictionary whose keys are the `dimlabels` of the `nddata` object,
     and whose values are :class:`axis` objects.
 
     Used to make sure that no axis names or aliases are duplicated.
 
     You can add axes to the collection in any of the following ways, where `example_nddata` is an nddata instance.
-    (Remember that all `nddata` instances have an attribute `axes` of type `axis_collection`).
+    (Remember that all `nddata` instances have an attribute `coords` of type `axis_collection`).
 
     building a new axis
-        `example_nddata.axes['t2'] = ax_[0:1.2:100j]`
+        `example_nddata.coords += ax_['t2',0:1.2:100j]`
         or
-        `example_nddata.axes['t2'] = ax_[0:1.2:0.01]`
+        `example_nddata.coords += ax_['t2',0:1.2:0.01]`
+        (or replace with ``example_nddata.coords['t2'] = ax_['t2',0:1.2:0.01]``;
+        replacement can also use ``example_nddata.coords ^= ax_['t2',0:1.2:0.01]``)
         (uses the same notation as numpy `r_[…]`)
+        the first argument to ``ax_`` must always be the axis name
 
         this takes the place of `labels` or `setaxis` in old versions of pyspecdata.
 
     associating an existing axis
-        `example_nddata.axes += existing_axis` `existing_axis` **must** have a
+        `example_nddata.coords ^= existing_axis` `existing_axis` **must** have a
         name or alias that matches one of `example_nddata.dimlabels`.
 
     Attributes
     ----------
     dimlabels: list
         This is the same `dimlabels` attribute as the instance of the parent class.
-    names_used: ChainMap
-        Stores a list of all the names and aliases used by the `axis` objects
-        that are contained in the collection,
-        as well as the axes for any conjugate domains.
-        since these need to be unique.
-
-        This is simply
-        `ChainMap(ax1.references,ax2.references,…,etc.)`
+        Axis names and aliases live on each axis object (where a ChainMap is
+        used internally to resolve preferred names and aliases).
     """
     def __init__(self,dimlabels):
         self.dimlabels = dimlabel
