@@ -217,6 +217,15 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
         retval = imshow(A, extent=myext, **kwargs)
     else:
         retval = imshow(A, extent=myext, **kwargs)
+        scaling = imagehsvkwargs.get("scaling")
+        if scaling is not None:
+            finite_data = np.asarray(A)
+            finite_data = finite_data[np.isfinite(finite_data)]
+            if finite_data.size > 0:
+                if np.all(finite_data >= 0):
+                    retval.set_clim(0, scaling)
+                else:
+                    retval.set_clim(-scaling, scaling)
         colorbar()
     if setlabels:
         xlabel(x_label)

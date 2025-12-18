@@ -1,0 +1,436 @@
+name: Test, Build, and Publish
+
+permissions:
+  contents: write
+  id-token: write
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+    types:
+      - closed
+  workflow_dispatch:
+
+# One run at a time per workflow+ref; cancel older runs on new pushes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # cibuildwheel knobs (adjust as needed)
+  CIBW_BUILD: cp3{9,10,11,12,13,14}-*
+  # IMPORTANT: build macOS wheels native-per-runner (no cross-arch)
+  CIBW_ARCHS_MACOS: "native"
+  # Ensure gfortran is available inside manylinux for Fortran builds (Linux job unchanged behavior).
+  # Tell Meson/meson-python which Fortran to use on macOS.
+  # Tell Meson/meson-python to use MinGW toolchain on Windows.
+  # PATH is amended by the Windows job steps; here we just point compilers.
+  CIBW_ENVIRONMENT_WINDOWS: "CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ FC=x86_64-w64-mingw32-gfortran PKG_CONFIG=C:/msys64/ucrt64/bin/pkgconf.exe"
+  CIBW_ENVIRONMENT_MACOS: "MACOSX_DEPLOYMENT_TARGET=15.0 FC=gfortran"
+
+jobs:
+  merge_guard:
+    name: Ensure workflow is running for merged PRs or non-PR events
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.merged == true }}
+    steps:
+      - name: Allow workflow to proceed
+        run: echo "Merge guard passed."
+
+  test:
+    needs: merge_guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      new_version: ${{ steps.determine.outputs.new_version }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install requirements
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gfortran libopenblas-dev liblapack-dev build-essential python3-dev
+          sudo apt-get install -y meson ninja-build pkg-config
+          python -m pip install --upgrade pip
+          pip install meson-python numpy pytest
+
+      - name: Install project for testing
+        run: |
+          pip install -e . --no-build-isolation
+
+      - name: Run pytest
+        run: pytest
+
+      - name: Determine next version
+        id: determine
+        run: |
+          new_version=$(python - <<'PY'
+          import tomllib
+          import pathlib
+
+          path = pathlib.Path('pyproject.toml')
+          data = tomllib.loads(path.read_text())
+          version = data['project']['version']
+          parts = version.split('.')
+          parts[-1] = str(int(parts[-1]) + 1)
+          print('.'.join(parts))
+          PY
+          )
+          echo "new_version=$new_version" >> "$GITHUB_OUTPUT"
+
+  version_bump:
+    needs: test
+    if: ${{ needs.test.result == 'success' }}
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.output.outputs.new_version }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: master
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Apply version bump
+        run: |
+          python - <<'PY'
+          import os
+          import pathlib
+          import re
+
+          new_version = os.environ['NEW_VERSION']
+          path = pathlib.Path('pyproject.toml')
+          text = path.read_text()
+          updated = re.sub(
+              r'(version\s*=\s*")([^"]+)(")',
+              lambda m: f"{m.group(1)}{new_version}{m.group(3)}",
+              text,
+              count=1,
+          )
+          path.write_text(updated)
+          PY
+        env:
+          NEW_VERSION: ${{ needs.test.outputs.new_version }}
+
+      - name: Commit version bump
+        env:
+          NEW_VERSION: ${{ needs.test.outputs.new_version }}
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add pyproject.toml
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "Bump version to ${NEW_VERSION} [skip ci]"
+
+      - name: Push version bump
+        # Instructions: Create a GitHub Personal Access Token (PAT) for admin pushes (fine-grained)
+        # =======================================================================================
+        # 1) Go to: https://github.com/settings/personal-access-tokens
+        #    → “Fine-grained tokens” → Generate new token.
+        #
+        # 2) Basic fields:
+        #    - Token name: e.g., "Actions admin push"
+        #    - Expiration: set a reasonable date
+        #    - Resource owner: select your organization
+        #
+        # 3) Repository access (IMPORTANT per current UI):
+        #    - Select **All repositories**  (required to expose repo permissions panel in this UI)
+        #    - In the **Permissions** area, click **Repositories (0)** → **Add permissions**
+        #      • Choose **Contents** → then under it select **Read and write**
+        #      • (Optional) Add **Workflows** → **Read and write** if commits touch .github/workflows/*
+        #    - You do **not** need Organization permissions for pushing; leave those empty.
+        #
+        # 4) Click **Generate token**, copy the value immediately.
+        #    - If your org uses SSO, click **Authorize** for this org on the yellow banner.
+        #
+        # 5) Add the token as a repo secret:
+        #    Repo → Settings → Secrets and variables → Actions → **New repository secret**
+        #    - Name: ADMIN_PAT
+        #    - Value: <the token from step 4>
+        #
+        # 6) Branch protection (classic “Branches” rule) checklist:
+        #    - Require a pull request before merging → **Include administrators = OFF**
+        #    - Restrict who can push to matching branches → add **your admin user** (PAT owner)
+        #
+        # 7) Workflow push step (uses the secret; no angle brackets):
+        #    git remote set-url origin "https://x-access-token:${ADMIN_PAT}@github.com/${GITHUB_REPOSITORY}.git"
+        #    git push origin HEAD:master
+        #
+        # Notes:
+        # - If the push is rejected: verify (a) Contents=Read&Write is set, (b) your admin user is in
+        #   “Restrict who can push…”, (c) Include administrators is OFF, (d) the URL uses ${GITHUB_REPOSITORY}.
+        env:
+          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
+        run: |
+          git config user.name "version-bump"
+          git config user.email "actions@users.noreply.github.com"
+          git remote add patremote "https://x-access-token:${ADMIN_PAT}@github.com/${GITHUB_REPOSITORY}.git"
+          git push patremote HEAD:refs/heads/master
+
+      - name: Expose version output
+        id: output
+        env:
+          NEW_VERSION: ${{ needs.test.outputs.new_version }}
+        run: |
+          echo "new_version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+
+  # ---------- Linux wheels (UNCHANGED behavior) ----------
+  build_wheels_linux:
+    name: Build wheels (Linux via cibuildwheel)
+    runs-on: ubuntu-latest
+    needs: [test, version_bump]
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install cibuildwheel
+        run: |
+          python -m pip install -U pip
+          pip install cibuildwheel
+
+      - name: Build wheels (Linux)
+        timeout-minutes: 60
+        env:
+          CIBW_BEFORE_ALL_LINUX: >
+            (yum -y install gcc-gfortran) ||
+            (dnf -y install gcc-gfortran) ||
+            (microdnf -y install gcc-gfortran) || true
+        run: python -m cibuildwheel --output-dir wheelhouse
+
+      - name: Upload wheels artifact (Linux)
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-linux-${{ github.sha }}
+          path: wheelhouse
+          if-no-files-found: error
+          retention-days: 7
+
+  # ---------- macOS wheels (per-arch native) ----------
+  build_wheels_macos:
+    name: Build wheels (macOS native per-arch via cibuildwheel)
+    needs: [test, version_bump]
+    strategy:
+      matrix:
+        os: [macos-15, macos-13]   # arm64 and Intel (x86_64)
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Fortran
+        uses: fortran-lang/setup-fortran@v1
+        with:
+          compiler: gcc
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install cibuildwheel
+        run: |
+          python -m pip install -U pip
+          pip install cibuildwheel delocate
+
+      - name: Build wheels (macOS)
+        timeout-minutes: 60
+        env:
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: "delocate-wheel -w {dest_dir} {wheel}"
+
+        run: |
+          FC=gfortran python -m cibuildwheel --output-dir wheelhouse
+
+      - name: Upload wheels artifact (macOS)
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-macos-${{ matrix.os }}-${{ github.sha }}
+          path: wheelhouse
+          if-no-files-found: error
+          retention-days: 7
+
+  # ---------- Windows wheels (MinGW-w64 + gfortran) ----------
+  build_wheels_windows:
+    name: Build wheels (Windows MinGW via cibuildwheel)
+    needs: [test, version_bump]
+    runs-on: windows-latest
+    timeout-minutes: 90
+    env:
+      # ensure cibuildwheel targets the native 64-bit arch on Windows
+      CIBW_ARCHS_WINDOWS: "AMD64"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Install MinGW-w64 toolchain and pkgconf via MSYS2
+      - name: Set up MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          # avoid update mid-launch
+          update: false
+          # switch to UCRT64 for modern CRT
+          msystem: UCRT64
+          # ucrt64 packages instead of mingw64
+          install: >-
+            base-devel
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-gcc-fortran
+            mingw-w64-ucrt-x86_64-pkgconf
+
+      - name: Add MinGW to PATH
+        shell: bash
+        run: |
+          echo "C:/msys64/ucrt64/bin" >> $GITHUB_PATH
+          echo "C:/msys64/usr/bin" >> $GITHUB_PATH
+          echo "PKG_CONFIG_PATH=C:/msys64/ucrt64/lib/pkgconfig" >> $GITHUB_ENV
+          # use prefixed compilers to avoid MSVC pickup
+          echo "CC=x86_64-w64-mingw32-gcc" >> $GITHUB_ENV
+          echo "CXX=x86_64-w64-mingw32-g++" >> $GITHUB_ENV
+          echo "FC=x86_64-w64-mingw32-gfortran" >> $GITHUB_ENV
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install cibuildwheel
+        run: |
+          python -m pip install -U pip
+          pip install cibuildwheel delvewheel
+
+      - name: Build wheels (Windows MinGW)
+        env:
+          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "python -m pip install -U delvewheel && python -m delvewheel repair -w {dest_dir} {wheel}"
+        run: |
+          python -m cibuildwheel --output-dir wheelhouse
+
+      - name: Upload wheels artifact (Windows)
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-windows-${{ github.sha }}
+          path: wheelhouse
+          if-no-files-found: error
+          retention-days: 7
+
+  # ---------- sdist (unchanged intent) ----------
+  sdist:
+    name: Build sdist
+    needs: [test, version_bump]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build sdist
+        run: |
+          python -m pip install -U pip build
+          python -m build --sdist
+          ls -l dist
+
+      - name: Upload sdist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdist-${{ github.sha }}
+          path: dist
+          if-no-files-found: error
+          retention-days: 7
+
+  # ---------- Publish to PyPI (downloads all artifacts) ----------
+  publish:
+    name: Publish to PyPI
+    needs: [build_wheels_linux, build_wheels_macos, build_wheels_windows, sdist]
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/master' && github.event_name == 'push') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create output dir
+        run: mkdir -p dist
+
+      - name: Download Linux wheels
+        uses: actions/download-artifact@v4
+        with:
+          name: wheels-linux-${{ github.sha }}
+          path: dist
+
+      - name: Download macOS wheels (arm64)
+        uses: actions/download-artifact@v4
+        with:
+          name: wheels-macos-macos-15-${{ github.sha }}
+          path: dist
+
+      - name: Download macOS wheels (x86_64)
+        uses: actions/download-artifact@v4
+        with:
+          name: wheels-macos-macos-13-${{ github.sha }}
+          path: dist
+
+      - name: Download Windows wheels
+        uses: actions/download-artifact@v4
+        with:
+          name: wheels-windows-${{ github.sha }}
+          path: dist
+
+      - name: Download sdist
+        uses: actions/download-artifact@v4
+        with:
+          name: sdist-${{ github.sha }}
+          path: dist
+
+      # In your repo, go to:
+      # Settings → Secrets and variables → Actions → New repository secret
+      # Create a secret named exactly PYPI_API_TOKEN
+      - name: Publish release to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist
+          password: ${{ secrets.PYPI_API_TOKEN }}

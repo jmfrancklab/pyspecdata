@@ -148,7 +148,10 @@ def dot(self, arg):
             assert arg_axis_coords_dict[j] is None
         else:
             assert all(axis_coords_dict[j] == arg_axis_coords_dict[j])
-        assert axis_units_dict[j] == arg_axis_units_dict[j]
+        assert axis_units_dict[j] == arg_axis_units_dict[j], (
+            f"Axes for {j} are {axis_units_dict[j]} on one side and"
+            f" {arg_axis_units_dict[j]} on the other"
+        )
         if axis_coords_error_dict[j] is None:
             assert arg_axis_coords_error_dict[j] is None
         else:

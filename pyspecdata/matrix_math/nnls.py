@@ -35,10 +35,11 @@ def venk_nnls(K_0, mvec, l):
     """
     c = np.ones(K_0.shape[0])
     for j in range(20):
-        print(f"venk_nnls iteration {j}")
+        logging.debug(f"venk_nnls iteration {j} for l={l}")
         # re-run to make c is converged
         old_c = c.copy()
         _nnls.venk_nnls(K_0, mvec, c, l**2)
+        logging.debug(f"venk_nnls gave c={c}")
         if np.linalg.norm(c - old_c) / np.linalg.norm(c) < 1e-5:
             break
     f = K_0.T.dot(c)
@@ -78,6 +79,7 @@ def nnls(
     default_cut=1e-3,
     store_uncompressed_kernel=False,
     method=None,
+    starting_l=1e-2,
 ):
     r"""Perform regularized non-negative least-squares "fit" on self.
 
@@ -255,14 +257,10 @@ def nnls(
     # equal to dimnames (length 1 for 1D and 2 for 2D)
     twoD = len(dimname_list) > 1
     fit_dimnames = [j.dimlabels[0] for j in newaxis_dict]
-    fit_axis_coords = [
-        j.getaxis(fit_dimnames[j_idx])
+    fit_axes = [
+        j
         for j_idx, j in enumerate(newaxis_dict)
         if j.getaxis(fit_dimnames[j_idx]) is not None
-    ]
-    fit_axes = [
-        nddata_cls(fit_axis_coords[j], fit_dimnames[j])
-        for j in range(len(dimname_list))
     ]
     data_axes = [
         self.fromaxis(dimname_list[j]) for j in range(len(dimname_list))
@@ -412,7 +410,7 @@ def nnls(
         logger.debug(
             "about to run venk" + strm(K_alldims.shape, data_fornnls.shape)
         )
-        retval, l = venk_BRD(1e-2, K_alldims, data_fornnls)
+        retval, l = venk_BRD(starting_l**2, K_alldims, data_fornnls)
         self.set_prop("opt_alpha", l)
         # 2) Compute residual: A·x − b (eq. 40)
         residual = K_alldims.dot(retval) - data_fornnls
@@ -478,7 +476,9 @@ def nnls(
         axis_coords_dict[fit_dimnames[j]] = fit_axes[j].getaxis(
             fit_dimnames[j]
         )
-        axis_units_dict[fit_dimnames[j]] = None
+        axis_units_dict[fit_dimnames[j]] = fit_axes[j].get_units(
+            fit_dimnames[j]
+        )
         axis_coords_error_dict[fit_dimnames[j]] = None
     if not np.isscalar(l):
         self.dimlabels = ["lambda"] + self.dimlabels

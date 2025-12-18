@@ -6,7 +6,7 @@ them."""
 import os
 import sys
 from matplotlib.pylab import gci
-from numpy import pi
+from numpy import pi, sqrt
 import numpy as np
 import logging
 import re
@@ -14,10 +14,22 @@ import pint
 import textwrap
 
 ureg = pint.UnitRegistry()
-
-ureg.define("cyc = rad/2/pi")  # 'cycle' is a new dimension
+ureg.define("cycle = [cyc] = cyc")  # 'cycle' is a new dimension
+ureg.define("rad = cyc*2*pi")  # 'cycle' is a new dimension
 ureg.define("Hz = cyc / s")  # Redefine 'Hz' to be cycles per second
 Q_ = ureg.Quantity
+
+
+def nicedef(self):
+    retval = self.to_base_units()
+    unit_list = ["Hz", "T", "W", "J", "G", "cyc/T", "cyc/m", "cyc/G"]
+    candidates = [u for u in [Q_(j) for j in unit_list] if retval.check(u)]
+    if len(candidates) > 0:
+        retval = retval.to(candidates[0])
+    return retval.to_compact()
+
+
+Q_.to_nice = nicedef
 try:
     if "√" in str(Q_("√W")):
         pass
@@ -26,7 +38,8 @@ try:
 except Exception:
     print(
         "**Warning!** I'm hacking the sqrt behavior of pint.  Consider using"
-        " the jmfranck/pint fork, which you can find at https://github.com/jmfranck/pint"
+        " the jmfranck/pint fork, which you can find at"
+        " https://github.com/jmfranck/pint"
     )
 
     def Q_(*args):
@@ -43,6 +56,10 @@ except Exception:
             b = g1 + f" {g2}" + "^{0.5} " + g3
             print(b)
         return ureg.Quantity(a, b)
+
+
+# the following is equivalent to √(μ₀/4π)
+T_per_G = (Q_("kg**0.5*m**0.5/s/A") / sqrt(1e7)).to_base_units()
 
 
 def inside_sphinx():

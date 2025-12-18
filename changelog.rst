@@ -3,12 +3,7 @@ History/Roadmap
 
 (Current version in bold -- future plans below) 
 
-**0.9.5.6**
-    - Updated sphinx gallery with DCCT plots
-      accompanying domain colored coherence transfer
-      preprint.
-0.9.5.5
-    - Implement a reader for Cary (Varian) UV-Vis files with examples.
+
 0.9.5.1
     - 0.9.5.1.1
       Some important debugging, and also added `pyspecdata.ipy` → executing the following at the top of a jupyter notebook:
@@ -58,9 +53,7 @@ History/Roadmap
         - ILT (Tikhonov regularization) with SVD Kernel compression
           (1 and 2 dimensions)
         - ``smoosh`` and ``chunk`` deal with axes properly
-
-0.9.5.3 **Current Version**
-    upgrade to Python 3 and begin to flesh out documentation
+0.9.5.3 upgrade to Python 3 and begin to flesh out documentation
 
 0.9.5.4
     - 0.9.5.4.1
@@ -68,11 +61,38 @@ History/Roadmap
       - 1.5 and 2.5 D ILT
 0.9.5
     First version distributed on pypi.python.org.
+0.9.5.6
+    - Updated sphinx gallery with DCCT plots
+      accompanying domain colored coherence transfer
+      preprint.
+0.9.5.5
+    - Implement a reader for Cary (Varian) UV-Vis files with examples.
+0.9.8.0
+    - upgraded to numpy 2.0
+    - stable ILT build w/ full implementation of Venkataramanan ILT
+      regularization.
+    - "vibe-coded" interface to configuration file
+
+      - used to store instrumental constants
+      - used in file searching mechanism
+0.9.45
+    - auto-deployment using github actions
+
+    - 0.9.45.4 **CURRENT**
+
+        - added a GUI that handles the pyspecdata configuration (file locations, etc.)
+        - set rclone to actually use regex
 
 Future Plans
 ^^^^^^^^^^^^
 
-0.9.5.7
+0.9.46
+    - Get rid of pytables dependency, and use pyhdf along with
+      setstate/getstate mechanism for HDF5 storage and retrieval.
+
+      - Simplifies ability to deal with other file formats (mat, etc.)
+
+0.9.47
     - Implement an ``nddata_placeholder`` class for quickly loading and
       searching through datasets in *e.g.* UV-Vis files or Bruker directories
       without actually loading all the data from each dataset.
@@ -89,8 +109,6 @@ Future Plans
       indexing for some combined range selections.)
 
 1.0.2
-    GUI for setting configuration directories.
-
     Means for dealing with non-linearly spaced data in image plots
     (0.9.5 auto-detects log spacing in 1D plots,
     but pretends that image plots are linear -- we will implement linear spline

@@ -42,12 +42,13 @@ import numpy as np
 import sympy as sp
 from numpy import r_, c_, nan, inf, pi
 from mpl_toolkits.mplot3d import axes3d
-import textwrap, atexit, scipy, warnings, inspect, re
+import textwrap, scipy, warnings, inspect, re
 from copy import deepcopy
 from sympy.functions.elementary.miscellaneous import sqrt as sympy_sqrt
 import scipy.sparse as sparse
 from scipy.interpolate import interp1d
 import logging
+import numbers
 from .ndshape import ndshape_base
 from . import fourier as this_fourier
 from . import axis_manipulation
@@ -64,13 +65,11 @@ from .general_functions import (
     scalar_or_zero_order,
     strm,
 )
-from .hdf_utils import (
-    h5loaddict,
-    h5child,
-    h5table,
-    h5nodebypath,
-    h5attachattributes,
+from .file_saving.hdf_save_dict_to_group import (
+    hdf_save_dict_to_group,
+    hdf_load_dict_from_group,
 )
+import os
 from .mpl_utils import (
     plot_label_points,
     default_cycler,
@@ -198,24 +197,11 @@ def apply_oom(average_oom, numbers, prev_label=""):
     new_label: str
         prev_label is prefixed by the appropriate SI prefix
     """
-    oom_names = ["T", "G", "M", "k", "", "m", "μ", "n", "p"]
-    oom_values = r_[12, 9, 6, 3, 0, -3, -6, -9, -12]
-    eq = oom_values == average_oom
-    if not np.any(eq):
-        if all(average_oom < oom_values):
-            oom_index = len(oom_values) - 1
-        elif all(average_oom > oom_values):
-            oom_index = 0
-        else:
-            raise ValueError(
-                strm(
-                    "you passed",
-                    average_oom,
-                    "which I can't find a prefix for",
-                )
-            )
-    else:
-        oom_index = np.nonzero(eq)[0][0]
+    prev_quant = Q_(10**average_oom, prev_label)
+    new_quant = prev_quant.to_nice()
+    # multiply by 1/1000 to convert g → kg
+    scaling = new_quant.magnitude / prev_quant.magnitude
+
     if numbers.dtype in ["int32", "int64"]:
         # this is not necessary unless we have an integer type
         logger.warning(
@@ -223,11 +209,11 @@ def apply_oom(average_oom, numbers, prev_label=""):
             "set of numbers that are described by integers.  This is"
             "probably not a good idea!!"
         )
-        new_values = numbers / 10.0 ** oom_values[oom_index]
+        new_values = numbers * scaling
         numbers[:] = new_values.astype(numbers.dtype)
     else:
-        numbers[:] /= 10.0 ** oom_values[oom_index]
-    return oom_names[oom_index] + prev_label
+        numbers[:] *= scaling
+    return f"{new_quant.units:~P}"
 
 
 def issympy(x):
@@ -1364,6 +1350,195 @@ class nddata(object):
     def _contains_symbolic(self, string):
         return string[:9] == "symbolic_" and hasattr(self, string)
 
+    def __getstate__(self):
+        """Return a plain ``dict`` describing the ``nddata`` state.
+
+        Any sub-dictionary that contains a ``"NUMPY_DATA"`` key is treated as
+        a dataset-plus-attributes bundle when the state is saved to a format
+        that supports attributes (for example, the HDF5 helpers).  The value of
+        ``"NUMPY_DATA"`` is the array to be written, and the remaining keys in
+        that sub-dictionary become attributes on the dataset.  The lowercase
+        ``data`` sub-dictionary is not special and continues to hold the main
+        data array and its companions.
+        """
+
+        axes = {}
+        for lbl in self.dimlabels:
+            coords = self.getaxis(lbl)
+            err = self.get_error(lbl)
+            if err is None:
+                axes[lbl] = {"NUMPY_DATA": coords}
+            else:
+                if coords.dtype.names is None:
+                    structured_axis = np.core.records.fromarrays(
+                        [coords, err], names="data,error"
+                    )
+                else:
+                    if "error" in coords.dtype.names:
+                        structured_axis = coords.copy()
+                        structured_axis["error"] = err
+                    else:
+                        new_dtype = list(coords.dtype.descr) + [
+                            ("error", err.dtype)
+                        ]
+                        structured_axis = np.empty(
+                            coords.shape, dtype=new_dtype
+                        )
+                        for field_name in coords.dtype.names:
+                            structured_axis[field_name] = coords[field_name]
+                        structured_axis["error"] = err
+                axes[lbl] = {"NUMPY_DATA": structured_axis}
+            units = self.get_units(lbl)
+            if units is not None:
+                axes[lbl]["axis_coords_units"] = units
+
+        def serialize_other_info(obj):
+            if isinstance(obj, dict):
+                return {k: serialize_other_info(v) for k, v in obj.items()}
+            elif isinstance(obj, (list, tuple)):
+                serialized_list = [serialize_other_info(v) for v in obj]
+                if isinstance(obj, tuple):
+                    return tuple(serialized_list)
+                return serialized_list
+            return obj
+
+        data_state = {"data": self.data}
+        if getattr(self, "data_error", None) is not None:
+            data_state["error"] = self.data_error
+        units = self.get_units()
+        data_state["data_units"] = units
+
+        dimlabels = list(self.dimlabels)
+
+        return {
+            "data": data_state,
+            "dimlabels": dimlabels,
+            "axes": axes,
+            "other_info": serialize_other_info(self.other_info),
+        }
+
+    def __deepcopy__(self, memo):
+        "don't involve setstate/getstate in deepcopy"
+        dup = self.__class__.__new__(self.__class__)
+        memo[id(self)] = dup
+        dup.__dict__ = {k: deepcopy(v, memo) for k, v in self.__dict__.items()}
+        # rebuild any transients if needed
+        return dup
+
+    def __setstate__(self, state):
+        """Restore object state from a dictionary."""
+
+        missing = [k for k in ("dimlabels", "data") if k not in state]
+        if missing:
+            raise ValueError(
+                "state is missing required keys: " + ", ".join(missing)
+            )
+
+        dimlabels = []
+        for lbl in state["dimlabels"]:
+            if isinstance(lbl, (tuple, list)):
+                dimlabels.append(lbl[0])
+            elif isinstance(lbl, np.ndarray):
+                if lbl.size == 0:
+                    continue
+                dimlabels.append(lbl.flat[0])
+            else:
+                dimlabels.append(lbl)
+        self.dimlabels = list(dimlabels)
+
+        self.axis_coords = []
+        self.axis_coords_units = []
+        self.axis_coords_error = []
+        for lbl in self.dimlabels:
+            if lbl not in state["axes"]:
+                raise ValueError(
+                    f"No axis coords for {lbl}, which is not allowed, because"
+                    " that's how I determine the size!!"
+                )
+            axis_units = None
+            axis_error = None
+            if isinstance(state["axes"][lbl], dict):
+                if "axis_coords_units" in state["axes"][lbl]:
+                    axis_units = state["axes"][lbl]["axis_coords_units"]
+                if "error" in state["axes"][lbl]:
+                    axis_error = state["axes"][lbl]["error"]
+                if "data" in state["axes"][lbl]:
+                    axis_array = state["axes"][lbl]["data"]
+                elif "NUMPY_DATA" in state["axes"][lbl]:
+                    axis_array = state["axes"][lbl]["NUMPY_DATA"]
+                else:
+                    axis_array = state["axes"][lbl]
+            else:
+                axis_array = state["axes"][lbl]
+            if isinstance(axis_array, dict) and "NUMPY_DATA" in axis_array:
+                axis_array = axis_array["NUMPY_DATA"]
+            if isinstance(axis_error, dict) and "NUMPY_DATA" in axis_error:
+                axis_error = axis_error["NUMPY_DATA"]
+            if (
+                isinstance(axis_array, np.ndarray)
+                and axis_array.dtype.names is not None
+            ):
+                if "data" in axis_array.dtype.names:
+                    axis_coords = axis_array["data"]
+                else:
+                    axis_coords = axis_array
+                if "error" in axis_array.dtype.names:
+                    axis_error = axis_array["error"]
+            else:
+                axis_coords = axis_array
+            self.axis_coords.append(axis_coords)
+            self.axis_coords_units.append(axis_units)
+            self.axis_coords_error.append(axis_error)
+
+        shape = tuple(len(ax) for ax in self.axis_coords)
+        if "data" not in state["data"]:
+            # support files where the data node was written directly as a
+            # dataset, so only a NUMPY_DATA payload comes back from the HDF5
+            # loader instead of a nested "data" key
+            if "NUMPY_DATA" in state["data"]:
+                reconstructed = {
+                    "data": {"NUMPY_DATA": state["data"]["NUMPY_DATA"]}
+                }
+                if "error" in state["data"]:
+                    reconstructed["error"] = state["data"]["error"]
+                if "data_units" in state["data"]:
+                    reconstructed["data_units"] = state["data"]["data_units"]
+                state["data"] = reconstructed
+            else:
+                raise ValueError("state['data'] is missing the data array")
+        if (
+            isinstance(state["data"]["data"], dict)
+            and "NUMPY_DATA" in state["data"]["data"]
+        ):
+            self.data = state["data"]["data"]["NUMPY_DATA"].reshape(shape)
+        else:
+            self.data = state["data"]["data"].reshape(shape)
+        if "error" in state["data"]:
+            if state["data"]["error"] is None:
+                self.data_error = None
+            elif (
+                isinstance(state["data"]["error"], dict)
+                and "NUMPY_DATA" in state["data"]["error"]
+            ):
+                self.data_error = state["data"]["error"]["NUMPY_DATA"].reshape(
+                    shape
+                )
+            else:
+                self.data_error = state["data"]["error"].reshape(shape)
+        else:
+            self.data_error = None
+        if "data_units" in state["data"]:
+            self.data_units = state["data"]["data_units"]
+        else:
+            self.data_units = None
+
+        if "other_info" in state:
+            self.other_info = state["other_info"]
+        else:
+            self.other_info = {}
+        self.genftpairs = False
+        return
+
     # {{{ for printing
     def __repr_pretty__(self, p, cycle):
         if cycle:
@@ -2075,10 +2250,16 @@ class nddata(object):
             self.set_units(other.get_units(thisaxis))
         return self
 
-    def div_units(self, arg1, arg2=None):
-        """divide units of the data (or axis)
+    def div_units(self, *args, **kwargs):
+        """
+        divide units of the data (or axis)
         by the units that are given, and
         return the multiplier as a number.
+
+        In other words, if you pass "a" and
+        the units of your data are in "b",
+        then this returns x, such that (x
+        a)/(b) = 1.
 
         If the result is not dimensionless,
         an error will be generated.
@@ -2089,25 +2270,33 @@ class nddata(object):
         or `d.div_units("s")` to divide the
         data units by seconds.
 
-        In other words, if you pass "a" and the units of your data are
-        in "b", then this returns x, such that (x a)/(b) = 1.
-
         e.g. to convert a variable from seconds
         to the units of `axisname`, do
         `var_s/d.div_units("axisname","s")`
+
+        e.g. to convert `axisname` to μs, do
+        `d["axisname"] *= d.div_units("axisname","μs")`
         """
-        if arg2 is not None:
-            denom_units = Q_(arg2)
-            numer_units = Q_(self.get_units(arg1))
+        if len(args) > 1:
+            denom_units = Q_(args[1])
+            numer_units = Q_(self.get_units(args[0]))
         else:
-            denom_units = Q_(arg1)
+            denom_units = Q_(args[0])
             numer_units = Q_(self.get_units())
         retval = (numer_units / denom_units).to_base_units()
-        assert retval.check(""), (
-            "the quotient you're asking for is not unitless -- it has units"
-            f" of {retval.dimensionality}"
-        )
-        return retval.magnitude
+        if len(kwargs) > 0:
+            assert len(kwargs) == 1
+            return_quant = kwargs["Q"]
+        else:
+            return_quant = False
+        if return_quant:
+            return retval
+        else:
+            assert retval.check(""), (
+                "the quotient you're asking for is not unitless -- it has"
+                f" units of {retval.dimensionality}"
+            )
+            return retval.magnitude
 
     def get_units(self, *args):
         if len(args) == 1:
@@ -2623,11 +2812,14 @@ class nddata(object):
         unitA = Q_(
             "dimensionless" if self.get_units() is None else self.get_units()
         )
-        unitB = Q_(
-            "dimensionless" if arg.get_units() is None else arg.get_units()
-        )
+        if isinstance(arg, nddata):
+            unitB = Q_(
+                "dimensionless" if arg.get_units() is None else arg.get_units()
+            )
+        else:
+            unitB = Q_("dimensionless")
         prod = unitA * unitB
-        unit_ret = f"{prod.to_compact().units:~P}"
+        unit_ret = f"{prod.to_nice().units:~P}"
         unit_ret = None if len(unit_ret) == 0 else unit_ret
         retval.set_units(unit_ret)
         return retval
@@ -2751,7 +2943,7 @@ class nddata(object):
             "dimensionless" if arg.get_units() is None else arg.get_units()
         )
         prod = unitA / unitB
-        unit_ret = f"{prod.to_compact().units:~P}"
+        unit_ret = f"{prod.to_nice().units:~P}"
         unit_ret = None if len(unit_ret) == 0 else unit_ret
         retval.set_units(unit_ret)
         return retval
@@ -3093,7 +3285,7 @@ class nddata(object):
             self.get_units(thisaxis) is not None
         ):
             ret_units = Q_(self.get_units()) * Q_(self.get_units(thisaxis))
-            self.set_units(f"{ret_units.to_compact().units:~P}")
+            self.set_units(f"{ret_units.to_nice().units:~P}")
         if len(self.axis_coords) > 0:
             t = self.getaxis(thisaxis)
             dt_array = np.diff(t)
@@ -3315,27 +3507,40 @@ class nddata(object):
         return func
         # }}}
 
-    def argmax(self, *args, **kwargs):
-        r"""find the max along a particular axis, and get rid of that axis,
-        replacing it with the index number of the max value
+    def argmax(self, *axes, **kwargs):
+        r"""If `.argmax('dimname')` find the max along a particular dimension,
+        and get rid of that dimension, replacing it with the coordinate where
+        the max value is found.
+
+        If `.argmax()`: return a dictionary giving the coordinates of the
+        overall maximum point.
 
         Parameters
         ==========
         raw_index: bool
-            return the raw (np.ndarray) numerical index, rather than the
-            corresponding axis value Note that the result returned is still,
-            however, an nddata (rather than numpy np.ndarray) object.
+            Return the raw (np.ndarray) numerical index, rather than the
+            corresponding axis value.
+            Note that the result returned is still, however, an nddata (rather
+            than numpy np.ndarray) object.
         """
-        # {{{ process arguments
-        axes = self._possibly_one_axis(*args)
-        raw_index = False
-        if "raw_index" in list(kwargs.keys()):
-            raw_index = kwargs.pop("raw_index")
-        if len(kwargs) > 0:
-            raise ValueError("I didn't understand the kwargs:", repr(kwargs))
-        if isinstance(axes, str):
+        raw_index = process_kwargs([("raw_index", False)], kwargs)
+        if len(axes) == 0:
+            raw_indices = dict(
+                zip(
+                    self.dimlabels,
+                    np.unravel_index(
+                        self.data.ravel().argmax(), self.data.shape
+                    ),
+                )
+            )
+            if raw_index:
+                return raw_indices
+            else:
+                return dict(
+                    [(k, self.getaxis(k)[v]) for k, v in raw_indices.items()]
+                )
+        if type(axes) is str:
             axes = [axes]
-        # }}}
         for j in range(0, len(axes)):
             try:
                 thisindex = self.axn(axes[j])
@@ -3344,27 +3549,20 @@ class nddata(object):
                 print("doesn't contain: ", axes[j])
                 raise
             temp = self.data.copy()
-            temp[~np.isfinite(temp)] = temp[np.isfinite(temp)].min()
+            temp[~np.isfinite(temp)] = temp[np.isfinite(temp)].max()
             argmax_result = np.argmax(temp, axis=thisindex)
-            argmax_units = self.get_units(axes[j])
             if raw_index:
                 self.data = argmax_result
             else:
-                if self.axis_coords[thisindex] is None:
-                    raise ValueError(
-                        "It doesn't make sense to call argmax if you have"
-                        " removed the axis coordinates! (getaxis yields None"
-                        " for %s" % thisindex
-                    )
                 self.data = self.axis_coords[thisindex][argmax_result]
-                self.set_units(argmax_units)
             self._pop_axis_info(thisindex)
         return self
 
     def argmin(self, *axes, **kwargs):
-        r"""If `.argmin('axisname')` find the min along a particular axis, and
-        get rid of that axis, replacing it with the index number of the max
-        value.
+        r"""If `.argmin('dimname')` find the min along a particular dimension,
+        and get rid of that dimension, replacing it with the coordinate where
+        the min value is found.
+
         If `.argmin()`: return a dictionary giving the coordinates of the
         overall minimum point.
 
@@ -3759,6 +3957,7 @@ class nddata(object):
                 logger.debug("popping axis info")
             return self
         else:
+            print("type of data", self.data.dtype)
             retval = func(self.data)
             if self.data.size == retval.size:
                 self.data = retval
@@ -4540,9 +4739,6 @@ class nddata(object):
             raise ValueError(
                 strm("I can't figure out how to deal with the arguments", args)
             )
-        for j in range(0, len(listofaxes)):
-            if isinstance(listofaxes[j], list):
-                listofaxes[j] = np.array(listofaxes[j])
         listofstrings = autostringconvert(listofstrings)
         if isinstance(listofstrings, str):
             listofstrings = [listofstrings]
@@ -4568,7 +4764,7 @@ class nddata(object):
                     listofaxes[j] = (
                         listofaxes[j] * r_[0 : ndshape(self)[listofstrings[j]]]
                     )
-                if type(listofaxes[j]) not in [np.ndarray, list]:
+                elif type(listofaxes[j]) not in [np.ndarray, list]:
                     raise TypeError(
                         "You passed an axis label of type "
                         + repr(type(listofaxes[j]))
@@ -4577,9 +4773,9 @@ class nddata(object):
                         + " to the labels method, which you can't do --> it"
                         " must be an nddata"
                     )
-                if (
-                    len(listofaxes[j]) != ndshape(self)[listofstrings[j]]
-                ) and (len(listofaxes[j]) != 0):
+                elif (len(listofaxes[j]) != self.shape[listofstrings[j]]) and (
+                    len(listofaxes[j]) != 0
+                ):
                     raise IndexError(
                         "You're trying to attach an axis of len %d to the '%s'"
                         " dimension, which has %d data points (shape of self"
@@ -5042,13 +5238,13 @@ class nddata(object):
                 "Axes that are called INDEX are special, and you are not"
                 " allowed to label them!"
             )
-        if isinstance(value, type(emptyfunction)):
+        elif isinstance(value, type(emptyfunction)):
             x = self.getaxis(axis)
             x[:] = value(x.copy())
             return self
-        if type(value) in [float, int, np.double, np.float64]:
+        elif type(value) in [float, int, np.double, np.float64]:
             value = np.linspace(0.0, value, self.axlen(axis))
-        if isinstance(value, list):
+        elif isinstance(value, list):
             value = np.array(value)
         if self.axis_coords is None or len(self.axis_coords) == 0:
             self.axis_coords = [None] * len(self.dimlabels)
@@ -5537,6 +5733,11 @@ class nddata(object):
                 raise ValueError("I don't know how to deal with this type!")
         else:
             raise ValueError("otherargs must be one or two arguments!")
+        if not type(axesout[0]) is str:
+            raise ValueError(
+                "the second argument should give the list of new axes that"
+                f" are created by chunking '{axisin}'"
+            )
         assert not np.any(
             [j in self.dimlabels for j in axesout if j != axisin]
         ), strm(
@@ -5976,6 +6177,8 @@ class nddata(object):
         )
         if len(rightdata.shape) > 0:
             left_shape = np.shape(self.data[leftindex])
+            if not self.data.flags.writeable:
+                self.data = self.data.copy()
             try:
                 self.data[leftindex] = rightdata.reshape(
                     left_shape
@@ -6335,7 +6538,10 @@ class nddata(object):
         # }}}
         if len(self.axis_coords) > 0:
             if errordict is not None:
-                axis_coords_error = [errordict[x] for x in newlabels]
+                axis_coords_error = [
+                    errordict[x].copy() if errordict[x] is not None else None
+                    for x in newlabels
+                ]
             else:
                 axis_coords_error = None
             if unitsdict is not None:
@@ -6364,7 +6570,10 @@ class nddata(object):
                     sliced_data,
                     sliced_data.shape,
                     newlabels,
-                    axis_coords=[axesdict[x] for x in newlabels],
+                    # even though we might want a view of the data, we
+                    # always want coords to be independent -- so copy
+                    # them.
+                    axis_coords=[axesdict[x].copy() for x in newlabels],
                     axis_coords_error=axis_coords_error,
                     data_error=newerror,
                     other_info=self.other_info,
@@ -6593,6 +6802,10 @@ class nddata(object):
                         args[j],
                         "I expected a 'dimname':(range_start,range_stop)",
                     )
+                    assert all([
+                        isinstance(j, numbers.Number) or j is None
+                        for j in target
+                    ]), f"one of {target} is not a number!"
                     if len(target) == 1:
                         sensible_list.append(
                             (hash("range"), dimname, target[0], None)
@@ -6758,8 +6971,27 @@ class nddata(object):
                     elif temp_low == -inf:
                         temp_low = 0
                     else:
-                        logger.debug(strm("looking for", temp_low))
+                        logger.debug(
+                            strm(
+                                "looking for",
+                                temp_low,
+                                "type(thisaxis)",
+                                type(thisaxis),
+                            )
+                        )
                         temp_low = np.searchsorted(thisaxis, temp_low)
+                        logger.debug(
+                            strm(
+                                "searchsorted",
+                                thisaxis,
+                                "with temp_low",
+                                temp_low,
+                                "gave",
+                                temp_low,
+                                "vs",
+                                len(thisaxis),
+                            )
+                        )
                         if temp_low >= len(thisaxis):
                             raise ValueError(
                                 'the lower value of your slice %s on the "%s"'
@@ -6939,13 +7171,11 @@ class nddata(object):
         Parameters
         ----------
         h5path : str
-            The name of the file followed by the node path where
-            you want to put it -- it does **not** include the directory where
-            the file lives.
-            (Because HDF5 files contain an internal directory-like group
-            structure.)
+            Name of the file followed by an optional internal path.
+            The dataset name is taken from the ``name`` property of the
+            :class:`nddata` instance.
         directory : str
-            the directory where the HDF5 file lives.
+            Directory where the HDF5 file lives.
         """
         for thisax in self.dimlabels:
             if self.getaxis(thisax) is None or len(self.getaxis(thisax)) == 0:
@@ -6957,491 +7187,69 @@ class nddata(object):
                         " to HDF5 if you do not label all your axes!!",
                     )
                 )
-        # {{{ add the final node based on the name stored in the nddata
-        #     structure
-        if h5path[-1] != "/":
-            h5path += "/"  # make sure it ends in a slash first
+        if "/" in h5path:
+            filename, internal = h5path.split("/", 1)
+        else:
+            filename, internal = h5path, ""
         try:
             thisname = self.get_prop("name")
         except Exception:
             raise ValueError(
                 strm(
                     "You're trying to save an nddata object which",
-                    "does not yet have a name, and you can't do this! Run",
-                    "yourobject.name('setname')",
+                    " does not yet have a name, and you can't do this! Run",
+                    " yourobject.name('setname')",
                 )
             )
-        if isinstance(thisname, str):
-            h5path += thisname
-        else:
+        if not isinstance(thisname, str):
             raise ValueError(
                 strm(
                     "problem trying to store HDF5 file; you need to",
-                    "set the ``name'' property of the nddata object to a"
-                    " string",
-                    "first!",
+                    " set the ``name'' property of the nddata object to a",
+                    " string first!",
                 )
             )
-        h5file, bottomnode = h5nodebypath(
-            h5path, directory=directory
-        )  # open the file and move to the right node
-        try:
-            # print 'DEBUG 1: bottomnode is',bottomnode
-            # }}}
-            # {{{ print out the attributes of the data
-            myattrs = normal_attrs(self)
-            # {{{ separate them into data and axes
-            mydataattrs = list(filter((lambda x: x[0:4] == "data"), myattrs))
-            myotherattrs = list(filter((lambda x: x[0:4] != "data"), myattrs))
-            myotherattrs = [
-                x
-                for x in myotherattrs
-                if x not in ["C", "sin", "cos", "exp", "log10"]
-            ]
-            myaxisattrs = list(
-                filter((lambda x: x[0:4] == "axis"), myotherattrs)
+        fullpath = "/".join(p for p in [internal.strip("/"), thisname] if p)
+        state = self.__getstate__()
+        filepath = os.path.join(directory, filename)
+        import h5py
+
+        with h5py.File(filepath, "a") as f:
+            if fullpath in f:
+                del f[fullpath]
+            g = f.create_group(fullpath)
+            hdf_save_dict_to_group(
+                g,
+                state,
+                use_pytables_hack=getattr(self, "_pytables_hack", False),
             )
-            myotherattrs = list(
-                filter((lambda x: x[0:4] != "axis"), myotherattrs)
-            )
-            logger.debug(
-                strm(
-                    lsafe(
-                        "data attributes:",
-                        list(
-                            zip(
-                                mydataattrs,
-                                [
-                                    type(self.__getattribute__(x))
-                                    for x in mydataattrs
-                                ],
-                            )
-                        ),
-                    ),
-                    "\n\n",
-                )
-            )
-            logger.debug(
-                strm(
-                    lsafe(
-                        "axis attributes:",
-                        list(
-                            zip(
-                                myaxisattrs,
-                                [
-                                    type(self.__getattribute__(x))
-                                    for x in myaxisattrs
-                                ],
-                            )
-                        ),
-                    ),
-                    "\n\n",
-                )
-            )
-            logger.debug(
-                strm(
-                    lsafe(
-                        "other attributes:",
-                        list(
-                            zip(
-                                myotherattrs,
-                                [
-                                    type(self.__getattribute__(x))
-                                    for x in myotherattrs
-                                ],
-                            )
-                        ),
-                    ),
-                    "\n\n",
-                )
-            )
-            # }}}
-            # }}}
-            # {{{ write the data table
-            if "data" in mydataattrs:
-                if (
-                    "data_error" in mydataattrs
-                    and self.get_error() is not None
-                    and len(self.get_error()) > 0
-                ):
-                    thistable = np.core.rec.fromarrays(
-                        [self.data, self.get_error()], names="data,error"
-                    )
-                    mydataattrs.remove("data_error")
-                else:
-                    thistable = np.core.rec.fromarrays(
-                        [self.data], names="data"
-                    )
-                mydataattrs.remove("data")
-                datatable = h5table(bottomnode, "data", thistable)
-                # print 'DEBUG 2: bottomnode is',bottomnode
-                # print 'DEBUG 2: datatable is',datatable
-                logger.debug(strm("Writing remaining axis attributes\n\n"))
-                if len(mydataattrs) > 0:
-                    h5attachattributes(datatable, mydataattrs, self)
-            else:
-                raise ValueError(
-                    "I can't find the data object when trying to save the HDF5"
-                    " file!!"
-                )
-            # }}}
-            # {{{ write the axes tables
-            if "axis_coords" in myaxisattrs:
-                if len(self.axis_coords) > 0:
-                    # {{{ create an 'axes' node
-                    axesnode = h5child(
-                        bottomnode,  # current node
-                        "axes",  # the child
-                        create=True,
-                    )
-                    # }}}
-                    for j, axisname in enumerate(
-                        self.dimlabels
-                    ):  # make a table for each different dimension
-                        myaxisattrsforthisdim = dict([
-                            (x, self.__getattribute__(x)[j])
-                            for x in list(myaxisattrs)
-                            if len(self.__getattribute__(x)) > 0
-                        ])  # collect the attributes for this dimension and
-                        #    their values
-                        logger.debug(
-                            strm(
-                                lsafe(
-                                    "for axis",
-                                    axisname,
-                                    "myaxisattrsforthisdim=",
-                                    myaxisattrsforthisdim,
-                                )
-                            )
-                        )
-                        if (
-                            "axis_coords" in list(myaxisattrsforthisdim.keys())
-                            and myaxisattrsforthisdim["axis_coords"]
-                            is not None
-                        ):
-                            if (
-                                "axis_coords_error"
-                                in list(myaxisattrsforthisdim.keys())
-                                and myaxisattrsforthisdim["axis_coords_error"]
-                                is not None
-                                and len(
-                                    myaxisattrsforthisdim["axis_coords_error"]
-                                )
-                                > 0
-                            ):  # this is needed to avoid all errors, though I
-                                # guess I could use try/except
-                                thistable = np.core.rec.fromarrays(
-                                    [
-                                        myaxisattrsforthisdim["axis_coords"],
-                                        myaxisattrsforthisdim[
-                                            "axis_coords_error"
-                                        ],
-                                    ],
-                                    names="data,error",
-                                )
-                                myaxisattrsforthisdim.pop("axis_coords_error")
-                            else:
-                                thistable = np.core.rec.fromarrays(
-                                    [myaxisattrsforthisdim["axis_coords"]],
-                                    names="data",
-                                )
-                            myaxisattrsforthisdim.pop("axis_coords")
-                        datatable = h5table(axesnode, axisname, thistable)
-                        # print 'DEBUG 3: axesnode is',axesnode
-                        logger.debug(
-                            strm(
-                                "Writing remaining axis attributes for",
-                                axisname,
-                                "\n\n",
-                            )
-                        )
-                        if len(myaxisattrsforthisdim) > 0:
-                            h5attachattributes(
-                                datatable,
-                                list(myaxisattrsforthisdim.keys()),
-                                list(myaxisattrsforthisdim.values()),
-                            )
-            # }}}
-            # {{{ Check the remaining attributes.
-            logger.debug(
-                strm(
-                    lsafe(
-                        "other attributes:",
-                        list(
-                            zip(
-                                myotherattrs,
-                                [
-                                    type(self.__getattribute__(x))
-                                    for x in myotherattrs
-                                ],
-                            )
-                        ),
-                    ),
-                    "\n\n",
-                )
-            )
-            logger.debug(strm("Writing remaining other attributes\n\n"))
-            if len(myotherattrs) > 0:
-                # print 'DEBUG 4: bottomnode is',bottomnode
-                test = repr(
-                    bottomnode
-                )  # somehow, this prevents it from claiming that the
-                #    bottomnode is None --> some type of bug?
-                logger.debug(strm("bottomnode", test))
-                h5attachattributes(
-                    bottomnode,
-                    [
-                        j
-                        for j in myotherattrs
-                        if not self._contains_symbolic(j)
-                    ],
-                    self,
-                )
-                warnlist = [
-                    j
-                    for j in myotherattrs
-                    if (not self._contains_symbolic(j))
-                    and isinstance(self.__getattribute__(j), dict)
-                ]
-                # {{{ to avoid pickling, test that none of the attributes I'm
-                #     trying to write are dictionaries or lists
-                if len(warnlist) > 0:
-                    print(
-                        "WARNING!!, attributes", warnlist, "are dictionaries!"
-                    )
-                warnlist = [
-                    j
-                    for j in myotherattrs
-                    if (not self._contains_symbolic(j))
-                    and isinstance(self.__getattribute__(j), list)
-                ]
-                if len(warnlist) > 0:
-                    print("WARNING!!, attributes", warnlist, "are lists!")
-                # }}}
-                logger.debug(
-                    strm(
-                        lsafe(
-                            "other attributes:",
-                            list(
-                                zip(
-                                    myotherattrs,
-                                    [
-                                        type(self.__getattribute__(x))
-                                        for x in myotherattrs
-                                    ],
-                                )
-                            ),
-                        ),
-                        "\n\n",
-                    )
-                )
-            # }}}
-        finally:
-            h5file.close()
 
     # }}}
 
 
-class testclass:
-    def __getitem__(self, *args, **kwargs):
-        logger.debug(
-            strm(
-                "you called __getitem__ with args", args, "and kwargs", kwargs
-            )
-        )
-        return
-
-    def __getattribute__(self, *args, **kwargs):
-        logger.debug(
-            strm(
-                "you called __getattribute__ with args",
-                args,
-                "and kwargs",
-                kwargs,
-            )
-        )
-        return
-
-
 class nddata_hdf5(nddata):
-    r"""Load an :class:`nddata` object saved with
-    :meth:`nddata.hdf5_write`.
+    r"""Load an :class:`nddata` object saved with :meth:`nddata.hdf5_write`."""
 
-    This subclass opens an array from an HDF5 file and exposes it as a
-    regular ``nddata`` instance.  Use :func:`pyspecdata.find_file` to
-    conveniently locate the desired file and then instantiate this class
-    or call :func:`nddata_hdf5` directly.
-    """
-
-    def __repr__(self):
-        if hasattr(self, "_node_children"):
-            return repr(self.datanode)
+    def __init__(self, h5path, directory="."):
+        if "/" in h5path:
+            filename, internal = h5path.split("/", 1)
         else:
-            return nddata.__repr__(self)
-        atexit.register(self._cleanup)
-
-    def _cleanup(self):
-        if hasattr(self, "_node_children"):
-            self.h5file.close()
-            del self.h5file
-            del self.datanode
-        return
-
-    def __init__(self, pathstring, directory=".", mode="r"):
-        self.pathstring = pathstring
-        # try:
-        self.h5file, self.datanode = h5nodebypath(
-            pathstring, check_only=True, directory=directory, mode=mode
-        )
-        logger.debug("about to call _init_datanode")
-        self._init_datanode(self.datanode)
-        atexit.register(self._cleanup)
-
-    def _init_datanode(self, datanode, **kwargs):
-        datadict = h5loaddict(datanode)
-        # {{{ load the data, and pop it from datadict
-        try:
-            datarecordarray = datadict["data"][
-                "data"
-            ]  # the table is called data, and the data of the table is called
-            #    data
-            mydata = datarecordarray["data"]
-        except Exception:
-            raise ValueError("I can't find the nddata.data")
-        try:
-            kwargs.update({"data_error": datarecordarray["error"]})
-        except Exception:
-            logger.debug(strm("No error found\n\n"))
-        datadict.pop("data")
-        # }}}
-        # {{{ be sure to load the dimlabels
-        mydimlabels = [j.decode("utf-8") for j in datadict["dimlabels"]]
-        if len(mydimlabels) == 1:
-            if len(mydimlabels[0]) == 1:
-                mydimlabels = list(
-                    [mydimlabels[0][0]]
-                )  # for some reason, think I need to do this for length 1
-        # }}}
-        # {{{ load the axes and pop them from datadict
-        datadict.pop("dimlabels")
-        if "axes" in list(datadict.keys()):
-            myaxiscoords = [None] * len(mydimlabels)
-            myaxiscoordserror = [None] * len(mydimlabels)
-            myaxis_units = [None] * len(mydimlabels)
-            logger.debug(
-                strm(
-                    "about to read out the various axes:",
-                    list(datadict["axes"].keys()),
-                )
-            )
-            for axisname in list(datadict["axes"].keys()):
-                try:
-                    axisnumber = mydimlabels.index(axisname)
-                except AttributeError:
-                    raise AttributeError(
-                        strm(
-                            "mydimlabels is not in the right format!\nit looks"
-                            " like this:\n",
-                            mydimlabels,
-                            type(mydimlabels),
-                        )
-                    )
-                except ValueError:
-                    raise ValueError(
-                        strm(
-                            "mydimlabels is not in the right format!\nit looks"
-                            " like this:\n",
-                            mydimlabels,
-                            type(mydimlabels),
-                        )
-                    )
-                recordarrayofaxis = datadict["axes"][axisname]["data"]
-                if "axis_coords_units" in datadict["axes"][axisname].keys():
-                    myaxis_units[axisnumber] = datadict["axes"][axisname][
-                        "axis_coords_units"
-                    ]
-                else:
-                    if ("Scans" in axisname) or ("ph" in axisname):
-                        pass
-                    else:
-                        print(
-                            "You didn't set units for %s before saving the"
-                            " data!!!" % axisname
-                        )
-                myaxiscoords[axisnumber] = recordarrayofaxis["data"]
-                if "error" in recordarrayofaxis.dtype.names:
-                    myaxiscoordserror[axisnumber] = recordarrayofaxis["error"]
-                datadict["axes"][axisname].pop("data")
-                for k in list(datadict["axes"][axisname].keys()):
-                    logger.debug(
-                        strm(
-                            "Warning, attribute",
-                            k,
-                            "of axis table",
-                            axisname,
-                            "remains, but the code to load this is not yet"
-                            " supported",
-                        )
-                    )
-                datadict["axes"].pop(axisname)
-            kwargs.update({"axis_coords": myaxiscoords})
-            kwargs.update({"axis_coords_units": myaxis_units})
-            kwargs.update({"axis_coords_error": myaxiscoordserror})
-        elif len(mydimlabels) > 1:
             raise ValueError(
-                "The current version uses the axis labels to"
-                "figure out the shape of the data\nBecause you stored"
-                "unlabeled data, I can't figure out the shape of the"
-                "data!!"
+                "h5path must include an internal path to the dataset"
             )
-            # the reshaping this refers to is done below
-        # }}}
-        logger.debug(
-            strm(
-                "about to initialize data with shape",
-                mydata.shape,
-                "labels",
-                mydimlabels,
-                "and kwargs",
-                kwargs,
-            )
-        )
-        nddata.__init__(self, mydata, mydata.shape, mydimlabels, **kwargs)
-        # {{{ reshape multidimensional data to match the axes
-        if len(mydimlabels) > 1:
-            det_shape = []
-            for thisdimlabel in mydimlabels:
-                try:
-                    temp = self.getaxis(thisdimlabel)
-                except Exception:
-                    temp = -1  # no axis is given
-                if isinstance(temp, np.ndarray):
-                    temp = len(temp)
-                det_shape.append(temp)
+        filepath = os.path.join(directory, filename)
+        import h5py
+
+        with h5py.File(filepath, "r") as f:
             try:
-                self.data = self.data.reshape(det_shape)
-            except Exception:
-                raise RuntimeError(
-                    strm(
-                        "The data is of shape",
-                        self.data.shape,
-                        "and I try to reshape it into",
-                        det_shape,
-                        "corresponding to the dimensions",
-                        mydimlabels,
-                        "--> this fails!",
-                    )
+                g = f[internal]
+            except KeyError:
+                raise KeyError(
+                    f"looking for {internal} inside {f}, and couldn't find it"
+                    f" -- are you looking for one of these? {f.keys()}"
                 )
-        # }}}
-        for remainingattribute in list(datadict.keys()):
-            self.__setattr__(remainingattribute, datadict[remainingattribute])
-        self.h5file.close()
-        del self.h5file
-        del self.datanode
-        return
-
-
-# }}}
+            state = hdf_load_dict_from_group(g)
+        self.__setstate__(state)
 
 
 class ndshape(ndshape_base):

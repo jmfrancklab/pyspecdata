@@ -7,9 +7,32 @@ import re
 from io import StringIO
 import os
 import logging
+import types
+import numbers
 
 logger = logging.getLogger("pyspecdata.load_files.bruker_esr")
 b0_texstr = r"$B_0$"
+
+
+def _collapse_string_lists(val):
+    flattened = []
+    for item in val:
+        if (
+            isinstance(item, list)
+            or isinstance(item, tuple)
+            and not all(
+                [j == "REAL" or j == "CPLX" or j == "IMAG" for j in val]
+            )
+        ):
+            print("recursing with", item)
+            flattened.append(_collapse_string_lists(item))
+        elif isinstance(item, numbers.Number):
+            flattened.append(str(item))
+        elif isinstance(item, str):
+            flattened.append(item)
+        else:
+            raise TypeError("type of", type(item), "not understood")
+    return " ".join(flattened)
 
 
 def xepr(filename, exp_type=None, dimname="", verbose=False):
@@ -247,11 +270,11 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
                         )
                 with open(filename_ygf, "rb") as fp:
                     y_axis = fp.read()
-                y_axis = np.fromstring(y_axis, ">f8")
+                y_axis = np.frombuffer(y_axis, ">f8")
                 assert (
                     len(y_axis) == y_points_calcd
                 ), "Length of the power axis doesn't seem to match!"
-            if v["YTYP"] == "IDX":
+            elif v["YTYP"] == "IDX":
                 temp = v.pop("YMIN")
                 y_axis = np.linspace(temp, temp + v.pop("YWID"), v.pop("YPTS"))
                 y_dim_name = v.pop("YNAM")
@@ -317,6 +340,61 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
     if "Field" in data.dimlabels:
         data.rename("Field", b0_texstr)
     # }}}
+    # {{{ add pulsspel functions
+    if "PlsSPELPrgTxt" in data.get_prop():
+
+        def find_phcyc(d):
+            "PulseSPEL allows many phase cycle lists in the exp file, with"
+            "only one selected.  Show the selected one."
+            pattern = (
+                r'begin +(lists\d*) +"'
+                + re.escape(d.get_prop("PlsSPELLISTSlct"))
+                + r'"(.*?)end \1'
+            )
+            match = re.search(
+                pattern, d.get_prop("PlsSPELPrgTxt"), flags=re.DOTALL
+            )
+            if match:
+                return match.group(0)  # full block including begin/end
+            else:
+                raise ValueError("couldn't find phcyc")
+
+        if type(data.get_prop("PlsSPELLISTSlct")) in [tuple, list]:
+            data.set_prop(
+                "PlsSPELLISTSlct",
+                _collapse_string_lists(data.get_prop("PlsSPELLISTSlct")),
+            )
+        if type(data.get_prop("PlsSPELEXPSlct")) in [tuple, list]:
+            data.set_prop(
+                "PlsSPELEXPSlct",
+                _collapse_string_lists(data.get_prop("PlsSPELEXPSlct")),
+            )
+        data.find_phcyc = types.MethodType(find_phcyc, data)
+
+        def find_ppg(d):
+            "PulseSPEL allows many pulse programs in the exp file, with only"
+            "one selected.  Show the selected one."
+            pattern = (
+                r'begin +(exp\d*) +"'
+                + d.get_prop("PlsSPELEXPSlct")
+                + r'"(.*?)end \1'
+            )
+            match = re.search(
+                pattern, d.get_prop("PlsSPELPrgTxt"), flags=re.DOTALL
+            )
+            if match:
+                return match.group(0)  # full block including begin/end
+            else:
+                raise ValueError(
+                    d.get_prop("PlsSPELPrgTxt")
+                    + "\n\n"
+                    + "couldn't find ppg with pattern: "
+                    + pattern
+                    + "in above"
+                )
+
+        data.find_ppg = types.MethodType(find_ppg, data)
+    # }}}
     return data
 
 
@@ -367,7 +445,7 @@ def winepr(filename, dimname="", exp_type=None):
         )
     with open(filename_spc, "rb") as fp:
         data = fp.read()
-    data = np.fromstring(data, "<f4")
+    data = np.frombuffer(data, "<f4")
     # }}}
     # load the parameters
     v = winepr_load_acqu(filename_par)
@@ -514,16 +592,69 @@ def xepr_load_acqu(filename):
         else:
             return None
 
+    def replace_escaped_newlines(val):
+        if isinstance(val, str):
+            val = val.replace("\\n", "\n")
+            val = val.replace("\n\\", "\n")
+            if val and val[0] == "'" and val[-1] == "'":
+                val = val[1:-1]
+            return val
+        if isinstance(val, list):
+            return [replace_escaped_newlines(v) for v in val]
+        return val
+
     which_block = None
     block_re = re.compile(r"^ *#(\w+)")
     comment_re = re.compile(r"^ *\*")
-    variable_re = re.compile(r"^ *([^\s]*)\s+(.*?) *$")
+    variable_re = re.compile(r"^ *([^\s]*)\s+(.*?) *$", re.DOTALL)
     comma_re = re.compile(r"\s*,\s*")
-    block_list = None # to clarify this is unset to start
+    block_list = None  # to clarify this is unset to start
+    lookahead_line = None
+    prev_line = None
     with open(filename, "r", encoding="utf-8") as fp:
         blocks = {}
         # {{{ read lines and assign to the appropriate block
-        for line in fp:
+        continued = False
+        while True:
+            if continued is True:
+                line = lookahead_line
+            else:
+                try:
+                    line = next(fp)
+                except StopIteration:
+                    break
+            line = line.rstrip("\n")
+            continued = False
+            while line.rstrip().endswith("\\"):
+                # for some reason, \r all over the place
+                line = line.rstrip()[:-1]
+                if continued is True:
+                    continuation = lookahead_line
+                else:
+                    continuation = next(fp)
+                # {{{ deal with an error in how the files are stored --
+                #     sometimes we get a real \n and a \\n
+                try:
+                    lookahead_line = next(fp)
+                except StopIteration:
+                    lookahead_line = ""
+                if lookahead_line:
+                    if (
+                        lookahead_line.startswith("\\n")
+                        or lookahead_line.strip() == ""
+                        and not continuation.endswith("\\")
+                    ):
+                        continuation += "\\"
+                    elif line.startswith(
+                        "PlsSPELPrgTxt"
+                    ) and not continuation.startswith("PlsSPELShpTxt"):
+                        continuation += "\\"
+                # }}}
+                if continuation == "":
+                    print("broke on empty")
+                    break
+                line += continuation.rstrip("\n")
+                continued = True
             m = comment_re.search(line)
             if m:
                 pass
@@ -545,28 +676,41 @@ def xepr_load_acqu(filename):
                     else:
                         m = variable_re.search(line)
                         if m:
-                            if "," in m.groups()[1]:
+                            raw_val = m.groups()[1]
+                            if continued:
+                                value = replace_escaped_newlines(raw_val)
+                                block_list.append((m.groups()[0], value))
+                            elif "," in raw_val and "\\n" not in raw_val:
                                 # {{{ break into lists
-                                block_list.append((
-                                    m.groups()[0],
-                                    list(
-                                        map(
-                                            auto_string_convert,
-                                            comma_re.split(m.groups()[1]),
-                                        )
-                                    ),
-                                ))
+                                values = list(
+                                    map(
+                                        auto_string_convert,
+                                        comma_re.split(raw_val),
+                                    )
+                                )
+                                values = [
+                                    replace_escaped_newlines(v) for v in values
+                                ]
+                                if isinstance(value, list):
+                                    values = _collapse_string_lists(values)
+                                block_list.append((m.groups()[0], values))
                                 # }}}
                             else:
-                                block_list.append((
-                                    m.groups()[0],
-                                    auto_string_convert(m.groups()[1]),
-                                ))
+                                value = auto_string_convert(raw_val)
+                                value = replace_escaped_newlines(value)
+                                if isinstance(value, list):
+                                    value = _collapse_string_lists(value)
+                                block_list.append((m.groups()[0], value))
+                        elif line == "":
+                            continue
                         else:
                             raise ValueError(
                                 "I don't know what to do with the line:\n"
                                 + line
+                                + "previous was:\n"
+                                + prev_line
                             )
+            prev_line = line
         blocks.update({which_block: dict(block_list)})
         # }}}
     return blocks
