@@ -50,6 +50,7 @@ from scipy.interpolate import interp1d
 import logging
 import numbers
 from .ndshape import ndshape_base
+from .axis_class import axis_collection, nddata_axis
 from . import fourier as this_fourier
 from . import axis_manipulation
 from . import plot_funcs as this_plotting
@@ -1337,6 +1338,7 @@ class nddata(object):
             self.axis_coords_units = [None] * len(axis_coords)
         else:
             self.axis_coords_units = axis_coords_units
+        self._coords = None
         return
 
     # }}}
@@ -1530,7 +1532,91 @@ class nddata(object):
         else:
             self.other_info = {}
         self.genftpairs = False
+        # after loading legacy state, expose coordinate objects through coords
+        # so newer code can rely on the axis collection
+        axes_dict = {}
+        for lbl, coords, units in zip(
+            self.dimlabels, self.axis_coords, self.axis_coords_units
+        ):
+            if isinstance(coords, nddata_axis):
+                axis_obj = coords
+            elif coords is None:
+                axis_obj = nddata_axis(lbl, np.array([]))
+            else:
+                axis_obj = nddata_axis(lbl, coords)
+            axis_obj.units = units
+            axes_dict[lbl] = axis_obj
+        self.coords = axes_dict
         return
+
+    def _sync_axis_lists_from_coords(self, collection=None):
+        """Keep the legacy axis lists in sync with the coords collection."""
+        if collection is None:
+            collection = self._coords
+        axis_list = [None] * len(self.dimlabels)
+        unit_list = [None] * len(self.dimlabels)
+        existing_units = None
+        if hasattr(self, "axis_coords_units"):
+            if isinstance(self.axis_coords_units, list):
+                if len(self.axis_coords_units) == len(self.dimlabels):
+                    existing_units = list(self.axis_coords_units)
+        for idx, lbl in enumerate(self.dimlabels):
+            if lbl in collection:
+                axis_obj = collection[lbl]
+                axis_list[idx] = axis_obj.to_array()
+                unit_val = axis_obj.units
+                if unit_val is None and existing_units is not None:
+                    unit_val = existing_units[idx]
+                unit_list[idx] = unit_val
+        self.axis_coords = axis_list
+        self.axis_coords_units = unit_list
+
+    @property
+    def coords(self):
+        if self._coords is None:
+            collection = axis_collection(self.dimlabels, self._sync_axis_lists_from_coords)
+            if isinstance(self.axis_coords, list) and len(self.axis_coords) > 0:
+                for lbl, coords in zip(self.dimlabels, self.axis_coords):
+                    if coords is None:
+                        continue
+                    axis_obj = coords if isinstance(coords, nddata_axis) else nddata_axis(lbl, coords)
+                    axis_obj.names = [lbl] + [x for x in axis_obj.names if x != lbl]
+                    if (
+                        isinstance(self.axis_coords_units, list)
+                        and len(self.axis_coords_units) > 0
+                    ):
+                        axis_obj.units = self.axis_coords_units[self.axn(lbl)]
+                    collection[lbl] = axis_obj
+            self._coords = collection
+        return self._coords
+
+    @coords.setter
+    def coords(self, value):
+        remove_axis_error = False
+        if isinstance(value, dict):
+            if hasattr(self, "axis_coords_error"):
+                if len(self.axis_coords_error) == 0 or all(
+                    x is None for x in self.axis_coords_error
+                ):
+                    remove_axis_error = True
+            else:
+                remove_axis_error = True
+        if isinstance(value, axis_collection):
+            value.dimlabels = list(self.dimlabels)
+            value._on_update = self._sync_axis_lists_from_coords
+            collection = value
+        elif isinstance(value, dict):
+            collection = axis_collection(self.dimlabels, self._sync_axis_lists_from_coords)
+            for lbl, coords in value.items():
+                axis_obj = coords if isinstance(coords, nddata_axis) else nddata_axis(lbl, coords)
+                axis_obj.names = [lbl] + [x for x in axis_obj.names if x != lbl]
+                collection[lbl] = axis_obj
+        else:
+            raise TypeError("coords must be assigned a dict or axis_collection")
+        self._coords = collection
+        self._sync_axis_lists_from_coords(collection)
+        if remove_axis_error and hasattr(self, "axis_coords_error"):
+            del self.axis_coords_error
 
     # {{{ for printing
     def __repr_pretty__(self, p, cycle):
@@ -2165,6 +2251,8 @@ class nddata(object):
             ):
                 self.axis_coords_units = [None] * len(self.dimlabels)
             self.axis_coords_units[self.axn(args[0])] = unitval
+            if args[0] in self.coords:
+                self.coords[args[0]].units = unitval
         elif len(args) == 1:
             unitval = args[0]  # later, have some type of processing bojive
             self.data_units = unitval
@@ -2327,6 +2415,14 @@ class nddata(object):
         .. todo::
                 several options below -- enumerate them in the documentation
         """
+        if not hasattr(self, "axis_coords_error"):
+            self.axis_coords_error = [None] * len(self.dimlabels)
+        elif len(self.axis_coords_error) < len(self.dimlabels):
+            existing_errors = list(self.axis_coords_error)
+            existing_errors += [None] * (
+                len(self.dimlabels) - len(existing_errors)
+            )
+            self.axis_coords_error = existing_errors
         if len(args) == 1:
             if np.isscalar(args[0]):
                 logger.debug("converting scalar")
@@ -2402,6 +2498,8 @@ class nddata(object):
             else:
                 return np.real(self.data_error)
         elif len(args) == 1:
+            if not hasattr(self, "axis_coords_error"):
+                return None
             thearg = args[0]
             if isinstance(thearg, np.str_):
                 thearg = str(
@@ -2765,7 +2863,17 @@ class nddata(object):
                 + repr(type(arg))
             )
 
-    __matmul__ = MM_matmul
+    def __matmul__(self, arg):
+        if isinstance(arg, nddata_axis):
+            if len(arg.names) == 0:
+                raise ValueError(
+                    "Axis must have a name before it can be used for interpolation"
+                )
+            target = arg.names[0]
+            interpolated = self.interp(target, arg.to_array())
+            interpolated.setaxis(target, arg)
+            return interpolated
+        return MM_matmul(self, arg)
 
     def __mul__(self, arg):
         # {{{ do scalar multiplication
@@ -5039,16 +5147,36 @@ class nddata(object):
                 return retval
 
     def getaxis(self, axisname):
+        if (
+            isinstance(self.axis_coords, list)
+            and len(self.axis_coords) > 0
+            and axisname in self.dimlabels
+        ):
+            axis_value = self.axis_coords[self.axn(axisname)]
+            if axis_value is not None and not isinstance(axis_value, nddata_axis):
+                axis_obj = nddata_axis(axisname, axis_value)
+                axis_obj.names = [axisname] + [
+                    x for x in axis_obj.names if x != axisname
+                ]
+                if (
+                    isinstance(self.axis_coords_units, list)
+                    and len(self.axis_coords_units) > self.axn(axisname)
+                ):
+                    axis_obj.units = self.axis_coords_units[self.axn(axisname)]
+                self.coords[axisname] = axis_obj
+        if axisname in self.coords:
+            axis_obj = self.coords[axisname]
+            if axis_obj is None:
+                return None
+            return axis_obj.to_array()
         if self.axis_coords is None or len(self.axis_coords) == 0:
             return None
-        else:
-            retval = self.axis_coords[self.axn(axisname)]
+        retval = self.axis_coords[self.axn(axisname)]
         if retval is None:
             return None
-        elif len(retval) > 0:
+        if len(retval) > 0:
             return retval
-        else:
-            return None
+        return None
 
     def extend(self, axis, extent, fill_with=0, tolerance=1e-5):
         r"""Extend the (domain of the) dataset and fill with a pre-set value.
@@ -5241,19 +5369,29 @@ class nddata(object):
             value = np.linspace(0.0, value, self.axlen(axis))
         elif isinstance(value, list):
             value = np.array(value)
-        if self.axis_coords is None or len(self.axis_coords) == 0:
-            self.axis_coords = [None] * len(self.dimlabels)
-            self.axis_coords_error = [None] * len(self.dimlabels)
-        if value is None:
-            self.axis_coords[self.axn(axis)] = None
+        axis_index = self.axn(axis)
+        if isinstance(value, nddata_axis):
+            axis_obj = value
+        elif value is None:
+            axis_obj = None
         else:
-            a = len(value)
-            b = self.data.shape[self.axn(axis)]
-            assert a == b, (
-                "Along the axis %s, the length of the axis you passed (%d)"
-                " doesn't match the size of the data (%d)." % (axis, a, b)
-            )
-            self.axis_coords[self.axn(axis)] = value
+            axis_obj = nddata_axis(axis, value)
+        if axis_obj is not None:
+            if len(axis_obj.names) == 0 or axis_obj.names[0] != axis:
+                axis_obj.names = [axis] + [x for x in axis_obj.names if x != axis]
+            if axis_obj.size != self.data.shape[axis_index]:
+                raise AssertionError(
+                    "Along the axis %s, the length of the axis you passed (%d)"
+                    " doesn't match the size of the data (%d)."
+                    % (axis, axis_obj.size, self.data.shape[axis_index])
+                )
+            self.coords[axis] = axis_obj
+        else:
+            if axis in self.coords:
+                self.coords._axes.pop(axis)
+            if isinstance(self.axis_coords, list) and len(self.axis_coords) > 0:
+                self.axis_coords[axis_index] = None
+        self._sync_axis_lists_from_coords(self.coords)
         return self
 
     def shear(
