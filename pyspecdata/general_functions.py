@@ -26,7 +26,12 @@ def nicedef(self):
     candidates = [u for u in [Q_(j) for j in unit_list] if retval.check(u)]
     if len(candidates) > 0:
         retval = retval.to(candidates[0])
-    return retval.to_compact()
+    retval = retval.to_compact()
+    temp = np.log10(retval.magnitude)
+    if np.round(temp, 3) == np.round(temp):
+        retval = Q_(10 ** np.round(temp), retval.units)
+        retval = retval.to_compact()
+    return retval
 
 
 Q_.to_nice = nicedef
@@ -356,27 +361,43 @@ def render_matrix(arg, format_code="%.4g"):
     math_str = r"\begin{bmatrix}"
     math_str += "\n"
     if hasattr(arg.dtype, "fields") and arg.dtype.fields is not None:
-        math_str += "\\\\\n".join([
-            " & ".join([
-                ", ".join([
-                    (
-                        r"\text{" + f[0] + r'}\!=\!\text{"' + elem[f[0]] + '"}'
-                        if isinstance(elem[f[0]], str)
-                        else r"\text{%s}\!=\!%g" % (f[0], elem[f[0]])
-                    )
-                    for f in arg.dtype.descr
-                ])  # f[0] is the name (vs. size)
-                for elem in arg[k, :]
-            ])
-            for k in range(arg.shape[0])
-        ])
+        math_str += "\\\\\n".join(
+            [
+                " & ".join(
+                    [
+                        ", ".join(
+                            [
+                                (
+                                    r"\text{"
+                                    + f[0]
+                                    + r'}\!=\!\text{"'
+                                    + elem[f[0]]
+                                    + '"}'
+                                    if isinstance(elem[f[0]], str)
+                                    else r"\text{%s}\!=\!%g"
+                                    % (f[0], elem[f[0]])
+                                )
+                                for f in arg.dtype.descr
+                            ]
+                        )  # f[0] is the name (vs. size)
+                        for elem in arg[k, :]
+                    ]
+                )
+                for k in range(arg.shape[0])
+            ]
+        )
     else:
-        math_str += "\\\\\n".join([
-            " & ".join(
-                [complex_str(j, format_code=format_code) for j in arg[k, :]]
-            )
-            for k in range(arg.shape[0])
-        ])
+        math_str += "\\\\\n".join(
+            [
+                " & ".join(
+                    [
+                        complex_str(j, format_code=format_code)
+                        for j in arg[k, :]
+                    ]
+                )
+                for k in range(arg.shape[0])
+            ]
+        )
     math_str += "\n"
     math_str += r"\end{bmatrix}"
     return math_str
