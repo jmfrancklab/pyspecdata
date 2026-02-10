@@ -55,7 +55,7 @@ except Exception:
             a, b = args
         else:
             raise ValueError("I don't know what to do with more than 2 args!")
-        m = re.match(r"(.*)√(\w+)(.*)", b)
+        m = re.match(r"(.*)√(\w+)(.*)", str(b))
         if m:
             g1, g2, g3 = m.groups()
             b = g1 + f" {g2}" + "^{0.5} " + g3

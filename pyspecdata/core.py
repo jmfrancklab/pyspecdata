@@ -132,8 +132,13 @@ mu_B = 9.27400968e-24  # Bohr magneton
 epsilon_0 = 8.854187817e-12
 hbar = 6.6260695729e-34 / 2.0 / pi
 N_A = 6.02214179e23
-gammabar_H = 4.258e7
-gammabar_D = gammabar_H * 61.422391 / 400.13  # ratio from Bruker BF
+gammabar_H = 42.577478461e6
+gammabar_D = 6.536e6
+gammabar_O = -5.772e6
+gammabar_C = 10.7084e6
+gammabar_N = 3.077e6
+gammabar_Li = 16.546e6
+gammabar_F = 40.078e6
 gammabar_e = 2.807e10  # this is for a nitroxide
 
 
@@ -618,9 +623,9 @@ def plot(*args, **kwargs):
         # }}}
         if len(myy.data.shape) > 1 and longest_is_x:
             longest_dim = np.argmax(myy.data.shape)
-            all_but_longest = set(range(len(myy.data.shape))) ^ set((
-                longest_dim,
-            ))
+            all_but_longest = set(range(len(myy.data.shape))) ^ set(
+                (longest_dim,)
+            )
             if len(all_but_longest) > 0:
                 last_not_longest = max(all_but_longest)
             else:
@@ -632,9 +637,9 @@ def plot(*args, **kwargs):
             longest_dim = 0  # treat first as x, like before
             last_not_longest = -1
             if len(myy.data.shape) > 1:
-                all_but_longest = set(range(len(myy.data.shape))) ^ set((
-                    longest_dim,
-                ))
+                all_but_longest = set(range(len(myy.data.shape))) ^ set(
+                    (longest_dim,)
+                )
                 all_but_longest = list(all_but_longest)
             else:
                 all_but_longest = []
@@ -877,14 +882,16 @@ def plot(*args, **kwargs):
                         "\noptions",
                         newkwargs,
                         "of len",
-                        ", ".join([
-                            (
-                                str(type(j)) + " " + str(j)
-                                if np.isscalar(j)
-                                else str(len(j))
-                            )
-                            for j in list(newkwargs.values())
-                        ]),
+                        ", ".join(
+                            [
+                                (
+                                    str(type(j)) + " " + str(j)
+                                    if np.isscalar(j)
+                                    else str(len(j))
+                                )
+                                for j in list(newkwargs.values())
+                            ]
+                        ),
                     )
                 )
             if x_inverted:
@@ -926,14 +933,16 @@ def plot(*args, **kwargs):
                         for j in plotargs
                     ],
                     "\nsizes of np.ndarray kwargs",
-                    dict([
-                        (
-                            (j, np.shape(kwargs[j]))
-                            if isinstance(kwargs[j], np.ndarray)
-                            else (j, kwargs[j])
-                        )
-                        for j in list(kwargs.keys())
-                    ]),
+                    dict(
+                        [
+                            (
+                                (j, np.shape(kwargs[j]))
+                                if isinstance(kwargs[j], np.ndarray)
+                                else (j, kwargs[j])
+                            )
+                            for j in list(kwargs.keys())
+                        ]
+                    ),
                     "\narguments = ",
                     plotargs,
                     "\nkwargs =",
@@ -962,11 +971,13 @@ def plot(*args, **kwargs):
                 "\nsizes of arguments:",
                 [np.shape(j) for j in plotargs],
                 "\nsizes of np.ndarray kwargs:",
-                dict([
-                    (j, np.shape(kwargs[j]))
-                    for j in list(kwargs.keys())
-                    if isinstance(kwargs[j], np.ndarray)
-                ]),
+                dict(
+                    [
+                        (j, np.shape(kwargs[j]))
+                        for j in list(kwargs.keys())
+                        if isinstance(kwargs[j], np.ndarray)
+                    ]
+                ),
             )
         )
     # plt.grid(True)
@@ -1007,10 +1018,12 @@ def concat(datalist, dimname, chop=False):
     other_info_out = datalist[0].other_info
     if dimname in datalist[0].dimlabels:
         dim_idx = datalist[0].axn(dimname)
-        assert all([
-            datalist[j].dimlabels == datalist[0].dimlabels
-            for j in range(len(datalist))
-        ]), (
+        assert all(
+            [
+                datalist[j].dimlabels == datalist[0].dimlabels
+                for j in range(len(datalist))
+            ]
+        ), (
             "the dimlabels for all your datasets do no match and/or are not"
             " ordered the same way"
         )
@@ -2365,8 +2378,7 @@ class nddata(object):
                     raise TypeError(
                         "you passed two arguments, starting with a string."
                         " But, this was not followed by numpy array or scalar,"
-                        " but rather "
-                        + str(type(args[1]))
+                        " but rather " + str(type(args[1]))
                     )
             else:
                 raise RuntimeError(
@@ -2844,9 +2856,7 @@ class nddata(object):
                 raise ValueError(
                     strm(
                         "nothing but -1 and 2 supported yet! (you tried to"
-                        " raise to a power of "
-                        + repr(arg)
-                        + ")"
+                        " raise to a power of " + repr(arg) + ")"
                     )
                 )
             else:
@@ -3975,11 +3985,13 @@ class nddata(object):
         temp = list(self.data.shape)
         temp[thisaxis] = 1
         func_sig = inspect.signature(func)
-        numnonoptargs = len([
-            v.default
-            for v in func_sig.parameters.values()
-            if v.default == inspect.Parameter.empty
-        ])
+        numnonoptargs = len(
+            [
+                v.default
+                for v in func_sig.parameters.values()
+                if v.default == inspect.Parameter.empty
+            ]
+        )
         kwargnames = [
             k
             for k, v in func_sig.parameters.items()
@@ -4984,8 +4996,7 @@ class nddata(object):
         elif not hasattr(func, "__call__"):
             raise ValueError(
                 "I can't interpret the second argument as a function! It is"
-                " type "
-                + str(type(func))
+                " type " + str(type(func))
             )
         # I can't do the following for sympy, because the argument count is
         # always zero
@@ -5008,8 +5019,7 @@ class nddata(object):
                 "The sympy function that you passed doesn't match the"
                 " automatically generated axis variables (obtained by mapping"
                 " sympy.var onto the axis variables, without any kwargs). The"
-                " atoms left over are:\n"
-                + str(func.atoms)
+                " atoms left over are:\n" + str(func.atoms)
             )
         logging.debug(strm("at this point, list of axes is:", list_of_axes))
         if len(list_of_axes) == 0:
@@ -5435,8 +5445,7 @@ class nddata(object):
             dimstocollapse
         ) > 1, (
             "What?? You must try to collapse more than one dimension!! -- you"
-            " claim you want to collapse '%s'"
-            % str(dimstocollapse)
+            " claim you want to collapse '%s'" % str(dimstocollapse)
         )
         not_present = set(dimstocollapse) - set(self.dimlabels)
         if len(not_present) > 0:
@@ -5877,11 +5886,13 @@ class nddata(object):
             #     (i.e.  chunking off a new dimension based on) -- because I am
             #     independently manipulating the data, I don't use
             #     self.getaxis()
-            x_strip_current_field = self.axis_coords[axis_number][[
-                j
-                for j in self.axis_coords[axis_number].dtype.names
-                if j != which_field
-            ]]
+            x_strip_current_field = self.axis_coords[axis_number][
+                [
+                    j
+                    for j in self.axis_coords[axis_number].dtype.names
+                    if j != which_field
+                ]
+            ]
             # }}}
             # {{{ reshape the axis coordinate so that it becomes a 2D np.array
             #     with the new dimension chunked off
@@ -6037,8 +6048,7 @@ class nddata(object):
                 + which_field
                 + "' does not represent an axis that is repeated one or more"
                 " times!  The counts for how many times each element along"
-                " the field is used is "
-                + repr(index_count)
+                " the field is used is " + repr(index_count)
             )
             return
 
@@ -6105,8 +6115,7 @@ class nddata(object):
             if key.dtype is not np.dtype("bool"):
                 raise ValueError(
                     "I don't know what to do with an np.ndarray subscript that"
-                    " has dtype "
-                    + repr(key.dtype)
+                    " has dtype " + repr(key.dtype)
                 )
             if key.shape != self.data.shape:
                 raise ValueError(
@@ -6136,10 +6145,12 @@ class nddata(object):
                 j for j in shared_indices if j not in unshared_indices
             ]
             if len(val.dimlabels) != len(shared_indices) or (
-                not all([
-                    val.dimlabels[j] == shared_indices[j]
-                    for j in range(0, len(shared_indices))
-                ])
+                not all(
+                    [
+                        val.dimlabels[j] == shared_indices[j]
+                        for j in range(0, len(shared_indices))
+                    ]
+                )
             ):
                 val.reorder(shared_indices)
             # }}}
@@ -6451,8 +6462,7 @@ class nddata(object):
                 if A.dtype is not np.dtype("bool"):
                     raise ValueError(
                         "I don't know what to do with an np.ndarray subscript"
-                        " that has dtype "
-                        + repr(A.dtype)
+                        " that has dtype " + repr(A.dtype)
                     )
                 if A.shape != self.data.shape:
                     temp = np.array(A.shape) == 1
@@ -6794,10 +6804,12 @@ class nddata(object):
                         args[j],
                         "I expected a 'dimname':(range_start,range_stop)",
                     )
-                    assert all([
-                        isinstance(j, numbers.Number) or j is None
-                        for j in target
-                    ]), f"one of {target} is not a number!"
+                    assert all(
+                        [
+                            isinstance(j, numbers.Number) or j is None
+                            for j in target
+                        ]
+                    ), f"one of {target} is not a number!"
                     if len(target) == 1:
                         sensible_list.append(
                             (hash("range"), dimname, target[0], None)
@@ -6902,8 +6914,7 @@ class nddata(object):
                             + " selection, but to do that, your axis"
                             " coordinates need to"
                             + " be labeled! (The axis coordinates of"
-                            f" {thisdim} aren't"
-                            + " labeled)"
+                            f" {thisdim} aren't" + " labeled)"
                         )
                     temp = np.diff(axesdict[thisdim])
                     if not all(temp * np.sign(temp[0]) > 0):
@@ -7062,8 +7073,7 @@ class nddata(object):
                             + " selection, but to do that, your axis"
                             " coordinates need to"
                             + " be labeled! (The axis coordinates of"
-                            f" {thisdim} aren't"
-                            + " labeled)"
+                            f" {thisdim} aren't" + " labeled)"
                         )
                     temp = abs(axesdict[thisdim] - thisargs[0]).argmin()
                     slicedict[thisdim] = temp
@@ -7215,6 +7225,7 @@ class nddata(object):
                 state,
                 use_pytables_hack=getattr(self, "_pytables_hack", False),
             )
+
     # }}}
 
 
@@ -7295,9 +7306,7 @@ class ndshape(ndshape_base):
                         "You passed a type of "
                         + repr(dtype)
                         + ", which was likely not understood (you also passed"
-                        " a shape of "
-                        + repr(tuple(self.shape))
-                        + ")"
+                        " a shape of " + repr(tuple(self.shape)) + ")"
                     )
             elif format == 1:
                 emptyar = np.ones(tuple(self.shape), dtype=dtype)
@@ -7407,14 +7416,16 @@ class fitdata(nddata):
         if isinstance(set, dict):
             set_to = list(set.values())
             set = list(set.keys())
-        solution_list = dict([
-            (
-                (self.symbolic_dict[k], set_to[j])
-                if k in set
-                else (self.symbolic_dict[k], self.output(k))
-            )
-            for j, k in enumerate(self.symbol_list)
-        ])  # load into the solution list
+        solution_list = dict(
+            [
+                (
+                    (self.symbolic_dict[k], set_to[j])
+                    if k in set
+                    else (self.symbolic_dict[k], self.output(k))
+                )
+                for j, k in enumerate(self.symbol_list)
+            ]
+        )  # load into the solution list
         number_of_i = len(xvals)
         parameters = self._active_symbols()
         mydiff_sym = [[]] * len(self.symbolic_vars)
@@ -7435,10 +7446,12 @@ class fitdata(nddata):
                     )
                 )
             try:
-                fprime[j, :] = np.array([
-                    complex(mydiff.subs(x, xvals[k]))
-                    for k in range(0, len(xvals))
-                ])
+                fprime[j, :] = np.array(
+                    [
+                        complex(mydiff.subs(x, xvals[k]))
+                        for k in range(0, len(xvals))
+                    ]
+                )
             except ValueError:
                 raise ValueError(
                     strm(
