@@ -27,10 +27,15 @@ def nicedef(self):
     if len(candidates) > 0:
         retval = retval.to(candidates[0])
     retval = retval.to_compact()
+    # {{{ if relatively close to an order of magnitude, assume that's correct
     temp = np.log10(retval.magnitude)
-    if np.round(temp, 3) == np.round(temp):
+    if np.round(temp, 4) == np.round(temp):
         retval = Q_(10 ** np.round(temp), retval.units)
         retval = retval.to_compact()
+    temp = np.log10(retval.magnitude)
+    if np.round(temp, 4) == np.round(temp):
+        retval = Q_(10 ** np.round(temp), retval.units)
+    # }}}
     return retval
 
 
