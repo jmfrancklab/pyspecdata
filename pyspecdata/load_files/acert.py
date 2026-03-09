@@ -159,7 +159,7 @@ def load_pulse(filename,
                     else:
                         raise ValueError('The fields have some weird/inconsistent spacing')
             if data.getaxis('bin').dtype.names == ('bin_switch_times',):
-                data.setaxis('bin',data.getaxis('bin')['bin_switch_times'])
+                data.set_axis('bin',data.getaxis('bin')['bin_switch_times'])
                 data.set_units('bin','s')
         #}}}
         #{{{ it always makes sense to put the phase cycle on the outside
@@ -234,8 +234,8 @@ def postproc_echo_T2(data):
     if data.get_prop('phasecycle') is None:
         warnings.warn("Warning!  There is no phase cycling information -- you should really fix this")
         data.chunk('phcyc',['phcyc2','phcyc1']) # the second pulse is on the outside, and the first pulse is on the inside
-        data.setaxis('phcyc1',r_[0:1:4j])
-        data.setaxis('phcyc2',r_[0:1:4j])
+        data.set_axis('phcyc1',r_[0:1:4j])
+        data.set_axis('phcyc2',r_[0:1:4j])
         data.ift('phcyc1') # remember from 2889 that I have to ift
         data.ift('phcyc2')
     else:
@@ -358,7 +358,7 @@ def automagical_phasecycle(data,verbose = False):
         logger.info(strm(j))
     logger.info(strm(ndshape(data)))
     #{{{ actually assign and chunk the phase cycle dimension
-    data.setaxis('phcyc',phase_cycles)
+    data.set_axis('phcyc',phase_cycles)
     sorted_indeces = argsort(phase_cycles)
     logger.info(strm('sorted indeces are',sorted_indeces))
     data = data['phcyc',sorted_indeces]
@@ -374,6 +374,6 @@ def automagical_phasecycle(data,verbose = False):
     #}}}
     for j in phase_cycles.dtype.names:
         x = data.getaxis(j)
-        data.setaxis(j,r_[0:1:1j*len(x)])
+        data.set_axis(j,r_[0:1:1j*len(x)])
         data.ift(j)
     return data

@@ -57,6 +57,6 @@ def inhomog_coords(self, direct_dim, indirect_dim, tolerance = 1e-5,
     newdata = self[direct_dim,lambda x: x>=0]
     newdata += left_data[direct_dim,lambda x: x>=0]
     self.data = newdata.data
-    self.setaxis(direct_dim,newdata.getaxis(direct_dim))
+    self.set_axis(direct_dim,newdata.getaxis(direct_dim))
     print("At END: first point along t2",self.getaxis(direct_dim)[0])
     return self

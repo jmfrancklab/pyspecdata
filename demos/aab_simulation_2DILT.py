@@ -206,8 +206,8 @@ for tau_1_index in range(shape(data_proj)[0]):
 
 nd_proj = nddata(data_proj,['N1','N2'])
 nd_proj.name('Projected data')
-nd_proj.setaxis('N1',s.getaxis(r'$\tau_{1}$')).rename('N1',r'$\tau_{1}$')
-nd_proj.setaxis('N2',s.getaxis(r'$\tau_{2}$')).rename('N2',r'$\tau_{2}$')
+nd_proj.set_axis('N1',s.getaxis(r'$\tau_{1}$')).rename('N1',r'$\tau_{1}$')
+nd_proj.set_axis('N2',s.getaxis(r'$\tau_{2}$')).rename('N2',r'$\tau_{2}$')
 nd_proj.meshplot(cmap=cm.viridis)
 
 # Generate compressed data, plot
@@ -502,8 +502,8 @@ nd_solution = nddata(solution,[r'log$(T_{1})$',r'log$(T_{2})$'])
 
 # Labelling axes, titles
 
-nd_solution.setaxis(r'log$(T_{1})$',log_Nx_ax.copy())
-nd_solution.setaxis(r'log$(T_{2})$',log_Ny_ax.copy())
+nd_solution.set_axis(r'log$(T_{1})$',log_Nx_ax.copy())
+nd_solution.set_axis(r'log$(T_{2})$',log_Ny_ax.copy())
 print(ndshape(nd_solution))
 print(ndshape(log_rho))
 

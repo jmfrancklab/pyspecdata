@@ -39,7 +39,7 @@ d = psd.find_file("Power.*Sat.*200303",
         exp_type='francklab_esr/Sam')
 d.chunk_auto('harmonic','phase')
 plt.figure(2)
-psd.image(d['harmonic',0]['phase',0].C.setaxis('Microwave Power','#').set_units('Microwave Power','scan #'))
+psd.image(d['harmonic',0]['phase',0].C.set_axis('Microwave Power','#').set_units('Microwave Power','scan #'))
 plt.title("2D Power Saturation")
 plt.gca().set_aspect('auto')
 plt.show()

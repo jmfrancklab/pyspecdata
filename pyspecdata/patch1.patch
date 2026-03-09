@@ -624,7 +624,7 @@ index d4e6de0..2b9f76f 100644
              try:
 @@ -4974,7 +4968,7 @@ class nddata (object):
              self.data = values
-             self.setaxis(axis,cdata)
+             self.set_axis(axis,cdata)
              return self
 -    def contiguous(self,lambdafunc,axis = None,verbose = False):
 +    def contiguous(self,lambdafunc,axis = None):
@@ -695,7 +695,7 @@ index d4e6de0..2b9f76f 100644
          self.data = newdata
          #}}}
 @@ -5830,7 +5823,7 @@ class nddata (object):
-                 self.setaxis(axesout[j],new_axes[j])
+                 self.set_axis(axesout[j],new_axes[j])
                  self.set_units(axesout[j],orig_axis_units)
          return self
 -    def chunk_auto(self,axis_name,which_field,verbose = False,dimname = None):
@@ -906,7 +906,7 @@ index d4e6de0..2b9f76f 100644
 -        logger.info(strm(r"\begin{verbatim}trying to generate",self.function_string,'\n',printfstring,'\n',[allsymb[x] for x in argsort(locations)],'\n',printfargs,r'\end{verbatim}'))
 +        logger.debug(strm(r"\begin{verbatim}trying to generate",self.function_string,'\n',printfstring,'\n',[allsymb[x] for x in argsort(locations)],'\n',printfargs,r'\end{verbatim}'))
          return printfstring%tuple(printfargs)
-     def settoguess(self):
+     def set_to_guess(self):
          'a debugging function, to easily plot the initial guess'
 @@ -7381,7 +7369,7 @@ class fitdata(nddata):
                          recordlist[runno][name] = thiscopy.output(name)

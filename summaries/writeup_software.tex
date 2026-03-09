@@ -926,8 +926,8 @@ for j in range(0,len(file_info)): # loop over the different records
     # next, I need to convert from experiments to seconds
     data.rename(r'exp #','t')
     nexp = data.getaxis('t').max()
-    #data.setaxis('t',data.getaxis('t').copy()*double(thisfile['total_min'])*60/nexp)
-    data.setaxis('t',double(thisfile['total_min'])*60)
+    #data.set_axis('t',data.getaxis('t').copy()*double(thisfile['total_min'])*60/nexp)
+    data.set_axis('t',double(thisfile['total_min'])*60)
     data.set_error(None) # finally, let's just ignore the error bars for now
     data = 1.-data # convert to 1-E
     plot(data)
@@ -1150,8 +1150,8 @@ for j in range(0,len(file_info)): # loop over the different records
     # next, I need to convert from experiments to seconds
     data.rename(r'exp #','t')
     nexp = data.getaxis('t').max()
-    #data.setaxis('t',data.getaxis('t').copy()*double(thisfile['total_min'])*60/nexp)
-    data.setaxis('t',double(thisfile['total_min'])*60)
+    #data.set_axis('t',data.getaxis('t').copy()*double(thisfile['total_min'])*60/nexp)
+    data.set_axis('t',double(thisfile['total_min'])*60)
     data.set_error(None) # finally, let's just ignore the error bars for now
     data = 1.-data # convert to 1-E
     plot(data)
@@ -2912,7 +2912,7 @@ def generate_corrected_amplitudes(iteration,threshold):
             transfer_function.name('$P_{out}$')
             transfer_function.rename('t2','$P_{in}$')
             for k in range(0,ndshape(transfer_function)['attenuation']):
-                transfer_function.setaxis('$P_{in}$',P_in['attenuation',k].data)
+                transfer_function.set_axis('$P_{in}$',P_in['attenuation',k].data)
                 fl.plot(transfer_function['attenuation',k],'.')
 for iteration in range(11):
     generate_corrected_amplitudes(iteration,5e-3)
@@ -3340,7 +3340,7 @@ This evaluates the initial guess along the fit axis.
 \ntd{how is the fit axis determined,
     and is it possible to fit
     if the data has more than one dimension?}
-\paragraph{instance.settoguess()}
+\paragraph{instance.set_to_guess()}
 This function is for {\bf debugging purposes only}.
 This works similar to {\tt instance.fit(\ldots)},
     except that it sets the ``fit result'' to the initial guess,

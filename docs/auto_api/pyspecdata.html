@@ -279,7 +279,7 @@ and whose values are <code class="xref py py-class docutils literal notranslate"
 or
 <cite>example_nddata.axes[‘t2’] = ax_[0:1.2:0.01]</cite>
 (uses the same notation as numpy <cite>r_[…]</cite>)</p>
-<p>this takes the place of <cite>labels</cite> or <cite>setaxis</cite> in old versions of pyspecdata.</p>
+<p>this takes the place of <cite>labels</cite> or <cite>set_axis</cite> in old versions of pyspecdata.</p>
 </dd>
 <dt>associating an existing axis</dt><dd><p><cite>example_nddata.axes += existing_axis</cite> <cite>existing_axis</cite> <strong>must</strong> have a
 name or alias that matches one of <cite>example_nddata.dimlabels</cite>.</p>
@@ -875,8 +875,8 @@ must be sympy symbols</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyspecdata.core.fitdata.settoguess">
-<span class="sig-name descname"><span class="pre">settoguess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.settoguess" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.set_to_guess">
+<span class="sig-name descname"><span class="pre">set_to_guess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.set_to_guess" title="Link to this definition">¶</a></dt>
 <dd><p>a debugging function, to easily plot the initial guess</p>
 </dd></dl>
 
@@ -2447,14 +2447,14 @@ operation</p></li>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyspecdata.core.nddata.setaxis">
-<span class="sig-name descname"><span class="pre">setaxis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.setaxis" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.core.nddata.set_axis">
+<span class="sig-name descname"><span class="pre">set_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.set_axis" title="Link to this definition">¶</a></dt>
 <dd><p>set or alter the value of the coordinate axis</p>
 <p>Can be used in one of several ways:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">self.setaxis('axisname',</span> <span class="pre">values)</span></code>: just sets the values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">self.set_axis('axisname',</span> <span class="pre">values)</span></code>: just sets the values</p></li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">self.setaxis('axisname',</span> <span class="pre">'#')</span></code>: just</dt><dd><p>number the axis in numerically increasing order,
+<dt><code class="docutils literal notranslate"><span class="pre">self.set_axis('axisname',</span> <span class="pre">'#')</span></code>: just</dt><dd><p>number the axis in numerically increasing order,
 with integers,
 (e.g. if you have smooshed it from a couple
 other dimensions.)</p>
@@ -4659,8 +4659,8 @@ guesses, or as the kwargs themselves (i.e.
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.settoguess">
-<span class="sig-name descname"><span class="pre">settoguess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.settoguess" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.set_to_guess">
+<span class="sig-name descname"><span class="pre">set_to_guess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.set_to_guess" title="Link to this definition">¶</a></dt>
 <dd><p>a debugging function, to easily plot the initial guess</p>
 </dd></dl>
 
@@ -6431,8 +6431,8 @@ must be sympy symbols</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyspecdata.fitdata.settoguess">
-<span class="sig-name descname"><span class="pre">settoguess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fitdata.settoguess" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fitdata.set_to_guess">
+<span class="sig-name descname"><span class="pre">set_to_guess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fitdata.set_to_guess" title="Link to this definition">¶</a></dt>
 <dd><p>a debugging function, to easily plot the initial guess</p>
 </dd></dl>
 
@@ -6940,8 +6940,8 @@ guesses, or as the kwargs themselves (i.e.
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyspecdata.lmfitdata.settoguess">
-<span class="sig-name descname"><span class="pre">settoguess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.settoguess" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.set_to_guess">
+<span class="sig-name descname"><span class="pre">set_to_guess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.set_to_guess" title="Link to this definition">¶</a></dt>
 <dd><p>a debugging function, to easily plot the initial guess</p>
 </dd></dl>
 
@@ -6975,7 +6975,7 @@ decorator)</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QWidget</span></code></p>
 <p>Qt UI for exploring lmfit parameters on a pyspecdata.lmfitdata.</p>
 <p>Pass the lmfitdata object <code class="docutils literal notranslate"><span class="pre">d</span></code> to <code class="docutils literal notranslate"><span class="pre">__init__</span></code>. The top area embeds a
-Matplotlib Axes plotting <code class="docutils literal notranslate"><span class="pre">d.settoguess().eval()</span></code> via <code class="docutils literal notranslate"><span class="pre">pyspecdata.plot</span></code>.</p>
+Matplotlib Axes plotting <code class="docutils literal notranslate"><span class="pre">d.set_to_guess().eval()</span></code> via <code class="docutils literal notranslate"><span class="pre">pyspecdata.plot</span></code>.</p>
 <dl class="simple">
 <dt>Below that:</dt><dd><ul class="simple">
 <li><p>A <em>parameter checkbox grid</em> (alpha-sorted). Checking a box sets
@@ -9022,14 +9022,14 @@ operation</p></li>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyspecdata.nddata.setaxis">
-<span class="sig-name descname"><span class="pre">setaxis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.setaxis" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.nddata.set_axis">
+<span class="sig-name descname"><span class="pre">set_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.set_axis" title="Link to this definition">¶</a></dt>
 <dd><p>set or alter the value of the coordinate axis</p>
 <p>Can be used in one of several ways:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">self.setaxis('axisname',</span> <span class="pre">values)</span></code>: just sets the values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">self.set_axis('axisname',</span> <span class="pre">values)</span></code>: just sets the values</p></li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">self.setaxis('axisname',</span> <span class="pre">'#')</span></code>: just</dt><dd><p>number the axis in numerically increasing order,
+<dt><code class="docutils literal notranslate"><span class="pre">self.set_axis('axisname',</span> <span class="pre">'#')</span></code>: just</dt><dd><p>number the axis in numerically increasing order,
 with integers,
 (e.g. if you have smooshed it from a couple
 other dimensions.)</p>

@@ -83,7 +83,7 @@ with figlist_var() as fl:
     bg_data = dataWKBSA[list_of_runs[background]]
     all_data = concat(
         [dataWKBSA[list_of_runs[k]] - bg_data for k in conc_labels], "concentration"
-    ).setaxis("concentration", conc_values)
+    ).set_axis("concentration", conc_values)
     # }}}
     # {{{ now, gather the data in to a 2D array, so that I can just average the peak and plot the calibration curve
     A280 = all_data[wv:wv_range].mean(wv)

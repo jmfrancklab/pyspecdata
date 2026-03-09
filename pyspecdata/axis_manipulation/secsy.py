@@ -69,5 +69,5 @@ def secsy_transform(self,
             else:
                 newdata = self[thisaxis:(0.,)] 
                 self.data = newdata.data
-                self.setaxis(thisaxis,newdata.getaxis(thisaxis))
+                self.set_axis(thisaxis,newdata.getaxis(thisaxis))
     return self

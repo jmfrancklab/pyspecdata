@@ -46,7 +46,7 @@ with psd.figlist_var() as fl:
         """show the guess and the fit -- group as a function so we're sure we
         do this consistently"""
         fl.next("fit with guess")
-        fitinst.settoguess()
+        fitinst.set_to_guess()
         guess_line = fl.plot(
             fitinst.eval(100), ":", alpha=0.5, label=f"{thislabel} guess"
         )

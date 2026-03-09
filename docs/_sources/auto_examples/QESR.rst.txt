@@ -261,10 +261,10 @@ very nice package for handling units.
             fl.next("for baseline")
             fl.plot(d_baseline, '.', alpha=0.3, human_units=False)
             middle_field = np.diff(d_baseline.getaxis(fieldaxis)[r_[0,-1]]).item()
-            d_baseline.setaxis(fieldaxis, lambda x: x-middle_field)
+            d_baseline.set_axis(fieldaxis, lambda x: x-middle_field)
             c = d_baseline.polyfit(fieldaxis, order=7)
-            polybaseline = d.fromaxis(fieldaxis).setaxis(fieldaxis, lambda x: x-middle_field).eval_poly(c,fieldaxis)
-            polybaseline.setaxis(fieldaxis, lambda x: x+middle_field)
+            polybaseline = d.fromaxis(fieldaxis).set_axis(fieldaxis, lambda x: x-middle_field).eval_poly(c,fieldaxis)
+            polybaseline.set_axis(fieldaxis, lambda x: x+middle_field)
             fl.plot(polybaseline, alpha=0.5, human_units=False)
             fl.next("absorption, with baseline")
             d_abs -= polybaseline

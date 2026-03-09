@@ -14,5 +14,5 @@ def ftshift(self,axis,value):
             f='current')
     #self.set_ft_prop(axis,['freq_not_aliased'])
     self.ift(axis)
-    self.setaxis('t',lambda x: x+value)
+    self.set_axis('t',lambda x: x+value)
     return self

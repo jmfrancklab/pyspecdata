@@ -16,7 +16,7 @@ class axis_collection(object):
         `example_nddata.axes['t2'] = ax_[0:1.2:0.01]`
         (uses the same notation as numpy `r_[…]`)
 
-        this takes the place of `labels` or `setaxis` in old versions of pyspecdata.
+        this takes the place of `labels` or `set_axis` in old versions of pyspecdata.
 
     associating an existing axis
         `example_nddata.axes += existing_axis` `existing_axis` **must** have a

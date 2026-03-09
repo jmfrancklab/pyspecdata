@@ -45,7 +45,7 @@ print(true_F.shape)
 
 M = K @ true_F  # the fake data
 print(M.shape)
-# M.setaxis('vd',y_axis)
+# M.set_axis('vd',y_axis)
 M.add_noise(0.2)
 M /= 0.2  # this is key -- make sure that the noise variance is 1, for BRD
 

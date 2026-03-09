@@ -80,7 +80,7 @@ def fake_data(
     # {{{ control the spectral density of the shifts to be gaussian
     frq_noise = nddata(frq_noise, [-1], ["temp"])
     N = ndshape(frq_noise)["temp"]
-    frq_noise.setaxis("temp", -0.5 + np.r_[0:N] / N).set_units(
+    frq_noise.set_axis("temp", -0.5 + np.r_[0:N] / N).set_units(
         "temp", "cycperscan"
     )
     SD_gen = zip(SD_sigma, SD_amp)
@@ -118,7 +118,7 @@ def fake_data(
     for j in signal_pathway.keys():
         data.ft(j, unitary=True)
     fl.pop_marker()
-    data.setaxis(direct, data.getaxis(direct))
+    data.set_axis(direct, data.getaxis(direct))
     data.ft(direct, shift=True)
     data.ift(direct)
     data.register_axis({direct: 0})

@@ -54,7 +54,7 @@ with figlist_var() as fl:
     )
     # }}}
     fl.next("fit with guess")
-    lmfitdata_instance.settoguess()
+    lmfitdata_instance.set_to_guess()
     guess_line = fl.plot(
         lmfitdata_instance.eval(100), ":", alpha=0.5, label="fitdata guess"
     )

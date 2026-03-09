@@ -20,7 +20,7 @@ class lmfitdataGUI(QtWidgets.QWidget):
     """Qt UI for exploring lmfit parameters on a pyspecdata.lmfitdata.
 
     Pass the lmfitdata object ``d`` to ``__init__``. The top area embeds a
-    Matplotlib Axes plotting ``d.settoguess().eval()`` via ``pyspecdata.plot``.
+    Matplotlib Axes plotting ``d.set_to_guess().eval()`` via ``pyspecdata.plot``.
 
     Below that:
       • A *parameter checkbox grid* (alpha-sorted). Checking a box sets
@@ -326,7 +326,7 @@ class lmfitdataGUI(QtWidgets.QWidget):
             self.ax.set_facecolor("none")
         except Exception:
             pass
-        y = self.d.settoguess().eval()
+        y = self.d.set_to_guess().eval()
         if not hasattr(self, "data_forcomp"):
             # NOTE: this should be converted to a function that we feed
             #       NO -- solved by assymetric transform

@@ -30,7 +30,7 @@ logger.info(strm("Functional Form:", thisfit.functional_form))
 #     the true values are a guess, and then outputting the guess data
 true_values = {"A": 14.0, "period": 5.4321, "shift": 0.12345, "decay": 0.01000}
 thisfit.set_guess(true_values)
-thisfit.settoguess()
+thisfit.set_to_guess()
 mydata = thisfit.eval()
 mydata.add_noise(2.8)
 # }}}
@@ -43,7 +43,7 @@ newfit.set_guess(
     period=dict(value=2, max=10),
     decay=dict(value=0.02, max=0.10, min=0.00),
 )
-newfit.settoguess()
+newfit.set_to_guess()
 guess = newfit.eval(100)
 # }}}
 # {{{ run the fit and generate nddata

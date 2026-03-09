@@ -258,7 +258,7 @@ This evaluates the initial guess along the fit axis.
     how is the fit axis determined, and is it possible to fit if the
     data has more than one dimension?
 
-instance.settoguess()
+instance.set_to_guess()
 ^^^^^^^^^^^^^^^^^^^^^
 
 This function is for **debugging purposes only**. This works similar to

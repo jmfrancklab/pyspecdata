@@ -29,7 +29,7 @@ def test_voltage_times_current_yields_power_units():
 
 def test_fourier_transform_updates_time_units_to_frequency():
     d = nddata(np.ones(8), "t")
-    d.setaxis("t", np.linspace(0.0, 7.0, 8))
+    d.set_axis("t", np.linspace(0.0, 7.0, 8))
     d.set_units("t", "µs")
     d.ft("t")
     assert d.get_units("t") == "MHz"
