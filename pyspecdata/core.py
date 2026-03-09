@@ -1721,8 +1721,8 @@ class nddata(object):
             Z = Z[:, ::-1]
         if downsample_self:
             self.data = sortedself.data
-            self.setaxis(self.dimlabels[0], x_axis)
-            self.setaxis(self.dimlabels[1], y_axis)
+            self.set_axis(self.dimlabels[0], x_axis)
+            self.set_axis(self.dimlabels[1], y_axis)
         if also1d:
             if invert:
                 return X, Y, Z, x_axis[::-1], y_axis[::-1]
@@ -3342,7 +3342,7 @@ class nddata(object):
             B_sigma = B.get_error()
             B_sigma = 1 if B_sigma is None else B_sigma
         self.data = np.angle(A.data / B.data) / 2 / pi / dt
-        self.setaxis(axis, A.getaxis(axis))
+        self.set_axis(axis, A.getaxis(axis))
         if return_error:
             self.set_error(
                 sqrt(
@@ -3420,7 +3420,7 @@ class nddata(object):
         """
         if npts:
             temp = np.linspace(self[axis][0], self[axis][-1], npts)
-            thisaxis = nddata(temp.copy(), [-1], [axis]).setaxis(axis, temp)
+            thisaxis = nddata(temp.copy(), [-1], [axis]).set_axis(axis, temp)
         else:
             thisaxis = self.fromaxis(axis)
         result = 0
@@ -3815,7 +3815,7 @@ class nddata(object):
         else:
             trans = True
         self.data = np.cov(self.data, rowvar=trans)
-        self.setaxis(along_dim, self.getaxis(var_dim).copy())
+        self.set_axis(along_dim, self.getaxis(var_dim).copy())
 
         def add_subscript(start, sub):
             ismath = re.compile(r"\$(.*)\$")
@@ -4209,12 +4209,12 @@ class nddata(object):
             else:
                 self = self[thisaxisname, 0:-temp]
         thisaxis = nddata(self.getaxis(thisaxisname), [-1], [thisaxisname])
-        self.setaxis(thisaxisname, [])
+        self.set_axis(thisaxisname, [])
         self.chunkoff(thisaxisname, ["avg"], [decimation])
         self.run(np.mean, "avg")
         thisaxis.chunkoff(thisaxisname, ["avg"], [decimation])
         thisaxis.run(np.mean, "avg")
-        self.setaxis(thisaxisname, thisaxis.data)
+        self.set_axis(thisaxisname, thisaxis.data)
         return self
 
     def spline_lambda(self, s_multiplier=None):
@@ -4255,7 +4255,7 @@ class nddata(object):
                 lambda x: nddata(
                     myspline_re(x) + 1j * myspline_im(x), self.dimlabels[0]
                 )
-                .setaxis(self.dimlabels[0], x)
+                .set_axis(self.dimlabels[0], x)
                 .set_units(
                     self.dimlabels[0], self.get_units(self.dimlabels[0])
                 )
@@ -4265,7 +4265,7 @@ class nddata(object):
         else:
             nddata_lambda = (
                 lambda x: nddata(myspline_re(x), self.dimlabels[0])
-                .setaxis(self.dimlabels[0], x)
+                .set_axis(self.dimlabels[0], x)
                 .set_units(
                     self.dimlabels[0], self.get_units(self.dimlabels[0])
                 )
@@ -4370,7 +4370,7 @@ class nddata(object):
         rdata = local_interp_func(rdata)
         idata = local_interp_func(idata)
         self.data = rdata + 1j * idata
-        self.setaxis(axis, axisvalues_final)
+        self.set_axis(axis, axisvalues_final)
         if thiserror is not None:
             rerrvar = local_interp_func(
                 rerrvar, kind="linear"
@@ -4445,7 +4445,7 @@ class nddata(object):
             return retval
         else:
             self.data = values
-            self.setaxis(axis, cdata)
+            self.set_axis(axis, cdata)
             return self
 
     def contiguous(self, lambdafunc, axis=None, return_idx=False):
@@ -4593,15 +4593,15 @@ class nddata(object):
             )  # this fourier transforms along t2, overwriting the data that
             #    was in self
         if axis == "t2":
-            self.setaxis(axis, lambda x: x - tms_hz)
-            self.setaxis(axis, lambda x: x / SF)
+            self.set_axis(axis, lambda x: x - tms_hz)
+            self.set_axis(axis, lambda x: x / SF)
             self.set_units(axis, "ppm")
             self.set_prop("x_inverted", True)
         elif axis == "t1":
-            self.setaxis(axis, lambda x: x / sfo1)
+            self.set_axis(axis, lambda x: x / sfo1)
             self.set_units(axis, "ppm")
             max_ppm = self.getaxis(axis).max()
-            self.setaxis(axis, lambda x: (x - max_ppm + offset))
+            self.set_axis(axis, lambda x: (x - max_ppm + offset))
             self.set_prop("y_inverted", True)
         return self
 
@@ -4759,7 +4759,7 @@ class nddata(object):
             )
         for j in range(0, len(listofstrings)):
             if listofaxes[j] is None:
-                self.setaxis(listofstrings[j], None)
+                self.set_axis(listofstrings[j], None)
             else:
                 # {{{ test that the axis is the right size
                 if np.isscalar(listofaxes[j]):  # interpret as a timestep
@@ -4790,7 +4790,7 @@ class nddata(object):
                         )
                     )
                 # }}}
-                self.setaxis(listofstrings[j], listofaxes[j])
+                self.set_axis(listofstrings[j], listofaxes[j])
         return self
 
     def check_axis_coords_errors(self):
@@ -4826,7 +4826,7 @@ class nddata(object):
                 thisax = other.getaxis(thisdim)
                 if thisax is not None:
                     thisax = thisax.copy()
-                self.setaxis(thisdim, thisax)
+                self.set_axis(thisdim, thisax)
                 if other.get_error(thisdim) is not None:
                     self.set_error(thisdim, np.copy(other.get_error(thisdim)))
                 if other.get_units(thisdim) is not None:
@@ -4924,7 +4924,7 @@ class nddata(object):
                     # object
                     retval = nddata(
                         axis_data, axis_data.shape, [axisname]
-                    ).setaxis(axisname, np.copy(axis_data))
+                    ).set_axis(axisname, np.copy(axis_data))
                     retval.set_units(axisname, self.get_units(axisname))
                     retval.data_units = self.data_units
                     retval.name(self.name())
@@ -5151,7 +5151,7 @@ class nddata(object):
         # }}}
         # construct the new axis
         new_u = u[0] + du * r_[start_index:stop_index]
-        self.setaxis(axis, new_u)
+        self.set_axis(axis, new_u)
         if start_index < 0:
             # if we are extending to negative values, we need to inform
             # the FT machinery!
@@ -5162,12 +5162,15 @@ class nddata(object):
         return self
 
     def setaxis(self, *args):
+        return self.set_axis(*args)
+
+    def set_axis(self, *args):
         """set or alter the value of the coordinate axis
 
         Can be used in one of several ways:
 
-        * ``self.setaxis('axisname', values)``: just sets the values
-        * ``self.setaxis('axisname', '#')``: just
+        * ``self.set_axis('axisname', values)``: just sets the values
+        * ``self.set_axis('axisname', '#')``: just
             number the axis in numerically increasing order,
             with integers,
             (e.g. if you have smooshed it from a couple
@@ -5180,7 +5183,7 @@ class nddata(object):
         if len(args) == 2:
             axis, value = args
             if np.isscalar(value) and value == "#":
-                self.setaxis(axis, r_[0 : ndshape(self)[axis]])
+                self.set_axis(axis, r_[0 : ndshape(self)[axis]])
                 return self
         elif len(args) == 1 and issympy(args[0]):
             func = args[0]
@@ -5233,7 +5236,7 @@ class nddata(object):
             axis = axis[0]
         else:
             raise ValueError(
-                "not a valid argument to setaxis -- look at the documentation!"
+                "not a valid argument to set_axis -- look at the documentation!"
             )
         if axis == "INDEX":
             raise ValueError(
@@ -5816,7 +5819,7 @@ class nddata(object):
         self.dimlabels = newnames
         if new_axes is not None:
             for j in range(len(axesout)):
-                self.setaxis(axesout[j], new_axes[j])
+                self.set_axis(axesout[j], new_axes[j])
                 self.set_units(axesout[j], orig_axis_units)
         return self
 
@@ -6130,7 +6133,7 @@ class nddata(object):
             return
         elif isinstance(key, str):
             logger.debug("setting the axis")
-            self.setaxis(key, val)
+            self.set_axis(key, val)
             return self
         if isinstance(val, nddata):
             logger.debug(
@@ -6430,7 +6433,7 @@ class nddata(object):
             newdata.data = newdata.data[mask]
             if len(newdata.dimlabels) == 1:
                 x = newdata.getaxis(newdata.dimlabels[0])
-                newdata.setaxis(newdata.dimlabels[0], x[mask])
+                newdata.set_axis(newdata.dimlabels[0], x[mask])
             else:
                 raise ValueError(
                     "I don't know how to do this for multidimensional data"
@@ -6453,7 +6456,7 @@ class nddata(object):
                         " dimension"
                     )
                 else:
-                    self.setaxis(
+                    self.set_axis(
                         nonsingleton[0],
                         self.getaxis(nonsingleton[0])[A.data.flatten()],
                     )
@@ -7950,6 +7953,9 @@ class fitdata(nddata):
         return retval
 
     def settoguess(self):
+        return self.set_to_guess()
+
+    def set_to_guess(self):
         "a debugging function, to easily plot the initial guess"
         self.fit_coeff = np.real(self.guess())
         return self
@@ -8195,7 +8201,7 @@ class fitdata(nddata):
                         for k, v in zip(infodict_keys, infodict_vals):
                             print(r"{\color{red}{\bf %s:}%s}" % (k, v), "\n\n")
                         # self.fit_coeff = None
-                        # self.settoguess()
+                        # self.set_to_guess()
                         # return
                     else:
                         raise RuntimeError(
