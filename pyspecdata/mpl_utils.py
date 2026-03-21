@@ -148,6 +148,30 @@ def othergridandtick(ax,rotation=(0,0),precision=(2,2),labelstring=('',''),gridc
         plt.setp(labels,rotation=rotation[1])
     return
 #}}}
+
+def adjust_spines(spines):
+    ax = plt.gca()
+    # {{{ taken from matplotlib examples
+    for loc, spine in list(ax.spines.items()):
+        if loc in spines:
+            spine.set_position(("outward", 10))  # outward by 10 points
+            # spine.set_smart_bounds(True)
+        else:
+            spine.set_color("none")  # don't draw spine
+
+    # turn off ticks where there is no spine
+    if "left" in spines:
+        ax.yaxis.set_ticks_position("left")
+    else:
+        # no yaxis ticks
+        ax.yaxis.set_ticks([])
+
+    if "bottom" in spines:
+        ax.xaxis.set_ticks_position("bottom")
+    else:
+        # no xaxis ticks
+        ax.xaxis.set_ticks([])
+    # }}}
 def autolegend(*args,**kwargs):
     #lg = legend(legendstr,'best'),loc = 2, borderaxespad = 0.)
     match_colors = False

@@ -87,6 +87,7 @@ The figure list gives us three things:
 
 from .general_functions import process_kwargs, strm, lsafen
 from .mpl_utils import autopad_figure, autolegend, gridandtick
+from .mpl_utils import adjust_spines as mpl_adjust_spines
 from . import plot_funcs as this_plotting
 from .core import nddata
 from .core import plot as pyspec_plot
@@ -639,28 +640,7 @@ class figlist(object):
         return testdata
 
     def adjust_spines(self, spines):
-        ax = plt.gca()
-        # {{{ taken from matplotlib examples
-        for loc, spine in list(ax.spines.items()):
-            if loc in spines:
-                spine.set_position(("outward", 10))  # outward by 10 points
-                # spine.set_smart_bounds(True)
-            else:
-                spine.set_color("none")  # don't draw spine
-
-        # turn off ticks where there is no spine
-        if "left" in spines:
-            ax.yaxis.set_ticks_position("left")
-        else:
-            # no yaxis ticks
-            ax.yaxis.set_ticks([])
-
-        if "bottom" in spines:
-            ax.xaxis.set_ticks_position("bottom")
-        else:
-            # no xaxis ticks
-            ax.xaxis.set_ticks([])
-        # }}}
+        return mpl_adjust_spines(spines)
 
     def grid(self):
         ax = plt.gca()

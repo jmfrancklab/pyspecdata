@@ -5161,7 +5161,7 @@ class nddata(object):
                 self.set_ft_prop(axis, ["start", "time"], new_u[0])
         return self
 
-    def set_axis(self, *args):
+    def setaxis(self, *args):
         return self.set_axis(*args)
 
     def set_axis(self, *args):
@@ -7952,7 +7952,7 @@ class fitdata(nddata):
         )
         return retval
 
-    def set_to_guess(self):
+    def settoguess(self):
         return self.set_to_guess()
 
     def set_to_guess(self):
