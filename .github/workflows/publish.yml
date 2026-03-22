@@ -246,7 +246,7 @@ jobs:
     needs: [test, version_bump]
     strategy:
       matrix:
-        os: [macos-15, macos-13]   # arm64 and Intel (x86_64)
+        os: [macos-latest, macos-15, macos-14]   # arm64 and Intel (x86_64)
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
     steps:
@@ -411,7 +411,7 @@ jobs:
       - name: Download macOS wheels (x86_64)
         uses: actions/download-artifact@v4
         with:
-          name: wheels-macos-macos-13-${{ github.sha }}
+          name: wheels-macos-macos-14-${{ github.sha }}
           path: dist
 
       - name: Download Windows wheels
