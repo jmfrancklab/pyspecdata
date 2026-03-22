@@ -1,17 +1,8 @@
 from .core import plot as psd_plot
 
-try:
-    from PySide6 import QtWidgets, QtCore
-    from matplotlib.backends.backend_qtagg import (
-        FigureCanvasQTAgg as FigureCanvas,
-    )
-    from matplotlib.backends.backend_qtagg import (
-        NavigationToolbar2QT as NavigationToolbar,
-    )
-except Exception:
-    from PyQt5 import QtWidgets, QtCore  # type: ignore
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas  # type: ignore
-    from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar  # type: ignore
+from PySide6 import QtCore, QtWidgets
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -33,14 +24,16 @@ class lmfitdataGUI(QtWidgets.QWidget):
         (min,max) when finite; otherwise ±5% around the current value (expanded
         to include the current value).
 
-    This class always creates its own ``QApplication`` in ``__init__``. The
-    event loop is not started automatically; call ``.exec()`` to show the
-    window and start the loop.
+    This class reuses an existing ``QApplication`` when one is already
+    running. The event loop is not started automatically; call ``.exec()``
+    to show the window and start the loop when needed.
     """
 
     def __init__(self, d, control=None):
-        # Always create our own QApplication (script-owned GUI)
-        self._app = QtWidgets.QApplication([])
+        # Reuse an existing application when embedded, otherwise create one.
+        self._app = QtWidgets.QApplication.instance()
+        if self._app is None:
+            self._app = QtWidgets.QApplication([])
 
         super().__init__()
         self.d = d
@@ -299,7 +292,7 @@ class lmfitdataGUI(QtWidgets.QWidget):
             pass
 
     def exec(self):
-        """Show the window and start the Qt event loop we created in `__init__`.
+        """Show the window and start the Qt event loop.
         Returns the event-loop exit code.
         """
         self.show()
@@ -308,11 +301,7 @@ class lmfitdataGUI(QtWidgets.QWidget):
             self.activateWindow()
         except Exception:
             pass
-        # Start the Qt event loop (we always own the QApplication)
-        if hasattr(self._app, "exec"):
-            return self._app.exec()
-        else:  # PyQt5
-            return self._app.exec_()
+        return self._app.exec()
 
     def _replot(self):
         # Preserve current view limits if we've plotted before

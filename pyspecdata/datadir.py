@@ -243,13 +243,10 @@ def genconfig():
     )
     filename = pyspec_config.config_location
     qt_widgets = None
-    for module_name in ["PyQt5", "PySide2", "PyQt6", "PySide6"]:
-        try:
-            qt_widgets = importlib.import_module(module_name + ".QtWidgets")
-            break
-        except ImportError:
-            qt_widgets = None
-            continue
+    try:
+        qt_widgets = importlib.import_module("PySide6.QtWidgets")
+    except ImportError:
+        qt_widgets = None
     if qt_widgets is None:
         with open(filename, "w", encoding="utf-8") as fp:
             fp.write("[General]\n")
@@ -628,7 +625,7 @@ def genconfig():
     if existing_app is None:
         existing_app = qt_widgets.QApplication(sys.argv)
     dialog = ConfigDialog(config_parser, filename, rclone_remotes)
-    dialog.exec_()
+    dialog.exec()
 
 
 def get_notebook_dir(*args):

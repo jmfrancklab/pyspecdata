@@ -99,7 +99,7 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
         def reject(self):
             self._accepted = False
 
-        def exec_(self):
+        def exec(self):
             return 1 if self._accepted else 0
 
     class StubApplication:
@@ -112,7 +112,7 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
         def instance(cls):
             return cls._instance
 
-        def exec_(self):
+        def exec(self):
             return 0
 
     class StubLayout:
@@ -274,7 +274,7 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
     original_import_module = importlib.import_module
 
     def fake_import_module(name, package=None):
-        if name == "PyQt5.QtWidgets":
+        if name == "PySide6.QtWidgets":
             return stub_widgets
         return original_import_module(name, package)
 
@@ -338,7 +338,7 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
         self.save_button.click()
         return 1
 
-    monkeypatch.setattr(stub_widgets.QDialog, "exec_", fake_exec)
+    monkeypatch.setattr(stub_widgets.QDialog, "exec", fake_exec)
 
     datadir.genconfig()
 

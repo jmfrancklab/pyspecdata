@@ -91,7 +91,6 @@ if _figure_mode_setting is None:
     pyspec_config.set_setting("mode", "figures", "standard")
     import matplotlib.pyplot as plt
 elif _figure_mode_setting == "latex":
-    environ["ETS_TOOLKIT"] = "qt4"
     import matplotlib as mpl
 
     mpl.use("Agg")

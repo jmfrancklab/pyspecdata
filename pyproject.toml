@@ -28,6 +28,9 @@ authors = [
     { name = "John Franck", email = "john.franck@outlook.com" }
 ]
 
+[project.optional-dependencies]
+gui = ["PySide6"]
+
 [tool.mesonpy]
 setup-kwargs = { native_file = "cross_file.txt" }
 
