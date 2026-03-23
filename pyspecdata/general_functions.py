@@ -15,6 +15,7 @@ import textwrap
 
 ureg = pint.UnitRegistry()
 ureg.define("cycle = [cyc] = cyc")  # 'cycle' is a new dimension
+ureg.define("scan = [scan]")  # experimental count is its own dimension
 ureg.define("rad = cyc*2*pi")  # 'cycle' is a new dimension
 ureg.define("Hz = cyc / s")  # Redefine 'Hz' to be cycles per second
 Q_ = ureg.Quantity

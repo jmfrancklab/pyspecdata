@@ -81,7 +81,7 @@ def fake_data(
     frq_noise = nddata(frq_noise, [-1], ["temp"])
     N = ndshape(frq_noise)["temp"]
     frq_noise.set_axis("temp", -0.5 + np.r_[0:N] / N).set_units(
-        "temp", "cycperscan"
+        "temp", "cyc / scan"
     )
     SD_gen = zip(SD_sigma, SD_amp)
     sigma, A = next(SD_gen)

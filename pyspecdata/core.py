@@ -6577,7 +6577,10 @@ class nddata(object):
                     # even though we might want a view of the data, we
                     # always want coords to be independent -- so copy
                     # them.
-                    axis_coords=[axesdict[x].copy() for x in newlabels],
+                    axis_coords=[
+                        axesdict[x].copy() if axesdict[x] is not None else None
+                        for x in newlabels
+                    ],
                     axis_coords_error=axis_coords_error,
                     data_error=newerror,
                     other_info=self.other_info,

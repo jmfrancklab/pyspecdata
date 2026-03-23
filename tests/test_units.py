@@ -33,3 +33,16 @@ def test_fourier_transform_updates_time_units_to_frequency():
     d.set_units("t", "µs")
     d.ft("t")
     assert d.get_units("t") == "MHz"
+
+
+def test_scan_unit_is_registered():
+    quantity = gf.Q_(1, "cyc / scan")
+    assert quantity.check(gf.Q_(1, "cyc") / gf.Q_(1, "scan"))
+
+
+def test_inverse_fourier_transform_accepts_cycles_per_scan_units():
+    d = nddata(np.ones(8), "temp")
+    d.set_axis("temp", np.linspace(-0.5, 0.5, 8, endpoint=False))
+    d.set_units("temp", "cyc / scan")
+    d.ift("temp")
+    assert d.get_units("temp") == "scan"
