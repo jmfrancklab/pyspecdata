@@ -232,7 +232,7 @@ def sha_string(script):
     "convert the sha hash to a string"
     s = hashlib.sha256()
     s.update(script.encode("utf-8"))
-    hasharray = numpy.fromstring(s.digest(), ">u8")
+    hasharray = numpy.frombuffer(s.digest(), ">u8")
     del s
     return "".join(["%016x" % x for x in list(hasharray)])
 

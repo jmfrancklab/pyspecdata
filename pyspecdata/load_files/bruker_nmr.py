@@ -86,9 +86,9 @@ def series(file_reference, *subpath, **kwargs):
     data = fp.read()
     fp.close()
     if int(v['BYTORDA']) == 1:
-        data = np.fromstring(data, dtype=np.dtype('>i4'), count=(len(data)//4))
+        data = np.frombuffer(data, dtype=np.dtype('>i4'), count=(len(data)//4))
     else:
-        data = np.fromstring(data, dtype=np.dtype('<i4'), count=(len(data)//4))
+        data = np.frombuffer(data, dtype=np.dtype('<i4'), count=(len(data)//4))
     data = np.complex128(data)
     data = data[0::2]+1j*data[1::2]
     data /= rg
@@ -188,9 +188,9 @@ def load_1D(file_reference, *subpath, **kwargs):
     fp = open_subpath(file_reference, *(subpath+('fid',)),mode='rb')
     data = fp.read()
     if int(v['BYTORDA']) == 1:
-        data = np.fromstring(data, dtype=np.dtype('>i4'), count=(len(data)//4))
+        data = np.frombuffer(data, dtype=np.dtype('>i4'), count=(len(data)//4))
     else:
-        data = np.fromstring(data, dtype=np.dtype('<i4'), count=(len(data)//4))
+        data = np.frombuffer(data, dtype=np.dtype('<i4'), count=(len(data)//4))
     data = np.complex128(data)
     data = data[0::2]+1j*data[1::2]
     rg = det_rg(v['RG'])
