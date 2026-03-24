@@ -3434,7 +3434,10 @@ class nddata(object):
             return result
 
     def polyfit(self, axis, order=1, force_y_intercept=None):
-        """polynomial fitting routine -- return the coefficients and the fit
+        """polynomial fitting routine -- return the coefficients and the fit.
+        If NaN values are present in the data, they are ignored -- *i.e.*
+        if you want to mask out parts of the data, just set to NaN.
+
         .. note:
             previously, this returned the fit data as a second argument called
             `formult`-- you very infrequently want it to be in the same size as
@@ -3475,6 +3478,9 @@ class nddata(object):
         formult.reorder(neworder)
         # }}}
         y = formult.data
+        mask = np.isfinite(y)
+        y = y[mask]
+        x = x[mask]
         # {{{ now solve Lx = y, where x is appropriate for our polynomial
         startingpower = 0
         if force_y_intercept is not None:

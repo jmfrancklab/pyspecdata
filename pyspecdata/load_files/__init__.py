@@ -888,7 +888,10 @@ def load_indiv_file(
     # }}}
 
 
-postproc_lookup = {
+postproc_lookup = {}
+
+# store the following here so it's available, but don't auto-load
+postproc_acert_lookup = {
     "ELDOR": acert.postproc_eldor_old,
     "ELDOR_3D": acert.postproc_eldor_3d,
     "FID": acert.postproc_generic,
