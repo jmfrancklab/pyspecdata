@@ -127,8 +127,8 @@
       ~fitdata.set_prop
       ~fitdata.set_to
       ~fitdata.set_units
-      ~fitdata.setaxis
-      ~fitdata.settoguess
+      ~fitdata.set_axis
+      ~fitdata.set_to_guess
       ~fitdata.shear
       ~fitdata.smoosh
       ~fitdata.sort

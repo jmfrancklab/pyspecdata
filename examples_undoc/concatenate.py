@@ -4,10 +4,10 @@ from numpy import r_
 # {{{ When the dimname exists
 coarse = psd.nddata(r_[0:4:4j], ["t"])
 coarse += 0.1  # so data and axis coords are not the same
-coarse.setaxis("t", r_[0:4:4j])
+coarse.set_axis("t", r_[0:4:4j])
 fine = psd.nddata(r_[2:3:5j], ["t"])
 fine += 0.1
-fine.setaxis("t", r_[2:3:5j])
+fine.set_axis("t", r_[2:3:5j])
 combined = psd.concat([coarse, fine], dimname="t")  # not sure if it does --
 #                                                     thiskwargs should match the
 #                                                     existing kwarg! (dimname, dimlabel,

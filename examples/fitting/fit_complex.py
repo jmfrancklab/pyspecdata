@@ -33,7 +33,7 @@ if only_real:
 #     the true values are a guess, and then outputting the guess data
 true_values = {"A": 14.0, "R": 10, "nu": 25}
 thisfit.set_guess(true_values)
-mydata = thisfit.settoguess().eval()
+mydata = thisfit.set_to_guess().eval()
 mydata.add_noise(0.1)
 fig, (ax1, ax2) = plt.subplots(2, 1)
 plot(mydata, "r", label="data", ax=ax1)
@@ -49,7 +49,7 @@ newfit.set_guess(
 )
 # }}}
 # {{{ show the guess
-guess = newfit.settoguess().eval()
+guess = newfit.set_to_guess().eval()
 # }}}
 # {{{ run the fit and generate nddata
 # again, now that this is a class, why is this not handled by the fit method?

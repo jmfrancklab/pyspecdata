@@ -52,7 +52,7 @@ init_logging(level='debug')
 #        P += A*exp(-(R-mu)**2/(2*sigma**2))
 #P = nddata(P,'R')
 #print("your labels are",P.dimlabels)
-#P.setaxis('R',R.ravel())
+#P.set_axis('R',R.ravel())
 #
 #
 ## Vary R as we move along the rows

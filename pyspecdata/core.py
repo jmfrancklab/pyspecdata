@@ -91,7 +91,6 @@ if _figure_mode_setting is None:
     pyspec_config.set_setting("mode", "figures", "standard")
     import matplotlib.pyplot as plt
 elif _figure_mode_setting == "latex":
-    environ["ETS_TOOLKIT"] = "qt4"
     import matplotlib as mpl
 
     mpl.use("Agg")
@@ -132,8 +131,13 @@ mu_B = 9.27400968e-24  # Bohr magneton
 epsilon_0 = 8.854187817e-12
 hbar = 6.6260695729e-34 / 2.0 / pi
 N_A = 6.02214179e23
-gammabar_H = 4.258e7
-gammabar_D = gammabar_H * 61.422391 / 400.13  # ratio from Bruker BF
+gammabar_H = 42.577478461e6
+gammabar_D = 6.536e6
+gammabar_O = -5.772e6
+gammabar_C = 10.7084e6
+gammabar_N = 3.077e6
+gammabar_Li = 16.546e6
+gammabar_F = 40.078e6
 gammabar_e = 2.807e10  # this is for a nitroxide
 
 
@@ -618,9 +622,9 @@ def plot(*args, **kwargs):
         # }}}
         if len(myy.data.shape) > 1 and longest_is_x:
             longest_dim = np.argmax(myy.data.shape)
-            all_but_longest = set(range(len(myy.data.shape))) ^ set((
-                longest_dim,
-            ))
+            all_but_longest = set(range(len(myy.data.shape))) ^ set(
+                (longest_dim,)
+            )
             if len(all_but_longest) > 0:
                 last_not_longest = max(all_but_longest)
             else:
@@ -632,9 +636,9 @@ def plot(*args, **kwargs):
             longest_dim = 0  # treat first as x, like before
             last_not_longest = -1
             if len(myy.data.shape) > 1:
-                all_but_longest = set(range(len(myy.data.shape))) ^ set((
-                    longest_dim,
-                ))
+                all_but_longest = set(range(len(myy.data.shape))) ^ set(
+                    (longest_dim,)
+                )
                 all_but_longest = list(all_but_longest)
             else:
                 all_but_longest = []
@@ -877,14 +881,16 @@ def plot(*args, **kwargs):
                         "\noptions",
                         newkwargs,
                         "of len",
-                        ", ".join([
-                            (
-                                str(type(j)) + " " + str(j)
-                                if np.isscalar(j)
-                                else str(len(j))
-                            )
-                            for j in list(newkwargs.values())
-                        ]),
+                        ", ".join(
+                            [
+                                (
+                                    str(type(j)) + " " + str(j)
+                                    if np.isscalar(j)
+                                    else str(len(j))
+                                )
+                                for j in list(newkwargs.values())
+                            ]
+                        ),
                     )
                 )
             if x_inverted:
@@ -926,14 +932,16 @@ def plot(*args, **kwargs):
                         for j in plotargs
                     ],
                     "\nsizes of np.ndarray kwargs",
-                    dict([
-                        (
-                            (j, np.shape(kwargs[j]))
-                            if isinstance(kwargs[j], np.ndarray)
-                            else (j, kwargs[j])
-                        )
-                        for j in list(kwargs.keys())
-                    ]),
+                    dict(
+                        [
+                            (
+                                (j, np.shape(kwargs[j]))
+                                if isinstance(kwargs[j], np.ndarray)
+                                else (j, kwargs[j])
+                            )
+                            for j in list(kwargs.keys())
+                        ]
+                    ),
                     "\narguments = ",
                     plotargs,
                     "\nkwargs =",
@@ -962,11 +970,13 @@ def plot(*args, **kwargs):
                 "\nsizes of arguments:",
                 [np.shape(j) for j in plotargs],
                 "\nsizes of np.ndarray kwargs:",
-                dict([
-                    (j, np.shape(kwargs[j]))
-                    for j in list(kwargs.keys())
-                    if isinstance(kwargs[j], np.ndarray)
-                ]),
+                dict(
+                    [
+                        (j, np.shape(kwargs[j]))
+                        for j in list(kwargs.keys())
+                        if isinstance(kwargs[j], np.ndarray)
+                    ]
+                ),
             )
         )
     # plt.grid(True)
@@ -1007,10 +1017,12 @@ def concat(datalist, dimname, chop=False):
     other_info_out = datalist[0].other_info
     if dimname in datalist[0].dimlabels:
         dim_idx = datalist[0].axn(dimname)
-        assert all([
-            datalist[j].dimlabels == datalist[0].dimlabels
-            for j in range(len(datalist))
-        ]), (
+        assert all(
+            [
+                datalist[j].dimlabels == datalist[0].dimlabels
+                for j in range(len(datalist))
+            ]
+        ), (
             "the dimlabels for all your datasets do no match and/or are not"
             " ordered the same way"
         )
@@ -1398,8 +1410,7 @@ class nddata(object):
         data_state = {"data": self.data}
         if getattr(self, "data_error", None) is not None:
             data_state["error"] = self.data_error
-        units = self.get_units()
-        data_state["data_units"] = units
+        data_state["data_units"] = self.get_units()
 
         dimlabels = list(self.dimlabels)
 
@@ -1451,10 +1462,8 @@ class nddata(object):
             axis_units = None
             axis_error = None
             if isinstance(state["axes"][lbl], dict):
-                if "axis_coords_units" in state["axes"][lbl]:
-                    axis_units = state["axes"][lbl]["axis_coords_units"]
-                if "error" in state["axes"][lbl]:
-                    axis_error = state["axes"][lbl]["error"]
+                axis_units = state["axes"][lbl].get("axis_coords_units")
+                axis_error = state["axes"][lbl].get("error")
                 if "data" in state["axes"][lbl]:
                     axis_array = state["axes"][lbl]["data"]
                 elif "NUMPY_DATA" in state["axes"][lbl]:
@@ -1471,6 +1480,7 @@ class nddata(object):
                 isinstance(axis_array, np.ndarray)
                 and axis_array.dtype.names is not None
             ):
+                # this is a strucctured array
                 if "data" in axis_array.dtype.names:
                     axis_coords = axis_array["data"]
                 else:
@@ -1710,8 +1720,8 @@ class nddata(object):
             Z = Z[:, ::-1]
         if downsample_self:
             self.data = sortedself.data
-            self.setaxis(self.dimlabels[0], x_axis)
-            self.setaxis(self.dimlabels[1], y_axis)
+            self.set_axis(self.dimlabels[0], x_axis)
+            self.set_axis(self.dimlabels[1], y_axis)
         if also1d:
             if invert:
                 return X, Y, Z, x_axis[::-1], y_axis[::-1]
@@ -2367,8 +2377,7 @@ class nddata(object):
                     raise TypeError(
                         "you passed two arguments, starting with a string."
                         " But, this was not followed by numpy array or scalar,"
-                        " but rather "
-                        + str(type(args[1]))
+                        " but rather " + str(type(args[1]))
                     )
             else:
                 raise RuntimeError(
@@ -2846,9 +2855,7 @@ class nddata(object):
                 raise ValueError(
                     strm(
                         "nothing but -1 and 2 supported yet! (you tried to"
-                        " raise to a power of "
-                        + repr(arg)
-                        + ")"
+                        " raise to a power of " + repr(arg) + ")"
                     )
                 )
             else:
@@ -3334,7 +3341,7 @@ class nddata(object):
             B_sigma = B.get_error()
             B_sigma = 1 if B_sigma is None else B_sigma
         self.data = np.angle(A.data / B.data) / 2 / pi / dt
-        self.setaxis(axis, A.getaxis(axis))
+        self.set_axis(axis, A.getaxis(axis))
         if return_error:
             self.set_error(
                 sqrt(
@@ -3412,7 +3419,7 @@ class nddata(object):
         """
         if npts:
             temp = np.linspace(self[axis][0], self[axis][-1], npts)
-            thisaxis = nddata(temp.copy(), [-1], [axis]).setaxis(axis, temp)
+            thisaxis = nddata(temp.copy(), [-1], [axis]).set_axis(axis, temp)
         else:
             thisaxis = self.fromaxis(axis)
         result = 0
@@ -3427,7 +3434,10 @@ class nddata(object):
             return result
 
     def polyfit(self, axis, order=1, force_y_intercept=None):
-        """polynomial fitting routine -- return the coefficients and the fit
+        """polynomial fitting routine -- return the coefficients and the fit.
+        If NaN values are present in the data, they are ignored -- *i.e.*
+        if you want to mask out parts of the data, just set to NaN.
+
         .. note:
             previously, this returned the fit data as a second argument called
             `formult`-- you very infrequently want it to be in the same size as
@@ -3468,6 +3478,9 @@ class nddata(object):
         formult.reorder(neworder)
         # }}}
         y = formult.data
+        mask = np.isfinite(y)
+        y = y[mask]
+        x = x[mask]
         # {{{ now solve Lx = y, where x is appropriate for our polynomial
         startingpower = 0
         if force_y_intercept is not None:
@@ -3807,7 +3820,7 @@ class nddata(object):
         else:
             trans = True
         self.data = np.cov(self.data, rowvar=trans)
-        self.setaxis(along_dim, self.getaxis(var_dim).copy())
+        self.set_axis(along_dim, self.getaxis(var_dim).copy())
 
         def add_subscript(start, sub):
             ismath = re.compile(r"\$(.*)\$")
@@ -3950,7 +3963,6 @@ class nddata(object):
                 logger.debug("popping axis info")
             return self
         else:
-            print("type of data", self.data.dtype)
             retval = func(self.data)
             if self.data.size == retval.size:
                 self.data = retval
@@ -3978,11 +3990,13 @@ class nddata(object):
         temp = list(self.data.shape)
         temp[thisaxis] = 1
         func_sig = inspect.signature(func)
-        numnonoptargs = len([
-            v.default
-            for v in func_sig.parameters.values()
-            if v.default == inspect.Parameter.empty
-        ])
+        numnonoptargs = len(
+            [
+                v.default
+                for v in func_sig.parameters.values()
+                if v.default == inspect.Parameter.empty
+            ]
+        )
         kwargnames = [
             k
             for k, v in func_sig.parameters.items()
@@ -4200,12 +4214,12 @@ class nddata(object):
             else:
                 self = self[thisaxisname, 0:-temp]
         thisaxis = nddata(self.getaxis(thisaxisname), [-1], [thisaxisname])
-        self.setaxis(thisaxisname, [])
+        self.set_axis(thisaxisname, [])
         self.chunkoff(thisaxisname, ["avg"], [decimation])
         self.run(np.mean, "avg")
         thisaxis.chunkoff(thisaxisname, ["avg"], [decimation])
         thisaxis.run(np.mean, "avg")
-        self.setaxis(thisaxisname, thisaxis.data)
+        self.set_axis(thisaxisname, thisaxis.data)
         return self
 
     def spline_lambda(self, s_multiplier=None):
@@ -4246,7 +4260,7 @@ class nddata(object):
                 lambda x: nddata(
                     myspline_re(x) + 1j * myspline_im(x), self.dimlabels[0]
                 )
-                .setaxis(self.dimlabels[0], x)
+                .set_axis(self.dimlabels[0], x)
                 .set_units(
                     self.dimlabels[0], self.get_units(self.dimlabels[0])
                 )
@@ -4256,7 +4270,7 @@ class nddata(object):
         else:
             nddata_lambda = (
                 lambda x: nddata(myspline_re(x), self.dimlabels[0])
-                .setaxis(self.dimlabels[0], x)
+                .set_axis(self.dimlabels[0], x)
                 .set_units(
                     self.dimlabels[0], self.get_units(self.dimlabels[0])
                 )
@@ -4361,7 +4375,7 @@ class nddata(object):
         rdata = local_interp_func(rdata)
         idata = local_interp_func(idata)
         self.data = rdata + 1j * idata
-        self.setaxis(axis, axisvalues_final)
+        self.set_axis(axis, axisvalues_final)
         if thiserror is not None:
             rerrvar = local_interp_func(
                 rerrvar, kind="linear"
@@ -4436,7 +4450,7 @@ class nddata(object):
             return retval
         else:
             self.data = values
-            self.setaxis(axis, cdata)
+            self.set_axis(axis, cdata)
             return self
 
     def contiguous(self, lambdafunc, axis=None, return_idx=False):
@@ -4584,15 +4598,15 @@ class nddata(object):
             )  # this fourier transforms along t2, overwriting the data that
             #    was in self
         if axis == "t2":
-            self.setaxis(axis, lambda x: x - tms_hz)
-            self.setaxis(axis, lambda x: x / SF)
+            self.set_axis(axis, lambda x: x - tms_hz)
+            self.set_axis(axis, lambda x: x / SF)
             self.set_units(axis, "ppm")
             self.set_prop("x_inverted", True)
         elif axis == "t1":
-            self.setaxis(axis, lambda x: x / sfo1)
+            self.set_axis(axis, lambda x: x / sfo1)
             self.set_units(axis, "ppm")
             max_ppm = self.getaxis(axis).max()
-            self.setaxis(axis, lambda x: (x - max_ppm + offset))
+            self.set_axis(axis, lambda x: (x - max_ppm + offset))
             self.set_prop("y_inverted", True)
         return self
 
@@ -4750,7 +4764,7 @@ class nddata(object):
             )
         for j in range(0, len(listofstrings)):
             if listofaxes[j] is None:
-                self.setaxis(listofstrings[j], None)
+                self.set_axis(listofstrings[j], None)
             else:
                 # {{{ test that the axis is the right size
                 if np.isscalar(listofaxes[j]):  # interpret as a timestep
@@ -4781,7 +4795,7 @@ class nddata(object):
                         )
                     )
                 # }}}
-                self.setaxis(listofstrings[j], listofaxes[j])
+                self.set_axis(listofstrings[j], listofaxes[j])
         return self
 
     def check_axis_coords_errors(self):
@@ -4817,7 +4831,7 @@ class nddata(object):
                 thisax = other.getaxis(thisdim)
                 if thisax is not None:
                     thisax = thisax.copy()
-                self.setaxis(thisdim, thisax)
+                self.set_axis(thisdim, thisax)
                 if other.get_error(thisdim) is not None:
                     self.set_error(thisdim, np.copy(other.get_error(thisdim)))
                 if other.get_units(thisdim) is not None:
@@ -4915,7 +4929,7 @@ class nddata(object):
                     # object
                     retval = nddata(
                         axis_data, axis_data.shape, [axisname]
-                    ).setaxis(axisname, np.copy(axis_data))
+                    ).set_axis(axisname, np.copy(axis_data))
                     retval.set_units(axisname, self.get_units(axisname))
                     retval.data_units = self.data_units
                     retval.name(self.name())
@@ -4987,8 +5001,7 @@ class nddata(object):
         elif not hasattr(func, "__call__"):
             raise ValueError(
                 "I can't interpret the second argument as a function! It is"
-                " type "
-                + str(type(func))
+                " type " + str(type(func))
             )
         # I can't do the following for sympy, because the argument count is
         # always zero
@@ -5011,8 +5024,7 @@ class nddata(object):
                 "The sympy function that you passed doesn't match the"
                 " automatically generated axis variables (obtained by mapping"
                 " sympy.var onto the axis variables, without any kwargs). The"
-                " atoms left over are:\n"
-                + str(func.atoms)
+                " atoms left over are:\n" + str(func.atoms)
             )
         logging.debug(strm("at this point, list of axes is:", list_of_axes))
         if len(list_of_axes) == 0:
@@ -5144,7 +5156,7 @@ class nddata(object):
         # }}}
         # construct the new axis
         new_u = u[0] + du * r_[start_index:stop_index]
-        self.setaxis(axis, new_u)
+        self.set_axis(axis, new_u)
         if start_index < 0:
             # if we are extending to negative values, we need to inform
             # the FT machinery!
@@ -5155,12 +5167,15 @@ class nddata(object):
         return self
 
     def setaxis(self, *args):
+        return self.set_axis(*args)
+
+    def set_axis(self, *args):
         """set or alter the value of the coordinate axis
 
         Can be used in one of several ways:
 
-        * ``self.setaxis('axisname', values)``: just sets the values
-        * ``self.setaxis('axisname', '#')``: just
+        * ``self.set_axis('axisname', values)``: just sets the values
+        * ``self.set_axis('axisname', '#')``: just
             number the axis in numerically increasing order,
             with integers,
             (e.g. if you have smooshed it from a couple
@@ -5173,7 +5188,7 @@ class nddata(object):
         if len(args) == 2:
             axis, value = args
             if np.isscalar(value) and value == "#":
-                self.setaxis(axis, r_[0 : ndshape(self)[axis]])
+                self.set_axis(axis, r_[0 : ndshape(self)[axis]])
                 return self
         elif len(args) == 1 and issympy(args[0]):
             func = args[0]
@@ -5226,7 +5241,7 @@ class nddata(object):
             axis = axis[0]
         else:
             raise ValueError(
-                "not a valid argument to setaxis -- look at the documentation!"
+                "not a valid argument to set_axis -- look at the documentation!"
             )
         if axis == "INDEX":
             raise ValueError(
@@ -5438,8 +5453,7 @@ class nddata(object):
             dimstocollapse
         ) > 1, (
             "What?? You must try to collapse more than one dimension!! -- you"
-            " claim you want to collapse '%s'"
-            % str(dimstocollapse)
+            " claim you want to collapse '%s'" % str(dimstocollapse)
         )
         not_present = set(dimstocollapse) - set(self.dimlabels)
         if len(not_present) > 0:
@@ -5810,7 +5824,7 @@ class nddata(object):
         self.dimlabels = newnames
         if new_axes is not None:
             for j in range(len(axesout)):
-                self.setaxis(axesout[j], new_axes[j])
+                self.set_axis(axesout[j], new_axes[j])
                 self.set_units(axesout[j], orig_axis_units)
         return self
 
@@ -5880,11 +5894,13 @@ class nddata(object):
             #     (i.e.  chunking off a new dimension based on) -- because I am
             #     independently manipulating the data, I don't use
             #     self.getaxis()
-            x_strip_current_field = self.axis_coords[axis_number][[
-                j
-                for j in self.axis_coords[axis_number].dtype.names
-                if j != which_field
-            ]]
+            x_strip_current_field = self.axis_coords[axis_number][
+                [
+                    j
+                    for j in self.axis_coords[axis_number].dtype.names
+                    if j != which_field
+                ]
+            ]
             # }}}
             # {{{ reshape the axis coordinate so that it becomes a 2D np.array
             #     with the new dimension chunked off
@@ -6040,8 +6056,7 @@ class nddata(object):
                 + which_field
                 + "' does not represent an axis that is repeated one or more"
                 " times!  The counts for how many times each element along"
-                " the field is used is "
-                + repr(index_count)
+                " the field is used is " + repr(index_count)
             )
             return
 
@@ -6108,8 +6123,7 @@ class nddata(object):
             if key.dtype is not np.dtype("bool"):
                 raise ValueError(
                     "I don't know what to do with an np.ndarray subscript that"
-                    " has dtype "
-                    + repr(key.dtype)
+                    " has dtype " + repr(key.dtype)
                 )
             if key.shape != self.data.shape:
                 raise ValueError(
@@ -6124,7 +6138,7 @@ class nddata(object):
             return
         elif isinstance(key, str):
             logger.debug("setting the axis")
-            self.setaxis(key, val)
+            self.set_axis(key, val)
             return self
         if isinstance(val, nddata):
             logger.debug(
@@ -6139,10 +6153,12 @@ class nddata(object):
                 j for j in shared_indices if j not in unshared_indices
             ]
             if len(val.dimlabels) != len(shared_indices) or (
-                not all([
-                    val.dimlabels[j] == shared_indices[j]
-                    for j in range(0, len(shared_indices))
-                ])
+                not all(
+                    [
+                        val.dimlabels[j] == shared_indices[j]
+                        for j in range(0, len(shared_indices))
+                    ]
+                )
             ):
                 val.reorder(shared_indices)
             # }}}
@@ -6422,7 +6438,7 @@ class nddata(object):
             newdata.data = newdata.data[mask]
             if len(newdata.dimlabels) == 1:
                 x = newdata.getaxis(newdata.dimlabels[0])
-                newdata.setaxis(newdata.dimlabels[0], x[mask])
+                newdata.set_axis(newdata.dimlabels[0], x[mask])
             else:
                 raise ValueError(
                     "I don't know how to do this for multidimensional data"
@@ -6445,7 +6461,7 @@ class nddata(object):
                         " dimension"
                     )
                 else:
-                    self.setaxis(
+                    self.set_axis(
                         nonsingleton[0],
                         self.getaxis(nonsingleton[0])[A.data.flatten()],
                     )
@@ -6454,8 +6470,7 @@ class nddata(object):
                 if A.dtype is not np.dtype("bool"):
                     raise ValueError(
                         "I don't know what to do with an np.ndarray subscript"
-                        " that has dtype "
-                        + repr(A.dtype)
+                        " that has dtype " + repr(A.dtype)
                     )
                 if A.shape != self.data.shape:
                     temp = np.array(A.shape) == 1
@@ -6568,7 +6583,10 @@ class nddata(object):
                     # even though we might want a view of the data, we
                     # always want coords to be independent -- so copy
                     # them.
-                    axis_coords=[axesdict[x].copy() for x in newlabels],
+                    axis_coords=[
+                        axesdict[x].copy() if axesdict[x] is not None else None
+                        for x in newlabels
+                    ],
                     axis_coords_error=axis_coords_error,
                     data_error=newerror,
                     other_info=self.other_info,
@@ -6797,10 +6815,12 @@ class nddata(object):
                         args[j],
                         "I expected a 'dimname':(range_start,range_stop)",
                     )
-                    assert all([
-                        isinstance(j, numbers.Number) or j is None
-                        for j in target
-                    ]), f"one of {target} is not a number!"
+                    assert all(
+                        [
+                            isinstance(j, numbers.Number) or j is None
+                            for j in target
+                        ]
+                    ), f"one of {target} is not a number!"
                     if len(target) == 1:
                         sensible_list.append(
                             (hash("range"), dimname, target[0], None)
@@ -6905,8 +6925,7 @@ class nddata(object):
                             + " selection, but to do that, your axis"
                             " coordinates need to"
                             + " be labeled! (The axis coordinates of"
-                            f" {thisdim} aren't"
-                            + " labeled)"
+                            f" {thisdim} aren't" + " labeled)"
                         )
                     temp = np.diff(axesdict[thisdim])
                     if not all(temp * np.sign(temp[0]) > 0):
@@ -7065,8 +7084,7 @@ class nddata(object):
                             + " selection, but to do that, your axis"
                             " coordinates need to"
                             + " be labeled! (The axis coordinates of"
-                            f" {thisdim} aren't"
-                            + " labeled)"
+                            f" {thisdim} aren't" + " labeled)"
                         )
                     temp = abs(axesdict[thisdim] - thisargs[0]).argmin()
                     slicedict[thisdim] = temp
@@ -7299,9 +7317,7 @@ class ndshape(ndshape_base):
                         "You passed a type of "
                         + repr(dtype)
                         + ", which was likely not understood (you also passed"
-                        " a shape of "
-                        + repr(tuple(self.shape))
-                        + ")"
+                        " a shape of " + repr(tuple(self.shape)) + ")"
                     )
             elif format == 1:
                 emptyar = np.ones(tuple(self.shape), dtype=dtype)
@@ -7411,14 +7427,16 @@ class fitdata(nddata):
         if isinstance(set, dict):
             set_to = list(set.values())
             set = list(set.keys())
-        solution_list = dict([
-            (
-                (self.symbolic_dict[k], set_to[j])
-                if k in set
-                else (self.symbolic_dict[k], self.output(k))
-            )
-            for j, k in enumerate(self.symbol_list)
-        ])  # load into the solution list
+        solution_list = dict(
+            [
+                (
+                    (self.symbolic_dict[k], set_to[j])
+                    if k in set
+                    else (self.symbolic_dict[k], self.output(k))
+                )
+                for j, k in enumerate(self.symbol_list)
+            ]
+        )  # load into the solution list
         number_of_i = len(xvals)
         parameters = self._active_symbols()
         mydiff_sym = [[]] * len(self.symbolic_vars)
@@ -7439,10 +7457,12 @@ class fitdata(nddata):
                     )
                 )
             try:
-                fprime[j, :] = np.array([
-                    complex(mydiff.subs(x, xvals[k]))
-                    for k in range(0, len(xvals))
-                ])
+                fprime[j, :] = np.array(
+                    [
+                        complex(mydiff.subs(x, xvals[k]))
+                        for k in range(0, len(xvals))
+                    ]
+                )
             except ValueError:
                 raise ValueError(
                     strm(
@@ -7941,6 +7961,9 @@ class fitdata(nddata):
         return retval
 
     def settoguess(self):
+        return self.set_to_guess()
+
+    def set_to_guess(self):
         "a debugging function, to easily plot the initial guess"
         self.fit_coeff = np.real(self.guess())
         return self
@@ -8186,7 +8209,7 @@ class fitdata(nddata):
                         for k, v in zip(infodict_keys, infodict_vals):
                             print(r"{\color{red}{\bf %s:}%s}" % (k, v), "\n\n")
                         # self.fit_coeff = None
-                        # self.settoguess()
+                        # self.set_to_guess()
                         # return
                     else:
                         raise RuntimeError(

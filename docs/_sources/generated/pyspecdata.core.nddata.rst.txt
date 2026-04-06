@@ -113,7 +113,7 @@
       ~nddata.set_prop
       ~nddata.set_to
       ~nddata.set_units
-      ~nddata.setaxis
+      ~nddata.set_axis
       ~nddata.shear
       ~nddata.smoosh
       ~nddata.sort

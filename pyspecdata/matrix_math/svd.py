@@ -56,10 +56,10 @@ def svd(self, todim, fromdim):
     Sigma = self.__class__(Sigma, all_but + ['SV'])
     # {{{ label the axes
     for j in all_but:
-        U.setaxis(j,self.getaxis(j))
-        Vh.setaxis(j,self.getaxis(j))
-    U.setaxis(todim,self.getaxis(todim))
-    Vh.setaxis(fromdim,self.getaxis(fromdim))
+        U.set_axis(j,self.getaxis(j))
+        Vh.set_axis(j,self.getaxis(j))
+    U.set_axis(todim,self.getaxis(todim))
+    Vh.set_axis(fromdim,self.getaxis(fromdim))
     # }}}
     self.reorder(orig_order)
     return U, Sigma, Vh

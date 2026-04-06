@@ -260,7 +260,7 @@ class lmfitdata(nddata):
         else:
             return [1.0] * len(self.variable_names)
 
-    def settoguess(self):
+    def set_to_guess(self):
         "a debugging function, to easily plot the initial guess"
         self.fit_coeff = np.real(self.guess())
         return self

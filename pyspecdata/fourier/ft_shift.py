@@ -128,7 +128,7 @@ def _ft_shift(self, thisaxis, p2, shift_axis=None, verbose=False):
         sourceslice = slice(None, p2)
         targetslice = slice(-p2, None)
         newaxis[targetslice] = x[sourceslice]
-        self.setaxis(axisname, newaxis)
+        self.set_axis(axisname, newaxis)
     return self
 
 

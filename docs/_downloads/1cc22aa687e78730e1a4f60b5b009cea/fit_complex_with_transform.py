@@ -58,7 +58,7 @@ thisfit.set_guess(true_values)
 thisfit.ft("t", shift=True).ift("t")
 # }}}
 # }}}
-mydata = thisfit.settoguess().eval()
+mydata = thisfit.set_to_guess().eval()
 mydata.add_noise(0.01)
 fig, ((ax3, ax1), (ax4, ax2)) = plt.subplots(2, 2)
 psd.plot(mydata, "r", label="data", ax=ax1)
@@ -82,7 +82,7 @@ newfit.residual_transform = thisfit.residual_transform # use the same
 #                                                        transform
 # }}}
 # {{{ show the guess
-guess = newfit.settoguess().eval()
+guess = newfit.set_to_guess().eval()
 psd.plot(guess, "g--", label="guess", ax=ax1)
 psd.plot(guess.imag, "g--", label="guess", ax=ax2)
 guess.ift("t")

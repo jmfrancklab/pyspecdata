@@ -47,7 +47,7 @@ def load_bindata(fp, param):
     # logging.debug(retval)
     retval = (
         nddata(retval["y"], r"$\lambda$")
-        .setaxis(r"$\lambda$", retval["x"])
+        .set_axis(r"$\lambda$", retval["x"])
         .set_units(r"$\lambda$", x_unit)
     )  # .set_units(y_unit)
     return retval

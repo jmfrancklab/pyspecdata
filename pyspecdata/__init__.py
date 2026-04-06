@@ -36,7 +36,6 @@ from .load_files import *
 from .figlist import *
 from .nnls import *
 from .lmfitdata import lmfitdata
-from .lmfitdataGUI import lmfitdataGUI
 from .generate_fake_data import fake_data
 from .dict_utils import make_ndarray, unmake_ndarray
 from .load_files.zenodo import zenodo_upload, create_deposition
@@ -46,6 +45,16 @@ from .mpl_utils import (
     figlistret,
     figlistini_old,
 )
+
+
+def __getattr__(name):
+    if name == "lmfitdataGUI":
+        # Import Qt only when the GUI helper is actually requested.
+        from .lmfitdataGUI import lmfitdataGUI as _lmfitdataGUI
+
+        return _lmfitdataGUI
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 # import numpy
 
@@ -58,3 +67,4 @@ from .mpl_utils import (
 #        'nddata_hdf5']
 # __all__.extend(numpy.__all__)
 __all__ = [x for x in dir() if x[0] != "_"]
+__all__.append("lmfitdataGUI")

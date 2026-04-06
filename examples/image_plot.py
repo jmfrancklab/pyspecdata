@@ -38,7 +38,7 @@ with figlist_var() as fl:
     max_data = abs(signal_amp.data).max()
     fl.next("different scales",fig=fig)
     for j,adjustment in enumerate([2,1,0.5]):
-        fl.image(signal_amp.C.setaxis('vd','#').set_units('vd','scan #'),
+        fl.image(signal_amp.C.set_axis('vd','#').set_units('vd','scan #'),
                 scaling=max_data*adjustment,
                 ax=ax_list[j])
         ax_list[j].set_title("adjust by %0.1f"%adjustment)

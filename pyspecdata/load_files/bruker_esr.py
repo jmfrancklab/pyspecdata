@@ -326,7 +326,7 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
     data.reorder(x_dimname)
     if "Microwave Power" in data.dimlabels:
         # convert from W to dBm
-        data.setaxis("Microwave Power", lambda x: 10 * np.log10(x)).set_units(
+        data.set_axis("Microwave Power", lambda x: 10 * np.log10(x)).set_units(
             "Microwave Power", "dBm"
         )
     if data.get_units(x_dimname) == "s":

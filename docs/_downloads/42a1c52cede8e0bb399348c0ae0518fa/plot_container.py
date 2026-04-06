@@ -53,7 +53,7 @@ test_data = nddata(
     [100, 100],
     ["x", "y"],
 )
-test_data.setaxis("x", "#").setaxis("y", "#")
+test_data.set_axis("x", "#").set_axis("y", "#")
 test_data.set_units("x", "s").set_units("y", "m")
 test_data.reorder("y")
 

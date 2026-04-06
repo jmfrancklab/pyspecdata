@@ -48,7 +48,7 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
                 renumber = [renumber]
         for thisaxis in A.dimlabels:
             if renumber is not None and thisaxis in renumber:
-                A.setaxis(thisaxis, "#")
+                A.set_axis(thisaxis, "#")
             try:
                 check_ascending_axis(
                     A.getaxis(thisaxis), allow_descending=True
@@ -59,7 +59,7 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
                         "Automatically changed to numbered axis along %s"
                         % thisaxis
                     )
-                    A.setaxis(thisaxis, "#").set_units(thisaxis, "#")
+                    A.set_axis(thisaxis, "#").set_units(thisaxis, "#")
                 else:
                     raise ValueError(
                         "You are not allowed to use image on data that doesn't"
@@ -68,7 +68,7 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
                         " For example, if you are looking at NMR data with a"
                         " set of variable delays that are unevenly spaced,"
                         " relabel this axis by index number -->"
-                        " .C.setaxis('%s','#').set_units('%s','scan #').\nThen"
+                        " .C.set_axis('%s','#').set_units('%s','scan #').\nThen"
                         " you have an accurate representation of your data"
                         % (2 * (thisaxis,))
                     )

@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**02:14.289** total execution time for 29 files **from all galleries**:
+**00:07.653** total execution time for 29 files **from all galleries**:
 
 .. container::
 
@@ -32,8 +32,8 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_auto_examples_ILT_2DILT.py` (``../examples/ILT/2DILT.py``)
-     - 02:14.289
+   * - :ref:`sphx_glr_auto_examples_ILT_BRD_test.py` (``../examples/ILT/BRD_test.py``)
+     - 00:07.653
      - 0.0
    * - :ref:`sphx_glr_auto_examples_DCCT_DCCT_dimensions.py` (``../examples/DCCT/DCCT_dimensions.py``)
      - 00:00.000
@@ -50,7 +50,7 @@ Computation times
    * - :ref:`sphx_glr_auto_examples_ESR_esr_example.py` (``../examples/ESR/esr_example.py``)
      - 00:00.000
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_ILT_BRD_test.py` (``../examples/ILT/BRD_test.py``)
+   * - :ref:`sphx_glr_auto_examples_ILT_2DILT.py` (``../examples/ILT/2DILT.py``)
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_UV_BSA_calibration.py` (``../examples/UV/BSA_calibration.py``)

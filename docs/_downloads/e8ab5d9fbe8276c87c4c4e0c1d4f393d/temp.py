@@ -24,7 +24,7 @@ with figlist_var() as fl:
         ),
     ]):
         d = find_file(thisfile, exp_type=exp_type)["harmonic", 0]
-        d.set_units(fieldaxis, "T").setaxis(fieldaxis, lambda x: x * 1e-4)
+        d.set_units(fieldaxis, "T").set_axis(fieldaxis, lambda x: x * 1e-4)
         d.rename("Time", "observations")
         d.reorder([fieldaxis,"observations"])
         fl.next("raw data")

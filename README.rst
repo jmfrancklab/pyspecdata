@@ -137,7 +137,7 @@ On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edit
 just run:
 
 *   *Remember* that for new installs of anaconda, you need to turn off the python "execution alias" in windows to prevent windows from overriding all the importnat commands!  Also, all of below are tested in the "anaconda prompt" in admin mode.
-*   ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython`` 
+*   ``conda install -y -c anaconda numpy scipy sympy pyside6 pytables matplotlib h5py libpython`` 
 *   ``conda install -y -c conda-forge gcc_win-64 gfortran_win-64 binutils_win-64``
 
     *   If you've installed before, you *might* need to first do ``conda remove -y m2w64-toolchain`` (this is an older toolchain that breaks with numpy 2.0)
@@ -152,8 +152,8 @@ just run:
 Then follow the `installation for developers <#installation-for-developers>`_ below. We have a package on pip, but it currently lags behind the github repo.
 
 On **CentOS7**, we've tested
-``yum install python-matplotlib python-matplotlib-qt4 python-devel sympy h5py python-tables scipy``
-(after running ``yum install epel-release`` to install the EPEL distribution).  Then follow the `installation for developers <#installation-for-developers>`_ below. 
+``yum install python-matplotlib python-devel sympy h5py python-tables scipy``
+(after running ``yum install epel-release`` to install the EPEL distribution).  Install ``PySide6`` separately if you want the Qt GUIs, then follow the `installation for developers <#installation-for-developers>`_ below. 
 
 On **Debian**,
 we've tested
@@ -169,7 +169,7 @@ On **Ubuntu**, we've tested:
 
 On **MacOS**, if you want to install as a developer your python distribution needs to have a working Fortran compiler, since some of the modules use Fortran.
 We have tested ``conda install -c conda-forge fortran-compiler``, followed by
-``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py``.
+``conda install -y -c anaconda numpy scipy sympy pyside6 pytables matplotlib h5py``.
 However *due to a problem with more recent versions of MacOS/xcode*, you need to modify ``setup.py`` to tell it where to find the system libraries.
 At about line 27, you need to add something like following as a keyword arg for the `Extension` function:
 ``library_dirs = ["/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"],``
@@ -186,7 +186,7 @@ that you install the following packages using a good package-management system (
 
 * sympy
 
-* pyqt
+* pyside6 (for the Qt GUIs)
 
 * pytables (in future work, we hope to eliminate dependence on this package)
 
