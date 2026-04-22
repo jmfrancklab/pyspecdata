@@ -37,7 +37,6 @@ from .matrix_math.dot import dot as MM_dot
 from .matrix_math.dot import matmul as MM_matmul
 from .matrix_math.dot import along as MM_along
 from .matrix_math.nnls import nnls as MM_nnls
-from os import environ
 import numpy as np
 import sympy as sp
 from numpy import r_, c_, nan, inf, pi
@@ -1614,11 +1613,13 @@ class nddata(object):
         if self.data.size < 2:
             val = self.data.item()
             if (
-                # TODO ☐: could the following be replaced with a simpler expression involving hasattr??
+                # TODO ☐: could the following be replaced with a simpler
+                #         expression involving hasattr??
                 getattr(self.data, "dtype", None) is not None
                 and self.data.dtype.names
             ):
-                # TODO ☐: this needs an explanation of what exactly is happening here (as a comment).
+                # TODO ☐: this needs an explanation of what exactly is
+                #         happening here (as a comment).
                 val = self.data[()]
             err = self.get_error()
             if err is not None:
@@ -5319,7 +5320,8 @@ class nddata(object):
             axis = axis[0]
         else:
             raise ValueError(
-                "not a valid argument to set_axis -- look at the documentation!"
+                "not a valid argument to set_axis -- look at the "
+                "documentation!"
             )
         if axis == "INDEX":
             raise ValueError(
