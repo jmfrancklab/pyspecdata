@@ -220,6 +220,58 @@ def apply_oom(average_oom, numbers, prev_label=""):
     return f"{new_quant.units:~P}"
 
 
+def _reduced_shape(shape, axis):
+    if axis is None:
+        return ()
+    if isinstance(axis, tuple):
+        axes = axis
+    else:
+        axes = (axis,)
+    ndim = len(shape)
+    normalized_axes = sorted(
+        {ax if ax >= 0 else ndim + ax for ax in axes}, reverse=True
+    )
+    reduced_shape = list(shape)
+    for ax in normalized_axes:
+        reduced_shape.pop(ax)
+    return tuple(reduced_shape)
+
+
+def _structured_fieldwise_reduce(array, reducer, axis=None):
+    if array.dtype.names is None:
+        return reducer(array, axis=axis)
+    retval = np.empty(_reduced_shape(array.shape, axis), dtype=array.dtype)
+    for thisfield in array.dtype.names:
+        retval[thisfield] = _structured_fieldwise_reduce(
+            array[thisfield], reducer, axis=axis
+        )
+    return retval
+
+
+def _structured_mean_error(data, data_error, axis):
+    if data.dtype.names is None:
+        this_axis_length = data.shape[axis]
+        return np.sqrt(
+            np.sum((data * data_error) ** 2, axis=axis)
+            / (this_axis_length**2)
+        )
+    retval = np.empty(_reduced_shape(data.shape, axis), dtype=data.dtype)
+    for thisfield in data.dtype.names:
+        retval[thisfield] = _structured_mean_error(
+            data[thisfield], data_error[thisfield], axis
+        )
+    return retval
+
+
+def _structured_scale(array, factor):
+    if array.dtype.names is None:
+        return array / factor
+    retval = np.empty(array.shape, dtype=array.dtype)
+    for thisfield in array.dtype.names:
+        retval[thisfield] = _structured_scale(array[thisfield], factor)
+    return retval
+
+
 def issympy(x):
     "tests if something is sympy (based on the module name)"
     return isinstance(x, sp.Expr)
@@ -1568,6 +1620,34 @@ class nddata(object):
             )
 
     def __str__(self):
+        def format_scalar(val, err=None):
+            if isinstance(val, np.void) and val.dtype.names is not None:
+                parts = []
+                for field_name in val.dtype.names:
+                    field_val = val[field_name]
+                    field_err = None if err is None else err[field_name]
+                    if field_err is None:
+                        parts.append(
+                            "%s=%s"
+                            % (field_name, format_scalar(field_val))
+                        )
+                    else:
+                        parts.append(
+                            "%s=%s"
+                            % (
+                                field_name,
+                                format_scalar(field_val, field_err),
+                            )
+                        )
+                return "(" + ", ".join(parts) + ")"
+            if err is not None:
+                oom_err = int(np.floor(np.log10(err)))  # int takes floor
+                oom_val = int(np.floor(np.log10(val)))  # int takes floor
+                return (
+                    "%#0." + str(oom_val - oom_err + 1) + "g ± %#0.2g"
+                ) % (val, err)
+            return "%#0.5g" % val
+
         def show_array(x, indent=""):
             x = repr(x)
             if x.startswith("np.array("):
@@ -1578,17 +1658,17 @@ class nddata(object):
                 return x
 
         if self.data.size < 2:
-            val = self.data.item()
+            if self.data.dtype.names is None:
+                val = self.data.item()
+            else:
+                val = self.data[()]
             err = self.get_error()
             if err is not None:
-                err = err.item()
-                oom_err = int(np.floor(np.log10(err)))  # int takes floor
-                oom_val = int(np.floor(np.log10(val)))  # int takes floor
-                retval = (
-                    "%#0." + str(oom_val - oom_err + 1) + "g ± %#0.2g"
-                ) % (val, err)
-            else:
-                retval = "%#0.5g" % val
+                if err.dtype.names is None:
+                    err = err.item()
+                else:
+                    err = err[()]
+            retval = format_scalar(val, err)
             myunits = self.get_units()
             if myunits is not None:
                 # say we have m^2 -- we want this rendered as m², and pint
@@ -3726,13 +3806,9 @@ class nddata(object):
                 logger.debug(strm("doesn't contain: ", axes[j]))
                 raise
             if self.data_error is not None:
-                this_axis_length = self.data.shape[thisindex]
                 try:
-                    self.data_error = sqrt(
-                        np.sum(
-                            (self.data * self.data_error) ** 2, axis=thisindex
-                        )
-                        / (this_axis_length**2)
+                    self.data_error = _structured_mean_error(
+                        self.data, self.data_error, thisindex
                     )
                 except Exception:
                     raise ValueError(
@@ -3744,12 +3820,18 @@ class nddata(object):
                         )
                     )
             if return_error:  # since I think this is causing an error
-                thiserror = np.std(self.data, axis=thisindex)
+                thiserror = _structured_fieldwise_reduce(
+                    self.data, np.std, axis=thisindex
+                )
                 if scalar_or_zero_order(thiserror):
                     thiserror = r_[thiserror]
                 if return_stderr:
-                    thiserror /= np.sqrt(self.data.shape[thisindex])
-            self.data = np.mean(self.data, axis=thisindex)
+                    thiserror = _structured_scale(
+                        thiserror, np.sqrt(self.data.shape[thisindex])
+                    )
+            self.data = _structured_fieldwise_reduce(
+                self.data, np.mean, axis=thisindex
+            )
             if return_error:  # this needs to go after the data setting
                 self.set_error(
                     thiserror
