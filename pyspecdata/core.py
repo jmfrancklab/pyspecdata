@@ -220,58 +220,6 @@ def apply_oom(average_oom, numbers, prev_label=""):
     return f"{new_quant.units:~P}"
 
 
-def _reduced_shape(shape, axis):
-    if axis is None:
-        return ()
-    if isinstance(axis, tuple):
-        axes = axis
-    else:
-        axes = (axis,)
-    ndim = len(shape)
-    normalized_axes = sorted(
-        {ax if ax >= 0 else ndim + ax for ax in axes}, reverse=True
-    )
-    reduced_shape = list(shape)
-    for ax in normalized_axes:
-        reduced_shape.pop(ax)
-    return tuple(reduced_shape)
-
-
-def _structured_fieldwise_reduce(array, reducer, axis=None):
-    if array.dtype.names is None:
-        return reducer(array, axis=axis)
-    retval = np.empty(_reduced_shape(array.shape, axis), dtype=array.dtype)
-    for thisfield in array.dtype.names:
-        retval[thisfield] = _structured_fieldwise_reduce(
-            array[thisfield], reducer, axis=axis
-        )
-    return retval
-
-
-def _structured_mean_error(data, data_error, axis):
-    if data.dtype.names is None:
-        this_axis_length = data.shape[axis]
-        return np.sqrt(
-            np.sum((data * data_error) ** 2, axis=axis)
-            / (this_axis_length**2)
-        )
-    retval = np.empty(_reduced_shape(data.shape, axis), dtype=data.dtype)
-    for thisfield in data.dtype.names:
-        retval[thisfield] = _structured_mean_error(
-            data[thisfield], data_error[thisfield], axis
-        )
-    return retval
-
-
-def _structured_scale(array, factor):
-    if array.dtype.names is None:
-        return array / factor
-    retval = np.empty(array.shape, dtype=array.dtype)
-    for thisfield in array.dtype.names:
-        retval[thisfield] = _structured_scale(array[thisfield], factor)
-    return retval
-
-
 def issympy(x):
     "tests if something is sympy (based on the module name)"
     return isinstance(x, sp.Expr)
@@ -1087,7 +1035,7 @@ def concat(datalist, dimname, chop=False):
             j.pop(dim_idx)
         assert all(
             [shape_check[j] == shape_check[0] for j in range(len(shape_check))]
-        ), ("shapes " + str(shape_check) + " are not all equal")
+        ), "shapes " + str(shape_check) + " are not all equal"
         # }}}
         # {{{ concatenate the data ndarrays and dimname axis ndarrays
         concated_data = np.concatenate(
@@ -1621,31 +1569,29 @@ class nddata(object):
 
     def __str__(self):
         def format_scalar(val, err=None):
-            if isinstance(val, np.void) and val.dtype.names is not None:
-                parts = []
-                for field_name in val.dtype.names:
-                    field_val = val[field_name]
-                    field_err = None if err is None else err[field_name]
-                    if field_err is None:
-                        parts.append(
-                            "%s=%s"
-                            % (field_name, format_scalar(field_val))
+            if getattr(val, "dtype", None) is not None and val.dtype.names:
+                return (
+                    "("
+                    + ", ".join(
+                        "%s=%s"
+                        % (
+                            field_name,
+                            format_scalar(
+                                val[field_name],
+                                None if err is None else err[field_name],
+                            ),
                         )
-                    else:
-                        parts.append(
-                            "%s=%s"
-                            % (
-                                field_name,
-                                format_scalar(field_val, field_err),
-                            )
-                        )
-                return "(" + ", ".join(parts) + ")"
+                        for field_name in val.dtype.names
+                    )
+                    + ")"
+                )
             if err is not None:
                 oom_err = int(np.floor(np.log10(err)))  # int takes floor
                 oom_val = int(np.floor(np.log10(val)))  # int takes floor
-                return (
-                    "%#0." + str(oom_val - oom_err + 1) + "g ± %#0.2g"
-                ) % (val, err)
+                return ("%#0." + str(oom_val - oom_err + 1) + "g ± %#0.2g") % (
+                    val,
+                    err,
+                )
             return "%#0.5g" % val
 
         def show_array(x, indent=""):
@@ -1658,16 +1604,18 @@ class nddata(object):
                 return x
 
         if self.data.size < 2:
-            if self.data.dtype.names is None:
-                val = self.data.item()
-            else:
+            val = self.data.item()
+            if (
+                getattr(self.data, "dtype", None) is not None
+                and self.data.dtype.names
+            ):
                 val = self.data[()]
             err = self.get_error()
             if err is not None:
-                if err.dtype.names is None:
-                    err = err.item()
-                else:
+                if getattr(err, "dtype", None) is not None and err.dtype.names:
                     err = err[()]
+                else:
+                    err = err.item()
             retval = format_scalar(val, err)
             myunits = self.get_units()
             if myunits is not None:
@@ -2676,12 +2624,13 @@ class nddata(object):
                 ]
                 if len(matches) == 0:
                     return None
-                assert (
-                    len(matches) == 1
-                ), "I found %d matches for regexp %s in properties: %s" % (
-                    len(matches),
-                    propname,
-                    " ".join(matches),
+                assert len(matches) == 1, (
+                    "I found %d matches for regexp %s in properties: %s"
+                    % (
+                        len(matches),
+                        propname,
+                        " ".join(matches),
+                    )
                 )
                 return self.other_info[matches[0]]
             else:
@@ -3798,6 +3747,26 @@ class nddata(object):
         if isinstance(axes, str):
             axes = [axes]
         # }}}
+        structured_dtype = None
+        if self.data.dtype.names is not None:
+            field_names = self.data.dtype.names
+            promoted_field_dtypes = []
+            for thisfield in field_names:
+                thisdtype = self.data.dtype.fields[thisfield][0]
+                if np.issubdtype(thisdtype, np.integer):
+                    thisdtype = np.dtype("float64")
+                promoted_field_dtypes.append(thisdtype)
+            common_dtype = np.result_type(*promoted_field_dtypes)
+            structured_dtype = np.dtype(
+                [(thisfield, common_dtype) for thisfield in field_names]
+            )
+            self.data = self.data.astype(structured_dtype).view(
+                (common_dtype, len(field_names))
+            )
+            if self.data_error is not None:
+                self.data_error = self.data_error.astype(
+                    structured_dtype
+                ).view((common_dtype, len(field_names)))
         for j in range(0, len(axes)):
             try:
                 thisindex = self.dimlabels.index(axes[j])
@@ -3806,9 +3775,13 @@ class nddata(object):
                 logger.debug(strm("doesn't contain: ", axes[j]))
                 raise
             if self.data_error is not None:
+                this_axis_length = self.data.shape[thisindex]
                 try:
-                    self.data_error = _structured_mean_error(
-                        self.data, self.data_error, thisindex
+                    self.data_error = sqrt(
+                        np.sum(
+                            (self.data * self.data_error) ** 2, axis=thisindex
+                        )
+                        / (this_axis_length**2)
                     )
                 except Exception:
                     raise ValueError(
@@ -3820,24 +3793,26 @@ class nddata(object):
                         )
                     )
             if return_error:  # since I think this is causing an error
-                thiserror = _structured_fieldwise_reduce(
-                    self.data, np.std, axis=thisindex
-                )
+                thiserror = np.std(self.data, axis=thisindex)
                 if scalar_or_zero_order(thiserror):
                     thiserror = r_[thiserror]
                 if return_stderr:
-                    thiserror = _structured_scale(
-                        thiserror, np.sqrt(self.data.shape[thisindex])
-                    )
-            self.data = _structured_fieldwise_reduce(
-                self.data, np.mean, axis=thisindex
-            )
+                    thiserror /= np.sqrt(self.data.shape[thisindex])
+            self.data = np.mean(self.data, axis=thisindex)
             if return_error:  # this needs to go after the data setting
                 self.set_error(
                     thiserror
                 )  # set the error to the standard deviation
             self._pop_axis_info(thisindex)
             logger.debug(strm("return error is", return_error))
+        if structured_dtype is not None:
+            self.data = self.data.view(structured_dtype).reshape(
+                self.data.shape[:-1]
+            )
+            if self.data_error is not None:
+                self.data_error = self.data_error.view(
+                    structured_dtype
+                ).reshape(self.data_error.shape[:-1])
         return self
 
     def mean_nopop(self, axis):
@@ -4338,10 +4313,8 @@ class nddata(object):
             myspline_im = thefunc(
                 self.getaxis(self.dimlabels[0]), self.data.imag, **kwargs
             )
-            nddata_lambda = (
-                lambda x: nddata(
-                    myspline_re(x) + 1j * myspline_im(x), self.dimlabels[0]
-                )
+            nddata_lambda = lambda x: (
+                nddata(myspline_re(x) + 1j * myspline_im(x), self.dimlabels[0])
                 .set_axis(self.dimlabels[0], x)
                 .set_units(
                     self.dimlabels[0], self.get_units(self.dimlabels[0])
@@ -4350,8 +4323,8 @@ class nddata(object):
                 .copy_props(self)
             )
         else:
-            nddata_lambda = (
-                lambda x: nddata(myspline_re(x), self.dimlabels[0])
+            nddata_lambda = lambda x: (
+                nddata(myspline_re(x), self.dimlabels[0])
                 .set_axis(self.dimlabels[0], x)
                 .set_units(
                     self.dimlabels[0], self.get_units(self.dimlabels[0])
@@ -4688,7 +4661,7 @@ class nddata(object):
             self.set_axis(axis, lambda x: x / sfo1)
             self.set_units(axis, "ppm")
             max_ppm = self.getaxis(axis).max()
-            self.set_axis(axis, lambda x: (x - max_ppm + offset))
+            self.set_axis(axis, lambda x: x - max_ppm + offset)
             self.set_prop("y_inverted", True)
         return self
 
@@ -5817,8 +5790,9 @@ class nddata(object):
                     shapesout = np.round(shapesout)
                 shapesout = [shapesout] * len(axesout)
             elif isinstance(otherargs[0], dict):
-                axesout, shapesout = list(otherargs[0].keys()), list(
-                    otherargs[0].values()
+                axesout, shapesout = (
+                    list(otherargs[0].keys()),
+                    list(otherargs[0].values()),
                 )
             else:
                 raise ValueError("I don't know how to deal with this type!")
@@ -7606,9 +7580,9 @@ class fitdata(nddata):
     def functional_form(self, sym_expr):
         r"""The functional form, given as a sympy expression, to
         which you would like to fit the data."""
-        assert issympy(
-            sym_expr
-        ), "for now, the functional form must be a sympy expression!"
+        assert issympy(sym_expr), (
+            "for now, the functional form must be a sympy expression!"
+        )
         self.symbolic_expr = sym_expr
         # {{{ adapted from fromaxis, trying to adapt the variable
         symbols_in_expr = self.symbolic_expr.atoms(sp.Symbol)
