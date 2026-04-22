@@ -16,6 +16,7 @@ from .general_functions import process_kwargs, strm
 import logging
 import atexit
 import collections
+import warnings
 from subprocess import Popen, PIPE
 from pathlib import Path, PureWindowsPath
 
@@ -246,6 +247,10 @@ def genconfig():
     try:
         qt_widgets = importlib.import_module("PySide6.QtWidgets")
     except ImportError:
+        warnings.warn(
+            "You don't have PySide6 installed!!\n**This will be much"
+            " easier if you install it with:\npip install PySide6"
+        )
         qt_widgets = None
     if qt_widgets is None:
         with open(filename, "w", encoding="utf-8") as fp:
@@ -560,8 +565,11 @@ def genconfig():
         def select_path(self, target_edit):
             "browse for an experiment directory"
             chosen = qt_widgets.QFileDialog.getExistingDirectory(
-                self, "Select directory", target_edit.text()
+                self, "Select directory -- NOTE files will not appear here", target_edit.text()
             )
+            # TODO ☐: when we select a path with an empty exp_type box, we
+            #         should auto-fill it using the bottom 2 levels of the path
+            #         so we have an exp_type of form "a/b"
             if chosen:
                 target_edit.setText(chosen)
                 target_edit.setCursorPosition(0)
