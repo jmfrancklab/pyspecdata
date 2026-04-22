@@ -535,7 +535,9 @@ def genconfig():
                     "remote_path_edit": remote_path_edit,
                 }
             )
-            browse_button.clicked.connect(lambda: self.select_path(path_edit))
+            browse_button.clicked.connect(
+                lambda: self.select_path(path_edit, name_edit)
+            )
             remote_combo.currentIndexChanged.connect(
                 lambda _: self.update_remote_state(
                     remote_combo, remote_path_edit
@@ -562,17 +564,32 @@ def genconfig():
                 self.data_directory_edit.setText(chosen)
                 self.data_directory_edit.setCursorPosition(0)
 
-        def select_path(self, target_edit):
+        def select_path(self, target_edit, name_edit=None):
             "browse for an experiment directory"
             chosen = qt_widgets.QFileDialog.getExistingDirectory(
-                self, "Select directory -- NOTE files will not appear here", target_edit.text()
+                self,
+                "Select directory -- NOTE files will not appear here",
+                target_edit.text(),
             )
-            # TODO ☐: when we select a path with an empty exp_type box, we
-            #         should auto-fill it using the bottom 2 levels of the path
-            #         so we have an exp_type of form "a/b"
             if chosen:
                 target_edit.setText(chosen)
                 target_edit.setCursorPosition(0)
+                if name_edit is not None and name_edit.text().strip() == "":
+                    chosen_path = Path(chosen)
+                    chosen_parts = list(chosen_path.parts)
+                    if chosen_path.anchor:
+                        chosen_parts = chosen_parts[1:]
+                    if len(chosen_parts) >= 2:
+                        inferred_exp_type = PureWindowsPath(
+                            *chosen_parts[-2:]
+                        ).as_posix()
+                    elif len(chosen_parts) == 1:
+                        inferred_exp_type = chosen_parts[0]
+                    else:
+                        inferred_exp_type = ""
+                    if inferred_exp_type:
+                        name_edit.setText(inferred_exp_type)
+                        name_edit.setCursorPosition(0)
 
         def handle_save(self):
             """collect the contents of the dialog and write the configuration
