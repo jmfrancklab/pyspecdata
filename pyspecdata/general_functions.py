@@ -48,9 +48,13 @@ try:
         raise ValueError("not interpreting sqrt!")
 except Exception:
     print(
-        "**Warning!** I'm hacking the sqrt behavior of pint.  Consider using"
-        " the jmfranck/pint fork, which you can find at"
-        " https://github.com/jmfranck/pint"
+        "**Warning!** pint is the package that handles units."
+        " It does a good job with everything but square roots."
+        " Right now, you are using a hack (partial fix) that helps it"
+        " handle square roots better, and basically workds."
+        " However, you are better off"
+        " getting the the jmfranck/pint fork off of github, which"
+        " you can find at https://github.com/jmfranck/pint"
     )
 
     def Q_(*args):

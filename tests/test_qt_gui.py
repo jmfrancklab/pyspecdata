@@ -324,6 +324,21 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
                 assert index != -1
                 row["remote_combo"].setCurrentIndex(index)
         self.files_add_button.click()
+        autofill_row = self.file_rows[-1]
+        original_get_existing_directory = (
+            stub_widgets.QFileDialog.getExistingDirectory
+        )
+        stub_widgets.QFileDialog.getExistingDirectory = staticmethod(
+            lambda *args, **kwargs: "/tmp/alpha/beta"
+        )
+        autofill_row["browse_button"].click()
+        assert autofill_row["name_edit"].text() == "alpha/beta"
+        assert autofill_row["name_edit"].cursor_position == 0
+        assert autofill_row["path_edit"].text() == "/tmp/alpha/beta"
+        stub_widgets.QFileDialog.getExistingDirectory = (
+            original_get_existing_directory
+        )
+        self.files_add_button.click()
         new_row = self.file_rows[-1]
         new_row["name_edit"].setText("new_entry")
         new_row["path_edit"].setText("/tmp/new_entry")

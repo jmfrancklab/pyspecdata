@@ -3677,6 +3677,8 @@ class nddata(object):
 
     def mean_all_but(self, listofdims):
         "take the mean over all dimensions not in the list"
+        if type(listofdims) is str:
+            listofdims = [listofdims]
         for dimname in list(
             self.dimlabels
         ):  # I can't be popping from the list as I iterate over it
