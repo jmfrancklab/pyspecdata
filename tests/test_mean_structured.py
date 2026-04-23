@@ -75,7 +75,11 @@ def test_mean_structured_preserves_complex_fields():
     expected_std = np.empty((2,), dtype=expected_dtype)
     for field in data.dtype.names:
         expected_mean[field] = np.mean(data[field], axis=0)
-        expected_std[field] = np.std(data[field], axis=0)
+        # calling std on a complex array in python is not the same as
+        # doing the following
+        expected_std[field] = np.std(data[field].real, axis=0) + 1j * np.std(
+            data[field].imag, axis=0
+        )
 
     assert x.data.dtype == expected_dtype
     assert x.get_error().dtype == expected_dtype
