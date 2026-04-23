@@ -1585,6 +1585,10 @@ class nddata(object):
                     )
                     + ")"
                 )
+            if hasattr(val, "item"):
+                val = val.item()
+            if err is not None and hasattr(err, "item"):
+                err = err.item()
             if err is not None:
                 oom_err = int(np.floor(np.log10(err)))  # int takes floor
                 oom_val = int(np.floor(np.log10(val)))  # int takes floor
