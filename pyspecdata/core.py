@@ -1034,7 +1034,7 @@ def concat(datalist, dimname, chop=False):
             j.pop(dim_idx)
         assert all(
             [shape_check[j] == shape_check[0] for j in range(len(shape_check))]
-        ), "shapes " + str(shape_check) + " are not all equal"
+        ), ("shapes " + str(shape_check) + " are not all equal")
         # }}}
         # {{{ concatenate the data ndarrays and dimname axis ndarrays
         concated_data = np.concatenate(
@@ -1585,10 +1585,12 @@ class nddata(object):
                     )
                     + ")"
                 )
+            # {{{ if 1d len 1, etc, convert to true scalars
             if hasattr(val, "item"):
                 val = val.item()
             if err is not None and hasattr(err, "item"):
                 err = err.item()
+            # }}}
             if err is not None:
                 oom_err = int(np.floor(np.log10(err)))  # int takes floor
                 oom_val = int(np.floor(np.log10(val)))  # int takes floor
@@ -2629,13 +2631,12 @@ class nddata(object):
                 ]
                 if len(matches) == 0:
                     return None
-                assert len(matches) == 1, (
-                    "I found %d matches for regexp %s in properties: %s"
-                    % (
-                        len(matches),
-                        propname,
-                        " ".join(matches),
-                    )
+                assert (
+                    len(matches) == 1
+                ), "I found %d matches for regexp %s in properties: %s" % (
+                    len(matches),
+                    propname,
+                    " ".join(matches),
                 )
                 return self.other_info[matches[0]]
             else:
@@ -3764,31 +3765,26 @@ class nddata(object):
                 if np.issubdtype(thisdtype, np.integer):
                     thisdtype = np.dtype("float64")
                 promoted_field_dtypes.append(thisdtype)
-            # the dtype needs to be at least a float, so include float
-            # in the promotion list
-            common_dtype = np.result_type(
-                *(promoted_field_dtypes + [np.float64])
-            )
+            # At this point, promoted_field_dtypes contains the types of
+            # the fields AFTER promotion
+            # We do not need to run result_type because it won't give
+            # more than float64, UNLESS something is complex128, which we
+            # do NOT want to use.
             structured_dtype = np.dtype(
                 list(zip(field_names, promoted_field_dtypes))
             )
+            # the following line actually does the type
+            # conversion/promotion (converts int to float)
             structured_data = self.data.astype(structured_dtype)
-            self.data = np.empty(
-                structured_data.shape + (len(field_names),),
-                dtype=common_dtype,
+            # we do not want a loop, and we do not want to copy the data.
+            # We just want a new view
+            self.data = self.data.astype(structured_dtype).view(
+                (np.dtype("f8"), structured_dtype.itemsize // 8)
             )
-            for field_idx, thisfield in enumerate(field_names):
-                self.data[..., field_idx] = structured_data[thisfield]
             if self.data_error is not None:
-                structured_error = self.data_error.astype(structured_dtype)
-                self.data_error = np.empty(
-                    structured_error.shape + (len(field_names),),
-                    dtype=common_dtype,
-                )
-                for field_idx, thisfield in enumerate(field_names):
-                    self.data_error[..., field_idx] = structured_error[
-                        thisfield
-                    ]
+                self.data_error = self.data_error.astype(
+                    structured_dtype
+                ).view((np.dtype("f8"), structured_dtype.itemsize // 8))
         for j in range(0, len(axes)):
             try:
                 thisindex = self.dimlabels.index(axes[j])
@@ -3828,27 +3824,18 @@ class nddata(object):
             self._pop_axis_info(thisindex)
             logger.debug(strm("return error is", return_error))
         if structured_dtype is not None:
-            structured_data = np.empty(
-                self.data.shape[:-1], dtype=structured_dtype
-            )
-            for field_idx, thisfield in enumerate(field_names):
-                field_data = self.data[..., field_idx]
-                field_dtype = structured_dtype.fields[thisfield][0]
-                if not np.issubdtype(field_dtype, np.complexfloating):
-                    field_data = np.real(field_data)
-                structured_data[thisfield] = field_data
-            self.data = structured_data
+            # here, we drop the new, innermost dimension that was used to
+            # store the fields, and expand the next one to accommodate
+            # all the fields
+            self.data = self.data.reshape(
+                self.data.shape[:-2]
+                + (self.data.shape[-2] * structured_dtype.itemsize // 8,)
+            ).view(structured_dtype)
             if self.data_error is not None:
-                structured_error = np.empty(
-                    self.data_error.shape[:-1], dtype=structured_dtype
-                )
-                for field_idx, thisfield in enumerate(field_names):
-                    field_error = self.data_error[..., field_idx]
-                    field_dtype = structured_dtype.fields[thisfield][0]
-                    if not np.issubdtype(field_dtype, np.complexfloating):
-                        field_error = np.real(field_error)
-                    structured_error[thisfield] = field_error
-                self.data_error = structured_error
+                self.data_error = self.data_error.reshape(
+                    self.data.shape[:-2]
+                    + (self.data.shape[-2] * structured_dtype.itemsize // 8,)
+                ).view(structured_dtype)
         return self
 
     def mean_nopop(self, axis):
@@ -4349,8 +4336,10 @@ class nddata(object):
             myspline_im = thefunc(
                 self.getaxis(self.dimlabels[0]), self.data.imag, **kwargs
             )
-            nddata_lambda = lambda x: (
-                nddata(myspline_re(x) + 1j * myspline_im(x), self.dimlabels[0])
+            nddata_lambda = (
+                lambda x: nddata(
+                    myspline_re(x) + 1j * myspline_im(x), self.dimlabels[0]
+                )
                 .set_axis(self.dimlabels[0], x)
                 .set_units(
                     self.dimlabels[0], self.get_units(self.dimlabels[0])
@@ -4359,8 +4348,8 @@ class nddata(object):
                 .copy_props(self)
             )
         else:
-            nddata_lambda = lambda x: (
-                nddata(myspline_re(x), self.dimlabels[0])
+            nddata_lambda = (
+                lambda x: nddata(myspline_re(x), self.dimlabels[0])
                 .set_axis(self.dimlabels[0], x)
                 .set_units(
                     self.dimlabels[0], self.get_units(self.dimlabels[0])
@@ -4697,7 +4686,7 @@ class nddata(object):
             self.set_axis(axis, lambda x: x / sfo1)
             self.set_units(axis, "ppm")
             max_ppm = self.getaxis(axis).max()
-            self.set_axis(axis, lambda x: x - max_ppm + offset)
+            self.set_axis(axis, lambda x: (x - max_ppm + offset))
             self.set_prop("y_inverted", True)
         return self
 
@@ -5827,9 +5816,8 @@ class nddata(object):
                     shapesout = np.round(shapesout)
                 shapesout = [shapesout] * len(axesout)
             elif isinstance(otherargs[0], dict):
-                axesout, shapesout = (
-                    list(otherargs[0].keys()),
-                    list(otherargs[0].values()),
+                axesout, shapesout = list(otherargs[0].keys()), list(
+                    otherargs[0].values()
                 )
             else:
                 raise ValueError("I don't know how to deal with this type!")
@@ -7617,9 +7605,9 @@ class fitdata(nddata):
     def functional_form(self, sym_expr):
         r"""The functional form, given as a sympy expression, to
         which you would like to fit the data."""
-        assert issympy(sym_expr), (
-            "for now, the functional form must be a sympy expression!"
-        )
+        assert issympy(
+            sym_expr
+        ), "for now, the functional form must be a sympy expression!"
         self.symbolic_expr = sym_expr
         # {{{ adapted from fromaxis, trying to adapt the variable
         symbols_in_expr = self.symbolic_expr.atoms(sp.Symbol)
