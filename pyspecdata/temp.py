@@ -16,4 +16,4 @@ a.data["power"] = np.r_[11:21]
 a.data["field"] = np.r_[1:11]
 print(a)
 a = a.mean("t")
-print(a)
+print("Here is the mean", a)
