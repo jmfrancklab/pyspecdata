@@ -3770,7 +3770,9 @@ class nddata(object):
                 promoted_field_dtypes.append(thisdtype)
             # the dtype needs to be at least a float, so include float
             # in the promotion list 
-            common_dtype = np.result_type(*(promoted_field_dtypes+(np.float,)))
+            common_dtype = np.result_type(
+                *(promoted_field_dtypes + [np.float64])
+            )
             # TODO ☐: the following isn't correct. We only want to
             #         change the type for the promoted fields. e.g. if
             #         one of the input fields is complex, we are going
@@ -3783,12 +3785,12 @@ class nddata(object):
             # and imag will be treated as 2 fields by the averaging/std,
             # but that's fine
             self.data = self.data.astype(structured_dtype).view(
-                (np.float, len(field_names))
+                (common_dtype, len(field_names))
             )
             if self.data_error is not None:
                 self.data_error = self.data_error.astype(
                     structured_dtype
-                ).view((np.float, len(field_names)))
+                ).view((common_dtype, len(field_names)))
         for j in range(0, len(axes)):
             try:
                 thisindex = self.dimlabels.index(axes[j])
