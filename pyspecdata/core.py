@@ -3778,9 +3778,11 @@ class nddata(object):
             structured_data = self.data.astype(structured_dtype)
             # we do not want a loop, and we do not want to copy the data.
             # We just want a new view
+            before = len(self.data.shape)
             self.data = self.data.astype(structured_dtype).view(
                 (np.dtype("f8"), structured_dtype.itemsize // 8)
             )
+            assert len(self.data.shape) == before + 1
             if self.data_error is not None:
                 self.data_error = self.data_error.astype(
                     structured_dtype
@@ -3827,15 +3829,18 @@ class nddata(object):
             # here, we drop the new, innermost dimension that was used to
             # store the fields, and expand the next one to accommodate
             # all the fields
-            self.data = self.data.reshape(
-                self.data.shape[:-2]
-                + (self.data.shape[-2] * structured_dtype.itemsize // 8,)
-            ).view(structured_dtype)
+            if len(self.data.shape) == 1:
+                # was zero-d to begin with
+                newshape = self.data.shape
+            else:
+                newshape = self.data.shape[:-2] + (
+                    self.data.shape[-2] * self.data.shape[-1],
+                )
+            self.data = self.data.reshape(newshape).view(structured_dtype)
             if self.data_error is not None:
-                self.data_error = self.data_error.reshape(
-                    self.data.shape[:-2]
-                    + (self.data.shape[-2] * structured_dtype.itemsize // 8,)
-                ).view(structured_dtype)
+                self.data_error = self.data_error.reshape(newshape).view(
+                    structured_dtype
+                )
         return self
 
     def mean_nopop(self, axis):
