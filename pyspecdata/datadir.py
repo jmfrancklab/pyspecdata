@@ -714,8 +714,10 @@ def getDATADIR(*args, **kwargs):
 
     Note that **the most common way** to use this mechanism is to set up your
     directories using
-    the pyspecdata_register_dir shell command -- see
+    the ``pyspecdata_register_dir`` shell command -- see
     :func:`~pyspecdata.datadir.register_directory`.
+    Alternatively, if PySide6 is installed, the ``pyspecdata_dataconfig``
+    command opens a GUI for editing the same configuration.
 
 
     It returns the directory ending in a trailing (back)slash.
@@ -732,7 +734,8 @@ def getDATADIR(*args, **kwargs):
         Typically, this gives the path relative to a google drive, rclone,
         dropbox, etc, repository.
         To make code portable, `exp_type` should **not** contain a full path
-        or or portions of the path that are specific to the computer/user.
+        or portions of the path that are specific to the computer/user.
+        The corresponding config-file value can be a full path.
 
         If the directory has note been used before, all the directories listed
         in the user's `_pyspecdata` or `.pyspecdata` config file will be
