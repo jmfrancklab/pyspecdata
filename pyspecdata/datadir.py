@@ -738,11 +738,13 @@ def getDATADIR(*args, **kwargs):
     typically used with the keyword argument `exp_type`, described below.
 
     Note that **the most common way** to use this mechanism is to set up your
-    directories using
+    directories using the ``pyspecdata_dataconfig``.
+    Note that you **must** have PySide6 installed to open the GUI.
+    (Otherwise, it creates a blank file for you).
+    
+    You can also add directories on the command line with
     the ``pyspecdata_register_dir`` shell command -- see
     :func:`~pyspecdata.datadir.register_directory`.
-    Alternatively, if PySide6 is installed, the ``pyspecdata_dataconfig``
-    command opens a GUI for editing the same configuration.
 
 
     It returns the directory ending in a trailing (back)slash.
@@ -760,7 +762,9 @@ def getDATADIR(*args, **kwargs):
         dropbox, etc, repository.
         To make code portable, `exp_type` should **not** contain a full path
         or portions of the path that are specific to the computer/user.
-        The corresponding config-file value can be a full path.
+        pySpecData relies on your config file
+        (shown by the ``pyspecdata_dataconfig`` GUI)
+        to store the full path.
 
         If the directory has note been used before, all the directories listed
         in the user's `_pyspecdata` or `.pyspecdata` config file will be
