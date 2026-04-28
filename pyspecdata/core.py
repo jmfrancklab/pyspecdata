@@ -37,7 +37,6 @@ from .matrix_math.dot import dot as MM_dot
 from .matrix_math.dot import matmul as MM_matmul
 from .matrix_math.dot import along as MM_along
 from .matrix_math.nnls import nnls as MM_nnls
-from os import environ
 import numpy as np
 import sympy as sp
 from numpy import r_, c_, nan, inf, pi
@@ -5243,7 +5242,8 @@ class nddata(object):
             axis = axis[0]
         else:
             raise ValueError(
-                "not a valid argument to set_axis -- look at the documentation!"
+                "not a valid argument to set_axis -- look at the"
+                " documentation!"
             )
         if axis == "INDEX":
             raise ValueError(

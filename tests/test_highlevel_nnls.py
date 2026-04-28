@@ -7,7 +7,8 @@ from numpy.random import seed
 
 
 def _load_real_pyspecdata_modules():
-    """Reload the installed package so `_nnls` stubs from other tests don't leak in."""
+    """Reload the installed package so `_nnls` stubs from other tests don't
+    leak in."""
     sys.modules.pop("_nnls", None)
     for name in list(sys.modules):
         if name == "pyspecdata" or name.startswith("pyspecdata."):
