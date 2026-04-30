@@ -3773,13 +3773,13 @@ class nddata(object):
             structured_dtype = np.dtype(
                 list(zip(field_names, promoted_field_dtypes))
             )
-            # the following line actually does the type
-            # conversion/promotion (converts int to float)
-            structured_data = self.data.astype(structured_dtype)
             # we do not want a loop, and we do not want to copy the data.
             # We just want a new view
             before = len(self.data.shape)
+            # the following line actually does the type
+            # conversion/promotion (converts int to float)
             self.data = self.data.astype(structured_dtype).view(
+                # and the view turns the fields into new dimension
                 (np.dtype("f8"), structured_dtype.itemsize // 8)
             )
             assert len(self.data.shape) == before + 1
