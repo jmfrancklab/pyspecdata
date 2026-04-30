@@ -1567,6 +1567,39 @@ class nddata(object):
             )
 
     def __str__(self):
+        def format_scalar(val, err=None):
+            "format the scalar, including the ± for the error"
+            if getattr(val, "dtype", None) is not None and val.dtype.names:
+                return (
+                    "("
+                    + ", ".join(
+                        "%s=%s"
+                        % (
+                            field_name,
+                            format_scalar(
+                                val[field_name],
+                                None if err is None else err[field_name],
+                            ),
+                        )
+                        for field_name in val.dtype.names
+                    )
+                    + ")"
+                )
+            # {{{ if 1d len 1, etc, convert to true scalars
+            if hasattr(val, "item"):
+                val = val.item()
+            if err is not None and hasattr(err, "item"):
+                err = err.item()
+            # }}}
+            if err is not None:
+                oom_err = int(np.floor(np.log10(err)))  # int takes floor
+                oom_val = int(np.floor(np.log10(val)))  # int takes floor
+                return ("%#0." + str(oom_val - oom_err + 1) + "g ± %#0.2g") % (
+                    val,
+                    err,
+                )
+            return "%#0.5g" % val
+
         def show_array(x, indent=""):
             x = repr(x)
             if x.startswith("np.array("):
@@ -1578,16 +1611,19 @@ class nddata(object):
 
         if self.data.size < 2:
             val = self.data.item()
+            if self.data.dtype.names is not None:
+                # self.data is always a NumPy array here, so checking
+                # dtype.names directly is enough to detect structured dtypes.
+                # For 0D structured arrays, item() returns a plain tuple,
+                # but self.data[()] preserves field access for formatting.
+                val = self.data[()]
             err = self.get_error()
             if err is not None:
-                err = err.item()
-                oom_err = int(np.floor(np.log10(err)))  # int takes floor
-                oom_val = int(np.floor(np.log10(val)))  # int takes floor
-                retval = (
-                    "%#0." + str(oom_val - oom_err + 1) + "g ± %#0.2g"
-                ) % (val, err)
-            else:
-                retval = "%#0.5g" % val
+                if err.dtype.names is not None:
+                    err = err[()]
+                else:
+                    err = err.item()
+            retval = format_scalar(val, err)
             myunits = self.get_units()
             if myunits is not None:
                 # say we have m^2 -- we want this rendered as m², and pint
@@ -3719,6 +3755,38 @@ class nddata(object):
         if isinstance(axes, str):
             axes = [axes]
         # }}}
+        structured_dtype = None
+        field_names = None
+        if self.data.dtype.names is not None:
+            field_names = self.data.dtype.names
+            promoted_field_dtypes = []
+            for thisfield in field_names:
+                thisdtype = self.data.dtype.fields[thisfield][0]
+                if np.issubdtype(thisdtype, np.integer):
+                    thisdtype = np.dtype("float64")
+                promoted_field_dtypes.append(thisdtype)
+            # At this point, promoted_field_dtypes contains the types of
+            # the fields AFTER promotion
+            # We do not need to run result_type because it won't give
+            # more than float64, UNLESS something is complex128, which we
+            # do NOT want to use.
+            structured_dtype = np.dtype(
+                list(zip(field_names, promoted_field_dtypes))
+            )
+            # we do not want a loop, and we do not want to copy the data.
+            # We just want a new view
+            before = len(self.data.shape)
+            # the following line actually does the type
+            # conversion/promotion (converts int to float)
+            self.data = self.data.astype(structured_dtype).view(
+                # and the view turns the fields into new dimension
+                (np.dtype("f8"), structured_dtype.itemsize // 8)
+            )
+            assert len(self.data.shape) == before + 1
+            if self.data_error is not None:
+                self.data_error = self.data_error.astype(
+                    structured_dtype
+                ).view((np.dtype("f8"), structured_dtype.itemsize // 8))
         for j in range(0, len(axes)):
             try:
                 thisindex = self.dimlabels.index(axes[j])
@@ -3757,6 +3825,22 @@ class nddata(object):
                 )  # set the error to the standard deviation
             self._pop_axis_info(thisindex)
             logger.debug(strm("return error is", return_error))
+        if structured_dtype is not None:
+            # here, we drop the new, innermost dimension that was used to
+            # store the fields, and expand the next one to accommodate
+            # all the fields
+            if len(self.data.shape) == 1:
+                # was zero-d to begin with
+                newshape = self.data.shape
+            else:
+                newshape = self.data.shape[:-2] + (
+                    self.data.shape[-2] * self.data.shape[-1],
+                )
+            self.data = self.data.reshape(newshape).view(structured_dtype)
+            if self.data_error is not None:
+                self.data_error = self.data_error.reshape(newshape).view(
+                    structured_dtype
+                )
         return self
 
     def mean_nopop(self, axis):
