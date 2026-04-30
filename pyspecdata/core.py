@@ -761,7 +761,7 @@ def plot(*args, **kwargs):
         if (
             (np.size(b) > 3)
             and all(abs((b - b[0]) / b[0]) < 1e-4)
-            and not ("nosemilog" in list(kwargs.keys()))
+            and "nosemilog" not in list(kwargs.keys())
         ):
             if "plottype" not in list(kwargs.keys()):
                 myplotfunc = ax.semilogx
@@ -5329,6 +5329,19 @@ class nddata(object):
                 "not a valid argument to set_axis -- look at the"
                 " documentation!"
             )
+        # TODO ☐: initializing these to a random object instance is very weird.
+        #         If you need to, initialize them to None, which I feel is more
+        #         standard. Also, with the changes that you are introducing,
+        #         you need to explain your strategy, and why two different
+        #         variables are needed here (why can't we just get away with
+        #         one, and if it's None, then there is no error/units
+        #         information to be set -- this also works naturally with the
+        #         general code strategy here that None means "unset" and might
+        #         help to reduce your lines)
+        keep_axis_error = object()
+        keep_axis_units = object()
+        new_axis_error = keep_axis_error
+        new_axis_units = keep_axis_units
         if axis == "INDEX":
             raise ValueError(
                 "Axes that are called INDEX are special, and you are not"
@@ -5338,23 +5351,69 @@ class nddata(object):
             x = self.getaxis(axis)
             x[:] = value(x.copy())
             return self
+        elif isinstance(value, nddata):
+            if len(value.dimlabels) != 1:
+                raise ValueError(
+                    strm(
+                        "When setting axis",
+                        axis,
+                        "from an nddata, the rhs must have exactly one"
+                        " dimension, but it has",
+                        value.dimlabels,
+                    )
+                )
+            if value.dimlabels[0] != axis:
+                raise ValueError(
+                    strm(
+                        "When setting axis",
+                        axis,
+                        "from an nddata, the rhs dimension must also be",
+                        axis,
+                        "but it is",
+                        value.dimlabels[0],
+                    )
+                )
+            new_axis_error = value.get_error()
+            new_axis_units = value.get_units()
+            value = value.data
         elif type(value) in [float, int, np.double, np.float64]:
             value = np.linspace(0.0, value, self.axlen(axis))
         elif isinstance(value, list):
             value = np.array(value)
         if self.axis_coords is None or len(self.axis_coords) == 0:
             self.axis_coords = [None] * len(self.dimlabels)
+        if self.axis_coords_error is None or len(self.axis_coords_error) == 0:
             self.axis_coords_error = [None] * len(self.dimlabels)
+        if self.axis_coords_units is None or len(self.axis_coords_units) == 0:
+            self.axis_coords_units = [None] * len(self.dimlabels)
+        axis_idx = self.axn(axis)
+        preserve_axis_error = (
+            value is not None
+            and new_axis_error is keep_axis_error
+            and value is self.axis_coords[axis_idx]
+        )
         if value is None:
-            self.axis_coords[self.axn(axis)] = None
+            self.axis_coords[axis_idx] = None
         else:
             a = len(value)
-            b = self.data.shape[self.axn(axis)]
+            b = self.data.shape[axis_idx]
             assert a == b, (
                 "Along the axis %s, the length of the axis you passed (%d)"
                 " doesn't match the size of the data (%d)." % (axis, a, b)
             )
-            self.axis_coords[self.axn(axis)] = value
+            self.axis_coords[axis_idx] = value
+        # TODO ☐: couldn't a lot of the conditionals here be grouped with the
+        #         conditionals above?  It seems like the code could be more
+        #         compact if you organized it better.
+        if new_axis_error is keep_axis_error:
+            if not preserve_axis_error:
+                self.axis_coords_error[axis_idx] = None
+        elif new_axis_error is None:
+            self.axis_coords_error[axis_idx] = None
+        else:
+            self.set_error(axis, new_axis_error)
+        if new_axis_units is not keep_axis_units:
+            self.set_units(axis, new_axis_units)
         return self
 
     def shear(
@@ -5821,14 +5880,15 @@ class nddata(object):
                     shapesout = np.round(shapesout)
                 shapesout = [shapesout] * len(axesout)
             elif isinstance(otherargs[0], dict):
-                axesout, shapesout = list(otherargs[0].keys()), list(
-                    otherargs[0].values()
+                axesout, shapesout = (
+                    list(otherargs[0].keys()),
+                    list(otherargs[0].values()),
                 )
             else:
                 raise ValueError("I don't know how to deal with this type!")
         else:
             raise ValueError("otherargs must be one or two arguments!")
-        if not type(axesout[0]) is str:
+        if type(axesout[0]) is not str:
             raise ValueError(
                 "the second argument should give the list of new axes that"
                 f" are created by chunking '{axisin}'"
@@ -5968,7 +6028,7 @@ class nddata(object):
             # {{{ actually reorder the data and error -- perhaps a view would
             #     be more efficient here
             old_data = self.data
-            has_data_error = not (self.get_error() is None)
+            has_data_error = self.get_error() is not None
             self.data = np.empty(new_shape, dtype=self.data.dtype)
             if has_data_error:
                 old_error = self.get_error()
