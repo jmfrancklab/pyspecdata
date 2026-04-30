@@ -5326,8 +5326,8 @@ class nddata(object):
             axis = axis[0]
         else:
             raise ValueError(
-                "not a valid argument to set_axis -- look at the "
-                "documentation!"
+                "not a valid argument to set_axis -- look at the"
+                " documentation!"
             )
         if axis == "INDEX":
             raise ValueError(

@@ -255,10 +255,10 @@ def ft_new_startpoint(self, axis, which_domain, value=None, nearest=False):
                 "that dimension"
             )
     if value is not None:
-        print("trying to set to", value)
+        logging.debug(strm("trying to set to", value))
         n_du = (orig_u - value) / du  # number of du's shifted by
         if n_du != 0 and abs((n_du - round(n_du)) / n_du) > 1e-3:
-            print("n_du is off by a significant fraction")
+            logging.debug(strm("n_du is off by a significant fraction"))
             if nearest is None:
                 raise ValueError(
                     strm(
