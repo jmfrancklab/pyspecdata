@@ -16,6 +16,7 @@ sys.modules.setdefault("pyspecdata.core", core_stub)
 gen_stub = types.ModuleType("pyspecdata.general_functions")
 gen_stub.strm = lambda *args, **kwargs: ""
 gen_stub.lsafen = lambda x: x
+gen_stub.read_binary = lambda *args, **kwargs: None
 sys.modules.setdefault("pyspecdata.general_functions", gen_stub)
 
 datadir_stub = types.ModuleType("pyspecdata.datadir")
