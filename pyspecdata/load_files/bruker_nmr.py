@@ -1,4 +1,5 @@
 from ..core import *
+from ..general_functions import read_binary
 from ..datadir import dirformat
 from .open_subpath import open_subpath
 import os.path
@@ -83,12 +84,11 @@ def series(file_reference, *subpath, **kwargs):
     td1 = int(v2['TD'])
     td2_zf = int(np.ceil(td2/256.)*256) # round up to 256 points, which is how it's stored
     fp = open_subpath(file_reference,*(subpath+('ser',)), mode='rb')
-    data = fp.read()
-    fp.close()
     if int(v['BYTORDA']) == 1:
-        data = np.frombuffer(data, dtype=np.dtype('>i4'), count=(len(data)//4))
+        data = read_binary(fp, np.dtype('>i4'))
     else:
-        data = np.frombuffer(data, dtype=np.dtype('<i4'), count=(len(data)//4))
+        data = read_binary(fp, np.dtype('<i4'))
+    fp.close()
     data = np.complex128(data)
     data = data[0::2]+1j*data[1::2]
     data /= rg
@@ -186,11 +186,11 @@ def load_1D(file_reference, *subpath, **kwargs):
     td1 = 1
     td2_zf = int(np.ceil(td2/256.)*256) # round up to 256 points, which is how it's stored
     fp = open_subpath(file_reference, *(subpath+('fid',)),mode='rb')
-    data = fp.read()
     if int(v['BYTORDA']) == 1:
-        data = np.frombuffer(data, dtype=np.dtype('>i4'), count=(len(data)//4))
+        data = read_binary(fp, np.dtype('>i4'))
     else:
-        data = np.frombuffer(data, dtype=np.dtype('<i4'), count=(len(data)//4))
+        data = read_binary(fp, np.dtype('<i4'))
+    fp.close()
     data = np.complex128(data)
     data = data[0::2]+1j*data[1::2]
     rg = det_rg(v['RG'])

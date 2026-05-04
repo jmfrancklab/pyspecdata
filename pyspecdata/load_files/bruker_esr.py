@@ -1,5 +1,5 @@
 from ..core import nddata
-from ..general_functions import strm, lsafen
+from ..general_functions import strm, lsafen, read_binary
 from ..datadir import rclone_search
 import numpy as np
 from numpy import r_
@@ -53,8 +53,8 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
         filename_spc, filename_par = filename.replace(".DSC", ".DTA"), filename
     elif filename[-4:] == ".YGF":
         filename_spc, filename_par = filename.replace(
-            ".YGF", ".DSC"
-        ), filename.replace(".YGF", ".DTA")
+            ".YGF", ".DTA"
+        ), filename.replace(".YGF", ".DSC")
     else:
         raise ValueError(
             strm(
@@ -111,9 +111,9 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
         )
     with open(filename_spc, "rb") as fp:
         if all([j == "REAL" for j in ikkf]):
-            data = np.frombuffer(fp.read(), ">f8")
+            data = read_binary(fp, ">f8")
         elif all([j == "CPLX" for j in ikkf]):
-            data = np.frombuffer(fp.read(), ">c16")
+            data = read_binary(fp, ">c16")
         else:
             raise ValueError(
                 "the data type (IKKF) is givn as "
@@ -269,8 +269,7 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
                             os.path.split(filename_ygf)[0],
                         )
                 with open(filename_ygf, "rb") as fp:
-                    y_axis = fp.read()
-                y_axis = np.frombuffer(y_axis, ">f8")
+                    y_axis = read_binary(fp, ">f8", count=y_points_calcd)
                 assert (
                     len(y_axis) == y_points_calcd
                 ), "Length of the power axis doesn't seem to match!"
@@ -444,8 +443,7 @@ def winepr(filename, dimname="", exp_type=None):
             os.path.split(filename_spc)[-1],
         )
     with open(filename_spc, "rb") as fp:
-        data = fp.read()
-    data = np.frombuffer(data, "<f4")
+        data = read_binary(fp, "<f4")
     # }}}
     # load the parameters
     v = winepr_load_acqu(filename_par)

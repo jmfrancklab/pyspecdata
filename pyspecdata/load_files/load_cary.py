@@ -85,7 +85,7 @@ def load_header(fp, param):
             strm("not yet set up for Tstore_type", param["Tstore_type"])
         )
     param.update(dict(zip(retval.dtype.fields, retval.item())))
-    spectrum_name = np.fromfile(fp, dtype="a256", count=1).item()
+    spectrum_name = np.fromfile(fp, dtype="S256", count=1).item()
     spectrum_name = spectrum_name[0 : spectrum_name.find(b"\x00")].decode(
         "ascii"
     )
@@ -101,9 +101,9 @@ def load_cary(filename):
         # line 92
         thislen = np.fromfile(fp, dtype="<u1", count=1).item()
         logging.debug(strm("thislen is", thislen))
-        magic = np.fromfile(fp, dtype=f"a{thislen}", count=1).item()
+        magic = np.fromfile(fp, dtype=f"S{thislen}", count=1).item()
         logging.debug(strm("magic is", magic))
-        _ = np.fromfile(fp, dtype=f"a{61-thislen}", count=1)
+        _ = np.fromfile(fp, dtype=f"S{61-thislen}", count=1)
         marker = fp.tell()
         fp.seek(0, 2)  # seek to end
         file_end = fp.tell()
@@ -115,7 +115,7 @@ def load_cary(filename):
             logging.debug(strm("blockoffset", param["blockoffset"]))
             # line 100
             thislen = np.fromfile(fp, dtype="<u4", count=1).item()
-            temp = np.fromfile(fp, dtype=f"a{thislen}", count=1).item()
+            temp = np.fromfile(fp, dtype=f"S{thislen}", count=1).item()
             try:
                 param["Tstore_type"] = temp.decode("ascii")
             except Exception:

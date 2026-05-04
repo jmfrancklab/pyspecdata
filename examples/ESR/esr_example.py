@@ -16,7 +16,7 @@ import pyspecdata as psd
 # The data is initial organized into two dimensions -- `harmonic` and $B_0$.
 # 
 
-d = psd.find_file("S175R1a.*DHPC.*200304",
+d = psd.find_file("S175R1a.*DHPC.*today.*200304",
         exp_type='francklab_esr/Sam')
 print(d.shape)
 print("here, we see the harmonic axis contains both harmonic and phase info",repr(d.getaxis('harmonic')))

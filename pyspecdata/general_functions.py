@@ -334,6 +334,31 @@ def strm(*args):
     return " ".join(map(str, args))
 
 
+def read_binary(fp, dtype, count=None):
+    """Allocate a writable NumPy array and fill it with ``readinto``."""
+    dtype = np.dtype(dtype)
+    if count is None:
+        start = fp.tell()
+        fp.seek(0, os.SEEK_END)
+        remaining_bytes = fp.tell() - start
+        fp.seek(start, os.SEEK_SET)
+        count, remainder = divmod(remaining_bytes, dtype.itemsize)
+        if remainder:
+            raise IOError(
+                f"{remaining_bytes} bytes is not divisible by"
+                f" {dtype.itemsize} for dtype {dtype}"
+            )
+    retval = np.empty(int(count), dtype=dtype)
+    bytes_read = fp.readinto(retval)
+    # ``readinto`` returns a short count at EOF rather than raising.
+    if bytes_read != retval.nbytes:
+        raise IOError(
+            f"Tried to read {retval.nbytes} bytes for dtype {dtype},"
+            f" but received {bytes_read}"
+        )
+    return retval
+
+
 exp_re = re.compile(r"(.*)e([+\-])0*([0-9]+)")
 
 
