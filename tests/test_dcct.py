@@ -41,7 +41,8 @@ def test_dcct_smoke_with_phase_dimensions():
     d.set_axis("t2", np.linspace(0.0, 15e-3, 16))
     d.set_units("t2", "s")
     d.ft("t2", shift=True).ft(["ph1", "ph2"])
-    ax_list, _ = dcct_mod.DCCT(d)
+    fig = plt.figure()
+    ax_list, _ = dcct_mod.DCCT(d, fig=fig)
     assert len(ax_list) == 8
     plt.close("all")
 

@@ -62,7 +62,8 @@ def decorate_axes(
             depth
             + 1  # plus one so the first horizontal isn't placed at 0
             #      (overlapping with the spine of the indirect axis)
-        ) * horiz_label_spacer  # will space the vertical lines along x approp.
+        ) * horiz_label_spacer  # will space the vertical lines along x
+        #                         approp.
         x1_disp = -label_spacing
         # {{{ Take y coordinate of top and bottom of axes objects to get the 2
         #     points for drawing the lines. To be lazy I pull this from the
@@ -306,7 +307,11 @@ def DCCT(
         ):
             fig = bbox.get_gridspec().figure
         else:
-            fig = plt.figure()
+            raise RuntimeError(
+                "Behavior of DCCT has been changed!  You either need to"
+                " (1) use the figlist_var DCCT method (2) pass a bbox or"
+                " (3) pass a fig kwarg"
+            )
     my_data = this_nddata.C
     if isinstance(bbox, SubplotSpec):
         temp = bbox.get_position(fig)
@@ -332,9 +337,10 @@ def DCCT(
                 this_max_coh_jump = max_coh_jump[this_dim]
                 all_possibilities = np.empty(
                     (int((2 * this_max_coh_jump + 1) / n_ph) + 1) * n_ph
-                )  # on reviewing, I *believe* this this is designed to fit the
-                #    array from -this_max_coh_jump to +this_max_coh_jump, but
-                #    it needs to round up to the closest multiple of n_ph
+                )  # on reviewing, I *believe* this this is designed to
+                #    fit the array from -this_max_coh_jump to
+                #    +this_max_coh_jump, but it needs to round up to the
+                #    closest multiple of n_ph
                 all_possibilities[:] = nan
                 all_possibilities[: this_max_coh_jump + 1] = r_[
                     0 : this_max_coh_jump + 1
@@ -350,16 +356,22 @@ def DCCT(
                 for j in range(n_ph):
                     temp = all_possibilities[
                         :, j
-                    ]  # grab the columns, which are the labels for all aliases
-                    #    that belong at this index
+                    ]  # grab the columns, which are the labels for all
+                    #    aliases that belong at this index
                     if j == 0:
-                        temp = ", ".join([
-                            "%d" % j for j in np.sort(temp[np.isfinite(temp)])
-                        ])
+                        temp = ", ".join(
+                            [
+                                "%d" % j
+                                for j in np.sort(temp[np.isfinite(temp)])
+                            ]
+                        )
                     else:
-                        temp = ", ".join([
-                            "%+d" % j for j in np.sort(temp[np.isfinite(temp)])
-                        ])
+                        temp = ", ".join(
+                            [
+                                "%+d" % j
+                                for j in np.sort(temp[np.isfinite(temp)])
+                            ]
+                        )
                     if len(temp) == 0:
                         temp = "X"
                     labels_in_order.append(temp)
@@ -393,11 +405,12 @@ def DCCT(
     # {{{ Determine number of axes objects based on shape of phase cycling
     #     dimensions
     # the procedure is to move from the innermost dimension to the outermost
-    # dimension, zooming out and replicating the division lines with each step.
+    # dimension, zooming out and replicating the division lines with
+    # each step.
     for j, thisdim in enumerate(a_shape.dimlabels[::-1][2:]):
-        # I'm going to zoom out, and the division lines I add will be twice the
-        # size of the largest I have added to date, so divide all previous
-        # sizes by 2
+        # I'm going to zoom out, and the division lines I add will be
+        # twice the size of the largest I have added to date, so divide
+        # all previous sizes by 2
         old = [j / 2.0 for j in divisions]
         # replicate the previous set of division lines, and adding a bolder
         # division (thickness = 1 vs. the most recent which is now thickness =
@@ -427,15 +440,18 @@ def DCCT(
     axes_width = bbox[2] - allow_for_labels
     for j, b in enumerate(axes_bottom):
         ax_list.append(
-            plt.axes([
-                allow_for_labels + bbox[0],
-                b,
-                axes_width,
-                axes_height,
-            ])
+            plt.axes(
+                [
+                    allow_for_labels + bbox[0],
+                    b,
+                    axes_width,
+                    axes_height,
+                ]
+            )
         )  # lbwh
     # {{{ make blended transform for plotting decorations sets origin for the
-    #     blended transform to the bottom left corner of the bottom axes object
+    #     blended transform to the bottom left corner of the bottom axes
+    #     object
     transDispTranslated = IdentityTransform() + ScaledTranslation(
         (allow_for_labels + bbox[0]), bbox[1], fig.transFigure
     )
@@ -577,7 +593,7 @@ def DCCT(
             0
         ].transAxes.transform((0, 0))
         if interpolation:
-            kwargs['interpolation'] = interpolation
+            kwargs["interpolation"] = interpolation
         else:
             if A["smooshed", j].data.shape[0] > width_px:
                 logging.debug(

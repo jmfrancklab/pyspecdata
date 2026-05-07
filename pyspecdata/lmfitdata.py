@@ -482,13 +482,23 @@ class lmfitdata(nddata):
         jacobian_array = np.array(
             [
                 self._apply_residual_transform(
-                    j(
+                    np.full_like(
+                        self.getaxis(self.fit_axis),
+                        raw_jacobian,
+                        dtype=float,
+                    )
+                    if np.isscalar(raw_jacobian)
+                    else raw_jacobian
+                )
+                for jacobian_fn in self.jacobian_lambda
+                for raw_jacobian in [
+                    jacobian_fn(
                         *(self.getaxis(k) for k in self.variable_names),
                         **pars.valuesdict(),
                     )
-                )  # function elements on the outside, so parameters can go on
-                #    the inside
-                for j in self.jacobian_lambda
+                    # function elements on the outside, so parameters can
+                    # go on the inside
+                ]
             ]
         )
         if np.issubdtype(
