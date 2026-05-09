@@ -1,4 +1,52 @@
 #!/usr/bin/env python3
+"""
+fit ESR to Lorentzian basis
+===========================
+
+λ_L is FWHM, not HWHM.
+For Lorentzian absorption:
+    L(B; B_c, λ_L) has HWHM = λ_L/2
+
+Fourier rule:
+    ℱ{L}(u) = exp(−π λ_L |u|) exp(−i 2π u B_c)
+
+Derivative rule:
+    ℱ{∂L/∂B} = i 2π u ℱ{L}
+
+Therefore:
+    A_u(u, B_c, λ_L)
+      = i 2π u exp(−π λ_L |u|) exp(−i 2π u B_c)
+
+This uses pyspecdata broadcasting over:
+    u        conjugate to B₀
+    center   Lorentzian center field B_c
+    λ_L      Lorentzian FWHM
+
+The SVD compression works like this:
+====================================
+
+Original constrained problem:
+    minimize ½ ‖A c − y‖₂²
+    subject to c ≥ 0 and 1ᵀc ≤ τ
+
+SVD:
+    A ≈ Uᵣ Σᵣ Vᵣᵀ
+
+Define:
+    Ã = Σᵣ Vᵣᵀ
+    ỹ = Uᵣᵀ y
+
+Compressed problem:
+    minimize ½ ‖Ã c − ỹ‖₂²
+    subject to c ≥ 0
+
+Positive LARS computes the LASSO path:
+    minimize ½ ‖Ã c − ỹ‖₂² + α 1ᵀc
+    with c ≥ 0
+
+Reading off 1ᵀc along that path gives the desired residual-vs-L1 curve.
+
+"""
 # vim: set foldmethod=marker :
 
 from pyspecdata import *
@@ -18,44 +66,27 @@ d = d["harmonic", 0]["phase", 0]
 d[Bname] *= 1e-4
 d.set_units(Bname, "T")
 d.set_ft_initial(Bname, "f").set_ft_prop(Bname, "time_not_aliased")
-print(d[Bname])
 
 # A derivative Lorentzian dictionary cannot represent a DC baseline.
 # Remove the DC component explicitly before fitting.
-d -= d.mean(Bname)
+d -= d.C.mean(Bname)
 
 # }}}
 
 # {{{ construct dense Lorentzian-derivative basis using labeled broadcasting
 
+# TODO ☐: move these up to the top
 n_center = 800
 n_lambda_L = 50
 
-# λ_L is FWHM, not HWHM.
-# For Lorentzian absorption:
-#     L(B; B_c, λ_L) has HWHM = λ_L/2
-#
-# Fourier rule:
-#     ℱ{L}(u) = exp(−π λ_L |u|) exp(−i 2π u B_c)
-#
-# Derivative rule:
-#     ℱ{∂L/∂B} = i 2π u ℱ{L}
-#
-# Therefore:
-#     A_u(u, B_c, λ_L)
-#       = i 2π u exp(−π λ_L |u|) exp(−i 2π u B_c)
-#
-# This uses pyspecdata broadcasting over:
-#     u        conjugate to B₀
-#     center   Lorentzian center field B_c
-#     λ_L      Lorentzian FWHM
-
-print(d[Bname]);quit()
 center = nddata(
     r_[d.getaxis(Bname)[0]:d.getaxis(Bname)[-1]:n_center * 1j],
     "center",
 ).set_units("center", "T")
 
+# TODO ☐: move the basis construction into a function (which will accept n center, n lambda, as well as the limits.
+# TODO ☐: to make sure that everything is correct, first plot with an extremely reduced basis, and plot the funcctions (this means that you will want to put the code in a figlist block starting from this point.
+# TODO ☐: also, n center =800 nlabmda = 50 takes a very very long time to run.  Make an extremely reduced basis to start, so that we can debug.
 lambda_L = nddata(
     logspace(-5, -2.5, n_lambda_L),
     "lambda_L",
@@ -89,45 +120,20 @@ A.smoosh(["center", "lambda_L"], "basis")
 # }}}
 
 # {{{ SVD-compress residual coordinates
-
-# Original constrained problem:
-#     minimize ½ ‖A c − y‖₂²
-#     subject to c ≥ 0 and 1ᵀc ≤ τ
-#
-# SVD:
-#     A ≈ Uᵣ Σᵣ Vᵣᵀ
-#
-# Define:
-#     Ã = Σᵣ Vᵣᵀ
-#     ỹ = Uᵣᵀ y
-#
-# Compressed problem:
-#     minimize ½ ‖Ã c − ỹ‖₂²
-#     subject to c ≥ 0
-#
-# Positive LARS computes the LASSO path:
-#     minimize ½ ‖Ã c − ỹ‖₂² + α 1ᵀc
-#     with c ≥ 0
-#
-# Reading off 1ᵀc along that path gives the desired residual-vs-L1 curve.
-
 U, Sigma, Vh = A.C.svd(Bname, "basis")
-
 A_tilde = Sigma * Vh
 y_tilde = U @ d
-
+print("during compression, d was reduced from",d.shape,"to",y_tilde.shape)
 # }}}
 
 # {{{ positive LARS solver boundary
-
 max_active = 400
-
 # Raw arrays appear only at the external solver boundary.
 # X has shape:
 #     n_samples × n_features = n_SV × n_basis
 X = A_tilde.C.reorder(["SV", "basis"]).data.real
 y = y_tilde.C.reorder("SV").data.real
-
+print("beginning LARS path")
 alphas, active, coefs = lars_path(
     X,
     y,
@@ -136,27 +142,22 @@ alphas, active, coefs = lars_path(
     max_iter=max_active,
     return_path=True,
 )
-
+print("done with LARS path")
 # Immediately wrap solver output back into labeled nddata.
 coef_path = nddata(coefs, ["basis", "alpha"])
 coef_path.setaxis("basis", A_tilde.getaxis("basis"))
 coef_path.setaxis("alpha", alphas)
-
 # }}}
 
 # {{{ evaluate path with pyspecdata algebra
-
 fit_path_tilde = A_tilde @ coef_path
 resid_path_tilde = fit_path_tilde - y_tilde
-
 residual_norm = sqrt((resid_path_tilde**2).sum("SV"))
 l1_norm = coef_path.sum("basis")
-
 # Show the least-regularized point in the path.
 show_idx = -1
 c_show = coef_path["alpha", show_idx]
 fit_show = A @ c_show
-
 # }}}
 
 # {{{ plots
