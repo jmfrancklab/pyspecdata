@@ -64,7 +64,6 @@ preview_n_lambda_L = 4
 # The dense basis can be made larger again once we know everything is correct.
 fit_n_center = 80
 fit_n_lambda_L = 8
-lambda_L_limits = (1e-5, 10 ** -2.5)
 # }}}
 
 
@@ -74,10 +73,12 @@ def build_lorentzian_basis(
     n_center,
     n_lambda_L,
     center_limits=None,
-    lambda_L_limits=lambda_L_limits,
 ):
+    x = d.getaxis(Bname)
+    # go for 5x the pixel size (decayed to 0 at end), b/c otherwise, we get weird discretization issues
+    lambda_L_limits = ((x[1]-x[0])*5, (x[-1]-x[0])/2)
     if center_limits is None:
-        center_limits = (d.getaxis(Bname)[0], d.getaxis(Bname)[-1])
+        center_limits = (x[0], x[-1])
     center = nddata(
         r_[center_limits[0] : center_limits[1] : n_center * 1j],
         "center",
@@ -88,14 +89,16 @@ def build_lorentzian_basis(
     ).set_units("lambda_L", "T")
     u = d.C.ift(Bname).fromaxis(Bname)
     A = (
-        1j
+        -1j
         * 2
         * pi
         * u
         * exp(-pi * lambda_L * abs(u))
-        * exp(-1j * 2 * pi * u * center)
-    ).C.ft(Bname)
-    A.setaxis(Bname, d.getaxis(Bname))
+        * exp(1j * 2 * pi * u * center)
+    )
+    A[Bname,0] *= 0.5 # u=0 Heaviside issue
+    A.ft(Bname)
+    A.setaxis(Bname, x)
     A.set_units(Bname, d.get_units(Bname))
     # Normalize each column:
     #     ‖A_i‖₂ = 1
@@ -208,8 +211,4 @@ with figlist_var() as fl:
     plot(fit_show, label="fit", alpha=0.7)
     plot(d - fit_show, label="residual", alpha=0.7)
     legend()
-
-    os.makedirs("auto_figures", exist_ok=True)
-    fl.show("lorentzian_basis.pdf")
-
 # }}}
