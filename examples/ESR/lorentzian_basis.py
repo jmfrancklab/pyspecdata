@@ -103,108 +103,104 @@ def build_lorentzian_basis(
     return A
 
 
-def main():
-    init_logging(level="info")
+init_logging(level="info")
 
-    # {{{ load a real cw ESR spectrum
+# {{{ load a real cw ESR spectrum
 
-    d = find_file(
-        esr_file, exp_type="francklab_esr/Sam"
+d = find_file(
+    esr_file, exp_type="francklab_esr/Sam"
+)
+d.chunk_auto("harmonic", "phase")
+d = d["harmonic", 0]["phase", 0]
+
+d[Bname] *= 1e-4
+d.set_units(Bname, "T")
+d.set_ft_initial(Bname, "f").set_ft_prop(Bname, "time_not_aliased")
+
+# A derivative Lorentzian dictionary cannot represent a DC baseline.
+# Remove the DC component explicitly before fitting.
+d -= d.C.mean(Bname)
+
+# }}}
+
+# {{{ plots
+
+with figlist_var() as fl:
+    # {{{ construct dense Lorentzian-derivative basis using labeled broadcasting
+    preview_A = build_lorentzian_basis(
+        d, Bname, preview_n_center, preview_n_lambda_L
     )
-    d.chunk_auto("harmonic", "phase")
-    d = d["harmonic", 0]["phase", 0]
+    A = build_lorentzian_basis(d, Bname, fit_n_center, fit_n_lambda_L)
 
-    d[Bname] *= 1e-4
-    d.set_units(Bname, "T")
-    d.set_ft_initial(Bname, "f").set_ft_prop(Bname, "time_not_aliased")
+    # The imaginary component is transform-roundoff; the solver boundary below
+    # uses the real part.  Keep A as nddata until that boundary.
 
-    # A derivative Lorentzian dictionary cannot represent a DC baseline.
-    # Remove the DC component explicitly before fitting.
-    d -= d.C.mean(Bname)
-
+    # Collapse the physical coefficient grid only after constructing the basis.
+    # The coefficient vector c still indexes individual (center, λ_L) components.
+    A.smoosh(["center", "lambda_L"], "basis")
     # }}}
 
-    # {{{ plots
+    fl.next("reduced basis preview")
+    for center_j in range(preview_n_center):
+        for lambda_j in range(preview_n_lambda_L):
+            plot(
+                preview_A["center", center_j]["lambda_L", lambda_j],
+                alpha=0.35,
+                human_units=False,
+            )
+    title("reduced Lorentzian-derivative basis")
 
-    with figlist_var() as fl:
-        # {{{ construct dense Lorentzian-derivative basis using labeled broadcasting
-        preview_A = build_lorentzian_basis(
-            d, Bname, preview_n_center, preview_n_lambda_L
-        )
-        A = build_lorentzian_basis(d, Bname, fit_n_center, fit_n_lambda_L)
-
-        # The imaginary component is transform-roundoff; the solver boundary below
-        # uses the real part.  Keep A as nddata until that boundary.
-
-        # Collapse the physical coefficient grid only after constructing the basis.
-        # The coefficient vector c still indexes individual (center, λ_L) components.
-        A.smoosh(["center", "lambda_L"], "basis")
-        # }}}
-
-        fl.next("reduced basis preview")
-        for center_j in range(preview_n_center):
-            for lambda_j in range(preview_n_lambda_L):
-                plot(
-                    preview_A["center", center_j]["lambda_L", lambda_j],
-                    alpha=0.35,
-                    human_units=False,
-                )
-        title("reduced Lorentzian-derivative basis")
-
-        # {{{ SVD-compress residual coordinates
-        U, Sigma, Vh = A.C.svd(Bname, "basis")
-        A_tilde = Sigma * Vh
-        y_tilde = U @ d
-        print(
-            "during compression, d was reduced from",
-            d.shape,
-            "to",
-            y_tilde.shape,
-        )
-        # }}}
-
-        # {{{ positive LARS solver boundary
-        print("beginning LARS path")
-        alphas, active, coefs = lars_path(
-            A_tilde.C.reorder(["SV", "basis"]).data.real,
-            y_tilde.C.reorder("SV").data.real,
-            method="lasso",
-            positive=True,
-            max_iter=400,
-            return_path=True,
-        )
-        print("done with LARS path")
-        # Immediately wrap solver output back into labeled nddata.
-        coef_path = nddata(coefs, ["basis", "alpha"])
-        coef_path.setaxis("basis", A_tilde.getaxis("basis"))
-        coef_path.setaxis("alpha", alphas)
-        # }}}
-
-        # {{{ evaluate path with pyspecdata algebra
-        # Show the least-regularized point in the path.
-        fit_show = A @ coef_path["alpha", -1]
-        # }}}
-
-        fl.next("positive LARS path")
-        plot(
-            coef_path.sum("basis"),
-            sqrt((abs((A_tilde @ coef_path) - y_tilde) ** 2).sum("SV")),
-            "o-",
-        )
-        xlabel("positive L1 mass 1ᵀc")
-        ylabel("compressed residual norm ‖Ãc − ỹ‖₂")
-        title("positive Lorentzian-derivative LASSO path")
-
-        fl.next("fit at end of path")
-        plot(d, label="data", alpha=0.7)
-        plot(fit_show, label="fit", alpha=0.7)
-        plot(d - fit_show, label="residual", alpha=0.7)
-        legend()
-
-        fl.show()
-
+    # {{{ SVD-compress residual coordinates
+    U, Sigma, Vh = A.C.svd(Bname, "basis")
+    A_tilde = Sigma * Vh
+    y_tilde = U @ d
+    print(
+        "during compression, d was reduced from",
+        d.shape,
+        "to",
+        y_tilde.shape,
+    )
     # }}}
 
+    # {{{ positive LARS solver boundary
+    print("beginning LARS path")
+    alphas, active, coefs = lars_path(
+        A_tilde.C.reorder(["SV", "basis"]).data.real,
+        y_tilde.C.reorder("SV").data.real,
+        method="lasso",
+        positive=True,
+        max_iter=400,
+        return_path=True,
+    )
+    print("done with LARS path")
+    # Immediately wrap solver output back into labeled nddata.
+    coef_path = nddata(coefs, ["basis", "alpha"])
+    coef_path.setaxis("basis", A_tilde.getaxis("basis"))
+    coef_path.setaxis("alpha", alphas)
+    # }}}
 
-if __name__ == "__main__":
-    main()
+    # {{{ evaluate path with pyspecdata algebra
+    # Show the least-regularized point in the path.
+    fit_show = A @ coef_path["alpha", -1]
+    # }}}
+
+    fl.next("positive LARS path")
+    plot(
+        coef_path.sum("basis"),
+        sqrt((abs((A_tilde @ coef_path) - y_tilde) ** 2).sum("SV")),
+        "o-",
+    )
+    xlabel("positive L1 mass 1ᵀc")
+    ylabel("compressed residual norm ‖Ãc − ỹ‖₂")
+    title("positive Lorentzian-derivative LASSO path")
+
+    fl.next("fit at end of path")
+    plot(d, label="data", alpha=0.7)
+    plot(fit_show, label="fit", alpha=0.7)
+    plot(d - fit_show, label="residual", alpha=0.7)
+    legend()
+
+    fl.show()
+
+# }}}
+
