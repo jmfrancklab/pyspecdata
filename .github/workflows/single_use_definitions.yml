@@ -1,0 +1,64 @@
+name: Single-Use Definitions
+
+on: [push, pull_request]
+
+jobs:
+  single-use-definitions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Fetch all branches
+        run: |
+          git fetch --all
+          git fetch origin master
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            git fetch origin ${{ github.event.pull_request.head.ref }}
+          else
+            if [ ! "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+              git fetch origin ${{ github.event.before }}
+            fi
+          fi
+          git fetch origin ${{ github.event.after }}
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "$(git branch)"
+          fi
+
+      - name: Get changed files
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            MYCMD="git diff --name-only origin/${{ github.base_ref }}...origin/${{ github.event.pull_request.head.ref }} --diff-filter=AM"
+            echo "$MYCMD"
+            echo "$($MYCMD)"
+            CHANGED_FILES=$($MYCMD | grep '\.py$' | sed '/__init/d' | tr '\n' ' ')
+          else
+            if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+              CHANGED_FILES=""
+            else
+              MYCMD="git diff --name-only ${{ github.event.before }} ${{ github.event.after }} --diff-filter=AM"
+              echo "$MYCMD"
+              echo "$($MYCMD)"
+              CHANGED_FILES=$($MYCMD | grep '\.py$' | sed '/__init/d' | tr '\n' ' ')
+            fi
+          fi
+          echo "Changed Python files:"
+          echo "$CHANGED_FILES"
+          echo "CHANGED_FILES=$CHANGED_FILES" >> $GITHUB_ENV
+
+      - name: Check changed files for single-use definitions
+        run: |
+          if [ -n "$CHANGED_FILES" ]; then
+            python .github/scripts/check_single_use.py $CHANGED_FILES
+          else
+            echo "No Python files were changed."
+          fi
+        env:
+          CHANGED_FILES: ${{ env.CHANGED_FILES }}

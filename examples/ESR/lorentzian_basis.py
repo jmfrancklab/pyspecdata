@@ -50,131 +50,161 @@ Reading off 1ᵀc along that path gives the desired residual-vs-L1 curve.
 # vim: set foldmethod=marker :
 
 from pyspecdata import *
-from numpy import r_, pi, exp, logspace, sqrt
+from numpy import r_, pi, exp, logspace, sqrt, log10
+from matplotlib.pyplot import title, xlabel, ylabel, legend
 from sklearn.linear_model import lars_path
 
-init_logging(level="info")
-
-# {{{ load a real cw ESR spectrum
-
+# {{{ changeable parameters
 Bname = "$B_0$"
-
-d = find_file("S175R1a.*DHPC.*200304", exp_type="francklab_esr/Sam")
-d.chunk_auto("harmonic", "phase")
-d = d["harmonic", 0]["phase", 0]
-
-d[Bname] *= 1e-4
-d.set_units(Bname, "T")
-d.set_ft_initial(Bname, "f").set_ft_prop(Bname, "time_not_aliased")
-
-# A derivative Lorentzian dictionary cannot represent a DC baseline.
-# Remove the DC component explicitly before fitting.
-d -= d.C.mean(Bname)
-
+esr_file = "15N_S175R1a_pR_DHPC_today_200304.DSC"
+# Use a tiny basis first so that we can inspect the functions and debug fast.
+preview_n_center = 7
+preview_n_lambda_L = 4
+# The dense basis can be made larger again once we know everything is correct.
+fit_n_center = 80
+fit_n_lambda_L = 8
+lambda_L_limits = (1e-5, 10 ** -2.5)
 # }}}
 
-# {{{ construct dense Lorentzian-derivative basis using labeled broadcasting
 
-# TODO ☐: move these up to the top
-n_center = 800
-n_lambda_L = 50
+def build_lorentzian_basis(
+    d,
+    Bname,
+    n_center,
+    n_lambda_L,
+    center_limits=None,
+    lambda_L_limits=lambda_L_limits,
+):
+    if center_limits is None:
+        center_limits = (d.getaxis(Bname)[0], d.getaxis(Bname)[-1])
+    center = nddata(
+        r_[center_limits[0] : center_limits[1] : n_center * 1j],
+        "center",
+    ).set_units("center", "T")
+    lambda_L = nddata(
+        logspace(log10(lambda_L_limits[0]), log10(lambda_L_limits[1]), n_lambda_L),
+        "lambda_L",
+    ).set_units("lambda_L", "T")
+    u = d.C.ift(Bname).fromaxis(Bname)
+    A = (
+        1j
+        * 2
+        * pi
+        * u
+        * exp(-pi * lambda_L * abs(u))
+        * exp(-1j * 2 * pi * u * center)
+    ).C.ft(Bname)
+    # Normalize each column:
+    #     ‖A_i‖₂ = 1
+    #
+    # Otherwise the L1 constraint would prefer some linewidths simply because
+    # the column norm changes with λ_L.
+    A /= sqrt((abs(A) ** 2).sum(Bname))
+    return A
 
-center = nddata(
-    r_[d.getaxis(Bname)[0]:d.getaxis(Bname)[-1]:n_center * 1j],
-    "center",
-).set_units("center", "T")
 
-# TODO ☐: move the basis construction into a function (which will accept n center, n lambda, as well as the limits.
-# TODO ☐: to make sure that everything is correct, first plot with an extremely reduced basis, and plot the funcctions (this means that you will want to put the code in a figlist block starting from this point.
-# TODO ☐: also, n center =800 nlabmda = 50 takes a very very long time to run.  Make an extremely reduced basis to start, so that we can debug.
-lambda_L = nddata(
-    logspace(-5, -2.5, n_lambda_L),
-    "lambda_L",
-).set_units("lambda_L", "T")
+def main():
+    init_logging(level="info")
 
-u = d.C.ift(Bname).fromaxis(Bname)
+    # {{{ load a real cw ESR spectrum
 
-A = (
-    1j
-    * 2
-    * pi
-    * u
-    * exp(-pi * lambda_L * abs(u))
-    * exp(-1j * 2 * pi * u * center)
-).C.ft(Bname)
+    d = find_file(
+        esr_file, exp_type="francklab_esr/Sam"
+    )
+    d.chunk_auto("harmonic", "phase")
+    d = d["harmonic", 0]["phase", 0]
 
-# The imaginary component is transform-roundoff; the solver boundary below
-# uses the real part.  Keep A as nddata until that boundary.
+    d[Bname] *= 1e-4
+    d.set_units(Bname, "T")
+    d.set_ft_initial(Bname, "f").set_ft_prop(Bname, "time_not_aliased")
 
-# Normalize each column:
-#     ‖A_i‖₂ = 1
-#
-# Otherwise the L1 constraint would prefer some linewidths simply because
-# the column norm changes with λ_L.
-A /= sqrt((A**2).sum(Bname))
+    # A derivative Lorentzian dictionary cannot represent a DC baseline.
+    # Remove the DC component explicitly before fitting.
+    d -= d.C.mean(Bname)
 
-# Collapse the physical coefficient grid only after constructing the basis.
-# The coefficient vector c still indexes individual (center, λ_L) components.
-A.smoosh(["center", "lambda_L"], "basis")
+    # }}}
 
-# }}}
+    # {{{ plots
 
-# {{{ SVD-compress residual coordinates
-U, Sigma, Vh = A.C.svd(Bname, "basis")
-A_tilde = Sigma * Vh
-y_tilde = U @ d
-print("during compression, d was reduced from",d.shape,"to",y_tilde.shape)
-# }}}
+    with figlist_var() as fl:
+        # {{{ construct dense Lorentzian-derivative basis using labeled broadcasting
+        preview_A = build_lorentzian_basis(
+            d, Bname, preview_n_center, preview_n_lambda_L
+        )
+        A = build_lorentzian_basis(d, Bname, fit_n_center, fit_n_lambda_L)
 
-# {{{ positive LARS solver boundary
-max_active = 400
-# Raw arrays appear only at the external solver boundary.
-# X has shape:
-#     n_samples × n_features = n_SV × n_basis
-X = A_tilde.C.reorder(["SV", "basis"]).data.real
-y = y_tilde.C.reorder("SV").data.real
-print("beginning LARS path")
-alphas, active, coefs = lars_path(
-    X,
-    y,
-    method="lasso",
-    positive=True,
-    max_iter=max_active,
-    return_path=True,
-)
-print("done with LARS path")
-# Immediately wrap solver output back into labeled nddata.
-coef_path = nddata(coefs, ["basis", "alpha"])
-coef_path.setaxis("basis", A_tilde.getaxis("basis"))
-coef_path.setaxis("alpha", alphas)
-# }}}
+        # The imaginary component is transform-roundoff; the solver boundary below
+        # uses the real part.  Keep A as nddata until that boundary.
 
-# {{{ evaluate path with pyspecdata algebra
-fit_path_tilde = A_tilde @ coef_path
-resid_path_tilde = fit_path_tilde - y_tilde
-residual_norm = sqrt((resid_path_tilde**2).sum("SV"))
-l1_norm = coef_path.sum("basis")
-# Show the least-regularized point in the path.
-show_idx = -1
-c_show = coef_path["alpha", show_idx]
-fit_show = A @ c_show
-# }}}
+        # Collapse the physical coefficient grid only after constructing the basis.
+        # The coefficient vector c still indexes individual (center, λ_L) components.
+        A.smoosh(["center", "lambda_L"], "basis")
+        # }}}
 
-# {{{ plots
+        fl.next("reduced basis preview")
+        for center_j in range(preview_n_center):
+            for lambda_j in range(preview_n_lambda_L):
+                plot(
+                    preview_A["center", center_j]["lambda_L", lambda_j],
+                    alpha=0.35,
+                    human_units=False,
+                )
+        title("reduced Lorentzian-derivative basis")
 
-with figlist_var() as fl:
-    fl.next("positive LARS path")
-    plot(l1_norm, residual_norm, "o-")
-    xlabel("positive L1 mass 1ᵀc")
-    ylabel("compressed residual norm ‖Ãc − ỹ‖₂")
-    title("positive Lorentzian-derivative LASSO path")
+        # {{{ SVD-compress residual coordinates
+        U, Sigma, Vh = A.C.svd(Bname, "basis")
+        A_tilde = Sigma * Vh
+        y_tilde = U @ d
+        print(
+            "during compression, d was reduced from",
+            d.shape,
+            "to",
+            y_tilde.shape,
+        )
+        # }}}
 
-    fl.next("fit at end of path")
-    plot(d, label="data", alpha=0.7)
-    plot(fit_show, label="fit", alpha=0.7)
-    plot(d - fit_show, label="residual", alpha=0.7)
-    legend()
+        # {{{ positive LARS solver boundary
+        print("beginning LARS path")
+        alphas, active, coefs = lars_path(
+            A_tilde.C.reorder(["SV", "basis"]).data.real,
+            y_tilde.C.reorder("SV").data.real,
+            method="lasso",
+            positive=True,
+            max_iter=400,
+            return_path=True,
+        )
+        print("done with LARS path")
+        # Immediately wrap solver output back into labeled nddata.
+        coef_path = nddata(coefs, ["basis", "alpha"])
+        coef_path.setaxis("basis", A_tilde.getaxis("basis"))
+        coef_path.setaxis("alpha", alphas)
+        # }}}
 
-    fl.show()
+        # {{{ evaluate path with pyspecdata algebra
+        # Show the least-regularized point in the path.
+        fit_show = A @ coef_path["alpha", -1]
+        # }}}
 
-# }}}
+        fl.next("positive LARS path")
+        plot(
+            coef_path.sum("basis"),
+            sqrt((abs((A_tilde @ coef_path) - y_tilde) ** 2).sum("SV")),
+            "o-",
+        )
+        xlabel("positive L1 mass 1ᵀc")
+        ylabel("compressed residual norm ‖Ãc − ỹ‖₂")
+        title("positive Lorentzian-derivative LASSO path")
+
+        fl.next("fit at end of path")
+        plot(d, label="data", alpha=0.7)
+        plot(fit_show, label="fit", alpha=0.7)
+        plot(d - fit_show, label="residual", alpha=0.7)
+        legend()
+
+        fl.show()
+
+    # }}}
+
+
+if __name__ == "__main__":
+    main()
