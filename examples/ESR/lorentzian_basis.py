@@ -53,6 +53,7 @@ from pyspecdata import *
 from numpy import r_, pi, exp, logspace, sqrt, log10
 from matplotlib.pyplot import title, xlabel, ylabel, legend
 from sklearn.linear_model import lars_path
+import os
 
 # {{{ changeable parameters
 Bname = "$B_0$"
@@ -94,6 +95,8 @@ def build_lorentzian_basis(
         * exp(-pi * lambda_L * abs(u))
         * exp(-1j * 2 * pi * u * center)
     ).C.ft(Bname)
+    A.setaxis(Bname, d.getaxis(Bname))
+    A.set_units(Bname, d.get_units(Bname))
     # Normalize each column:
     #     ‖A_i‖₂ = 1
     #
@@ -130,6 +133,7 @@ with figlist_var() as fl:
     preview_A = build_lorentzian_basis(
         d, Bname, preview_n_center, preview_n_lambda_L
     )
+    print("preview basis shape", preview_A.shape)
     A = build_lorentzian_basis(d, Bname, fit_n_center, fit_n_lambda_L)
 
     # The imaginary component is transform-roundoff; the solver boundary below
@@ -152,8 +156,9 @@ with figlist_var() as fl:
 
     # {{{ SVD-compress residual coordinates
     U, Sigma, Vh = A.C.svd(Bname, "basis")
+    U.set_units(Bname, d.get_units(Bname))
     A_tilde = Sigma * Vh
-    y_tilde = U @ d
+    y_tilde = U.C.reorder(["SV", Bname]).along(Bname) @ d
     print(
         "during compression, d was reduced from",
         d.shape,
@@ -181,13 +186,17 @@ with figlist_var() as fl:
 
     # {{{ evaluate path with pyspecdata algebra
     # Show the least-regularized point in the path.
-    fit_show = A @ coef_path["alpha", -1]
+    fit_show = A.C.along("basis") @ coef_path.C["alpha", -1]
     # }}}
 
     fl.next("positive LARS path")
     plot(
-        coef_path.sum("basis"),
-        sqrt((abs((A_tilde @ coef_path) - y_tilde) ** 2).sum("SV")),
+        coef_path.C.sum("basis").data,
+        sqrt(
+            (
+                abs((A_tilde.C.along("basis") @ coef_path) - y_tilde) ** 2
+            ).sum("SV")
+        ).data,
         "o-",
     )
     xlabel("positive L1 mass 1ᵀc")
@@ -200,7 +209,7 @@ with figlist_var() as fl:
     plot(d - fit_show, label="residual", alpha=0.7)
     legend()
 
-    fl.show()
+    os.makedirs("auto_figures", exist_ok=True)
+    fl.show("lorentzian_basis.pdf")
 
 # }}}
-
