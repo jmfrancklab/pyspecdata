@@ -76,6 +76,8 @@ def test_zenodo_download_prints_after_download(tmp_path, monkeypatch, capsys):
     zenodo = load_module("load_files.zenodo")
     base_dir = tmp_path / "experiment"
     base_dir.mkdir()
+    file_key = "Pure_T177R1a_pR_210615.BSW"
+    file_url = "https://zenodo.org/api/records/21041480/files/" + file_key
 
     def fake_getdatadir(exp_type=None):
         assert exp_type == "remote_exp"
@@ -89,8 +91,8 @@ def test_zenodo_download_prints_after_download(tmp_path, monkeypatch, capsys):
             return {
                 "files": [
                     {
-                        "key": "remote.dat",
-                        "links": {"self": "https://example/remote.dat"},
+                        "key": file_key,
+                        "links": {"self": file_url},
                     }
                 ]
             }
@@ -112,14 +114,17 @@ def test_zenodo_download_prints_after_download(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(zenodo.urllib.request, "urlretrieve", fake_urlretrieve)
 
     path = zenodo.zenodo_download(
-        "21041480", r"remote\.dat$", exp_type="remote_exp"
+        "21041480", r".*T177R1a_pR_210615.*", exp_type="remote_exp"
     )
 
-    assert path == str(base_dir) + os.path.sep + "remote.dat"
+    assert path == str(base_dir) + os.path.sep + file_key
     assert retrieved["record_url"] == "https://zenodo.org/api/records/21041480"
-    assert retrieved["file_url"] == "https://example/remote.dat"
+    assert retrieved["file_url"] == file_url
     assert retrieved["dest"] == path
-    assert capsys.readouterr().out == f"Downloaded to {path}\n"
+    assert (
+        capsys.readouterr().out
+        == f"Downloaded from zenodo '{file_url}' to {path}\n"
+    )
 
 
 def test_search_filename_uses_zenodo_when_file_is_missing(
