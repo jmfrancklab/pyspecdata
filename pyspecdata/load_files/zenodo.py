@@ -43,6 +43,7 @@ def zenodo_download(deposition, searchstring, exp_type=None):
     r = requests.get(f"https://zenodo.org/api/records/{deposition}")
     r.raise_for_status()
     files = r.json().get("files", [])
+    logging.debug("all the files are "+str(files))
     pattern = re.compile(searchstring)
     matches = [f for f in files if pattern.search(f.get("key", ""))]
     if len(matches) == 0:

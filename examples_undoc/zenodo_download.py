@@ -8,7 +8,9 @@ keyword of :func:`pyspecdata.search_filename`.
 This downloads the same file as the upload example.
 """
 
-from pyspecdata import search_filename
+from pyspecdata import search_filename, init_logging
+
+init_logging(level='debug')
 
 path = search_filename(
     "Pure_T177R1a_pR_210615.BSW",

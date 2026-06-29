@@ -18,16 +18,18 @@ the remaining files will be uploaded to that same deposition.
 """
 
 from pyspecdata import search_filename, zenodo_upload
+import re
 
 # list of (search string, exp_type) pairs for all UV examples
 files_to_upload = [
-    ("T177R1a_pR_210615", "UV_Vis/proteorhodopsin"),
+    # in older versions, we auto-added the .*, but that's no longer true
+    (".*T177R1a_pR_210615.*", "UV_Vis/proteorhodopsin"),
     (
-        "221110_BSAexerciseWK_0p07-0percentBSAcalibration.BSW",
+        re.escape("221110_BSAexerciseWK_0p07-0percentBSAcalibration.BSW"),
         "UV_Vis/BSA_Exercise",
     ),
-    ("200703_Ellman_before_SL.DSW", "UV_Vis/Ellmans_Assay"),
-    ("Ras_Stability4", "UV_Vis/Ras_stability/200803_RT"),
+    (re.escape("200703_Ellman_before_SL.DSW"), "UV_Vis/Ellmans_Assay"),
+    (".*Ras_Stability4.*", "UV_Vis/Ras_stability/200803_RT"),
 ]
 
 deposition_id = None
