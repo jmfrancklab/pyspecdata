@@ -61,6 +61,7 @@ def zenodo_download(deposition, searchstring, exp_type=None):
     url = fileinfo["links"]["self"]
     urllib.request.urlretrieve(url, dest)
     logging.debug(f"downloading zenodo '{url}' to '{dest}'")
+    print(f"Downloaded from zenodo '{url}' to {dest}")
     return dest
 
 

@@ -47,6 +47,117 @@ def test_search_filename_respects_anchors(tmp_path, monkeypatch):
     assert recorded == []
 
 
+def test_search_filename_skips_zenodo_when_file_is_local(
+    tmp_path, monkeypatch, capsys
+):
+    base_dir = tmp_path / "experiment"
+    base_dir.mkdir()
+    (base_dir / "local.dat").write_text("local")
+
+    def fake_getdatadir(exp_type=None):
+        assert exp_type == "local_exp"
+        return str(base_dir) + os.path.sep
+
+    def fake_zenodo_download(*_args, **_kwargs):
+        raise AssertionError("zenodo_download should not be called")
+
+    monkeypatch.setattr(load_files, "getDATADIR", fake_getdatadir)
+    monkeypatch.setattr(load_files, "zenodo_download", fake_zenodo_download)
+
+    results = load_files.search_filename(
+        r"local\.dat$", "local_exp", print_result=False, zenodo="21041480"
+    )
+
+    assert results == [str(base_dir) + os.path.sep + "local.dat"]
+    assert capsys.readouterr().out == ""
+
+
+def test_zenodo_download_prints_after_download(tmp_path, monkeypatch, capsys):
+    zenodo = load_module("load_files.zenodo")
+    base_dir = tmp_path / "experiment"
+    base_dir.mkdir()
+
+    def fake_getdatadir(exp_type=None):
+        assert exp_type == "remote_exp"
+        return str(base_dir) + os.path.sep
+
+    class FakeResponse:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {
+                "files": [
+                    {
+                        "key": "remote.dat",
+                        "links": {"self": "https://example/remote.dat"},
+                    }
+                ]
+            }
+
+    retrieved = {}
+
+    def fake_get(url):
+        retrieved["record_url"] = url
+        return FakeResponse()
+
+    def fake_urlretrieve(url, dest):
+        retrieved["file_url"] = url
+        retrieved["dest"] = dest
+        with open(dest, "w") as fp:
+            fp.write("remote")
+
+    monkeypatch.setattr(zenodo, "getDATADIR", fake_getdatadir)
+    monkeypatch.setattr(zenodo.requests, "get", fake_get)
+    monkeypatch.setattr(zenodo.urllib.request, "urlretrieve", fake_urlretrieve)
+
+    path = zenodo.zenodo_download(
+        "21041480", r"remote\.dat$", exp_type="remote_exp"
+    )
+
+    assert path == str(base_dir) + os.path.sep + "remote.dat"
+    assert retrieved["record_url"] == "https://zenodo.org/api/records/21041480"
+    assert retrieved["file_url"] == "https://example/remote.dat"
+    assert retrieved["dest"] == path
+    assert capsys.readouterr().out == f"Downloaded to {path}\n"
+
+
+def test_search_filename_uses_zenodo_when_file_is_missing(
+    tmp_path, monkeypatch
+):
+    base_dir = tmp_path / "experiment"
+    base_dir.mkdir()
+
+    def fake_getdatadir(exp_type=None):
+        assert exp_type == "remote_exp"
+        return str(base_dir) + os.path.sep
+
+    calls = []
+
+    def fake_zenodo_download(deposition, searchstring, exp_type=None):
+        calls.append((deposition, searchstring, exp_type))
+        downloaded = base_dir / "remote.dat"
+        downloaded.write_text("remote")
+        return str(downloaded)
+
+    def fake_rclone(*_args, **_kwargs):
+        raise AssertionError("rclone_search should not be called")
+
+    monkeypatch.setattr(load_files, "getDATADIR", fake_getdatadir)
+    monkeypatch.setattr(load_files, "zenodo_download", fake_zenodo_download)
+    monkeypatch.setattr(load_files, "rclone_search", fake_rclone)
+
+    results = load_files.search_filename(
+        r"remote\.dat$",
+        "remote_exp",
+        print_result=False,
+        zenodo="21041480",
+    )
+
+    assert results == [str(base_dir) + os.path.sep + "remote.dat"]
+    assert calls == [("21041480", r"remote\.dat$", "remote_exp")]
+
+
 def test_search_filename_passes_raw_regex_to_rclone(tmp_path, monkeypatch):
     empty_dir = tmp_path / "empty"
     empty_dir.mkdir()
