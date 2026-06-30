@@ -505,7 +505,11 @@ class lmfitdata(nddata):
                     "I don't understand the dtype", self.data.dtype
                 )
         if sigma is not None:
-            sigma, normalization = self._weighted_residual_scale(sigma)
+            normalization = np.sum(
+                1.0 / sigma[np.logical_and(sigma != 0.0, np.isfinite(sigma))]
+            )
+            sigma[sigma == 0.0] = 1
+            sigma[~np.isfinite(sigma)] = 1
             jacobian_array = jacobian_array / sigma * normalization
         jacobian_array = jacobian_array.view(float)
         jacobian_array = jacobian_array[
@@ -595,7 +599,11 @@ class lmfitdata(nddata):
         )
         fit = self._apply_residual_transform(fit)
         if sigma is not None:
-            sigma, normalization = self._weighted_residual_scale(sigma)
+            normalization = np.sum(
+                1.0 / sigma[np.logical_and(sigma != 0.0, np.isfinite(sigma))]
+            )
+            sigma[sigma == 0.0] = 1
+            sigma[~np.isfinite(sigma)] = 1
         try:
             # as noted here:
             # https://stackoverflow.com/questions/6949370/scipy-leastsq-dfun-usage
@@ -612,15 +620,6 @@ class lmfitdata(nddata):
         retval = retval.view(float)  # to deal with complex data
         self.nan_mask = np.isfinite(retval)
         return retval[self.nan_mask]
-
-    @staticmethod
-    def _weighted_residual_scale(sigma):
-        """Return a safe sigma copy and the residual normalization factor."""
-        sigma = np.array(sigma, copy=True)
-        valid = np.logical_and(sigma != 0.0, np.isfinite(sigma))
-        normalization = np.sum(1.0 / sigma[valid])
-        sigma[~valid] = 1
-        return sigma, normalization
 
     def copy(self, **kwargs):
         namelist = []
