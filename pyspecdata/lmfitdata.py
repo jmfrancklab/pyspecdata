@@ -367,7 +367,7 @@ class lmfitdata(nddata):
             else self.residual_transform(newdata)
         )
 
-    def fit(self, use_jacobian=True):
+    def fit(self):
         r"""actually run the fit"""
         # we can ignore set_what, since I think there's a mechanism in
         # lmfit to take care of that (it's for fixing parameters)
@@ -393,12 +393,7 @@ class lmfitdata(nddata):
                 self.guess_parameters,
                 fcn_args=(sigma,),
             )
-        if use_jacobian and sigma is None:
-            out = themin.leastsq(Dfun=self.jacobian, col_deriv=True)
-        else:
-            # The analytic Jacobian does not yet support generalized
-            # least-squares weighting, so weighted fits use lmfit's Jacobian.
-            out = themin.leastsq()
+        out = themin.leastsq(Dfun=self.jacobian, col_deriv=True)
         # {{{ capture the result for ouput, etc
         self.fit_parameters = out.params
         self.fit_coeff = [out.params[j].value for j in self.parameter_names]
@@ -464,11 +459,6 @@ class lmfitdata(nddata):
         parameters, and gives the complex view for complex data (since in a
         complex fit, we use view to treat real an imaginary parts the same)
         """
-        if sigma is not None:
-            raise ValueError(
-                "Jacobian with generalized leastsq not yet supported (you have"
-                " error set, so I want to do generalized)"
-            )
         if not hasattr(self, "jacobian_symbolic"):
             self.jacobian_symbolic = [
                 sp.diff(self.expression, j, 1) for j in self.parameter_symbols
@@ -514,6 +504,9 @@ class lmfitdata(nddata):
                 raise ValueError(
                     "I don't understand the dtype", self.data.dtype
                 )
+        if sigma is not None:
+            sigma, normalization = self._weighted_residual_scale(sigma)
+            jacobian_array = jacobian_array / sigma * normalization
         jacobian_array = jacobian_array.view(float)
         jacobian_array = jacobian_array[
             :, self.nan_mask
@@ -602,11 +595,7 @@ class lmfitdata(nddata):
         )
         fit = self._apply_residual_transform(fit)
         if sigma is not None:
-            normalization = np.sum(
-                1.0 / sigma[np.logical_and(sigma != 0.0, np.isfinite(sigma))]
-            )
-            sigma[sigma == 0.0] = 1
-            sigma[~np.isfinite(sigma)] = 1
+            sigma, normalization = self._weighted_residual_scale(sigma)
         try:
             # as noted here:
             # https://stackoverflow.com/questions/6949370/scipy-leastsq-dfun-usage
@@ -623,6 +612,15 @@ class lmfitdata(nddata):
         retval = retval.view(float)  # to deal with complex data
         self.nan_mask = np.isfinite(retval)
         return retval[self.nan_mask]
+
+    @staticmethod
+    def _weighted_residual_scale(sigma):
+        """Return a safe sigma copy and the residual normalization factor."""
+        sigma = np.array(sigma, copy=True)
+        valid = np.logical_and(sigma != 0.0, np.isfinite(sigma))
+        normalization = np.sum(1.0 / sigma[valid])
+        sigma[~valid] = 1
+        return sigma, normalization
 
     def copy(self, **kwargs):
         namelist = []
