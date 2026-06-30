@@ -140,9 +140,9 @@ class lmfitdata(nddata):
         ==========
         this_expr: sympy expression
         """
-        assert issympy(
-            this_expr
-        ), "for now, the functional form must be a sympy expression"
+        assert issympy(this_expr), (
+            "for now, the functional form must be a sympy expression"
+        )
         self.expression = this_expr
         # {{{ decide which symbols are parameters vs. variables
         #     here, I discriminate "names" which are strings from "symbols"
@@ -382,7 +382,7 @@ class lmfitdata(nddata):
         # But you  should read through and see what the previous fit method is
         # doing and then copy over what you can
         sigma = self.get_error()
-        if sigma is not None:
+        if sigma is None:
             themin = Minimizer(
                 self.residual,
                 self.guess_parameters,
@@ -393,9 +393,11 @@ class lmfitdata(nddata):
                 self.guess_parameters,
                 fcn_args=(sigma,),
             )
-        if use_jacobian:
+        if use_jacobian and sigma is None:
             out = themin.leastsq(Dfun=self.jacobian, col_deriv=True)
         else:
+            # The analytic Jacobian does not yet support generalized
+            # least-squares weighting, so weighted fits use lmfit's Jacobian.
             out = themin.leastsq()
         # {{{ capture the result for ouput, etc
         self.fit_parameters = out.params
