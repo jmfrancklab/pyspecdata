@@ -13,7 +13,7 @@ color_cycle = cycle(['#1f77b4', '#ff7f0e', '#2ca02c',
     '#7f7f7f', '#bcbd22', '#17becf'])
 #init_logging('debug')
 data = find_file('200703_Ellman_before_SL.DSW',
-    exp_type='UV_Vis/Ellmans_Assay')
+    exp_type='UV_Vis/Ellmans_Assay', zenodo="21041480")
 print("the experiments present in this file are:",data.keys())
 with figlist_var() as fl:
     fl.next("UV data")
@@ -42,7 +42,7 @@ with figlist_var() as fl:
     gridandtick(gca())
     print("now I'm going to try a DSW file")
     data = find_file('Ras_Stability4',
-            exp_type='UV_Vis/Ras_stability/200803_RT')
+            exp_type='UV_Vis/Ras_stability/200803_RT', zenodo="21041480")
     print("the experiments present in this file are:",data.keys())
     fl.next("kinetics data")
     for k,thisspectrum in data.items():

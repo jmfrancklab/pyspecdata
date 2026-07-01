@@ -25,7 +25,7 @@ There are three requirements for where this file must be stored:
 from pylab import *
 from pyspecdata import *
 data = find_file('T177R1a_pR_210615',
-        exp_type='UV_Vis/proteorhodopsin')
+        exp_type='UV_Vis/proteorhodopsin', zenodo="21041480")
 print("the experiments present in this file are:",data.keys())
 with figlist_var() as fl:
     fl.next("UV data")

@@ -17,7 +17,7 @@ import pyspecdata as psd
 # 
 
 d = psd.find_file("S175R1a.*DHPC.*today.*200304",
-        exp_type='francklab_esr/Sam')
+        exp_type='francklab_esr/Sam', zenodo="21084153")
 print(d.shape)
 print("here, we see the harmonic axis contains both harmonic and phase info",repr(d.getaxis('harmonic')))
 d.chunk_auto('harmonic','phase')
@@ -36,7 +36,7 @@ plt.title("1D Data with Multiple Harmonics")
 # Next, let's load some power-saturation data
 
 d = psd.find_file("Power.*Sat.*200303",
-        exp_type='francklab_esr/Sam')
+        exp_type='francklab_esr/Sam', zenodo="21084153")
 d.chunk_auto('harmonic','phase')
 plt.figure(2)
 psd.image(d['harmonic',0]['phase',0].C.set_axis('Microwave Power','#').set_units('Microwave Power','scan #'))

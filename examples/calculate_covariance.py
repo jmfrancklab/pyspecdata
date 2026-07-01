@@ -15,7 +15,7 @@ with figlist_var() as fl:
     for filenum, (thisfile) in enumerate(
         [("230504_3p8mM_TEMPOL_stb_wt_4x.DSC")]
     ):
-        d = find_file(thisfile, exp_type=exp_type)["harmonic", 0]
+        d = find_file(thisfile, exp_type=exp_type, zenodo="21084153")["harmonic", 0]
         d.set_units(fieldaxis, 'T').set_axis(fieldaxis, lambda x: x*1e-4)
         d.rename("Time", "observations")
         d.reorder(["observations", fieldaxis])

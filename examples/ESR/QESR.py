@@ -26,7 +26,7 @@ QESR_concs = r_[190.8,
         155.9,]*1e-6
 myconcs = []
 with figlist_var() as fl:
-    background = find_file("QESR_Test_WaterCap_Background_210923.DSC", exp_type="francklab_esr/Sam")['harmonic',0]
+    background = find_file("QESR_Test_WaterCap_Background_210923.DSC", exp_type="francklab_esr/Sam", zenodo="21084153")['harmonic',0]
     #background -= background[fieldaxis, -100:].data.mean()
     for filenum, (thisfile, thislabel) in enumerate([("QESR_150uM_TEMPOL_1_noglyc_210923.DSC", "sample #1"),
             ("QESR_150uM_TEMPOL_2_noglyc_210923.DSC", "sample #2"),
@@ -35,7 +35,7 @@ with figlist_var() as fl:
             ("QESR_150uM_TEMPOL_5_wglyc_210923.DSC", "sample #5"),
             ("QESR_150uM_TEMPOL_6_wglyc_210923.DSC", "sample #6"),
             ]):
-        d = find_file(thisfile, exp_type="francklab_esr/Sam")['harmonic',0]
+        d = find_file(thisfile, exp_type="francklab_esr/Sam", zenodo="21084153")['harmonic',0]
         G_R = Q_(*d.get_prop("Gain"))
         C_t = Q_(*d.get_prop("ConvTime"))
         # it seems like n is already divided out
