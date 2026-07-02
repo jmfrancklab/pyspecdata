@@ -829,6 +829,9 @@ def load_indiv_file(
                 if type_by_extension == "DSC":
                     # DSC identifies the new-format XEpr parameter file, and
                     # DTA holds the spectrum; some 2D datasets also use YGF.
+                    # Keep remote lookup in this generic loading layer. The
+                    # parser requests a companion only after determining that
+                    # the dataset actually requires it.
                     def resolve_xepr_companion(companion):
                         return search_filename(
                             rf"^{re.escape(os.path.basename(companion))}$",
