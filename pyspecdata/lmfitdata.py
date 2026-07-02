@@ -6,6 +6,7 @@ from .core import nddata, normal_attrs, issympy, ndshape, dp
 from .general_functions import strm, pinvr
 import logging
 import asteval
+import warnings
 
 
 # {{{ functions and modules
@@ -382,6 +383,11 @@ class lmfitdata(nddata):
         # But you  should read through and see what the previous fit method is
         # doing and then copy over what you can
         sigma = self.get_error()
+        if any(~np.isfinite(sigma)) or any(sigma == 0.0):
+            warnings.warn("You have one or more errors set to zero or not"
+                          " finite.  That's really weird!  I'm going to set"
+                          " them to 1 so this runs, but you probably messed"
+                          " up.")
         if sigma is None:
             themin = Minimizer(
                 self.residual,
