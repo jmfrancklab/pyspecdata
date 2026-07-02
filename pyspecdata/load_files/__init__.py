@@ -443,6 +443,7 @@ def find_file(
             expno=expno,
             exp_type=exp_type,
             return_list=return_list,
+            zenodo=zenodo,
         )
         if return_list:
             return data
@@ -629,6 +630,7 @@ def load_indiv_file(
     expno=None,
     exp_type=None,
     return_list=False,
+    zenodo=None,
 ):
     """Open the file given by `filename`, use file signature magic and/or
     filename extension(s) to identify the file type, and call the appropriate
@@ -827,8 +829,21 @@ def load_indiv_file(
                 if type_by_extension == "DSC":
                     # DSC identifies the new-format XEpr parameter file, and
                     # DTA the binary spectrum
+                    dta_filename = filename[:-4] + ".DTA"
+                    if not (
+                        os.path.exists(dta_filename)
+                        or os.path.exists(dta_filename[:-4] + ".dta")
+                    ):
+                        search_filename(
+                            rf"^{re.escape(os.path.basename(dta_filename))}$",
+                            exp_type=exp_type,
+                            unique=True,
+                            zenodo=zenodo,
+                        )
                     data = bruker_esr.xepr(
-                        filename, dimname=dimname, exp_type=exp_type
+                        filename,
+                        dimname=dimname,
+                        exp_type=exp_type,
                     )
                 else:
                     raise RuntimeError(

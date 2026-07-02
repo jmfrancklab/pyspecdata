@@ -15,6 +15,37 @@ datadir = load_module("datadir")
 load_files = load_module("load_files.__init__")
 
 
+def test_load_indiv_file_finds_xepr_companion_with_zenodo(
+    tmp_path, monkeypatch
+):
+    dsc = tmp_path / "sample.DSC"
+    dta = tmp_path / "sample.DTA"
+    dsc.write_text("descriptor")
+    calls = []
+    expected = types.SimpleNamespace(dimlabels=[])
+
+    def fake_search_filename(
+        searchstring, exp_type=None, unique=False, zenodo=None
+    ):
+        calls.append((searchstring, exp_type, unique, zenodo))
+        dta.write_bytes(b"data")
+        return str(dta)
+
+    monkeypatch.setattr(load_files, "search_filename", fake_search_filename)
+    monkeypatch.setattr(load_files, "_check_signature", lambda _path: "TXT")
+    monkeypatch.setattr(load_files, "_check_extension", lambda _path: "DSC")
+    monkeypatch.setattr(load_files.bruker_esr, "xepr", lambda *_a, **_k: expected)
+
+    result = load_files.load_indiv_file(
+        str(dsc), exp_type="remote_exp", zenodo="21084153"
+    )
+
+    assert result is expected
+    assert calls == [
+        (r"^sample\.DTA$", "remote_exp", True, "21084153")
+    ]
+
+
 def test_search_filename_respects_anchors(tmp_path, monkeypatch):
     base_dir = tmp_path / "experiment"
     base_dir.mkdir()
