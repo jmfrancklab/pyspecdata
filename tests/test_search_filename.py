@@ -20,6 +20,7 @@ def test_load_indiv_file_finds_xepr_companion_with_zenodo(
 ):
     dsc = tmp_path / "sample.DSC"
     dta = tmp_path / "sample.DTA"
+    ygf = tmp_path / "sample.YGF"
     dsc.write_text("descriptor")
     calls = []
     expected = types.SimpleNamespace(dimlabels=[])
@@ -28,13 +29,20 @@ def test_load_indiv_file_finds_xepr_companion_with_zenodo(
         searchstring, exp_type=None, unique=False, zenodo=None
     ):
         calls.append((searchstring, exp_type, unique, zenodo))
-        dta.write_bytes(b"data")
-        return str(dta)
+        target = dta if "DTA" in searchstring else ygf
+        target.write_bytes(b"data")
+        return str(target)
 
     monkeypatch.setattr(load_files, "search_filename", fake_search_filename)
     monkeypatch.setattr(load_files, "_check_signature", lambda _path: "TXT")
     monkeypatch.setattr(load_files, "_check_extension", lambda _path: "DSC")
-    monkeypatch.setattr(load_files.bruker_esr, "xepr", lambda *_a, **_k: expected)
+
+    def fake_xepr(_filename, companion_resolver=None, **_kwargs):
+        companion_resolver(str(dta))
+        companion_resolver(str(ygf))
+        return expected
+
+    monkeypatch.setattr(load_files.bruker_esr, "xepr", fake_xepr)
 
     result = load_files.load_indiv_file(
         str(dsc), exp_type="remote_exp", zenodo="21084153"
@@ -42,7 +50,8 @@ def test_load_indiv_file_finds_xepr_companion_with_zenodo(
 
     assert result is expected
     assert calls == [
-        (r"^sample\.DTA$", "remote_exp", True, "21084153")
+        (r"^sample\.DTA$", "remote_exp", True, "21084153"),
+        (r"^sample\.YGF$", "remote_exp", True, "21084153"),
     ]
 
 

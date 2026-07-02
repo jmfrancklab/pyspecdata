@@ -35,13 +35,22 @@ def _collapse_string_lists(val):
     return " ".join(flattened)
 
 
-def xepr(filename, exp_type=None, dimname="", verbose=False):
+def xepr(
+    filename,
+    exp_type=None,
+    dimname="",
+    verbose=False,
+    companion_resolver=None,
+):
     """For opening Xepr files.
 
     Parameters
     ----------
     filename : str
         The filename that ends with ``.DSC``, ``.DTA``, or ``.YGF``.
+    companion_resolver : callable, optional
+        Called with the expected path of a missing companion file. It must
+        return the local path where that file can be opened.
     """
     # {{{ determine the pair of filenames that we need
     filename = (
@@ -104,11 +113,14 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
                 "your file remotely, but you called with "
                 "exp_type None!"
             )
-        rclone_search(
-            os.path.split(filename_spc)[-1],
-            exp_type,
-            os.path.split(filename_spc)[0],
-        )
+        if companion_resolver is None:
+            rclone_search(
+                os.path.split(filename_spc)[-1],
+                exp_type,
+                os.path.split(filename_spc)[0],
+            )
+        else:
+            filename_spc = companion_resolver(filename_spc)
     with open(filename_spc, "rb") as fp:
         if all([j == "REAL" for j in ikkf]):
             data = read_binary(fp, ">f8")
@@ -249,25 +261,23 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
                 )
                 dim_units.update({y_dim_name: interpret_units("YUNI")})
                 filename_ygf = filename_par[:-4] + ".YGF"
-                for j in range(2):
-                    if not os.path.exists(filename_ygf) and j > 0:
-                        filename_ygf = (
-                            filename_ygf[:-4] + filename_ygf[-4:].lower()
-                        )
-                    if not os.path.exists(filename_ygf):
-                        # because the spc isn't part of the original search, we
-                        # need to log the fact that it's missing manually
+                if not os.path.exists(filename_ygf):
+                    lowercase_ygf = filename_ygf[:-4] + ".ygf"
+                    if os.path.exists(lowercase_ygf):
+                        filename_ygf = lowercase_ygf
+                    elif companion_resolver is None:
                         if exp_type is None:
                             raise ValueError(
-                                "I could probably find "
-                                "your file remotely, but you called with "
-                                "exp_type None!"
+                                "I could probably find your file remotely, "
+                                "but you called with exp_type None!"
                             )
                         rclone_search(
                             os.path.split(filename_ygf)[-1],
                             exp_type,
                             os.path.split(filename_ygf)[0],
                         )
+                    else:
+                        filename_ygf = companion_resolver(filename_ygf)
                 with open(filename_ygf, "rb") as fp:
                     y_axis = read_binary(fp, ">f8", count=y_points_calcd)
                 assert (

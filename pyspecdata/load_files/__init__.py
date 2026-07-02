@@ -828,22 +828,20 @@ def load_indiv_file(
             elif type_by_signature == "TXT":
                 if type_by_extension == "DSC":
                     # DSC identifies the new-format XEpr parameter file, and
-                    # DTA the binary spectrum
-                    dta_filename = filename[:-4] + ".DTA"
-                    if not (
-                        os.path.exists(dta_filename)
-                        or os.path.exists(dta_filename[:-4] + ".dta")
-                    ):
-                        search_filename(
-                            rf"^{re.escape(os.path.basename(dta_filename))}$",
+                    # DTA holds the spectrum; some 2D datasets also use YGF.
+                    def resolve_xepr_companion(companion):
+                        return search_filename(
+                            rf"^{re.escape(os.path.basename(companion))}$",
                             exp_type=exp_type,
                             unique=True,
                             zenodo=zenodo,
                         )
+
                     data = bruker_esr.xepr(
                         filename,
                         dimname=dimname,
                         exp_type=exp_type,
+                        companion_resolver=resolve_xepr_companion,
                     )
                 else:
                     raise RuntimeError(
