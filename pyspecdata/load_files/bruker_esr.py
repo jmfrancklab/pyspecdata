@@ -35,6 +35,29 @@ def _collapse_string_lists(val):
     return " ".join(flattened)
 
 
+def _resolve_missing_xepr_companion(companion, exp_type, zenodo):
+    if exp_type is None:
+        raise ValueError(
+            "I could probably find "
+            "your file remotely, but you called with "
+            "exp_type None!"
+        )
+    if zenodo is not None:
+        from .zenodo import zenodo_download
+
+        return zenodo_download(
+            zenodo,
+            rf"^{re.escape(os.path.basename(companion))}$",
+            exp_type=exp_type,
+        )
+    rclone_search(
+        os.path.split(companion)[-1],
+        exp_type,
+        os.path.split(companion)[0],
+    )
+    return companion
+
+
 def xepr(
     filename,
     exp_type=None,
@@ -52,29 +75,6 @@ def xepr(
         present locally, download it from this deposition instead of searching
         rclone remotes.
     """
-
-    # TODO ☐: move this function outside (not a nested def, and make all args required, ok to name starting with _).  Then, you changed the logic for ygf too much relative to the devel branch, so I restored and indicated where this function should go
-    def resolve_missing_companion(companion):
-        if exp_type is None:
-            raise ValueError(
-                "I could probably find "
-                "your file remotely, but you called with "
-                "exp_type None!"
-            )
-        if zenodo is not None:
-            from .zenodo import zenodo_download
-
-            return zenodo_download(
-                zenodo,
-                rf"^{re.escape(os.path.basename(companion))}$",
-                exp_type=exp_type,
-            )
-        rclone_search(
-            os.path.split(companion)[-1],
-            exp_type,
-            os.path.split(companion)[0],
-        )
-        return companion
 
     # {{{ determine the pair of filenames that we need
     filename = (
@@ -129,7 +129,9 @@ def xepr(
     # }}}
     # {{{ load the data
     if not os.path.exists(filename_spc):
-        filename_spc = resolve_missing_companion(filename_spc)
+        filename_spc = _resolve_missing_xepr_companion(
+            filename_spc, exp_type, zenodo
+        )
     with open(filename_spc, "rb") as fp:
         if all([j == "REAL" for j in ikkf]):
             data = read_binary(fp, ">f8")
@@ -276,7 +278,9 @@ def xepr(
                             filename_ygf[:-4] + filename_ygf[-4:].lower()
                         )
                     if not os.path.exists(filename_ygf):
-                        # TODO ☐: call to new function goes here
+                        filename_ygf = _resolve_missing_xepr_companion(
+                            filename_ygf, exp_type, zenodo
+                        )
                 with open(filename_ygf, "rb") as fp:
                     y_axis = read_binary(fp, ">f8", count=y_points_calcd)
                 assert (

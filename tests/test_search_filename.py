@@ -337,7 +337,7 @@ def test_pyspecdata_zenodo_cli_uses_existing_numeric_deposition_id(
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(zenodo, "zenodo_upload", fake_upload)
 
-    assert zenodo.main(["21084153"]) == 0
+    assert zenodo.cmd(["21084153"]) == 0
     assert calls == [(str(local_path), None, "21084153")]
 
 
@@ -368,7 +368,7 @@ def test_pyspecdata_zenodo_cli_uses_title_for_new_deposition(
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(zenodo, "zenodo_upload", fake_upload)
 
-    assert zenodo.main(["my new data"]) == 0
+    assert zenodo.cmd(["my new data"]) == 0
     assert calls == [
         (str(first_path), "my new data", None),
         (str(second_path), None, "777777"),
@@ -378,9 +378,9 @@ def test_pyspecdata_zenodo_cli_uses_title_for_new_deposition(
 def test_pyspecdata_zenodo_cli_requires_one_argument():
     zenodo = load_module("load_files.zenodo")
     with pytest.raises(SystemExit):
-        zenodo.main([])
+        zenodo.cmd([])
     with pytest.raises(SystemExit):
-        zenodo.main(["21084153", "extra"])
+        zenodo.cmd(["21084153", "extra"])
 
 
 def test_pyspecdata_zenodo_cli_requires_data_files_csv(
@@ -390,4 +390,4 @@ def test_pyspecdata_zenodo_cli_requires_data_files_csv(
     monkeypatch.chdir(tmp_path)
 
     with pytest.raises(FileNotFoundError, match="data_files.csv"):
-        zenodo.main(["21084153"])
+        zenodo.cmd(["21084153"])

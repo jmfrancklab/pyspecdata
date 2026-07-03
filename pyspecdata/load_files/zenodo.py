@@ -8,7 +8,7 @@ from ..datadir import getDATADIR, pyspec_config
 import logging
 import requests
 
-__all__ = ["zenodo_download", "zenodo_upload", "create_deposition", "main"]
+__all__ = ["zenodo_download", "zenodo_upload", "create_deposition", "cmd"]
 
 ZENODO_ID_RE = re.compile(r"^[1-9][0-9]{5,9}$")
 
@@ -129,12 +129,16 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
         deposition_id = create_deposition(title)
 
     with open(local_path, "rb") as fp:
+        filename = os.path.basename(local_path)
         r = requests.post(
             "https://zenodo.org/api/deposit/depositions/"
             f"{deposition_id}/files",
-            # TODO ☐: you made significant changes here -- explain why.  Also, explain why you set the "name" to os.path.basename is that thing supposed to be the filename, or what?  Does this have the same effect as the old code, or are you changing the form of the zenodo dep??
+            # The old deposition-files API expects multipart form data with a
+            # "name" field naming the remote file and a "file" upload part.
+            # Using the basename preserves the prior behavior of uploading
+            # the local file under its file name, not its full local path.
             headers={"Authorization": f"Bearer {token}"},
-            data={"name": os.path.basename(local_path)},
+            data={"name": filename},
             files={"file": fp},
         )
 
@@ -142,7 +146,7 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
     info = r.json()
     print(
         "Uploaded",
-        info.get("filename", info.get("name", os.path.basename(local_path))),
+        info.get("filename", info.get("name", filename)),
     )
     print("View deposition at", f"https://zenodo.org/uploads/{deposition_id}")
 
@@ -200,8 +204,7 @@ def data_files_from_log(log_path="data_files.csv"):
     return local_paths
 
 
-# TODO ☐: do NOT call this main, and don't have a main block below -- call this cmd or something like that
-def main(argv=None):
+def cmd(argv=None):
     """Upload files from ``./data_files.csv`` to a Zenodo draft.
 
     The command line interface is ``pyspecdata_zenodo <draft-id-or-title>``.
@@ -241,7 +244,3 @@ def main(argv=None):
             )
     print("View deposition at", f"https://zenodo.org/uploads/{deposition_id}")
     return 0
-
-
-if __name__ == "__main__":
-    main()
