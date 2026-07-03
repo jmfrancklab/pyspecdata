@@ -5,8 +5,8 @@ which uses :module:`datadir` to search for the filename, then automatically
 identifies the file type and calls the appropriate module to load the data into
 an nddata.
 
-Currently, Bruker file formats (both ESR and NMR) are supported, as well as
-(at least some earlier iteration) of Magritek file formats.
+Currently, Bruker file formats (both ESR and NMR), CIQTEK JSON EPR files, and
+(at least some earlier iteration) of Magritek file formats are supported.
 
 Users/developers are very strongly encouraged to add support for new file
 types.
@@ -22,6 +22,7 @@ from . import prospa
 from . import bruker_esr
 from . import acert
 from . import load_cary
+from . import ciqtek
 from .open_subpath import open_subpath
 from ..datadir import getDATADIR, rclone_search
 from ..datadir import pyspec_config, log_fname
@@ -824,7 +825,11 @@ def load_indiv_file(
                         % filename
                     )
             elif type_by_signature == "TXT":
-                if type_by_extension == "DSC":
+                if type_by_extension == "EPR" and ciqtek.is_ciqtek_file(
+                    filename
+                ):
+                    data = ciqtek.load_ciqtek(filename)
+                elif type_by_extension == "DSC":
                     # DSC identifies the new-format XEpr parameter file, and
                     # DTA the binary spectrum
                     data = bruker_esr.xepr(
@@ -975,6 +980,7 @@ __all__ = [
     "bruker_load_t1_axis",
     "bruker_load_title",
     "bruker_nmr",
+    "ciqtek",
     "cw",
     "find_file",
     "format_listofexps",
