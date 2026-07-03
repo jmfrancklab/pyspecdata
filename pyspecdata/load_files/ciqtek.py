@@ -2,6 +2,8 @@
 
 import json
 import logging
+import shutil
+import subprocess
 
 import numpy as np
 
@@ -11,6 +13,11 @@ from ..general_functions import strm
 logger = logging.getLogger("pyspecdata.load_files.ciqtek")
 
 b0_texstr = r"$B_0$"
+seven_zip_signature = b"7z\xbc\xaf'\x1c"
+
+
+class Missing7Zip(RuntimeError):
+    pass
 
 
 def _as_two_column_array(values, key, line_name):
@@ -60,21 +67,47 @@ def is_ciqtek_payload(payload):
     return True
 
 
+def _read_text_from_7z(filename):
+    seven_zip = shutil.which("7z") or shutil.which("7za")
+    if seven_zip is None:
+        raise Missing7Zip(
+            "Loading 7z-compressed CIQTEK EPR files requires the 7z "
+            "or 7za command. Please install 7zip/p7zip or provide "
+            "the uncompressed .epr file."
+        )
+    proc = subprocess.run(
+        [seven_zip, "x", "-so", filename],
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    return proc.stdout.decode("utf-8")
+
+
+def _load_json_from_file(filename):
+    with open(filename, "rb") as fp:
+        signature = fp.read(len(seven_zip_signature))
+    if signature == seven_zip_signature:
+        return json.loads(_read_text_from_7z(filename))
+    with open(filename, encoding="utf-8") as fp:
+        return json.load(fp)
+
+
 def is_ciqtek_file(filename):
-    """Return true when *filename* is a CIQTEK JSON ``.epr`` file."""
+    """Return true when *filename* contains a CIQTEK JSON EPR payload."""
     try:
-        with open(filename, encoding="utf-8") as fp:
-            payload = json.load(fp)
+        payload = _load_json_from_file(filename)
+    except Missing7Zip:
+        raise
     except Exception:
         return False
     return is_ciqtek_payload(payload)
 
 
 def _load_payload(filename):
-    with open(filename, encoding="utf-8") as fp:
-        payload = json.load(fp)
+    payload = _load_json_from_file(filename)
     if not is_ciqtek_payload(payload):
-        raise ValueError(strm(filename, "does not look like a CIQTEK .epr"))
+        raise ValueError(strm(filename, "does not contain a CIQTEK EPR file"))
     return payload
 
 

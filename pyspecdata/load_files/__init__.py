@@ -594,6 +594,7 @@ def _check_signature(filename):
         b"\x89\x48\x44\x46\x0d\x0a\x1a\x0a": "HDF5",
         b"DOS  Format": "DOS Format",
         b"\x11Varian": "Cary UV",
+        b"7z\xbc\xaf'\x1c": "7-Zip",
     }
     max_sig_length = max(list(map(len, list(file_signatures.keys()))))
     with open(filename, "rb") as fp:
@@ -824,10 +825,16 @@ def load_indiv_file(
                         "I'm not able to figure out what file type %s this is!"
                         % filename
                     )
+            elif type_by_signature == "7-Zip":
+                if ciqtek.is_ciqtek_file(filename):
+                    data = ciqtek.load_ciqtek(filename)
+                else:
+                    raise RuntimeError(
+                        "I'm not able to figure out what file type %s this is!"
+                        % filename
+                    )
             elif type_by_signature == "TXT":
-                if type_by_extension == "EPR" and ciqtek.is_ciqtek_file(
-                    filename
-                ):
+                if ciqtek.is_ciqtek_file(filename):
                     data = ciqtek.load_ciqtek(filename)
                 elif type_by_extension == "DSC":
                     # DSC identifies the new-format XEpr parameter file, and

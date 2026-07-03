@@ -140,6 +140,33 @@ def test_load_indiv_file_dispatches_ciqtek_epr(tmp_path):
     np.testing.assert_allclose(data.data, [0.0 + 0.0j, 1.0 + 0.0j, 0.0 + 0.0j])
 
 
+def test_load_indiv_file_dispatches_ciqtek_7z_by_magic(tmp_path, monkeypatch):
+    archive = tmp_path / "field_delay.epr.7z"
+    payload = _payload([_line("Delay_0", 0, [0, 1, 0], [0, 0, 0])])
+    archive.write_bytes(ciqtek.seven_zip_signature + b"test archive bytes")
+
+    def fake_read_text_from_7z(filename):
+        assert filename == str(archive)
+        return json.dumps(payload)
+
+    monkeypatch.setattr(ciqtek, "_read_text_from_7z", fake_read_text_from_7z)
+
+    assert ciqtek.is_ciqtek_file(str(archive))
+    data = load_indiv_file(str(archive))
+
+    assert data.get_prop("source_format") == "CIQTEK JSON EPR"
+    np.testing.assert_allclose(data.data, [0.0 + 0.0j, 1.0 + 0.0j, 0.0 + 0.0j])
+
+
+def test_ciqtek_7z_without_7z_gives_clear_error(tmp_path, monkeypatch):
+    archive = tmp_path / "field_delay.epr.7z"
+    archive.write_bytes(ciqtek.seven_zip_signature + b"test archive bytes")
+    monkeypatch.setattr(ciqtek.shutil, "which", lambda _name: None)
+
+    with pytest.raises(ciqtek.Missing7Zip, match="requires the 7z or 7za"):
+        load_indiv_file(str(archive))
+
+
 def test_non_ciqtek_json_epr_is_not_claimed(tmp_path):
     path = tmp_path / "not_ciqtek.epr"
     path.write_text('{"hello": "world"}', encoding="utf-8")

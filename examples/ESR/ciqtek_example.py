@@ -8,33 +8,43 @@ Load CIQTEK JSON EPR data through :func:`pyspecdata.find_file`.
 import re
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pyspecdata as psd
 
 Bname = r"$B_0$"
 filename = "384K_1mM_TEMPO_SFO5_pt5G_MAmp_25dB_100G_22scans_2D.epr"
+# To make the compressed version on Linux with maximum 7zip compression:
+# 7z a -t7z -mx=9 384K_1mM_TEMPO_SFO5_pt5G_MAmp_25dB_100G_22scans_2D.epr.7z \
+#     384K_1mM_TEMPO_SFO5_pt5G_MAmp_25dB_100G_22scans_2D.epr
 
-d = psd.find_file(re.escape(filename), exp_type="ciqtek")
+d = psd.find_file(re.escape(filename) + r"(\.7z)?$", exp_type="ciqtek")
 g_axis = d.get_prop("ciqtek_g_axis")
+g_axis = np.asarray(g_axis)
+if g_axis.ndim > 1:
+    g_axis = g_axis[:, 0]
 
+field_axis = d.getaxis(Bname)
+fig, (real_ax, imag_ax) = plt.subplots(2, 1, sharex=True, sharey=True)
+psd.plot(d.real, ax=real_ax, alpha=0.7)
+real_ax.set_title("CIQTEK real signal")
+psd.plot(d.imag, ax=imag_ax, alpha=0.7)
+imag_ax.set_title("CIQTEK imaginary signal")
+shared_lim = max(np.max(np.abs(d.real.data)), np.max(np.abs(d.imag.data)))
+for ax in [real_ax, imag_ax]:
+    ax.set_ylim(-shared_lim, shared_lim)
 
-# TODO ☐: don't have real and imag as two figures -- put on a single subplot, and bind the scale of the subplots together (autoscale to the larger data -- there should be a matplotlib way of doing this automatically)
-plt.figure(1)
-# TODO ☐: DO NOT use plt.plot!!! use psd.plot!!!
-psd.plot(d.real, alpha=0.7)
-plt.title("CIQTEK real signal")
+g_ax = real_ax.twiny()
+g_ax.set_xlim(real_ax.get_xlim())
+g_tick_idx = np.linspace(0, len(field_axis) - 1, 6, dtype=int)
+g_ax.set_xticks(field_axis[g_tick_idx])
+g_ax.set_xticklabels(["%0.4f" % j for j in g_axis[g_tick_idx]])
+g_ax.set_xlabel("g")
+fig.tight_layout()
 
+indirect_dim = next(j for j in d.dimlabels if j != Bname)
+image_data = d.real.C.reorder([Bname, indirect_dim])
 plt.figure(2)
-psd.plot(d.imag, alpha=0.7)
-plt.title("CIQTEK imaginary signal")
-
-plt.figure(3)
-# TODO ☐: do not plot this as a separate plot -- rather use this to set up a twiny for the plots above that labels g factor along the top
-plt.plot(d.getaxis(Bname), g_axis)
-plt.xlabel(Bname)
-plt.ylabel("g")
-plt.gca().invert_yaxis()
-plt.title("CIQTEK g-axis")
-
-# TODO ☐: since this is 2D data, use psd.image to show the 2D data! put the field along the y axis (use reorder!)
+image_data.pcolor(cmap="seismic", force_balanced_cmap=True)
+plt.title("CIQTEK real signal image")
 
 plt.show()
