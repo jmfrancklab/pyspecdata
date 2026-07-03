@@ -39,8 +39,7 @@ def xepr(
     filename,
     exp_type=None,
     dimname="",
-    verbose=False,
-    companion_resolver=None,
+    zenodo=None,
 ):
     """For opening Xepr files.
 
@@ -48,10 +47,35 @@ def xepr(
     ----------
     filename : str
         The filename that ends with ``.DSC``, ``.DTA``, or ``.YGF``.
-    companion_resolver : callable, optional
-        Called with the expected path of a missing companion file. It must
-        return the local path where that file can be opened.
+    zenodo : str, optional
+        Deposition number on Zenodo.  If a required companion file is not
+        present locally, download it from this deposition instead of searching
+        rclone remotes.
     """
+
+    # TODO ☐: move this function outside (not a nested def, and make all args required, ok to name starting with _).  Then, you changed the logic for ygf too much relative to the devel branch, so I restored and indicated where this function should go
+    def resolve_missing_companion(companion):
+        if exp_type is None:
+            raise ValueError(
+                "I could probably find "
+                "your file remotely, but you called with "
+                "exp_type None!"
+            )
+        if zenodo is not None:
+            from .zenodo import zenodo_download
+
+            return zenodo_download(
+                zenodo,
+                rf"^{re.escape(os.path.basename(companion))}$",
+                exp_type=exp_type,
+            )
+        rclone_search(
+            os.path.split(companion)[-1],
+            exp_type,
+            os.path.split(companion)[0],
+        )
+        return companion
+
     # {{{ determine the pair of filenames that we need
     filename = (
         filename[:-4] + filename[-4:].upper()
@@ -105,23 +129,7 @@ def xepr(
     # }}}
     # {{{ load the data
     if not os.path.exists(filename_spc):
-        # DTA contains the spectrum described by DSC. find_file supplies a
-        # resolver that can use Zenodo; direct xepr calls retain the legacy
-        # rclone fallback.
-        if exp_type is None:
-            raise ValueError(
-                "I could probably find "
-                "your file remotely, but you called with "
-                "exp_type None!"
-            )
-        if companion_resolver is None:
-            rclone_search(
-                os.path.split(filename_spc)[-1],
-                exp_type,
-                os.path.split(filename_spc)[0],
-            )
-        else:
-            filename_spc = companion_resolver(filename_spc)
+        filename_spc = resolve_missing_companion(filename_spc)
     with open(filename_spc, "rb") as fp:
         if all([j == "REAL" for j in ikkf]):
             data = read_binary(fp, ">f8")
@@ -262,26 +270,13 @@ def xepr(
                 )
                 dim_units.update({y_dim_name: interpret_units("YUNI")})
                 filename_ygf = filename_par[:-4] + ".YGF"
-                # YGF is required only for an irregular second axis, so wait
-                # until YTYP has been interpreted before resolving it. Check
-                # both extension cases before attempting remote lookup.
-                if not os.path.exists(filename_ygf):
-                    lowercase_ygf = filename_ygf[:-4] + ".ygf"
-                    if os.path.exists(lowercase_ygf):
-                        filename_ygf = lowercase_ygf
-                    elif companion_resolver is None:
-                        if exp_type is None:
-                            raise ValueError(
-                                "I could probably find your file remotely, "
-                                "but you called with exp_type None!"
-                            )
-                        rclone_search(
-                            os.path.split(filename_ygf)[-1],
-                            exp_type,
-                            os.path.split(filename_ygf)[0],
+                for j in range(2):
+                    if not os.path.exists(filename_ygf) and j > 0:
+                        filename_ygf = (
+                            filename_ygf[:-4] + filename_ygf[-4:].lower()
                         )
-                    else:
-                        filename_ygf = companion_resolver(filename_ygf)
+                    if not os.path.exists(filename_ygf):
+                        # TODO ☐: call to new function goes here
                 with open(filename_ygf, "rb") as fp:
                     y_axis = read_binary(fp, ">f8", count=y_points_calcd)
                 assert (

@@ -15,31 +15,25 @@ datadir = load_module("datadir")
 load_files = load_module("load_files.__init__")
 
 
-def test_load_indiv_file_finds_xepr_companion_with_zenodo(
+def test_load_indiv_file_passes_zenodo_to_xepr_without_companion_search(
     tmp_path, monkeypatch
 ):
     dsc = tmp_path / "sample.DSC"
-    dta = tmp_path / "sample.DTA"
-    ygf = tmp_path / "sample.YGF"
     dsc.write_text("descriptor")
     calls = []
     expected = types.SimpleNamespace(dimlabels=[])
 
-    def fake_search_filename(
-        searchstring, exp_type=None, unique=False, zenodo=None
-    ):
-        calls.append((searchstring, exp_type, unique, zenodo))
-        target = dta if "DTA" in searchstring else ygf
-        target.write_bytes(b"data")
-        return str(target)
+    def fake_search_filename(*_args, **_kwargs):
+        raise AssertionError(
+            "load_indiv_file should not search for XEPR companions"
+        )
 
     monkeypatch.setattr(load_files, "search_filename", fake_search_filename)
     monkeypatch.setattr(load_files, "_check_signature", lambda _path: "TXT")
     monkeypatch.setattr(load_files, "_check_extension", lambda _path: "DSC")
 
-    def fake_xepr(_filename, companion_resolver=None, **_kwargs):
-        companion_resolver(str(dta))
-        companion_resolver(str(ygf))
+    def fake_xepr(filename, dimname="", exp_type=None, zenodo=None):
+        calls.append((filename, dimname, exp_type, zenodo))
         return expected
 
     monkeypatch.setattr(load_files.bruker_esr, "xepr", fake_xepr)
@@ -50,8 +44,7 @@ def test_load_indiv_file_finds_xepr_companion_with_zenodo(
 
     assert result is expected
     assert calls == [
-        (r"^sample\.DTA$", "remote_exp", True, "21084153"),
-        (r"^sample\.YGF$", "remote_exp", True, "21084153"),
+        (str(dsc), "", "remote_exp", "21084153"),
     ]
 
 
@@ -262,3 +255,139 @@ def test_rclone_search_uses_regex_mode(monkeypatch, tmp_path):
     assert '--include "*' not in command
     assert "example:remote" in command
     assert str(destination) in command
+
+
+def test_zenodo_upload_existing_deposition_uses_documented_file_api(
+    tmp_path, monkeypatch
+):
+    zenodo = load_module("load_files.zenodo")
+    local_path = tmp_path / "payload.dat"
+    local_path.write_text("payload")
+    settings = []
+    captured = {}
+
+    def fake_post(url, headers=None, data=None, files=None, **kwargs):
+        captured["url"] = url
+        captured["headers"] = headers
+        captured["data"] = data
+        captured["kwargs"] = kwargs
+        captured["file_contents"] = files["file"].read()
+
+        class FakeResponse:
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return {"name": "payload.dat"}
+
+        return FakeResponse()
+
+    monkeypatch.setattr(zenodo, "_get_token", lambda: "TOKEN")
+    monkeypatch.setattr(
+        zenodo,
+        "create_deposition",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("should use existing deposition id")
+        ),
+    )
+    monkeypatch.setattr(zenodo.requests, "post", fake_post)
+    monkeypatch.setattr(
+        zenodo.pyspec_config,
+        "get_setting",
+        lambda *_args, **_kwargs: "0",
+    )
+    monkeypatch.setattr(
+        zenodo.pyspec_config,
+        "set_setting",
+        lambda *args, **_kwargs: settings.append(args),
+    )
+
+    deposition_id = zenodo.zenodo_upload(
+        str(local_path), deposition_id="21084153"
+    )
+
+    assert deposition_id == "21084153"
+    assert captured["url"].endswith("/deposit/depositions/21084153/files")
+    assert captured["headers"] == {"Authorization": "Bearer TOKEN"}
+    assert captured["data"] == {"name": "payload.dat"}
+    assert captured["kwargs"] == {}
+    assert captured["file_contents"] == b"payload"
+    assert ("zenodo", "upload_deposition1", "21084153") in settings
+
+
+def test_pyspecdata_zenodo_cli_uses_existing_numeric_deposition_id(
+    tmp_path, monkeypatch
+):
+    zenodo = load_module("load_files.zenodo")
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    local_path = data_dir / "one.dat"
+    local_path.write_text("one")
+    (tmp_path / "data_files.csv").write_text(
+        "Filename,Path,exp_type\n"
+        f"one.dat,{data_dir},example\n",
+        encoding="utf-8",
+    )
+    calls = []
+
+    def fake_upload(local_path, title=None, deposition_id=None):
+        calls.append((local_path, title, deposition_id))
+        return deposition_id
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(zenodo, "zenodo_upload", fake_upload)
+
+    assert zenodo.main(["21084153"]) == 0
+    assert calls == [(str(local_path), None, "21084153")]
+
+
+def test_pyspecdata_zenodo_cli_uses_title_for_new_deposition(
+    tmp_path, monkeypatch
+):
+    zenodo = load_module("load_files.zenodo")
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    first_path = data_dir / "one.dat"
+    second_path = data_dir / "two.dat"
+    first_path.write_text("one")
+    second_path.write_text("two")
+    (tmp_path / "data_files.csv").write_text(
+        "Filename,Path,exp_type\n"
+        f"one.dat,{data_dir},example\n"
+        f"two.dat,{data_dir},example\n",
+        encoding="utf-8",
+    )
+    calls = []
+
+    def fake_upload(local_path, title=None, deposition_id=None):
+        calls.append((local_path, title, deposition_id))
+        if deposition_id is None:
+            return "777777"
+        return deposition_id
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(zenodo, "zenodo_upload", fake_upload)
+
+    assert zenodo.main(["my new data"]) == 0
+    assert calls == [
+        (str(first_path), "my new data", None),
+        (str(second_path), None, "777777"),
+    ]
+
+
+def test_pyspecdata_zenodo_cli_requires_one_argument():
+    zenodo = load_module("load_files.zenodo")
+    with pytest.raises(SystemExit):
+        zenodo.main([])
+    with pytest.raises(SystemExit):
+        zenodo.main(["21084153", "extra"])
+
+
+def test_pyspecdata_zenodo_cli_requires_data_files_csv(
+    tmp_path, monkeypatch
+):
+    zenodo = load_module("load_files.zenodo")
+    monkeypatch.chdir(tmp_path)
+
+    with pytest.raises(FileNotFoundError, match="data_files.csv"):
+        zenodo.main(["21084153"])
