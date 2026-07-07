@@ -141,9 +141,9 @@ class lmfitdata(nddata):
         ==========
         this_expr: sympy expression
         """
-        assert issympy(this_expr), (
-            "for now, the functional form must be a sympy expression"
-        )
+        assert issympy(
+            this_expr
+        ), "for now, the functional form must be a sympy expression"
         self.expression = this_expr
         # {{{ decide which symbols are parameters vs. variables
         #     here, I discriminate "names" which are strings from "symbols"
@@ -383,17 +383,19 @@ class lmfitdata(nddata):
         # But you  should read through and see what the previous fit method is
         # doing and then copy over what you can
         sigma = self.get_error()
-        if any(~np.isfinite(sigma)) or any(sigma == 0.0):
-            warnings.warn("You have one or more errors set to zero or not"
-                          " finite.  That's really weird!  I'm going to set"
-                          " them to 1 so this runs, but you probably messed"
-                          " up.")
         if sigma is None:
             themin = Minimizer(
                 self.residual,
                 self.guess_parameters,
             )
         else:
+            if any(~np.isfinite(sigma)) or any(sigma == 0.0):
+                warnings.warn(
+                    "You have one or more errors set to zero or not"
+                    " finite.  That's really weird!  I'm going to set"
+                    " them to 1 so this runs, but you probably messed"
+                    " up."
+                )
             themin = Minimizer(
                 self.residual,
                 self.guess_parameters,
