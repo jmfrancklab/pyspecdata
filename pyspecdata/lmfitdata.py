@@ -368,7 +368,7 @@ class lmfitdata(nddata):
             else self.residual_transform(newdata)
         )
 
-    def fit(self):
+    def fit(self, use_jacobian=True):
         r"""actually run the fit"""
         # we can ignore set_what, since I think there's a mechanism in
         # lmfit to take care of that (it's for fixing parameters)
@@ -399,7 +399,10 @@ class lmfitdata(nddata):
                 self.guess_parameters,
                 fcn_args=(sigma,),
             )
-        out = themin.leastsq(Dfun=self.jacobian, col_deriv=True)
+        if use_jacobian:
+            out = themin.leastsq(Dfun=self.jacobian, col_deriv=True)
+        else:
+            out = themin.leastsq()
         # {{{ capture the result for ouput, etc
         self.fit_parameters = out.params
         self.fit_coeff = [out.params[j].value for j in self.parameter_names]
