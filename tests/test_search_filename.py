@@ -427,7 +427,7 @@ def test_rclone_search_uses_regex_mode(monkeypatch, tmp_path):
     assert str(destination) in command
 
 
-def test_zenodo_upload_existing_deposition_uses_documented_file_api(
+def test_zenodo_upload_existing_deposition_uses_bucket_file_api(
     tmp_path, monkeypatch
 ):
     zenodo = load_module("load_files.zenodo")
@@ -436,19 +436,36 @@ def test_zenodo_upload_existing_deposition_uses_documented_file_api(
     settings = []
     captured = {}
 
-    def fake_post(url, headers=None, data=None, files=None, **kwargs):
-        captured["url"] = url
-        captured["headers"] = headers
-        captured["data"] = data
-        captured["kwargs"] = kwargs
-        captured["file_contents"] = files["file"].read()
+    def fake_get(url, headers=None, **kwargs):
+        captured["get_url"] = url
+        captured["get_headers"] = headers
+        captured["get_kwargs"] = kwargs
 
         class FakeResponse:
             def raise_for_status(self):
                 pass
 
             def json(self):
-                return {"name": "payload.dat"}
+                return {
+                    "links": {
+                        "bucket": "https://zenodo.org/api/files/bucket-id"
+                    }
+                }
+
+        return FakeResponse()
+
+    def fake_put(url, headers=None, data=None, **kwargs):
+        captured["put_url"] = url
+        captured["put_headers"] = headers
+        captured["put_kwargs"] = kwargs
+        captured["file_contents"] = data.read()
+
+        class FakeResponse:
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return {"key": "payload.dat"}
 
         return FakeResponse()
 
@@ -463,7 +480,8 @@ def test_zenodo_upload_existing_deposition_uses_documented_file_api(
             AssertionError("should use existing deposition id")
         ),
     )
-    monkeypatch.setattr(zenodo.requests, "post", fake_post)
+    monkeypatch.setattr(zenodo.requests, "get", fake_get)
+    monkeypatch.setattr(zenodo.requests, "put", fake_put)
     monkeypatch.setattr(
         zenodo.pyspec_config,
         "get_setting",
@@ -480,10 +498,14 @@ def test_zenodo_upload_existing_deposition_uses_documented_file_api(
     )
 
     assert deposition_id == "21084153"
-    assert captured["url"].endswith("/deposit/depositions/21084153/files")
-    assert captured["headers"] == {"Authorization": "Bearer TOKEN"}
-    assert captured["data"] == {"name": "payload.dat"}
-    assert captured["kwargs"] == {}
+    assert captured["get_url"].endswith("/deposit/depositions/21084153")
+    assert captured["get_headers"] == {"Authorization": "Bearer TOKEN"}
+    assert captured["get_kwargs"] == {}
+    assert captured["put_url"] == (
+        "https://zenodo.org/api/files/bucket-id/payload.dat"
+    )
+    assert captured["put_headers"] == {"Authorization": "Bearer TOKEN"}
+    assert captured["put_kwargs"] == {}
     assert captured["file_contents"] == b"payload"
     assert ("zenodo", "upload_deposition1", "21084153") in settings
 
