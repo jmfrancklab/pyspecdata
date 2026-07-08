@@ -13,6 +13,10 @@ an unpublished draft, configure ``token_file`` in the ``[zenodo]`` section of
         "123456", "my_file.h5", exp_type="ODNP", draft=True
     )
 
+See Zenodo's `instructions for sharing a draft
+<https://help.zenodo.org/docs/share/user-sharing/#share-draft>`_ to grant
+another user access to an unpublished deposition.
+
 This downloads the same files as the upload example.
 """
 
