@@ -289,7 +289,6 @@ def genconfig():
         "ExpTypes",
         "RcloneRemotes",
         "zenodo",
-        "zenodo_tokens",
     ]:
         if not config_parser.has_section(section_name):
             config_parser.add_section(section_name)
@@ -322,7 +321,6 @@ def genconfig():
             self.remote_names = remote_names
             self.file_rows = []
             self.general_entries = []
-            self.zenodo_rows = []
             self.build_interface()
 
         def build_interface(self):
@@ -467,150 +465,40 @@ def genconfig():
             self.tab_widget.addTab(variables_tab, "Variables")
 
         def create_zenodo_tab(self):
-            "create the tab that manages named Zenodo token files"
+            "create the tab that manages the Zenodo token file"
             zenodo_tab = qt_widgets.QWidget()
             zenodo_layout = qt_widgets.QVBoxLayout(zenodo_tab)
             zenodo_layout.addWidget(
                 qt_widgets.QLabel(
-                    "Configure names and local file paths for Zenodo personal "
-                    "access tokens. Token files must stay local and must not "
+                    "Select the local file containing your Zenodo personal "
+                    "access token. The token file must stay local and must not "
                     "be committed to version control. See "
                     "https://developers.zenodo.org/#rest-api"
                 )
             )
-
-            default_layout = qt_widgets.QHBoxLayout()
-            default_layout.addWidget(qt_widgets.QLabel("Default token:"))
-            self.zenodo_default_combo = qt_widgets.QComboBox()
-            default_layout.addWidget(self.zenodo_default_combo)
-            zenodo_layout.addLayout(default_layout)
-
-            self.zenodo_scroll = qt_widgets.QScrollArea()
-            self.zenodo_scroll.setWidgetResizable(True)
-            self.zenodo_container = qt_widgets.QWidget()
-            self.zenodo_layout = qt_widgets.QVBoxLayout(
-                self.zenodo_container
+            token_layout = qt_widgets.QHBoxLayout()
+            token_layout.addWidget(qt_widgets.QLabel("Token file:"))
+            self.zenodo_token_file_edit = qt_widgets.QLineEdit()
+            self.zenodo_token_file_edit.setText(
+                self.config_parser.get(
+                    "zenodo", "token_file", fallback=""
+                )
             )
-            self.zenodo_layout.setContentsMargins(0, 0, 0, 0)
-            self.zenodo_layout.setSpacing(6)
-
-            header_widget = qt_widgets.QWidget()
-            header_layout = qt_widgets.QHBoxLayout(header_widget)
-            header_layout.setContentsMargins(0, 0, 0, 0)
-            header_layout.setSpacing(6)
-            for label_text in ["token name", "token file", ""]:
-                header_layout.addWidget(qt_widgets.QLabel(label_text))
-            self.zenodo_layout.addWidget(header_widget)
-
-            for name, token_path in self.config_parser.items(
-                "zenodo_tokens"
-            ):
-                self.add_zenodo_row(name, token_path)
-
-            self.zenodo_spacer = qt_widgets.QWidget()
-            self.zenodo_spacer.setSizePolicy(
-                qt_widgets.QSizePolicy.Minimum,
-                qt_widgets.QSizePolicy.Expanding,
-            )
-            self.zenodo_layout.addWidget(self.zenodo_spacer)
-            self.zenodo_scroll.setWidget(self.zenodo_container)
-            zenodo_layout.addWidget(self.zenodo_scroll)
-
-            self.zenodo_add_button = qt_widgets.QPushButton("Add Token")
-            zenodo_layout.addWidget(self.zenodo_add_button)
-            self.zenodo_add_button.clicked.connect(
-                lambda: self.add_zenodo_row("", "")
-            )
-            default_token = self.config_parser.get(
-                "zenodo", "default_token", fallback=""
-            )
-            self.refresh_zenodo_default_tokens(default_token)
-            self.tab_widget.addTab(zenodo_tab, "Zenodo")
-
-        def add_zenodo_row(self, name, token_path):
-            "add a named Zenodo token-file row"
-            row_widget = qt_widgets.QWidget()
-            row_layout = qt_widgets.QHBoxLayout(row_widget)
-            row_layout.setContentsMargins(0, 0, 0, 0)
-            name_edit = qt_widgets.QLineEdit()
-            name_edit.setText(name)
-            name_edit.setCursorPosition(0)
-            path_edit = qt_widgets.QLineEdit()
-            path_edit.setText(token_path)
-            path_edit.setCursorPosition(0)
-            browse_button = qt_widgets.QToolButton()
-            browse_button.setIcon(
+            self.zenodo_token_file_edit.setCursorPosition(0)
+            token_layout.addWidget(self.zenodo_token_file_edit)
+            self.zenodo_browse_button = qt_widgets.QToolButton()
+            self.zenodo_browse_button.setIcon(
                 self.style().standardIcon(qt_widgets.QStyle.SP_DirOpenIcon)
             )
-            remove_button = qt_widgets.QPushButton("Remove")
-            path_container = qt_widgets.QWidget()
-            path_layout = qt_widgets.QHBoxLayout(path_container)
-            path_layout.setContentsMargins(0, 0, 0, 0)
-            path_layout.setSpacing(3)
-            path_layout.addWidget(path_edit)
-            path_layout.addWidget(browse_button)
-            row_layout.addWidget(name_edit)
-            row_layout.addWidget(path_container)
-            row_layout.addWidget(remove_button)
-            insert_index = self.zenodo_layout.count()
-            if hasattr(self, "zenodo_spacer"):
-                spacer_index = self.zenodo_layout.indexOf(
-                    self.zenodo_spacer
+            token_layout.addWidget(self.zenodo_browse_button)
+            self.zenodo_browse_button.clicked.connect(
+                lambda: self.select_zenodo_token_file(
+                    self.zenodo_token_file_edit
                 )
-                if spacer_index != -1:
-                    insert_index = spacer_index
-            if insert_index < 1:
-                insert_index = 1
-            self.zenodo_layout.insertWidget(insert_index, row_widget)
-            row = {
-                "widget": row_widget,
-                "name_edit": name_edit,
-                "path_edit": path_edit,
-                "browse_button": browse_button,
-                "remove_button": remove_button,
-            }
-            self.zenodo_rows.append(row)
-            browse_button.clicked.connect(
-                lambda: self.select_zenodo_token_file(path_edit)
             )
-            remove_button.clicked.connect(
-                lambda: self.remove_zenodo_row(row)
-            )
-            name_edit.textChanged.connect(
-                lambda _text: self.refresh_zenodo_default_tokens()
-            )
-            path_edit.textChanged.connect(
-                lambda _text: self.refresh_zenodo_default_tokens()
-            )
-            self.refresh_zenodo_default_tokens()
-
-        def remove_zenodo_row(self, row):
-            "remove a named Zenodo token-file row"
-            if row in self.zenodo_rows:
-                self.zenodo_rows.remove(row)
-            self.zenodo_layout.removeWidget(row["widget"])
-            row["widget"].deleteLater()
-            self.refresh_zenodo_default_tokens()
-
-        def refresh_zenodo_default_tokens(self, preferred=None):
-            "refresh the default-token choices from the current token rows"
-            if preferred is None:
-                preferred = self.zenodo_default_combo.currentText()
-            names = sorted(
-                {
-                    row["name_edit"].text().strip()
-                    for row in self.zenodo_rows
-                    if row["name_edit"].text().strip() != ""
-                    and row["path_edit"].text().strip() != ""
-                }
-            )
-            self.zenodo_default_combo.clear()
-            for name in names:
-                self.zenodo_default_combo.addItem(name)
-            if preferred in names:
-                self.zenodo_default_combo.setCurrentIndex(
-                    names.index(preferred)
-                )
+            zenodo_layout.addLayout(token_layout)
+            zenodo_layout.addStretch(1)
+            self.tab_widget.addTab(zenodo_tab, "Zenodo")
 
         def select_zenodo_token_file(self, target_edit):
             "browse for a file containing a Zenodo personal access token"
@@ -807,7 +695,6 @@ def genconfig():
                     "ExpTypes",
                     "RcloneRemotes",
                     "zenodo",
-                    "zenodo_tokens",
                 ]:
                     continue
                 if not new_config.has_section(section):
@@ -816,19 +703,11 @@ def genconfig():
                     new_config.set(section, key, value)
             new_config.add_section("zenodo")
             for key, value in self.config_parser.items("zenodo"):
-                if key not in ["default_token", "token_file"]:
+                if key != "token_file":
                     new_config.set("zenodo", key, value)
-            default_token = self.zenodo_default_combo.currentText().strip()
-            if default_token != "":
-                new_config.set("zenodo", "default_token", default_token)
-            new_config.add_section("zenodo_tokens")
-            for row in self.zenodo_rows:
-                token_name = row["name_edit"].text().strip()
-                token_path = row["path_edit"].text().strip()
-                if token_name != "" and token_path != "":
-                    new_config.set(
-                        "zenodo_tokens", token_name, token_path
-                    )
+            token_path = self.zenodo_token_file_edit.text().strip()
+            if token_path != "":
+                new_config.set("zenodo", "token_file", token_path)
             pyspec_config.write_sorted_config(new_config)
             self.accept()
 

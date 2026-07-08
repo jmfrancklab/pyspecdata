@@ -15,57 +15,22 @@ datadir = load_module("datadir")
 load_files = load_module("load_files.__init__")
 
 
-def test_zenodo_auth_headers_uses_named_token(tmp_path, monkeypatch):
+def test_zenodo_auth_headers_uses_configured_token_file(
+    tmp_path, monkeypatch
+):
     zenodo = load_module("load_files.zenodo")
-    token_file = tmp_path / "lab.token"
-    token_file.write_text("LAB_TOKEN\n")
-    settings = {
-        ("zenodo", "default_token"): "other",
-        ("zenodo_tokens", "lab"): str(token_file),
-    }
+    token_file = tmp_path / "zenodo.token"
+    token_file.write_text("TOKEN\n")
 
     monkeypatch.setattr(
         zenodo.pyspec_config,
         "get_setting",
-        lambda key, section=None: settings.get((section, key)),
-    )
-
-    assert zenodo._auth_headers("lab") == {
-        "Authorization": "Bearer LAB_TOKEN"
-    }
-
-
-def test_zenodo_auth_headers_uses_default_named_token(tmp_path, monkeypatch):
-    zenodo = load_module("load_files.zenodo")
-    token_file = tmp_path / "default.token"
-    token_file.write_text("DEFAULT_TOKEN")
-    settings = {
-        ("zenodo", "default_token"): "lab",
-        ("zenodo_tokens", "lab"): str(token_file),
-    }
-
-    monkeypatch.setattr(
-        zenodo.pyspec_config,
-        "get_setting",
-        lambda key, section=None: settings.get((section, key)),
+        lambda key, section=None: str(token_file),
     )
 
     assert zenodo._auth_headers() == {
-        "Authorization": "Bearer DEFAULT_TOKEN"
+        "Authorization": "Bearer TOKEN"
     }
-
-
-def test_zenodo_auth_headers_requires_a_default_token(monkeypatch):
-    zenodo = load_module("load_files.zenodo")
-
-    monkeypatch.setattr(
-        zenodo.pyspec_config,
-        "get_setting",
-        lambda *_args, **_kwargs: None,
-    )
-
-    with pytest.raises(ValueError, match="default_token is not configured"):
-        zenodo._auth_headers()
 
 
 def test_load_indiv_file_passes_zenodo_to_xepr_without_companion_search(
@@ -279,8 +244,8 @@ def test_zenodo_draft_download_authenticates_and_matches_filename(
         captured["download"] = (url, dest)
 
     monkeypatch.setattr(zenodo, "getDATADIR", lambda **_kwargs: str(tmp_path))
-    def fake_auth_headers(token_name=None):
-        captured["token_name"] = token_name
+
+    def fake_auth_headers():
         return {"Authorization": "Bearer TOKEN"}
 
     monkeypatch.setattr(zenodo, "_auth_headers", fake_auth_headers)
@@ -290,12 +255,11 @@ def test_zenodo_draft_download_authenticates_and_matches_filename(
     )
 
     path = zenodo.zenodo_download(
-        "123456", r"draft\.dat", exp_type="test", token_name="lab"
+        "123456", r"draft\.dat", exp_type="test", draft=True
     )
 
     assert captured["url"].endswith("/deposit/depositions/123456/files")
     assert captured["headers"] == {"Authorization": "Bearer TOKEN"}
-    assert captured["token_name"] == "lab"
     assert captured["download"] == (file_url, path)
     assert path == str(tmp_path / "draft.dat")
 
@@ -350,7 +314,7 @@ def test_zenodo_draft_download_401_explains_token_requirement(
     monkeypatch.setattr(
         zenodo,
         "_auth_headers",
-        lambda *_args: {"Authorization": "Bearer BAD_TOKEN"},
+        lambda: {"Authorization": "Bearer BAD_TOKEN"},
     )
     monkeypatch.setattr(
         zenodo.requests, "get", lambda *_args, **_kwargs: FakeResponse()
@@ -488,8 +452,7 @@ def test_zenodo_upload_existing_deposition_uses_documented_file_api(
 
         return FakeResponse()
 
-    def fake_auth_headers(token_name=None):
-        captured["token_name"] = token_name
+    def fake_auth_headers():
         return {"Authorization": "Bearer TOKEN"}
 
     monkeypatch.setattr(zenodo, "_auth_headers", fake_auth_headers)
@@ -513,25 +476,23 @@ def test_zenodo_upload_existing_deposition_uses_documented_file_api(
     )
 
     deposition_id = zenodo.zenodo_upload(
-        str(local_path), deposition_id="21084153", token_name="lab"
+        str(local_path), deposition_id="21084153"
     )
 
     assert deposition_id == "21084153"
     assert captured["url"].endswith("/deposit/depositions/21084153/files")
     assert captured["headers"] == {"Authorization": "Bearer TOKEN"}
-    assert captured["token_name"] == "lab"
     assert captured["data"] == {"name": "payload.dat"}
     assert captured["kwargs"] == {}
     assert captured["file_contents"] == b"payload"
     assert ("zenodo", "upload_deposition1", "21084153") in settings
 
 
-def test_create_deposition_uses_named_token(monkeypatch):
+def test_create_deposition_uses_auth_headers(monkeypatch):
     zenodo = load_module("load_files.zenodo")
     captured = {}
 
-    def fake_auth_headers(token_name=None):
-        captured["token_name"] = token_name
+    def fake_auth_headers():
         return {"Authorization": "Bearer TOKEN"}
 
     def fake_post(url, headers=None, json=None):
@@ -553,15 +514,15 @@ def test_create_deposition_uses_named_token(monkeypatch):
     monkeypatch.setattr(zenodo, "_auth_headers", fake_auth_headers)
     monkeypatch.setattr(zenodo.requests, "post", fake_post)
 
-    deposition_id = zenodo.create_deposition(
-        "Named token deposition", token_name="lab"
-    )
+    deposition_id = zenodo.create_deposition("Authenticated deposition")
 
     assert deposition_id == 123456
-    assert captured["token_name"] == "lab"
     assert captured["url"] == "https://zenodo.org/api/deposit/depositions"
     assert captured["headers"] == {"Authorization": "Bearer TOKEN"}
-    assert captured["json"]["metadata"]["title"] == "Named token deposition"
+    assert (
+        captured["json"]["metadata"]["title"]
+        == "Authenticated deposition"
+    )
 
 
 def test_pyspecdata_zenodo_cli_uses_existing_numeric_deposition_id(
@@ -579,17 +540,15 @@ def test_pyspecdata_zenodo_cli_uses_existing_numeric_deposition_id(
     )
     calls = []
 
-    def fake_upload(
-        local_path, title=None, deposition_id=None, token_name=None
-    ):
-        calls.append((local_path, title, deposition_id, token_name))
+    def fake_upload(local_path, title=None, deposition_id=None):
+        calls.append((local_path, title, deposition_id))
         return deposition_id
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(zenodo, "zenodo_upload", fake_upload)
 
     assert zenodo.cmd(["21084153"]) == 0
-    assert calls == [(str(local_path), None, "21084153", None)]
+    assert calls == [(str(local_path), None, "21084153")]
 
 
 def test_pyspecdata_zenodo_cli_uses_title_for_new_deposition(
@@ -610,10 +569,8 @@ def test_pyspecdata_zenodo_cli_uses_title_for_new_deposition(
     )
     calls = []
 
-    def fake_upload(
-        local_path, title=None, deposition_id=None, token_name=None
-    ):
-        calls.append((local_path, title, deposition_id, token_name))
+    def fake_upload(local_path, title=None, deposition_id=None):
+        calls.append((local_path, title, deposition_id))
         if deposition_id is None:
             return "777777"
         return deposition_id
@@ -621,10 +578,10 @@ def test_pyspecdata_zenodo_cli_uses_title_for_new_deposition(
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(zenodo, "zenodo_upload", fake_upload)
 
-    assert zenodo.cmd(["--token", "lab", "my new data"]) == 0
+    assert zenodo.cmd(["my new data"]) == 0
     assert calls == [
-        (str(first_path), "my new data", None, "lab"),
-        (str(second_path), None, "777777", "lab"),
+        (str(first_path), "my new data", None),
+        (str(second_path), None, "777777"),
     ]
 
 
