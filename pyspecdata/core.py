@@ -2290,13 +2290,13 @@ class nddata(object):
 
     def div_units(self, *args, **kwargs):
         """
-        divide units of the data (or axis)
+        Divide units of the data (or axis)
         by the units that are given, and
         return the multiplier as a number.
 
         In other words, if you pass "a" and
         the units of your data are in "b",
-        then this returns x, such that (x
+        then this returns x = b/a, such that (x
         a)/(b) = 1.
 
         If the result is not dimensionless,
