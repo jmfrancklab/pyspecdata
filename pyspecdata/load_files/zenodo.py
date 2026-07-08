@@ -13,14 +13,30 @@ __all__ = ["zenodo_download", "zenodo_upload", "create_deposition", "cmd"]
 ZENODO_ID_RE = re.compile(r"^[1-9][0-9]{5,9}$")
 
 
-def _get_token():
-    """Return the API access token for Zenodo."""
+def _auth_headers():
+    """Return authorization headers for authenticated Zenodo API requests."""
     token_path = pyspec_config.get_setting("token_file", section="zenodo")
     with open(os.path.expanduser(token_path)) as fp:
-        return fp.read().strip()
+        token = fp.read().strip()
+    return {"Authorization": f"Bearer {token}"}
 
 
-def zenodo_download(deposition, searchstring, exp_type=None):
+def _file_name(fileinfo):
+    """Return a file name from public-record or draft file metadata."""
+    # Published-record file metadata uses "key", while the draft deposition
+    # API uses "filename"; fall back to the draft field when needed.
+    return fileinfo.get("key") or fileinfo.get("filename")
+
+
+def _file_download_url(fileinfo):
+    """Return a download URL from public-record or draft file metadata."""
+    links = fileinfo.get("links", {})
+    # Draft metadata can provide a dedicated "download" link, whereas public
+    # record metadata commonly exposes the file URL as "self".
+    return links.get("download") or links.get("self")
+
+
+def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
     """Download the file from Zenodo ``deposition`` that matches
     ``searchstring`` and place it in the directory associated with
     ``exp_type`` using :func:`getDATADIR`.
@@ -34,6 +50,10 @@ def zenodo_download(deposition, searchstring, exp_type=None):
     exp_type : str
         Experiment type used to determine where the file should be stored via
         :func:`getDATADIR`.
+    draft : bool, optional
+        If ``True``, download from an unpublished draft deposition using the
+        configured Zenodo token.  The default uses the public records API and
+        does not require authentication.
     Returns
     -------
     str
@@ -44,25 +64,65 @@ def zenodo_download(deposition, searchstring, exp_type=None):
     dest_dir = getDATADIR(exp_type=exp_type)
     os.makedirs(dest_dir, exist_ok=True)
 
-    r = requests.get(f"https://zenodo.org/api/records/{deposition}")
-    r.raise_for_status()
-    files = r.json().get("files", [])
+    if draft:
+        r = requests.get(
+            "https://zenodo.org/api/deposit/depositions/"
+            f"{deposition}/files",
+            headers=_auth_headers(),
+        )
+        try:
+            r.raise_for_status()
+        except requests.HTTPError as exc:
+            status_code = r.status_code
+            if status_code == 401:
+                detail = (
+                    "draft deposition access requires a valid Zenodo token"
+                )
+            elif status_code == 403:
+                detail = (
+                    "the Zenodo token does not have permission for this "
+                    "deposition"
+                )
+            elif status_code == 404:
+                detail = (
+                    "the deposition may not exist, may not belong to this "
+                    "token, may not be a draft, or may be on the wrong "
+                    "Zenodo host"
+                )
+            else:
+                detail = str(exc)
+            raise requests.HTTPError(f"{detail}\n{r.text}") from exc
+        # The draft file-list endpoint returns the list of file objects
+        # directly, rather than wrapping it in a top-level "files" field.
+        files = r.json()
+    else:
+        r = requests.get(f"https://zenodo.org/api/records/{deposition}")
+        r.raise_for_status()
+        # A published record response contains its file objects under the
+        # top-level "files" field.
+        files = r.json().get("files", [])
     logging.debug("all the files are "+str(files))
     pattern = re.compile(searchstring)
-    matches = [f for f in files if pattern.search(f.get("key", ""))]
+    matches = [f for f in files if pattern.search(_file_name(f) or "")]
     if len(matches) == 0:
         raise ValueError(
             f"no files matching {searchstring!r} in deposition {deposition}\n"
-            f"files: {[f['key'] for f in files]}"
+            f"files: {[_file_name(f) for f in files]}"
         )
     elif len(matches) > 1:
         raise ValueError(
             f"multiple files match {searchstring!r} in deposition"
-            f" {deposition}: {[f['key'] for f in matches]}"
+            f" {deposition}: {[_file_name(f) for f in matches]}"
         )
     fileinfo = matches[0]
-    dest = os.path.join(dest_dir, fileinfo["key"])
-    url = fileinfo["links"]["self"]
+    filename = _file_name(fileinfo)
+    url = _file_download_url(fileinfo)
+    if url is None:
+        raise ValueError(
+            f"no usable download link for {filename!r} in deposition "
+            f"{deposition}"
+        )
+    dest = os.path.join(dest_dir, filename)
     urllib.request.urlretrieve(url, dest)
     logging.debug(f"downloading zenodo '{url}' to '{dest}'")
     print(f"Downloaded from zenodo '{url}' to {dest}")
@@ -77,8 +137,6 @@ def create_deposition(title):
     availability date.
     """
 
-    token = _get_token()
-
     today = datetime.date.today().isoformat()
     metadata = {
         "title": title,
@@ -92,7 +150,7 @@ def create_deposition(title):
 
     r = requests.post(
         "https://zenodo.org/api/deposit/depositions",
-        params={"access_token": token},
+        headers=_auth_headers(),
         json={"metadata": metadata},
     )
     try:
@@ -119,8 +177,6 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
         created using ``title``.
     """
 
-    token = _get_token()
-
     if deposition_id is None:
         if title is None:
             raise ValueError(
@@ -137,7 +193,7 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
             # "name" field naming the remote file and a "file" upload part.
             # Using the basename preserves the prior behavior of uploading
             # the local file under its file name, not its full local path.
-            headers={"Authorization": f"Bearer {token}"},
+            headers=_auth_headers(),
             data={"name": filename},
             files={"file": fp},
         )
