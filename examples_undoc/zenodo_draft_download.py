@@ -1,9 +1,21 @@
-"""Download a file from an unpublished Zenodo draft deposition.
+"""Download a file from an unpublished Zenodo draft deposition
+---------------------------------------------------------------
 
 Published Zenodo record downloads do not require authentication.  Draft
-deposition downloads reuse the existing ``[zenodo] token_file`` setting.  The
-token file should contain a Zenodo personal access token with appropriate
-deposit permissions.  Keep that file local and never commit it to git.
+deposition downloads select a named token from ``[zenodo_tokens]`` in
+``~/.pyspecdata``::
+
+    [zenodo]
+    default_token = lab
+
+    [zenodo_tokens]
+    lab = /path/to/zenodo.token
+
+Each token file should contain a Zenodo personal access token with appropriate
+deposit permissions.  Keep token files local and never commit them to git.
+Supplying ``token_name`` tells :func:`zenodo_download` to use the authenticated
+draft-deposition API.  See https://developers.zenodo.org/#rest-api for API and
+authentication details.
 """
 
 from pyspecdata import zenodo_download
@@ -13,6 +25,6 @@ path = zenodo_download(
     "123456",
     "my_file.h5",
     exp_type="ODNP",
-    draft=True,
+    token_name="lab",
 )
 print(f"Downloaded to {path}")

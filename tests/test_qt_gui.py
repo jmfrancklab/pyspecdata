@@ -79,6 +79,9 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
         def setSizePolicy(self, *args, **kwargs):
             return
 
+        def deleteLater(self):
+            return
+
     class StubWidget(BaseWidget):
         pass
 
@@ -151,6 +154,10 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
             except ValueError:
                 return -1
 
+        def removeWidget(self, widget):
+            if widget in self.items:
+                self.items.remove(widget)
+
     class StubVBoxLayout(StubLayout):
         pass
 
@@ -178,10 +185,12 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
             self._text = ""
             self.enabled = True
             self.cursor_position = 0
+            self.textChanged = StubSignal()
 
         def setText(self, value):
             self._text = str(value)
             self.cursor_position = len(self._text)
+            self.textChanged.emit(self._text)
 
         def text(self):
             return self._text
@@ -189,6 +198,7 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
         def clear(self):
             self._text = ""
             self.cursor_position = 0
+            self.textChanged.emit(self._text)
 
         def setEnabled(self, state):
             self.enabled = state
@@ -226,6 +236,10 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
         def addItem(self, text):
             self.items.append(text)
 
+        def clear(self):
+            self.items = []
+            self.index = 0
+
         def setCurrentIndex(self, index):
             if 0 <= index < len(self.items):
                 self.index = index
@@ -248,6 +262,10 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
         @staticmethod
         def getExistingDirectory(*args, **kwargs):
             return ""
+
+        @staticmethod
+        def getOpenFileName(*args, **kwargs):
+            return "", ""
 
     class StubSizePolicy:
         Minimum = 0
@@ -294,6 +312,12 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
         assert self.data_directory_edit.cursor_position == 0
         assert self.files_add_button.text == "Add Entry"
         assert self.variables_add_button.text == "Add Entry"
+        assert self.zenodo_add_button.text == "Add Token"
+        assert [name for _widget, name in self.tab_widget.tabs] == [
+            "Files",
+            "Variables",
+            "Zenodo",
+        ]
         header_widget = self.files_layout.items[0]
         header_labels = [
             widget._text
@@ -349,6 +373,35 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
         extra_general = self.general_entries[-1]
         extra_general["key_edit"].setText("new_variable")
         extra_general["value_edit"].setText("42")
+        assert self.zenodo_rows == []
+        self.zenodo_add_button.click()
+        lab_token = self.zenodo_rows[-1]
+        lab_token["name_edit"].setText("lab")
+        lab_token["path_edit"].setText("/tmp/lab.token")
+        self.zenodo_add_button.click()
+        proc_token = self.zenodo_rows[-1]
+        proc_token["name_edit"].setText("proc_scripts")
+        original_get_open_file_name = (
+            stub_widgets.QFileDialog.getOpenFileName
+        )
+        stub_widgets.QFileDialog.getOpenFileName = staticmethod(
+            lambda *args, **kwargs: ("/tmp/proc_scripts.token", "")
+        )
+        proc_token["browse_button"].click()
+        assert proc_token["path_edit"].text() == "/tmp/proc_scripts.token"
+        assert proc_token["path_edit"].cursor_position == 0
+        stub_widgets.QFileDialog.getOpenFileName = (
+            original_get_open_file_name
+        )
+        self.zenodo_add_button.click()
+        removed_token = self.zenodo_rows[-1]
+        removed_token["name_edit"].setText("remove_me")
+        removed_token["path_edit"].setText("/tmp/remove_me.token")
+        removed_token["remove_button"].click()
+        assert removed_token not in self.zenodo_rows
+        default_index = self.zenodo_default_combo.findText("lab")
+        assert default_index != -1
+        self.zenodo_default_combo.setCurrentIndex(default_index)
         self.data_directory_edit.setText("/tmp/data_dir")
         self.save_button.click()
         return 1
@@ -376,5 +429,14 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
     assert config.has_section("zenodo"), (
         "Existing sections outside the editor must remain."
     )
+    assert config.get("zenodo", "default_token") == "lab"
+    assert config.get("zenodo", "upload_number") == "4"
+    assert not config.has_option("zenodo", "token_file")
+    assert config.get("zenodo_tokens", "lab") == "/tmp/lab.token"
+    assert (
+        config.get("zenodo_tokens", "proc_scripts")
+        == "/tmp/proc_scripts.token"
+    )
+    assert not config.has_option("zenodo_tokens", "remove_me")
     exp_keys = [key for key, _ in config.items("ExpTypes")]
     assert exp_keys == sorted(exp_keys)

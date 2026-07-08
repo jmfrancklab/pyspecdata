@@ -8,13 +8,18 @@ example.
 
 To run this script you must create a personal access token on the Zenodo
 website (with ``deposit:write`` scope).  Save the token in a file and reference
-it from the ``[zenodo]`` section of ``~/.pyspecdata``::
+it by name in ``~/.pyspecdata``::
 
     [zenodo]
-    token_file = /path/to/zenodo.token
+    default_token = documentation
+
+    [zenodo_tokens]
+    documentation = /path/to/zenodo.token
 
 A new deposition record will be created automatically for the first file and
-the remaining files will be uploaded to that same deposition.
+the remaining files will be uploaded to that same deposition.  Keep token
+files local and never commit them to git.  See
+https://developers.zenodo.org/#rest-api for API and authentication details.
 """
 
 from pyspecdata import search_filename, zenodo_upload
@@ -151,8 +156,13 @@ for search_str, exp_type in files_to_upload:
         deposition_id = zenodo_upload(
             local_path,
             title="Documentation example data files for pySpecData",
+            token_name="documentation",
         )
     else:
-        zenodo_upload(local_path, deposition_id=deposition_id)
+        zenodo_upload(
+            local_path,
+            deposition_id=deposition_id,
+            token_name="documentation",
+        )
 
 print("View deposition at https://zenodo.org/uploads/" + str(deposition_id))

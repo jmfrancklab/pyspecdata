@@ -9,20 +9,25 @@ It also supplies the :func:`cmd` function used by the installed
 ``pyspecdata_zenodo`` command.  This command uploads every file listed in
 ``./data_files.csv`` and accepts one required positional argument::
 
-    pyspecdata_zenodo DRAFT_ID_OR_TITLE
+    pyspecdata_zenodo [--token TOKEN_NAME] DRAFT_ID_OR_TITLE
 
 If ``DRAFT_ID_OR_TITLE`` is a six-to-ten-digit positive integer, the files are
 uploaded to that existing draft deposition.  Any other value is used as the
-title of a new draft.  The only optional command-line flags are the standard
-``-h`` and ``--help`` flags supplied by :mod:`argparse`.
+title of a new draft.  ``--token`` selects an entry from the
+``[zenodo_tokens]`` configuration section; otherwise the configured default
+token is used.
 
 Published records are downloaded through Zenodo's public records API and do
 not require authentication.  Draft downloads, deposition creation, and
 uploads read a Zenodo personal access token from the file configured in the
-``[zenodo]`` section of the pyspecdata configuration file::
+``[zenodo_tokens]`` section of the pyspecdata configuration file.  The
+``[zenodo]`` section selects the token used when no name is supplied::
 
     [zenodo]
-    token_file = /path/to/zenodo.token
+    default_token = lab
+
+    [zenodo_tokens]
+    lab = /path/to/zenodo.token
 
 The token must have the appropriate deposit permissions.  Keep the token file
 local and do not commit it to version control.
@@ -47,9 +52,25 @@ __all__ = ["zenodo_download", "zenodo_upload", "create_deposition", "cmd"]
 ZENODO_ID_RE = re.compile(r"^[1-9][0-9]{5,9}$")
 
 
-def _auth_headers():
-    """Return authorization headers for authenticated Zenodo API requests."""
-    token_path = pyspec_config.get_setting("token_file", section="zenodo")
+def _auth_headers(token_name=None):
+    """Return Zenodo authorization headers for a named token."""
+    if token_name is None:
+        token_name = pyspec_config.get_setting(
+            "default_token", section="zenodo"
+        )
+    if token_name is None:
+        raise ValueError(
+            "No Zenodo token was selected and [zenodo] default_token is "
+            "not configured"
+        )
+    token_path = pyspec_config.get_setting(
+        token_name, section="zenodo_tokens"
+    )
+    if token_path is None:
+        raise ValueError(
+            "Zenodo token file is not configured for "
+            f"[zenodo_tokens] {token_name}"
+        )
     with open(os.path.expanduser(token_path)) as fp:
         token = fp.read().strip()
     return {"Authorization": f"Bearer {token}"}
@@ -70,7 +91,13 @@ def _file_download_url(fileinfo):
     return links.get("download") or links.get("self")
 
 
-def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
+def zenodo_download(
+    deposition,
+    searchstring,
+    exp_type=None,
+    draft=False,
+    token_name=None,
+):
     """Download the file from Zenodo ``deposition`` that matches
     ``searchstring`` and place it in the directory associated with
     ``exp_type`` using :func:`getDATADIR`.
@@ -88,6 +115,10 @@ def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
         If ``True``, download from an unpublished draft deposition using the
         configured Zenodo token.  The default uses the public records API and
         does not require authentication.
+    token_name : str, optional
+        Name of a token in the ``[zenodo_tokens]`` configuration section.
+        Supplying a token name implies ``draft=True``.  When ``draft=True``
+        and no name is supplied, ``[zenodo] default_token`` is used.
     Returns
     -------
     str
@@ -98,10 +129,10 @@ def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
     dest_dir = getDATADIR(exp_type=exp_type)
     os.makedirs(dest_dir, exist_ok=True)
 
-    if draft:
+    if draft or token_name is not None:
         r = requests.get(
             f"https://zenodo.org/api/deposit/depositions/{deposition}/files",
-            headers=_auth_headers(),
+            headers=_auth_headers(token_name),
         )
         try:
             r.raise_for_status()
@@ -162,12 +193,14 @@ def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
     return dest
 
 
-def create_deposition(title):
+def create_deposition(title, token_name=None):
     """Create a new Zenodo deposition using ``title``.
 
     The deposition will pre-reserve a DOI, set the upload type to
     ``dataset`` and mark today's date as both the publication date and the
-    availability date.
+    availability date.  ``token_name`` selects a token from the
+    ``[zenodo_tokens]`` configuration section; if omitted, the configured
+    default token is used.
     """
 
     today = datetime.date.today().isoformat()
@@ -183,7 +216,7 @@ def create_deposition(title):
 
     r = requests.post(
         "https://zenodo.org/api/deposit/depositions",
-        headers=_auth_headers(),
+        headers=_auth_headers(token_name),
         json={"metadata": metadata},
     )
     try:
@@ -195,7 +228,9 @@ def create_deposition(title):
     return r.json()["id"]
 
 
-def zenodo_upload(local_path, title=None, deposition_id=None):
+def zenodo_upload(
+    local_path, title=None, deposition_id=None, token_name=None
+):
     """Upload ``local_path`` to Zenodo.
 
     Parameters
@@ -208,6 +243,9 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
     deposition_id : str, optional
         Existing deposition identifier.  If ``None`` a new deposition is
         created using ``title``.
+    token_name : str, optional
+        Name of a token in the ``[zenodo_tokens]`` configuration section.  If
+        omitted, ``[zenodo] default_token`` is used.
     """
 
     if deposition_id is None:
@@ -215,7 +253,7 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
             raise ValueError(
                 "must provide title when creating a new deposition"
             )
-        deposition_id = create_deposition(title)
+        deposition_id = create_deposition(title, token_name=token_name)
 
     with open(local_path, "rb") as fp:
         filename = os.path.basename(local_path)
@@ -226,7 +264,7 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
             # "name" field naming the remote file and a "file" upload part.
             # Using the basename preserves the prior behavior of uploading
             # the local file under its file name, not its full local path.
-            headers=_auth_headers(),
+            headers=_auth_headers(token_name),
             data={"name": filename},
             files={"file": fp},
         )
@@ -296,12 +334,14 @@ def data_files_from_log(log_path="data_files.csv"):
 def cmd(argv=None):
     """Upload files from ``./data_files.csv`` to a Zenodo draft.
 
-    The command line interface is ``pyspecdata_zenodo <draft-id-or-title>``.
+    The command line interface is
+    ``pyspecdata_zenodo [--token TOKEN_NAME] <draft-id-or-title>``.
     If the single argument matches ``^[1-9][0-9]{5,9}$``, it is interpreted as
     an existing Zenodo draft deposition id.  Otherwise, it is used verbatim as
     the title for a new draft deposition.  Files are read from the
     ``data_files.csv`` created in the current directory by
     :func:`pyspecdata.find_file` and :func:`pyspecdata.search_filename`.
+    ``--token`` selects a named token; if omitted, the default token is used.
     """
     parser = argparse.ArgumentParser(
         description=(
@@ -316,6 +356,14 @@ def cmd(argv=None):
             "new draft."
         ),
     )
+    parser.add_argument(
+        "--token",
+        dest="token_name",
+        help=(
+            "token name from [zenodo_tokens]; defaults to "
+            "[zenodo] default_token"
+        ),
+    )
     args = parser.parse_args(argv)
     local_paths = data_files_from_log()
     if ZENODO_ID_RE.match(args.draft_id_or_title):
@@ -326,10 +374,14 @@ def cmd(argv=None):
         title = args.draft_id_or_title
     for j, local_path in enumerate(local_paths):
         if j == 0 and deposition_id is None:
-            deposition_id = zenodo_upload(local_path, title=title)
+            deposition_id = zenodo_upload(
+                local_path, title=title, token_name=args.token_name
+            )
         else:
             deposition_id = zenodo_upload(
-                local_path, deposition_id=deposition_id
+                local_path,
+                deposition_id=deposition_id,
+                token_name=args.token_name,
             )
     print("View deposition at", f"https://zenodo.org/uploads/{deposition_id}")
     return 0
