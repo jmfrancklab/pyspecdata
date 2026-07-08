@@ -9,18 +9,27 @@ Check out the
 example to understand how
 pySpecData locates the file here.
 """
+
+import re
+
 import matplotlib.pyplot as plt
 import pyspecdata as psd
 # %%
 # Load some 1D ESR data with harmonic + phase info.
 # The data is initial organized into two dimensions -- `harmonic` and $B_0$.
-# 
+#
 
-d = psd.find_file("S175R1a.*DHPC.*today.*200304",
-        exp_type='francklab_esr/Sam', zenodo="21084153")
+d = psd.find_file(
+    "S175R1a.*DHPC.*today.*200304.DSC",
+    exp_type="francklab_esr/Sam",
+    zenodo="21084153",
+)
 print(d.shape)
-print("here, we see the harmonic axis contains both harmonic and phase info",repr(d.getaxis('harmonic')))
-d.chunk_auto('harmonic','phase')
+print(
+    "here, we see the harmonic axis contains both harmonic and phase info",
+    repr(d.getaxis("harmonic")),
+)
+d.chunk_auto("harmonic", "phase")
 
 # %%
 # `chunk_auto` breaks the `harmonic` dimensions since it was labeled with an axis that had 2 fields.
@@ -28,18 +37,25 @@ d.chunk_auto('harmonic','phase')
 print(d.shape)
 
 plt.figure(1)
-psd.plot(d['phase',0], alpha=0.5)
-psd.plot(d['phase',1], ':', alpha=0.5)
+psd.plot(d["phase", 0], alpha=0.5)
+psd.plot(d["phase", 1], ":", alpha=0.5)
 plt.title("1D Data with Multiple Harmonics")
 
 # %%
 # Next, let's load some power-saturation data
 
-d = psd.find_file("Power.*Sat.*200303",
-        exp_type='francklab_esr/Sam', zenodo="21084153")
-d.chunk_auto('harmonic','phase')
+d = psd.find_file(
+    re.escape("15N_S175R1a_pR_DHPC_Power_Sat_6G_200303.DSC"),
+    exp_type="francklab_esr/Sam",
+    zenodo="21084153",
+)
+d.chunk_auto("harmonic", "phase")
 plt.figure(2)
-psd.image(d['harmonic',0]['phase',0].C.set_axis('Microwave Power','#').set_units('Microwave Power','scan #'))
+psd.image(
+    d["harmonic", 0]["phase", 0]
+    .C.set_axis("Microwave Power", "#")
+    .set_units("Microwave Power", "scan #")
+)
 plt.title("2D Power Saturation")
-plt.gca().set_aspect('auto')
+plt.gca().set_aspect("auto")
 plt.show()
