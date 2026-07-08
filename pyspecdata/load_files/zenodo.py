@@ -1,5 +1,6 @@
 import os
 import urllib.request
+import urllib.parse
 import re
 import datetime
 import argparse
@@ -11,6 +12,18 @@ import requests
 __all__ = ["zenodo_download", "zenodo_upload", "create_deposition", "cmd"]
 
 ZENODO_ID_RE = re.compile(r"^[1-9][0-9]{5,9}$")
+
+
+def _raise_for_status(response, action):
+    try:
+        response.raise_for_status()
+    except requests.HTTPError as exc:
+        msg = f"{action}: {exc}"
+        response_text = getattr(response, "text", "")
+        if response_text != "":
+            msg += f"\n{response_text}"
+        logging.error(msg)
+        raise requests.HTTPError(msg, response=response) from exc
 
 
 def _get_token():
@@ -95,12 +108,7 @@ def create_deposition(title):
         params={"access_token": token},
         json={"metadata": metadata},
     )
-    try:
-        r.raise_for_status()
-    except requests.HTTPError as exc:
-        msg = f"{exc}\n{r.text}"
-        logging.error("failed to create deposition: %s", msg)
-        raise requests.HTTPError(msg) from exc
+    _raise_for_status(r, "failed to create Zenodo deposition")
     return r.json()["id"]
 
 
@@ -128,25 +136,29 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
             )
         deposition_id = create_deposition(title)
 
-    with open(local_path, "rb") as fp:
-        filename = os.path.basename(local_path)
-        r = requests.post(
-            "https://zenodo.org/api/deposit/depositions/"
-            f"{deposition_id}/files",
-            # The old deposition-files API expects multipart form data with a
-            # "name" field naming the remote file and a "file" upload part.
-            # Using the basename preserves the prior behavior of uploading
-            # the local file under its file name, not its full local path.
-            headers={"Authorization": f"Bearer {token}"},
-            data={"name": filename},
-            files={"file": fp},
+    headers = {"Authorization": f"Bearer {token}"}
+    r = requests.get(
+        "https://zenodo.org/api/deposit/depositions/" f"{deposition_id}",
+        headers=headers,
+    )
+    _raise_for_status(r, f"failed to fetch Zenodo deposition {deposition_id}")
+    bucket_url = r.json().get("links", {}).get("bucket")
+    if bucket_url is None:
+        raise ValueError(
+            f"Zenodo deposition {deposition_id} did not include a bucket "
+            "upload URL; make sure this is an editable draft deposition."
         )
 
-    r.raise_for_status()
+    filename = os.path.basename(local_path)
+    quoted_filename = urllib.parse.quote(filename, safe="")
+    upload_url = bucket_url.rstrip("/") + "/" + quoted_filename
+    with open(local_path, "rb") as fp:
+        r = requests.put(upload_url, data=fp, headers=headers)
+    _raise_for_status(r, f"failed to upload {filename!r} to Zenodo")
     info = r.json()
     print(
         "Uploaded",
-        info.get("filename", info.get("name", filename)),
+        info.get("key", info.get("filename", info.get("name", filename))),
     )
     print("View deposition at", f"https://zenodo.org/uploads/{deposition_id}")
 
