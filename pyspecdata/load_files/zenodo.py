@@ -1,3 +1,37 @@
+"""Transfer files between pyspecdata and Zenodo
+------------------------------------------------
+
+This module provides :func:`zenodo_download` for downloading files from
+published records or authenticated drafts, :func:`create_deposition` for
+creating a draft, and :func:`zenodo_upload` for uploading a file to a draft.
+
+It also supplies the :func:`cmd` function used by the installed
+``pyspecdata_zenodo`` command.  This command uploads every file listed in
+``./data_files.csv`` and accepts one required positional argument::
+
+    pyspecdata_zenodo DRAFT_ID_OR_TITLE
+
+If ``DRAFT_ID_OR_TITLE`` is a six-to-ten-digit positive integer, the files are
+uploaded to that existing draft deposition.  Any other value is used as the
+title of a new draft.  The only optional command-line flags are the standard
+``-h`` and ``--help`` flags supplied by :mod:`argparse`.
+
+Published records are downloaded through Zenodo's public records API and do
+not require authentication.  Draft downloads, deposition creation, and
+uploads read a Zenodo personal access token from the file configured in the
+``[zenodo]`` section of the pyspecdata configuration file::
+
+    [zenodo]
+    token_file = /path/to/zenodo.token
+
+The token must have the appropriate deposit permissions.  Keep the token file
+local and do not commit it to version control.
+
+See the `Zenodo REST API documentation
+<https://developers.zenodo.org/#rest-api>`_ for endpoint and authentication
+details.
+"""
+
 import os
 import urllib.request
 import re
@@ -66,8 +100,7 @@ def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
 
     if draft:
         r = requests.get(
-            "https://zenodo.org/api/deposit/depositions/"
-            f"{deposition}/files",
+            f"https://zenodo.org/api/deposit/depositions/{deposition}/files",
             headers=_auth_headers(),
         )
         try:
@@ -101,7 +134,7 @@ def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
         # A published record response contains its file objects under the
         # top-level "files" field.
         files = r.json().get("files", [])
-    logging.debug("all the files are "+str(files))
+    logging.debug("all the files are " + str(files))
     pattern = re.compile(searchstring)
     matches = [f for f in files if pattern.search(_file_name(f) or "")]
     if len(matches) == 0:
