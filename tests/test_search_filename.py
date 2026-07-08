@@ -15,9 +15,7 @@ datadir = load_module("datadir")
 load_files = load_module("load_files.__init__")
 
 
-def test_zenodo_auth_headers_uses_configured_token_file(
-    tmp_path, monkeypatch
-):
+def test_zenodo_auth_headers_uses_configured_token_file(tmp_path, monkeypatch):
     zenodo = load_module("load_files.zenodo")
     token_file = tmp_path / "zenodo.token"
     token_file.write_text("TOKEN\n")
@@ -28,9 +26,7 @@ def test_zenodo_auth_headers_uses_configured_token_file(
         lambda key, section=None: str(token_file),
     )
 
-    assert zenodo._auth_headers() == {
-        "Authorization": "Bearer TOKEN"
-    }
+    assert zenodo._auth_headers() == {"Authorization": "Bearer TOKEN"}
 
 
 def test_load_indiv_file_passes_zenodo_to_xepr_without_companion_search(
@@ -189,9 +185,7 @@ def test_zenodo_public_download_does_not_read_token(tmp_path, monkeypatch):
 
         def json(self):
             return {
-                "files": [
-                    {"key": "public.dat", "links": {"self": file_url}}
-                ]
+                "files": [{"key": "public.dat", "links": {"self": file_url}}]
             }
 
     def fake_get(url):
@@ -250,9 +244,7 @@ def test_zenodo_draft_download_authenticates_and_matches_filename(
 
     monkeypatch.setattr(zenodo, "_auth_headers", fake_auth_headers)
     monkeypatch.setattr(zenodo.requests, "get", fake_get)
-    monkeypatch.setattr(
-        zenodo.urllib.request, "urlretrieve", fake_urlretrieve
-    )
+    monkeypatch.setattr(zenodo.urllib.request, "urlretrieve", fake_urlretrieve)
 
     path = zenodo.zenodo_download(
         "123456", r"draft\.dat", exp_type="test", draft=True
@@ -324,9 +316,7 @@ def test_zenodo_draft_download_401_explains_token_requirement(
         zenodo.requests.HTTPError,
         match="draft deposition access requires a valid Zenodo token",
     ) as exc_info:
-        zenodo.zenodo_download(
-            "123456", "file", exp_type="test", draft=True
-        )
+        zenodo.zenodo_download("123456", "file", exp_type="test", draft=True)
     assert "Invalid access token" in str(exc_info.value)
 
 
@@ -400,9 +390,9 @@ def test_search_filename_passes_raw_regex_to_rclone(tmp_path, monkeypatch):
 def test_rclone_search_uses_regex_mode(monkeypatch, tmp_path):
     exp_type = "remote_exp"
     exp_key = datadir.PureWindowsPath(exp_type).as_posix().casefold()
-    datadir.pyspec_config.config_vars["RcloneRemotes"][
-        exp_key
-    ] = "example:remote"
+    datadir.pyspec_config.config_vars["RcloneRemotes"][exp_key] = (
+        "example:remote"
+    )
 
     captured = {}
 
@@ -541,10 +531,7 @@ def test_create_deposition_uses_auth_headers(monkeypatch):
     assert deposition_id == 123456
     assert captured["url"] == "https://zenodo.org/api/deposit/depositions"
     assert captured["headers"] == {"Authorization": "Bearer TOKEN"}
-    assert (
-        captured["json"]["metadata"]["title"]
-        == "Authenticated deposition"
-    )
+    assert captured["json"]["metadata"]["title"] == "Authenticated deposition"
 
 
 def test_pyspecdata_zenodo_cli_uses_existing_numeric_deposition_id(
@@ -556,8 +543,7 @@ def test_pyspecdata_zenodo_cli_uses_existing_numeric_deposition_id(
     local_path = data_dir / "one.dat"
     local_path.write_text("one")
     (tmp_path / "data_files.csv").write_text(
-        "Filename,Path,exp_type\n"
-        f"one.dat,{data_dir},example\n",
+        f"Filename,Path,exp_type\none.dat,{data_dir},example\n",
         encoding="utf-8",
     )
     calls = []
@@ -615,9 +601,7 @@ def test_pyspecdata_zenodo_cli_requires_one_argument():
         zenodo.cmd(["21084153", "extra"])
 
 
-def test_pyspecdata_zenodo_cli_requires_data_files_csv(
-    tmp_path, monkeypatch
-):
+def test_pyspecdata_zenodo_cli_requires_data_files_csv(tmp_path, monkeypatch):
     zenodo = load_module("load_files.zenodo")
     monkeypatch.chdir(tmp_path)
 
