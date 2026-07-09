@@ -90,17 +90,14 @@ def zenodo_download_draft(deposition):
     return r.json()
 
 
-# TODO ☐: why do we need "draft"? Why can't it just use the draft
-#         mechanism if the number given is not public?? w/ the aim of
-#         enabling this, and also getting rid of the stupid private
-#         functions codex likes to create, I moved your code into the
-#         function above.
-#         Previous rationale wasn't valid → if it's not a public token,
-#         then we try draft, then we fail.
-def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
+def zenodo_download(deposition, searchstring, exp_type=None):
     """Download the file from Zenodo ``deposition`` that matches
     ``searchstring`` and place it in the directory associated with
     ``exp_type`` using :func:`getDATADIR`.
+
+    The public records API is tried first.  If Zenodo reports that the public
+    record is not found, this function then tries the authenticated
+    draft-deposition API using the configured Zenodo token.
 
     Parameters
     ----------
@@ -111,10 +108,6 @@ def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
     exp_type : str
         Experiment type used to determine where the file should be stored via
         :func:`getDATADIR`.
-    draft : bool, optional
-        If ``True``, download from an unpublished draft deposition using the
-        configured Zenodo token.  The default uses the public records API and
-        does not require authentication.
     Returns
     -------
     str
@@ -125,7 +118,16 @@ def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
     dest_dir = getDATADIR(exp_type=exp_type)
     os.makedirs(dest_dir, exist_ok=True)
 
-    if draft:
+    try:
+        r = requests.get(f"https://zenodo.org/api/records/{deposition}")
+        r.raise_for_status()
+    except requests.HTTPError:
+        if getattr(r, "status_code", None) != 404:
+            raise
+        print(
+            "Zenodo public record was not found.  This may be an unpublished "
+            "draft deposition; trying the authenticated draft API."
+        )
         files = zenodo_download_draft(deposition)
         # Draft deposition file metadata is returned directly as a list.
         # In that API, the filename is stored under "filename" and the
@@ -133,9 +135,8 @@ def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
         name_key = "filename"
         url_key = "download"
         deposition_label = "draft deposition"
+        draft = True
     else:
-        r = requests.get(f"https://zenodo.org/api/records/{deposition}")
-        r.raise_for_status()
         # Published-record metadata is a dictionary with a top-level "files"
         # list.  In that API, the filename is stored under "key" and the
         # public file URL is stored under links["self"].
@@ -143,6 +144,7 @@ def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
         name_key = "key"
         url_key = "self"
         deposition_label = "deposition"
+        draft = False
 
     logging.debug("all the files are " + str(files))
     pattern = re.compile(searchstring)
@@ -175,10 +177,8 @@ def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
         urllib.request.urlopen(download_url) as response,
         open(dest, "wb") as fp,
     ):
-        # TODO ☐: do we really need shutil here, or could this be
-        #         achieved with fp.write?  I ask just b/c shutil is an
-        #         extra import here and seems like it could be not
-        #         totally necessary
+        # Stream the response so large Zenodo files are not held fully in
+        # memory.
         shutil.copyfileobj(response, fp)
     logging.debug(f"downloading zenodo '{url}' to '{dest}'")
     print(f"Downloaded from zenodo '{url}' to {dest}")
