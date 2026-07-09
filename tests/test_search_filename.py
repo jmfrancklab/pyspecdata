@@ -144,24 +144,101 @@ def test_zenodo_download_prints_after_download(tmp_path, monkeypatch, capsys):
         retrieved["record_url"] = url
         return FakeResponse()
 
-    def fake_urlretrieve(url, dest):
+    class FakeDownloadResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            pass
+
+        def read(self, *_args):
+            if retrieved.get("downloaded", False):
+                return b""
+            retrieved["downloaded"] = True
+            return b"remote"
+
+    def fake_urlopen(url):
         retrieved["file_url"] = url
-        retrieved["dest"] = dest
-        with open(dest, "w") as fp:
-            fp.write("remote")
+        return FakeDownloadResponse()
 
     monkeypatch.setattr(zenodo, "getDATADIR", fake_getdatadir)
     monkeypatch.setattr(zenodo.requests, "get", fake_get)
-    monkeypatch.setattr(zenodo.urllib.request, "urlretrieve", fake_urlretrieve)
+    monkeypatch.setattr(zenodo.urllib.request, "urlopen", fake_urlopen)
 
     path = zenodo.zenodo_download(
         "21041480", r".*T177R1a_pR_210615.*", exp_type="remote_exp"
     )
 
     assert path == str(base_dir) + os.path.sep + file_key
+    assert (base_dir / file_key).read_bytes() == b"remote"
     assert retrieved["record_url"] == "https://zenodo.org/api/records/21041480"
     assert retrieved["file_url"] == file_url
-    assert retrieved["dest"] == path
+    assert (
+        capsys.readouterr().out
+        == f"Downloaded from zenodo '{file_url}' to {path}\n"
+    )
+
+
+def test_zenodo_download_draft_uses_auth_header_for_file_download(
+    tmp_path, monkeypatch, capsys
+):
+    zenodo = load_module("load_files.zenodo")
+    base_dir = tmp_path / "experiment"
+    base_dir.mkdir()
+    file_key = "draft.dat"
+    file_url = (
+        "https://zenodo.org/api/records/123456/draft/files/draft.dat/content"
+    )
+
+    def fake_getdatadir(exp_type=None):
+        assert exp_type == "remote_exp"
+        return str(base_dir) + os.path.sep
+
+    class FakeDownloadResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            pass
+
+        def read(self, *_args):
+            if calls.get("downloaded", False):
+                return b""
+            calls["downloaded"] = True
+            return b"draft"
+
+    calls = {}
+
+    def fake_urlopen(download_url):
+        calls["is_request"] = isinstance(
+            download_url, zenodo.urllib.request.Request
+        )
+        calls["url"] = download_url.full_url
+        calls["headers"] = dict(download_url.header_items())
+        return FakeDownloadResponse()
+
+    monkeypatch.setattr(zenodo, "getDATADIR", fake_getdatadir)
+    monkeypatch.setattr(
+        zenodo,
+        "zenodo_download_draft",
+        lambda _deposition: [
+            {"filename": file_key, "links": {"download": file_url}}
+        ],
+    )
+    monkeypatch.setattr(
+        zenodo, "_auth_headers", lambda: {"Authorization": "Bearer fake"}
+    )
+    monkeypatch.setattr(zenodo.urllib.request, "urlopen", fake_urlopen)
+
+    path = zenodo.zenodo_download(
+        "123456", r"draft\.dat$", exp_type="remote_exp", draft=True
+    )
+
+    assert path == str(base_dir) + os.path.sep + file_key
+    assert (base_dir / file_key).read_bytes() == b"draft"
+    assert calls["is_request"]
+    assert calls["url"] == file_url
+    assert calls["headers"] == {"Authorization": "Bearer fake"}
     assert (
         capsys.readouterr().out
         == f"Downloaded from zenodo '{file_url}' to {path}\n"

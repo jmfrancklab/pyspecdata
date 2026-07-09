@@ -13,6 +13,7 @@ import re
 import datetime
 import argparse
 import csv
+import shutil
 from ..datadir import getDATADIR, pyspec_config
 import logging
 import requests
@@ -67,13 +68,10 @@ def zenodo_download_draft(deposition):
     except requests.HTTPError as exc:
         status_code = r.status_code
         if status_code == 401:
-            detail = (
-                "draft deposition access requires a valid Zenodo token"
-            )
+            detail = "draft deposition access requires a valid Zenodo token"
         elif status_code == 403:
             detail = (
-                "the Zenodo token does not have permission for this "
-                "deposition"
+                "the Zenodo token does not have permission for this deposition"
             )
         elif status_code == 404:
             detail = (
@@ -160,7 +158,16 @@ def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
             f"{deposition_label} {deposition}"
         )
     dest = os.path.join(dest_dir, filename)
-    urllib.request.urlretrieve(url, dest)
+    # urlretrieve cannot attach the Authorization header needed by draft
+    # content links, so use urlopen for both public and draft downloads.
+    download_url = url
+    if draft:
+        download_url = urllib.request.Request(url, headers=_auth_headers())
+    with (
+        urllib.request.urlopen(download_url) as response,
+        open(dest, "wb") as fp,
+    ):
+        shutil.copyfileobj(response, fp)
     logging.debug(f"downloading zenodo '{url}' to '{dest}'")
     print(f"Downloaded from zenodo '{url}' to {dest}")
     return dest
