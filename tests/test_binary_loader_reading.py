@@ -38,6 +38,10 @@ sys.modules.pop("pyspecdata.load_files.load_cary", None)
 
 load_module("general_functions")
 core = load_module("core", use_real_pint=True, use_real_h5py=True)
+lmfitdata_mod = load_module("lmfitdata", use_real_pint=True, use_real_h5py=True)
+pyspecdata_pkg.nddata = core.nddata
+pyspecdata_pkg.ndshape = core.ndshape
+pyspecdata_pkg.lmfitdata = lmfitdata_mod.lmfitdata
 bruker_esr = importlib.import_module("pyspecdata.load_files.bruker_esr")
 load_cary = importlib.import_module("pyspecdata.load_files.load_cary")
 
