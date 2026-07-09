@@ -18,6 +18,7 @@ To run the curve for your data:
         the spectrometer to subtract and hide the absorbance values of our
         baseline.
 """
+
 from pylab import *
 from pyspecdata import *
 import numpy as np
@@ -32,7 +33,9 @@ wv_range = (276, 281)  # range of wavelengths we consider to be our peak
 
 # HERE we get dictionaries of nddata
 dataWKBSA = find_file(
-    "221110_BSAexerciseWK_0p07-0percentBSAcalibration.BSW", exp_type="UV_Vis/BSA_Exercise", zenodo="21041480"
+    "221110_BSAexerciseWK_0p07-0percentBSAcalibration.BSW",
+    exp_type="UV_Vis/BSA_Exercise",
+    zenodo="21041480",
 )
 print("the experiments present in this file are:", dataWKBSA.keys())
 # from our notebook, we get the following info
@@ -57,9 +60,7 @@ list_of_runs = OrderedDict(
         ("0.0700 %", "A-0p0700%BSA"),
     ]
 )
-background = (
-    "0 %"  # this is the label of the thing we want to subtract as the background
-)
+background = "0 %"  # this is the label of the thing we want to subtract as the background
 with figlist_var() as fl:
     # {{{ first, just show the raw data and the region of the spectrum that we intend to slice
     bg_data = dataWKBSA[list_of_runs[background]]
@@ -79,26 +80,37 @@ with figlist_var() as fl:
     #     (percentage), as well as an array of floating point values for the
     #     corresponding concentrations
     conc_labels = [k for k, v in list_of_runs.items() if "%" in k]
-    conc_values = array([float(j.replace("%", "")) for j in conc_labels])
     bg_data = dataWKBSA[list_of_runs[background]]
-    all_data = concat(
-        [dataWKBSA[list_of_runs[k]] - bg_data for k in conc_labels], "concentration"
-    ).set_axis("concentration", conc_values)
     # }}}
     # {{{ now, gather the data in to a 2D array, so that I can just average the peak and plot the calibration curve
-    A280 = all_data[wv:wv_range].mean(wv)
+    A280 = (
+        concat(
+            [dataWKBSA[list_of_runs[k]] - bg_data for k in conc_labels],
+            "concentration",
+        )
+        .set_axis(
+            "concentration",
+            array([float(j.replace("%", "")) for j in conc_labels]),
+        )[wv:wv_range]
+        .mean(wv)
+    )
     fl.next("calibration curve")
     fl.plot(A280, "o")
     c = A280.polyfit("concentration", order=1)
     fl.plot(A280.eval_poly(c, "concentration"))
     # }}}
     # {{{ use sympy to print the fit equation
-    conc_symb = sp.symbols("c", real=True)
-    expr = sum([conc_symb ** j * sp.Float(c[j], 3) for j in range(len(c))])
     plt.text(
         0.5,
         0.5,
-        sp.latex(expr),
+        sp.latex(
+            sum(
+                [
+                    sp.symbols("c", real=True) ** j * sp.Float(c[j], 3)
+                    for j in range(len(c))
+                ]
+            )
+        ),
         transform=gca().transAxes,
         va="center",
         ha="center",

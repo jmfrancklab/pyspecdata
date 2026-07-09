@@ -38,7 +38,9 @@ sys.modules.pop("pyspecdata.load_files.load_cary", None)
 
 load_module("general_functions")
 core = load_module("core", use_real_pint=True, use_real_h5py=True)
-lmfitdata_mod = load_module("lmfitdata", use_real_pint=True, use_real_h5py=True)
+lmfitdata_mod = load_module(
+    "lmfitdata", use_real_pint=True, use_real_h5py=True
+)
 pyspecdata_pkg.nddata = core.nddata
 pyspecdata_pkg.ndshape = core.ndshape
 pyspecdata_pkg.lmfitdata = lmfitdata_mod.lmfitdata
@@ -55,6 +57,9 @@ def _write_big_endian_array(path, values, dtype):
     path.write_bytes(arr.tobytes())
 
 
+# NOTE TO JF: although this helper is only used once, it contains bulky binary
+# fixture setup.  Keeping it separate makes the Cary loader test easier to
+# read.
 def _write_fake_cary_file(path, x_values, y_values, spectrum_name="fake_uv"):
     x_values = np.asarray(x_values, dtype="<f4")
     y_values = np.asarray(y_values, dtype="<f4")
@@ -154,9 +159,7 @@ def test_xepr_dsc_entrypoint_reads_chunkable_harmonics(tmp_path):
     np.testing.assert_allclose(data.data.shape, (4, 1, 2))
 
 
-def test_xepr_uses_zenodo_for_missing_dta_companion(
-    tmp_path, monkeypatch
-):
+def test_xepr_uses_zenodo_for_missing_dta_companion(tmp_path, monkeypatch):
     zenodo = importlib.import_module("pyspecdata.load_files.zenodo")
     dsc = tmp_path / "remote_esr.DSC"
     dta = tmp_path / "remote_esr.DTA"
@@ -179,9 +182,7 @@ def test_xepr_uses_zenodo_for_missing_dta_companion(
 
     monkeypatch.setattr(zenodo, "zenodo_download", fake_zenodo_download)
 
-    data = bruker_esr.xepr(
-        str(dsc), exp_type="remote_exp", zenodo="21084153"
-    )
+    data = bruker_esr.xepr(str(dsc), exp_type="remote_exp", zenodo="21084153")
 
     assert calls == [("21084153", r"^remote_esr\.DTA$", "remote_exp")]
     np.testing.assert_allclose(data.data, np.arange(4, dtype=float))
@@ -226,9 +227,7 @@ def test_xepr_dta_entrypoint_reads_power_axis_from_ygf(tmp_path):
     )
 
 
-def test_xepr_uses_zenodo_for_missing_ygf_companion(
-    tmp_path, monkeypatch
-):
+def test_xepr_uses_zenodo_for_missing_ygf_companion(tmp_path, monkeypatch):
     zenodo = importlib.import_module("pyspecdata.load_files.zenodo")
     dsc = tmp_path / "remote_power.DSC"
     dta = tmp_path / "remote_power.DTA"
@@ -258,9 +257,7 @@ def test_xepr_uses_zenodo_for_missing_ygf_companion(
 
     monkeypatch.setattr(zenodo, "zenodo_download", fake_zenodo_download)
 
-    data = bruker_esr.xepr(
-        str(dsc), exp_type="remote_exp", zenodo="21084153"
-    )
+    data = bruker_esr.xepr(str(dsc), exp_type="remote_exp", zenodo="21084153")
 
     assert calls == [("21084153", r"^remote_power\.YGF$", "remote_exp")]
     np.testing.assert_allclose(

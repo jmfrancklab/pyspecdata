@@ -85,9 +85,10 @@ def xepr(
     elif filename[-4:] == ".DSC":
         filename_spc, filename_par = filename.replace(".DSC", ".DTA"), filename
     elif filename[-4:] == ".YGF":
-        filename_spc, filename_par = filename.replace(
-            ".YGF", ".DTA"
-        ), filename.replace(".YGF", ".DSC")
+        filename_spc, filename_par = (
+            filename.replace(".YGF", ".DTA"),
+            filename.replace(".YGF", ".DSC"),
+        )
     else:
         raise ValueError(
             strm(
@@ -283,16 +284,16 @@ def xepr(
                         )
                 with open(filename_ygf, "rb") as fp:
                     y_axis = read_binary(fp, ">f8", count=y_points_calcd)
-                assert (
-                    len(y_axis) == y_points_calcd
-                ), "Length of the power axis doesn't seem to match!"
+                assert len(y_axis) == y_points_calcd, (
+                    "Length of the power axis doesn't seem to match!"
+                )
             elif v["YTYP"] == "IDX":
                 temp = v.pop("YMIN")
                 y_axis = np.linspace(temp, temp + v.pop("YWID"), v.pop("YPTS"))
                 y_dim_name = v.pop("YNAM")
-                assert (
-                    len(y_axis) == y_points_calcd
-                ), "Length of the y axis doesn't seem to match!"
+                assert len(y_axis) == y_points_calcd, (
+                    "Length of the y axis doesn't seem to match!"
+                )
             else:
                 raise ValueError(
                     strm(
@@ -503,6 +504,9 @@ def winepr(filename, dimname="", exp_type=None):
     return data
 
 
+# NOTE TO JF: this is called directly only once inside this module, but it is
+# a format-specific loader helper that external code may reasonably import, so
+# I was not sure whether to inline it and left it top-level.
 def winepr_load_acqu(filename):
     "Load the parameters for the winepr filename"
     with open(filename, "rU") as fp:  # the U automatically converts dos format
@@ -571,6 +575,9 @@ def winepr_load_acqu(filename):
     return v
 
 
+# NOTE TO JF: this is called directly only once inside this module, but tests
+# and external code import it directly to parse Xepr acquisition files, so I
+# left it top-level rather than inlining it.
 def xepr_load_acqu(filename):
     """Load the Xepr acquisition parameter file, which should be a .dsc
     extension.
