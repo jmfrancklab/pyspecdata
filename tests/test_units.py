@@ -40,6 +40,26 @@ def test_scan_unit_is_registered():
     assert quantity.check(gf.Q_(1, "cyc") / gf.Q_(1, "scan"))
 
 
+def test_compact_square_root_unit_is_parseable():
+    assert gf.Q_(1, "s√W").check(gf.Q_(1, "s * W**0.5"))
+
+
+def test_pretty_unit_string_is_parseable():
+    pretty = gf.Q_(1, "g⁰⋅⁵·µm/s⁰⋅⁵")
+    parseable = gf.Q_(1, "g**0.5 * um / s**0.5")
+    assert pretty.check(parseable)
+    assert gf.det_unit_prefactor("g⁰⋅⁵·µm/s⁰⋅⁵") == -9
+
+
+def test_div_units_accepts_pretty_unit_labels():
+    d = nddata(np.ones(2), "beta")
+    d.setaxis("beta", np.r_[0:2])
+    d.set_units("beta", "g⁰⋅⁵·µm/s⁰⋅⁵")
+    assert np.isclose(
+        d.div_units("beta", "s * W**0.5"), np.sqrt(1e-3) * 1e-6
+    )
+
+
 def test_inverse_fourier_transform_accepts_cycles_per_scan_units():
     d = nddata(np.ones(8), "temp")
     d.set_axis("temp", np.linspace(-0.5, 0.5, 8, endpoint=False))
