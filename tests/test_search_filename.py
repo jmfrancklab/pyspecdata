@@ -207,6 +207,24 @@ def test_zenodo_download_falls_back_to_draft_and_authenticates_file_download(
         def raise_for_status(self):
             raise zenodo.requests.HTTPError("404 Client Error")
 
+    class FakeDraftResponse:
+        status_code = 200
+        text = ""
+
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return [{"filename": file_key, "links": {"download": file_url}}]
+
+    def fake_get(url, headers=None):
+        calls.setdefault("get", []).append((url, headers))
+        if url.endswith("/api/records/123456"):
+            return FakePublicResponse()
+        if url.endswith("/api/deposit/depositions/123456/files"):
+            return FakeDraftResponse()
+        raise AssertionError(f"unexpected Zenodo URL {url!r}")
+
     def fake_urlopen(download_url):
         calls["is_request"] = isinstance(
             download_url, zenodo.urllib.request.Request
@@ -217,18 +235,9 @@ def test_zenodo_download_falls_back_to_draft_and_authenticates_file_download(
 
     monkeypatch.setattr(zenodo, "getDATADIR", fake_getdatadir)
     monkeypatch.setattr(
-        zenodo.requests, "get", lambda *_args, **_kwargs: FakePublicResponse()
-    )
-    monkeypatch.setattr(
-        zenodo,
-        "zenodo_download_draft",
-        lambda _deposition: [
-            {"filename": file_key, "links": {"download": file_url}}
-        ],
-    )
-    monkeypatch.setattr(
         zenodo, "_auth_headers", lambda: {"Authorization": "Bearer fake"}
     )
+    monkeypatch.setattr(zenodo.requests, "get", fake_get)
     monkeypatch.setattr(zenodo.urllib.request, "urlopen", fake_urlopen)
 
     path = zenodo.zenodo_download(
@@ -237,6 +246,13 @@ def test_zenodo_download_falls_back_to_draft_and_authenticates_file_download(
 
     assert path == str(base_dir) + os.path.sep + file_key
     assert (base_dir / file_key).read_bytes() == b"draft"
+    assert calls["get"] == [
+        ("https://zenodo.org/api/records/123456", None),
+        (
+            "https://zenodo.org/api/deposit/depositions/123456/files",
+            {"Authorization": "Bearer fake"},
+        ),
+    ]
     assert calls["is_request"]
     assert calls["url"] == file_url
     assert calls["headers"] == {"Authorization": "Bearer fake"}
