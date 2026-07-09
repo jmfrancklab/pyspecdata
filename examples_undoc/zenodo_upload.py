@@ -21,15 +21,12 @@ authentication details.  See Zenodo's `instructions for sharing a draft
 <https://help.zenodo.org/docs/share/user-sharing/#share-draft>`_ to grant
 another user access to an unpublished deposition.
 
-Note, to share a draft (unpublished record), you must grant one of the
-following permissions:
-
-* can preview drafts
-* can edit
-* can manage permissions
-
-In order to share the draft, you must also resolve validation issues in
-``Basic Information`` in the deposition.
+To share a draft (unpublished record), click ``Share`` on the right side and
+add your collaborator, who must also have a Zenodo account.  Then click the
+``Preview`` button, also on the right side.  Either the panel on the right
+changes, indicating success, or you get a small red error message at the very
+top of the page, typically because author information or other required
+metadata is missing.
 """
 
 from pyspecdata import search_filename, zenodo_upload
