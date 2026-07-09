@@ -20,6 +20,16 @@ documentation <https://developers.zenodo.org/#rest-api>`_ for API and
 authentication details.  See Zenodo's `instructions for sharing a draft
 <https://help.zenodo.org/docs/share/user-sharing/#share-draft>`_ to grant
 another user access to an unpublished deposition.
+
+Note, to share a draft (unpublished record), you must grant one of the
+following permissions:
+
+* can preview drafts
+* can edit
+* can manage permissions
+
+In order to share the draft, you must also resolve validation issues in
+``Basic Information`` in the deposition.
 """
 
 from pyspecdata import search_filename, zenodo_upload
