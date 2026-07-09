@@ -19,6 +19,7 @@ To run the curve for your data:
         baseline.
 """
 
+# TODO ☐: see comment elsewhere about resolving the import *
 from pylab import *
 from pyspecdata import *
 import numpy as np
@@ -82,16 +83,19 @@ with figlist_var() as fl:
     conc_labels = [k for k, v in list_of_runs.items() if "%" in k]
     bg_data = dataWKBSA[list_of_runs[background]]
     # }}}
-    # {{{ now, gather the data in to a 2D array, so that I can just average the peak and plot the calibration curve
+    # {{{ now, gather the data in to a 2D array, so that I can just
+    #     average the peak and plot the calibration curve
     A280 = (
-        concat(
+        concat(  # gathering:
             [dataWKBSA[list_of_runs[k]] - bg_data for k in conc_labels],
             "concentration",
         )
-        .set_axis(
+        .set_axis(  # naming and labeling the indirect axis we just created
             "concentration",
             array([float(j.replace("%", "")) for j in conc_labels]),
-        )[wv:wv_range]
+        )[
+            wv:wv_range
+        ]  # slicing out frequency range
         .mean(wv)
     )
     fl.next("calibration curve")
@@ -106,6 +110,8 @@ with figlist_var() as fl:
         sp.latex(
             sum(
                 [
+                    # construct a symbolic polynomial function of
+                    # concentration
                     sp.symbols("c", real=True) ** j * sp.Float(c[j], 3)
                     for j in range(len(c))
                 ]

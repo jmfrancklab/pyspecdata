@@ -82,15 +82,13 @@ def zenodo_download(deposition, searchstring, exp_type=None):
         r = requests.get(f"https://zenodo.org/api/records/{deposition}")
         r.raise_for_status()
     except requests.HTTPError:
+        # {{{ try for a draft deposition, since we can't find a private one
         if getattr(r, "status_code", None) != 404:
             raise
-        print(
+        logging.debug(
             "Zenodo public record was not found.  This may be an unpublished "
             "draft deposition; trying the authenticated draft API."
         )
-        # NOTES TO JF: the draft metadata request used to be a separate
-        # zenodo_download_draft() helper, but it was only used here and was
-        # not exported in __all__, so it has been inlined.
         r = requests.get(
             f"https://zenodo.org/api/deposit/depositions/{deposition}/files",
             headers=_auth_headers(),
@@ -115,7 +113,7 @@ def zenodo_download(deposition, searchstring, exp_type=None):
                     "Zenodo host"
                 )
             else:
-                detail = str(exc)
+                detail = "Unknown HTTPError"
             raise requests.HTTPError(f"{detail}\n{r.text}") from exc
         # The draft file-list endpoint returns the list of file objects
         # directly, rather than wrapping it in a top-level "files" field.
@@ -127,15 +125,18 @@ def zenodo_download(deposition, searchstring, exp_type=None):
         url_key = "download"
         deposition_label = "draft deposition"
         draft = True
+        # }}}
     else:
-        # Published-record metadata is a dictionary with a top-level "files"
-        # list.  In that API, the filename is stored under "key" and the
-        # public file URL is stored under links["self"].
+        # {{{ Published-record metadata is a dictionary with a top-level
+        #     "files" list.
+        #     In that API, the filename is stored under "key" and the public
+        #     file URL is stored under links["self"].
         files = r.json().get("files", [])
         name_key = "key"
         url_key = "self"
         deposition_label = "deposition"
         draft = False
+        # }}}
 
     logging.debug("all the files are " + str(files))
     pattern = re.compile(searchstring)
@@ -176,9 +177,8 @@ def zenodo_download(deposition, searchstring, exp_type=None):
     return dest
 
 
-# NOTES TO JF: this is called only by zenodo_upload(), but it is exported in
-# __all__.  I left it as a top-level function because I was not sure whether
-# external code is expected to call it directly.
+# TODO ☐: the following is fine -- if it doesn't pass the single-use test, then ask codex to edit the single use linter so that it respects the following keyword:
+# SINGLE_USE_EXCEPTION (exported by __all__, even though it's also used above)
 def create_deposition(title):
     """Create a new Zenodo deposition using ``title``.
 
@@ -213,19 +213,6 @@ def create_deposition(title):
 def zenodo_upload(local_path, title=None, deposition_id=None):
     """Upload ``local_path`` to Zenodo.
 
-    To use this function, you must create a personal access token on the Zenodo
-    website.  Go to your Zenodo profile, then ``Applications``, create the
-    token there, and select the ``deposit:write`` scope.  Zenodo shows the
-    token only once, so copy it before leaving the page.
-
-    Create a local token file, for example ``~/.zenodo_token``, and write the
-    token into that file.  Then use the ``pyspecdata_dataconfig`` command-line
-    tool to add the token file to ``~/.pyspecdata``, or edit
-    ``~/.pyspecdata`` manually under ``[zenodo]``::
-
-        [zenodo]
-        token_file = ~/.zenodo_token
-
     A new deposition record will be created automatically for the first file and
     the remaining files will be uploaded to that same deposition.  Keep token
     files local and never commit them to git.
@@ -236,6 +223,27 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
     Either the panel on the right changes, indicating success, or you get a
     small red error message at the very top of the page, typically because
     author information or other required metadata is missing.
+
+    To use this function, you must create a personal access token on the Zenodo
+    website:
+
+    Getting zenodo authorization set up
+    ```````````````````````````````````
+
+    Go to your Zenodo profile, then ``Applications``, create the
+    token there, and select the ``deposit:write`` scope.
+    Zenodo shows the token only once, so copy it before leaving the page.
+
+    Create a local token file, for example ``~/.zenodo_token``,
+    and write the token into that file.
+    Then use the ``pyspecdata_dataconfig`` command-line
+    tool (which opens a GUI as long as you have pyside installed)
+    to add the token file to ``~/.pyspecdata``
+    If you don't want to use the GUI, you can edit ``~/.pyspecdata``
+    manually under ``[zenodo]``::
+
+        [zenodo]
+        token_file = ~/.zenodo_token
 
 
     Parameters
@@ -304,11 +312,13 @@ def cmd(argv=None):
     """Upload files from ``./data_files.csv`` to a Zenodo draft.
 
     The command line interface is ``pyspecdata_zenodo <draft-id-or-title>``.
-    If the single argument matches ``^[1-9][0-9]{5,9}$``, it is interpreted as
-    an existing Zenodo draft deposition id.  Otherwise, it is used verbatim as
-    the title for a new draft deposition.  Files are read from the
-    ``data_files.csv`` created in the current directory by
-    :func:`pyspecdata.find_file` and :func:`pyspecdata.search_filename`.
+
+    -  If the single argument matches ``^[1-9][0-9]{5,9}$``, it is interpreted
+       as an existing Zenodo draft deposition id.
+    -  Otherwise, it is used verbatim as the title for a new draft deposition.
+
+    Files are read from the ``data_files.csv`` created in the current directory
+    by :func:`pyspecdata.find_file` and :func:`pyspecdata.search_filename`.
     """
     parser = argparse.ArgumentParser(
         description=(
@@ -324,8 +334,7 @@ def cmd(argv=None):
         ),
     )
     args = parser.parse_args(argv)
-    # NOTES TO JF: data_files_from_log() used to hold this block, but it was
-    # only used here and was not exported in __all__, so it has been inlined.
+    # In the future log_path could be set to a cmdline arg.
     log_path = "data_files.csv"
     required_fields = {"Filename", "Path", "exp_type"}
     if not os.path.exists(log_path):

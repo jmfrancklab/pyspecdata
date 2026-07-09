@@ -9,16 +9,11 @@ This makes use of the package `pint`, which is a
 very nice package for handling units.
 """
 
-from pyspecdata import *
+from pyspecdata import Q_, figlist_var, find_file
 import numpy as np
-from matplotlib.pyplot import axvline, axhline, gca
-from pint import UnitRegistry
+from numpy import r_
+from matplotlib.pyplot import axvline, axhline
 
-Q_ = UnitRegistry(
-    system="mks",
-    autoconvert_offset_to_baseunit=True,
-    auto_reduce_dimensions=True,
-).Quantity
 fieldaxis = "$B_0$"
 pushout = 3
 QESR_concs = (
@@ -34,15 +29,11 @@ QESR_concs = (
 )
 myconcs = []
 with figlist_var() as fl:
-    # NOTE TO JF: background is textually used once below, but that use is
-    # inside the file loop.  Keeping it here avoids reloading the same Zenodo
-    # file for every sample.
     background = find_file(
         "QESR_Test_WaterCap_Background_210923.DSC",
         exp_type="francklab_esr/Sam",
         zenodo="21084153",
     )["harmonic", 0]
-    # background -= background[fieldaxis, -100:].data.mean()
     for filenum, (thisfile, thislabel) in enumerate(
         [
             ("QESR_150uM_TEMPOL_1_noglyc_210923.DSC", "sample #1"),
@@ -59,7 +50,8 @@ with figlist_var() as fl:
         G_R = Q_(*d.get_prop("Gain"))
         C_t = Q_(*d.get_prop("ConvTime"))
         # it seems like n is already divided out
-        # n = Q_(1,'dimensionless') # Q_(float(d.get_prop('AVGS')),'dimensionless')
+        # n = Q_(1,'dimensionless')
+        # n = Q_(float(d.get_prop('AVGS')),'dimensionless')
         power = Q_(*d.get_prop("Power"))
         B_m = Q_(*d.get_prop("ModAmp"))
         Q = Q_(float(d.get_prop("QValue")), "dimensionless")
@@ -69,8 +61,8 @@ with figlist_var() as fl:
         c = Q_(
             1, "dimensionless"
         )  # the first fraction on pg 2-17 -- essentially the conversion factor
-        signal_denom = G_R * C_t * sqrt(power) * B_m * Q * n_B * S * (S + 1)
-        signal_denom = signal_denom.to(Q_("G") * sqrt(Q_("W")) * Q_("s"))
+        signal_denom = G_R * C_t * np.sqrt(power) * B_m * Q * n_B * S * (S + 1)
+        signal_denom = signal_denom.to(Q_("G") * np.sqrt(Q_("W")) * Q_("s"))
         print(
             f"G_R {G_R:~P}\n",
             f"C_t {C_t:~P}\n",

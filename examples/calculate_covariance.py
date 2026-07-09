@@ -7,6 +7,7 @@ of field with multiple collections or "Times")
 
 """
 
+# TODO ☐: to remove the following, delete one at a time, and  look at the errors in vscode.  You can either do "from ... import funcname..." or else do psd.
 from pyspecdata import *
 from pylab import *
 
