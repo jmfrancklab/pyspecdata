@@ -217,15 +217,20 @@ def create_deposition(title):
 
 
 def zenodo_upload(local_path, title=None, deposition_id=None):
-    # TODO ☐: better than pointing to the API below, you should point to instructions on how to get a token.
     """Upload ``local_path`` to Zenodo.
 
     To use this function, you must create a personal access token on the Zenodo
-    website (with ``deposit:write`` scope).  Save the token in a file and reference
-    it from ``~/.pyspecdata``::
+    website.  Go to your Zenodo profile, then ``Applications``, create the
+    token there, and select the ``deposit:write`` scope.  Zenodo shows the
+    token only once, so copy it before leaving the page.
+
+    Create a local token file, for example ``~/.zenodo_token``, and write the
+    token into that file.  Then use the ``pyspecdata_dataconfig`` command-line
+    tool to add the token file to ``~/.pyspecdata``, or edit
+    ``~/.pyspecdata`` manually under ``[zenodo]``::
 
         [zenodo]
-        token_file = /path/to/zenodo.token
+        token_file = ~/.zenodo_token
 
     A new deposition record will be created automatically for the first file and
     the remaining files will be uploaded to that same deposition.  Keep token
