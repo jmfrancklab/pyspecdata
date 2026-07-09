@@ -18,6 +18,55 @@ ureg.define("cycle = [cyc] = cyc")  # 'cycle' is a new dimension
 ureg.define("scan = [scan]")  # experimental count is its own dimension
 ureg.define("rad = cyc*2*pi")  # 'cycle' is a new dimension
 ureg.define("Hz = cyc / s")  # Redefine 'Hz' to be cycles per second
+
+# Pint runs preprocessors on every unit string it parses.  Precompile the
+# translation table and regex once so that accepting pretty unit labels does
+# not add avoidable overhead to repeated unit operations.
+superscript_translation = str.maketrans(
+    {
+        "⁰": "0",
+        "¹": "1",
+        "²": "2",
+        "³": "3",
+        "⁴": "4",
+        "⁵": "5",
+        "⁶": "6",
+        "⁷": "7",
+        "⁸": "8",
+        "⁹": "9",
+        "⁺": "+",
+        "⁻": "-",
+        "⋅": ".",
+    }
+)
+pretty_exponent_re = re.compile(
+    r"[⁺⁻]?[⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:⋅[⁰¹²³⁴⁵⁶⁷⁸⁹]+)?"
+)
+
+
+def _normalize_pretty_unit_string(unit_string):
+    """Translate pretty Pint unit text back into parseable unit syntax."""
+    if not isinstance(unit_string, str):
+        return unit_string
+    unit_string = re.sub(r"(?<=[A-Za-z0-9_\)])√", r"*√", unit_string)
+    unit_string = re.sub(
+        r"√\s*([A-Za-z_][A-Za-z0-9_]*)",
+        r"\1**0.5",
+        unit_string,
+    )
+    unit_string = pretty_exponent_re.sub(
+        lambda match: "**" + match.group(0).translate(superscript_translation),
+        unit_string,
+    )
+    return unit_string.replace("·", "*").replace("µ", "u")
+
+
+ureg.preprocessors.append(_normalize_pretty_unit_string)
+# Older code replaced Q_ with a custom wrapper when Pint could not parse
+# compact square-root units such as "√W".  Registering this preprocessor keeps
+# Q_ as the single Pint Quantity definition while teaching every Pint parsing
+# path -- Q_, div_units, and det_unit_prefactor -- to accept both those compact
+# square-root units and Pint's pretty display strings.
 Q_ = ureg.Quantity
 
 
@@ -41,36 +90,6 @@ def nicedef(self):
 
 
 Q_.to_nice = nicedef
-try:
-    if "√" in str(Q_("√W")):
-        pass
-    else:
-        raise ValueError("not interpreting sqrt!")
-except Exception:
-    print(
-        "**Warning!** pint is the package that handles units."
-        " It does a good job with everything but square roots."
-        " Right now, you are using a hack (partial fix) that helps it"
-        " handle square roots better, and basically workds."
-        " However, you are better off"
-        " getting the the jmfranck/pint fork off of github, which"
-        " you can find at https://github.com/jmfranck/pint"
-    )
-
-    def Q_(*args):
-        if len(args) == 1:
-            b = args[0]
-            a = 1
-        elif len(args) == 2:
-            a, b = args
-        else:
-            raise ValueError("I don't know what to do with more than 2 args!")
-        m = re.match(r"(.*)√(\w+)(.*)", str(b))
-        if m:
-            g1, g2, g3 = m.groups()
-            b = g1 + f" {g2}" + "^{0.5} " + g3
-            print(b)
-        return ureg.Quantity(a, b)
 
 
 # the following is equivalent to √(μ₀/4π)
@@ -481,7 +500,9 @@ def lsafen(*string, **kwargs):
 def lsafe(*string, **kwargs):
     "Output properly escaped for latex"
     if len(string) > 1:
-        lsafewkargs = lambda x: lsafe(x, **kwargs)
+        def lsafewkargs(x):
+            return lsafe(x, **kwargs)
+
         return " ".join(list(map(lsafewkargs, string)))
     else:
         string = string[0]
