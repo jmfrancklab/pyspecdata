@@ -168,8 +168,10 @@ def test_xepr_uses_zenodo_for_missing_dta_companion(
     )
     calls = []
 
-    def fake_zenodo_download(deposition, searchstring, exp_type=None):
-        calls.append((deposition, searchstring, exp_type))
+    def fake_zenodo_download(
+        deposition, searchstring, exp_type=None, draft=False
+    ):
+        calls.append((deposition, searchstring, exp_type, draft))
         _write_big_endian_array(dta, np.arange(4, dtype=float), ">f8")
         return str(dta)
 
@@ -179,7 +181,9 @@ def test_xepr_uses_zenodo_for_missing_dta_companion(
         str(dsc), exp_type="remote_exp", zenodo="21084153"
     )
 
-    assert calls == [("21084153", r"^remote_esr\.DTA$", "remote_exp")]
+    assert calls == [
+        ("21084153", r"^remote_esr\.DTA$", "remote_exp", False)
+    ]
     np.testing.assert_allclose(data.data, np.arange(4, dtype=float))
 
 
@@ -247,18 +251,25 @@ def test_xepr_uses_zenodo_for_missing_ygf_companion(
     _write_big_endian_array(dta, np.arange(24, dtype=float), ">f8")
     calls = []
 
-    def fake_zenodo_download(deposition, searchstring, exp_type=None):
-        calls.append((deposition, searchstring, exp_type))
+    def fake_zenodo_download(
+        deposition, searchstring, exp_type=None, draft=False
+    ):
+        calls.append((deposition, searchstring, exp_type, draft))
         _write_big_endian_array(ygf, np.array([1e-3, 1e-2, 1e-1]), ">f8")
         return str(ygf)
 
     monkeypatch.setattr(zenodo, "zenodo_download", fake_zenodo_download)
 
     data = bruker_esr.xepr(
-        str(dsc), exp_type="remote_exp", zenodo="21084153"
+        str(dsc),
+        exp_type="remote_exp",
+        zenodo="21084153",
+        zenodo_draft=True,
     )
 
-    assert calls == [("21084153", r"^remote_power\.YGF$", "remote_exp")]
+    assert calls == [
+        ("21084153", r"^remote_power\.YGF$", "remote_exp", True)
+    ]
     np.testing.assert_allclose(
         data.getaxis("Microwave Power"),
         np.array([-30.0, -20.0, -10.0]),

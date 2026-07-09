@@ -21,7 +21,9 @@ def test_load_indiv_file_passes_zenodo_to_xepr_without_companion_search(
     dsc = tmp_path / "sample.DSC"
     dsc.write_text("descriptor")
     calls = []
-    expected = types.SimpleNamespace(dimlabels=[])
+    expected = types.SimpleNamespace(
+        dimlabels=[], get_prop=lambda _key: None
+    )
 
     def fake_search_filename(*_args, **_kwargs):
         raise AssertionError(
@@ -32,8 +34,14 @@ def test_load_indiv_file_passes_zenodo_to_xepr_without_companion_search(
     monkeypatch.setattr(load_files, "_check_signature", lambda _path: "TXT")
     monkeypatch.setattr(load_files, "_check_extension", lambda _path: "DSC")
 
-    def fake_xepr(filename, dimname="", exp_type=None, zenodo=None):
-        calls.append((filename, dimname, exp_type, zenodo))
+    def fake_xepr(
+        filename,
+        dimname="",
+        exp_type=None,
+        zenodo=None,
+        zenodo_draft=False,
+    ):
+        calls.append((filename, dimname, exp_type, zenodo, zenodo_draft))
         return expected
 
     monkeypatch.setattr(load_files.bruker_esr, "xepr", fake_xepr)
@@ -44,7 +52,7 @@ def test_load_indiv_file_passes_zenodo_to_xepr_without_companion_search(
 
     assert result is expected
     assert calls == [
-        (str(dsc), "", "remote_exp", "21084153"),
+        (str(dsc), "", "remote_exp", "21084153", False),
     ]
 
 
@@ -172,8 +180,10 @@ def test_search_filename_uses_zenodo_when_file_is_missing(
 
     calls = []
 
-    def fake_zenodo_download(deposition, searchstring, exp_type=None):
-        calls.append((deposition, searchstring, exp_type))
+    def fake_zenodo_download(
+        deposition, searchstring, exp_type=None, draft=False
+    ):
+        calls.append((deposition, searchstring, exp_type, draft))
         downloaded = base_dir / "remote.dat"
         downloaded.write_text("remote")
         return str(downloaded)
@@ -193,7 +203,94 @@ def test_search_filename_uses_zenodo_when_file_is_missing(
     )
 
     assert results == [str(base_dir) + os.path.sep + "remote.dat"]
-    assert calls == [("21041480", r"remote\.dat$", "remote_exp")]
+    assert calls == [("21041480", r"remote\.dat$", "remote_exp", False)]
+
+
+def test_search_filename_passes_zenodo_draft_to_download(
+    tmp_path, monkeypatch
+):
+    base_dir = tmp_path / "experiment"
+    base_dir.mkdir()
+
+    def fake_getdatadir(exp_type=None):
+        assert exp_type == "remote_exp"
+        return str(base_dir) + os.path.sep
+
+    calls = []
+
+    def fake_zenodo_download(
+        deposition, searchstring, exp_type=None, draft=False
+    ):
+        calls.append((deposition, searchstring, exp_type, draft))
+        downloaded = base_dir / "draft.dat"
+        downloaded.write_text("draft")
+        return str(downloaded)
+
+    monkeypatch.setattr(load_files, "getDATADIR", fake_getdatadir)
+    monkeypatch.setattr(load_files, "zenodo_download", fake_zenodo_download)
+    monkeypatch.setattr(
+        load_files,
+        "rclone_search",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("rclone_search should not be called")
+        ),
+    )
+
+    results = load_files.search_filename(
+        r"draft\.dat$",
+        "remote_exp",
+        print_result=False,
+        zenodo="123456",
+        zenodo_draft=True,
+    )
+
+    assert results == [str(base_dir) + os.path.sep + "draft.dat"]
+    assert calls == [("123456", r"draft\.dat$", "remote_exp", True)]
+
+
+def test_find_file_passes_zenodo_draft_through(monkeypatch, tmp_path):
+    local_path = tmp_path / "draft.dat"
+    local_path.write_text("draft")
+    calls = {"search": [], "load": []}
+    expected = types.SimpleNamespace(
+        dimlabels=[], get_prop=lambda _key: None
+    )
+
+    def fake_search_filename(
+        searchstring,
+        exp_type,
+        print_result=True,
+        zenodo=None,
+        zenodo_draft=False,
+    ):
+        calls["search"].append(
+            (searchstring, exp_type, print_result, zenodo, zenodo_draft)
+        )
+        return [str(local_path)]
+
+    def fake_load_indiv_file(filename, **kwargs):
+        calls["load"].append((filename, kwargs))
+        return expected
+
+    monkeypatch.setattr(load_files, "search_filename", fake_search_filename)
+    monkeypatch.setattr(load_files, "load_indiv_file", fake_load_indiv_file)
+    monkeypatch.setattr(load_files, "log_fname", lambda *_args: None)
+
+    result = load_files.find_file(
+        r"draft\.dat$",
+        exp_type="remote_exp",
+        print_result=False,
+        zenodo="123456",
+        zenodo_draft=True,
+    )
+
+    assert result is expected
+    assert calls["search"] == [
+        (r"draft\.dat$", "remote_exp", False, "123456", True)
+    ]
+    assert calls["load"][0][0] == str(local_path)
+    assert calls["load"][0][1]["zenodo"] == "123456"
+    assert calls["load"][0][1]["zenodo_draft"] is True
 
 
 def test_search_filename_passes_raw_regex_to_rclone(tmp_path, monkeypatch):
