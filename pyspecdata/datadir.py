@@ -471,8 +471,8 @@ def genconfig():
             zenodo_layout.addWidget(
                 qt_widgets.QLabel(
                     "Select the local file containing your Zenodo personal "
-                    "access token. The token file must stay local and must not "
-                    "be committed to version control. See "
+                    "access token. The token file must stay local and must "
+                    "not be committed to version control. See "
                     "https://developers.zenodo.org/#rest-api"
                 )
             )

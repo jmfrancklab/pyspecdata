@@ -6,9 +6,9 @@ After you've looked at the simple UV-Vis example, this one shows how you can
 manipulate UV-Vis data.
 """
 
-from pylab import *
-from pyspecdata import *
 from itertools import cycle
+import matplotlib.pyplot as plt
+import pyspecdata as psd
 
 # {{{ changeable parameters
 color_cycle = cycle(
@@ -27,18 +27,18 @@ color_cycle = cycle(
 )
 # }}}
 # init_logging('debug')
-data = find_file(
+data = psd.find_file(
     "200703_Ellman_before_SL.DSW",
     exp_type="UV_Vis/Ellmans_Assay",
     zenodo="21041480",
 )
 print("the experiments present in this file are:", data.keys())
-with figlist_var() as fl:
+with psd.figlist_var() as fl:
     fl.next("UV data")
     for k, thisspectrum in data.items():
         fl.plot(thisspectrum, alpha=0.5, label=k)
-    ylabel(thisspectrum.get_units())
-    ylim((-0.05, 1))
+    plt.ylabel(thisspectrum.get_units())
+    plt.ylim((-0.05, 1))
     fl.next("subtract")
     for k, d in {
         "TCM": data["TCM w_ellman"] - data["TCM w_o"],
@@ -53,10 +53,10 @@ with figlist_var() as fl:
             color=thiscolor,
             label="%s, subtracted" % k,
         )
-    ylabel(d.get_units())
-    gridandtick(gca())
+    plt.ylabel(d.get_units())
+    psd.gridandtick(plt.gca())
     print("now I'm going to try a DSW file")
-    data = find_file(
+    data = psd.find_file(
         "Ras_Stability4",
         exp_type="UV_Vis/Ras_stability/200803_RT",
         zenodo="21041480",
@@ -65,6 +65,6 @@ with figlist_var() as fl:
     fl.next("kinetics data")
     for k, thisspectrum in data.items():
         fl.plot(thisspectrum, alpha=0.5, label=k)
-    ylabel(thisspectrum.get_units())
-    ylim((-0.05, 1))
-    gridandtick(gca())
+    plt.ylabel(thisspectrum.get_units())
+    plt.ylim((-0.05, 1))
+    psd.gridandtick(plt.gca())

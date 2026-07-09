@@ -6,10 +6,9 @@ documented :mod:`examples` package and upload them all to the same Zenodo
 deposition.  UV-Vis example data are already covered by the Zenodo download
 example.
 
-For more important details (including how to set up draft depositions on zenodo),
-see :func:`pyspecdata.load_files.zenodo.zenodo_upload`
+For more important details (including how to set up draft depositions on
+zenodo), see :func:`pyspecdata.load_files.zenodo.zenodo_upload`
 """
-
 
 from pyspecdata import search_filename, zenodo_upload
 import re

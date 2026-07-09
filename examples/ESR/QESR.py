@@ -9,9 +9,9 @@ This makes use of the package `pint`, which is a
 very nice package for handling units.
 """
 
-from pyspecdata import *
 import numpy as np
-from matplotlib.pyplot import axvline, axhline, gca
+import pyspecdata as psd
+from matplotlib.pyplot import axhline, axvline
 from pint import UnitRegistry
 
 Q_ = UnitRegistry(
@@ -22,7 +22,7 @@ Q_ = UnitRegistry(
 fieldaxis = "$B_0$"
 pushout = 3
 QESR_concs = (
-    r_[
+    np.r_[
         190.8,
         172.1,
         177.7,
@@ -33,11 +33,11 @@ QESR_concs = (
     * 1e-6
 )
 myconcs = []
-with figlist_var() as fl:
+with psd.figlist_var() as fl:
     # NOTE TO JF: background is textually used once below, but that use is
     # inside the file loop.  Keeping it here avoids reloading the same Zenodo
     # file for every sample.
-    background = find_file(
+    background = psd.find_file(
         "QESR_Test_WaterCap_Background_210923.DSC",
         exp_type="francklab_esr/Sam",
         zenodo="21084153",
@@ -53,13 +53,14 @@ with figlist_var() as fl:
             ("QESR_150uM_TEMPOL_6_wglyc_210923.DSC", "sample #6"),
         ]
     ):
-        d = find_file(
+        d = psd.find_file(
             thisfile, exp_type="francklab_esr/Sam", zenodo="21084153"
         )["harmonic", 0]
         G_R = Q_(*d.get_prop("Gain"))
         C_t = Q_(*d.get_prop("ConvTime"))
         # it seems like n is already divided out
-        # n = Q_(1,'dimensionless') # Q_(float(d.get_prop('AVGS')),'dimensionless')
+        # n = Q_(1, 'dimensionless')
+        # or Q_(float(d.get_prop('AVGS')), 'dimensionless')
         power = Q_(*d.get_prop("Power"))
         B_m = Q_(*d.get_prop("ModAmp"))
         Q = Q_(float(d.get_prop("QValue")), "dimensionless")
@@ -69,8 +70,8 @@ with figlist_var() as fl:
         c = Q_(
             1, "dimensionless"
         )  # the first fraction on pg 2-17 -- essentially the conversion factor
-        signal_denom = G_R * C_t * sqrt(power) * B_m * Q * n_B * S * (S + 1)
-        signal_denom = signal_denom.to(Q_("G") * sqrt(Q_("W")) * Q_("s"))
+        signal_denom = G_R * C_t * np.sqrt(power) * B_m * Q * n_B * S * (S + 1)
+        signal_denom = signal_denom.to(Q_("G") * np.sqrt(Q_("W")) * Q_("s"))
         print(
             f"G_R {G_R:~P}\n",
             f"C_t {C_t:~P}\n",
@@ -100,9 +101,9 @@ with figlist_var() as fl:
         fl.plot(d_abs.C.integrate(fieldaxis, cumulative=True), alpha=0.5)
         fl.next("absorption, direct")
         generous_limits = (
-            specrange + r_[-pushout * peaksize, +pushout * peaksize]
+            specrange + np.r_[-pushout * peaksize, +pushout * peaksize]
         )
-        for j in r_[np.array(specrange), generous_limits]:
+        for j in np.r_[np.array(specrange), generous_limits]:
             axvline(x=j / 1e3, alpha=0.1)
         d_baseline = d_abs[
             fieldaxis,
@@ -112,7 +113,9 @@ with figlist_var() as fl:
         ]
         fl.next("for baseline")
         fl.plot(d_baseline, ".", alpha=0.3, human_units=False)
-        middle_field = np.diff(d_baseline.getaxis(fieldaxis)[r_[0, -1]]).item()
+        middle_field = np.diff(
+            d_baseline.getaxis(fieldaxis)[np.r_[0, -1]]
+        ).item()
         d_baseline.set_axis(fieldaxis, lambda x: x - middle_field)
         c = d_baseline.polyfit(fieldaxis, order=7)
         polybaseline = (
@@ -145,9 +148,9 @@ with figlist_var() as fl:
     fl.next("compare my QESR to Bruker")
     fl.plot(QESR_concs, myconcs, "x")
     myconcs.append(0)  # add a point at 0,0
-    m, b = np.polyfit(r_[QESR_concs, 0], myconcs, 1)
+    m, b = np.polyfit(np.r_[QESR_concs, 0], myconcs, 1)
     myconcs = myconcs[:-1]
-    x = r_[QESR_concs.min() : QESR_concs.max() : 100j]
+    x = np.r_[QESR_concs.min() : QESR_concs.max() : 100j]
     fl.plot(x, m * x + b, label="m=%g b=%g" % (m, b))
     # from above m = 3.99635e-3
     m_hardcode = 3.99635e-3

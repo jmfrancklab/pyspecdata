@@ -7,15 +7,16 @@ of field with multiple collections or "Times")
 
 """
 
-from pyspecdata import *
-from pylab import *
+import pyspecdata as psd
 
 fieldaxis = "$B_0$"
-with figlist_var() as fl:
+with psd.figlist_var() as fl:
     for filenum, (thisfile, exp_type) in enumerate(
         [("230504_3p8mM_TEMPOL_stb_wt_4x.DSC", "francklab_esr/alex")]
     ):
-        d = find_file(thisfile, exp_type=exp_type, zenodo="21084153")[
+        # TODO: Zenodo ID does not work. .YGF file is missing from the 
+        # deposition. Need to fix this.
+        d = psd.find_file(thisfile, exp_type=exp_type, zenodo="21084153")[
             "harmonic", 0
         ]
         d.set_units(fieldaxis, "T").set_axis(fieldaxis, lambda x: x * 1e-4)

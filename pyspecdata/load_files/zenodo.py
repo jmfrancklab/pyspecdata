@@ -226,9 +226,9 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
         [zenodo]
         token_file = ~/.zenodo_token
 
-    A new deposition record will be created automatically for the first file and
-    the remaining files will be uploaded to that same deposition.  Keep token
-    files local and never commit them to git.
+    A new deposition record will be created automatically for the first file
+    and the remaining files will be uploaded to that same deposition.  Keep
+    token files local and never commit them to git.
 
     To share a draft (unpublished record), click ``Share`` on the right side
     and add your collaborator, who must also have a Zenodo account.
