@@ -5,20 +5,12 @@ This example shows how to retrieve a file from Zenodo when it is not already
 present locally.  The download occurs transparently via the ``zenodo``
 keyword of :func:`pyspecdata.search_filename`.
 
-Published records do not require authentication.  To download directly from
-an unpublished draft, configure ``token_file`` in the ``[zenodo]`` section of
-``~/.pyspecdata``::
-
-    [zenodo]
-    token_file = /path/to/zenodo.token
-
-Then call :func:`pyspecdata.load_files.zenodo.zenodo_download` with
-``draft=True``::
+This is done using :func:`pyspecdata.load_files.zenodo.zenodo_download`
+(click for more details)
 
     zenodo_download(
-        "123456", "my_file.h5", exp_type="ODNP", draft=True
+        "123456", "my_file.h5", exp_type="ODNP"
     )
-
 This downloads the same files as the upload example.
 """
 

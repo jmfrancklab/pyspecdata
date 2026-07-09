@@ -6,28 +6,10 @@ documented :mod:`examples` package and upload them all to the same Zenodo
 deposition.  UV-Vis example data are already covered by the Zenodo download
 example.
 
-To run this script you must create a personal access token on the Zenodo
-website (with ``deposit:write`` scope).  Save the token in a file and reference
-it from ``~/.pyspecdata``::
-
-    [zenodo]
-    token_file = /path/to/zenodo.token
-
-A new deposition record will be created automatically for the first file and
-the remaining files will be uploaded to that same deposition.  Keep token
-files local and never commit them to git.  See the `Zenodo REST API
-documentation <https://developers.zenodo.org/#rest-api>`_ for API and
-authentication details.  See Zenodo's `instructions for sharing a draft
-<https://help.zenodo.org/docs/share/user-sharing/#share-draft>`_ to grant
-another user access to an unpublished deposition.
-
-To share a draft (unpublished record), click ``Share`` on the right side and
-add your collaborator, who must also have a Zenodo account.  Then click the
-``Preview`` button, also on the right side.  Either the panel on the right
-changes, indicating success, or you get a small red error message at the very
-top of the page, typically because author information or other required
-metadata is missing.
+For more important details (including how to set up draft depositions on zenodo),
+see :func:`pyspecdata.load_files.zenodo.zenodo_upload`
 """
+
 
 from pyspecdata import search_filename, zenodo_upload
 import re

@@ -1,3 +1,6 @@
+# TODO ☐: I removed a lot of it, but you are locking in this unnecessary
+#         "draft" kwarg here by relying on it in your tests.  You need
+#         to clean that up.
 import os
 import sys
 import types
@@ -21,9 +24,7 @@ def test_load_indiv_file_passes_zenodo_to_xepr_without_companion_search(
     dsc = tmp_path / "sample.DSC"
     dsc.write_text("descriptor")
     calls = []
-    expected = types.SimpleNamespace(
-        dimlabels=[], get_prop=lambda _key: None
-    )
+    expected = types.SimpleNamespace(dimlabels=[])
 
     def fake_search_filename(*_args, **_kwargs):
         raise AssertionError(
@@ -34,14 +35,8 @@ def test_load_indiv_file_passes_zenodo_to_xepr_without_companion_search(
     monkeypatch.setattr(load_files, "_check_signature", lambda _path: "TXT")
     monkeypatch.setattr(load_files, "_check_extension", lambda _path: "DSC")
 
-    def fake_xepr(
-        filename,
-        dimname="",
-        exp_type=None,
-        zenodo=None,
-        zenodo_draft=False,
-    ):
-        calls.append((filename, dimname, exp_type, zenodo, zenodo_draft))
+    def fake_xepr(filename, dimname="", exp_type=None, zenodo=None):
+        calls.append((filename, dimname, exp_type, zenodo))
         return expected
 
     monkeypatch.setattr(load_files.bruker_esr, "xepr", fake_xepr)
@@ -52,7 +47,7 @@ def test_load_indiv_file_passes_zenodo_to_xepr_without_companion_search(
 
     assert result is expected
     assert calls == [
-        (str(dsc), "", "remote_exp", "21084153", False),
+        (str(dsc), "", "remote_exp", "21084153"),
     ]
 
 
@@ -257,10 +252,8 @@ def test_search_filename_uses_zenodo_when_file_is_missing(
 
     calls = []
 
-    def fake_zenodo_download(
-        deposition, searchstring, exp_type=None, draft=False
-    ):
-        calls.append((deposition, searchstring, exp_type, draft))
+    def fake_zenodo_download(deposition, searchstring, exp_type=None):
+        calls.append((deposition, searchstring, exp_type))
         downloaded = base_dir / "remote.dat"
         downloaded.write_text("remote")
         return str(downloaded)
@@ -280,7 +273,7 @@ def test_search_filename_uses_zenodo_when_file_is_missing(
     )
 
     assert results == [str(base_dir) + os.path.sep + "remote.dat"]
-    assert calls == [("21041480", r"remote\.dat$", "remote_exp", False)]
+    assert calls == [("21041480", r"remote\.dat$", "remote_exp")]
 
 
 def test_search_filename_passes_zenodo_draft_to_download(
@@ -329,9 +322,7 @@ def test_find_file_passes_zenodo_draft_through(monkeypatch, tmp_path):
     local_path = tmp_path / "draft.dat"
     local_path.write_text("draft")
     calls = {"search": [], "load": []}
-    expected = types.SimpleNamespace(
-        dimlabels=[], get_prop=lambda _key: None
-    )
+    expected = types.SimpleNamespace(dimlabels=[], get_prop=lambda _key: None)
 
     def fake_search_filename(
         searchstring,

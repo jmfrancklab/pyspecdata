@@ -37,10 +37,13 @@ def _raise_for_status(response, action):
 
 
 def _auth_headers():
-    """Return authorization headers for authenticated Zenodo API requests."""
-    # Zenodo accepts bearer-token authentication for the deposition API.
-    # Keeping the token in the Authorization header avoids putting it in
-    # request URLs and lets the same helper work for GET, POST, and PUT calls.
+    """Return authorization headers for authenticated Zenodo API requests.
+
+    Zenodo accepts bearer-token authentication for the deposition API.
+    Keeping the token in the Authorization header avoids putting it in
+    request URLs and lets the same helper work for GET, POST, and PUT
+    calls.
+    """
     token_path = pyspec_config.get_setting("token_file", section="zenodo")
     with open(os.path.expanduser(token_path)) as fp:
         token = fp.read().strip()
@@ -87,6 +90,13 @@ def zenodo_download_draft(deposition):
     return r.json()
 
 
+# TODO ☐: why do we need "draft"? Why can't it just use the draft
+#         mechanism if the number given is not public?? w/ the aim of
+#         enabling this, and also getting rid of the stupid private
+#         functions codex likes to create, I moved your code into the
+#         function above.
+#         Previous rationale wasn't valid → if it's not a public token,
+#         then we try draft, then we fail.
 def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
     """Download the file from Zenodo ``deposition`` that matches
     ``searchstring`` and place it in the directory associated with
@@ -104,9 +114,7 @@ def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
     draft : bool, optional
         If ``True``, download from an unpublished draft deposition using the
         configured Zenodo token.  The default uses the public records API and
-        does not require authentication.  Draft mode is explicit so that a
-        misspelled or unavailable public record does not silently read a token
-        file and retry against the authenticated deposition API.
+        does not require authentication.
     Returns
     -------
     str
@@ -167,6 +175,10 @@ def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
         urllib.request.urlopen(download_url) as response,
         open(dest, "wb") as fp,
     ):
+        # TODO ☐: do we really need shutil here, or could this be
+        #         achieved with fp.write?  I ask just b/c shutil is an
+        #         extra import here and seems like it could be not
+        #         totally necessary
         shutil.copyfileobj(response, fp)
     logging.debug(f"downloading zenodo '{url}' to '{dest}'")
     print(f"Downloaded from zenodo '{url}' to {dest}")
@@ -205,18 +217,27 @@ def create_deposition(title):
 
 
 def zenodo_upload(local_path, title=None, deposition_id=None):
+    # TODO ☐: better than pointing to the API below, you should point to instructions on how to get a token.
     """Upload ``local_path`` to Zenodo.
 
-    The upload uses the Zenodo deposition API and therefore requires a
-    personal access token with ``deposit:write`` scope.  Configure the file
-    containing this token in ``~/.pyspecdata``::
+    To use this function, you must create a personal access token on the Zenodo
+    website (with ``deposit:write`` scope).  Save the token in a file and reference
+    it from ``~/.pyspecdata``::
 
         [zenodo]
         token_file = /path/to/zenodo.token
 
-    See the `Zenodo REST API documentation
-    <https://developers.zenodo.org/#rest-api>`_ for API and authentication
-    details.
+    A new deposition record will be created automatically for the first file and
+    the remaining files will be uploaded to that same deposition.  Keep token
+    files local and never commit them to git.
+
+    To share a draft (unpublished record), click ``Share`` on the right side
+    and add your collaborator, who must also have a Zenodo account.
+    Then click the ``Preview`` button, also on the right side.
+    Either the panel on the right changes, indicating success, or you get a
+    small red error message at the very top of the page, typically because
+    author information or other required metadata is missing.
+
 
     Parameters
     ----------

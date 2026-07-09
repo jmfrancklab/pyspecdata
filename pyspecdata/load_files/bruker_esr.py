@@ -35,9 +35,7 @@ def _collapse_string_lists(val):
     return " ".join(flattened)
 
 
-def _resolve_missing_xepr_companion(
-    companion, exp_type, zenodo, zenodo_draft=False
-):
+def _resolve_missing_xepr_companion(companion, exp_type, zenodo):
     if exp_type is None:
         raise ValueError(
             "I could probably find "
@@ -51,7 +49,6 @@ def _resolve_missing_xepr_companion(
             zenodo,
             rf"^{re.escape(os.path.basename(companion))}$",
             exp_type=exp_type,
-            draft=zenodo_draft,
         )
     rclone_search(
         os.path.split(companion)[-1],
@@ -66,7 +63,6 @@ def xepr(
     exp_type=None,
     dimname="",
     zenodo=None,
-    zenodo_draft=False,
 ):
     """For opening Xepr files.
 
@@ -78,9 +74,6 @@ def xepr(
         Deposition number on Zenodo.  If a required companion file is not
         present locally, download it from this deposition instead of searching
         rclone remotes.
-    zenodo_draft : bool, optional
-        If ``True``, download missing companion files from an authenticated
-        Zenodo draft deposition.
     """
 
     # {{{ determine the pair of filenames that we need
@@ -137,7 +130,7 @@ def xepr(
     # {{{ load the data
     if not os.path.exists(filename_spc):
         filename_spc = _resolve_missing_xepr_companion(
-            filename_spc, exp_type, zenodo, zenodo_draft=zenodo_draft
+            filename_spc, exp_type, zenodo
         )
     with open(filename_spc, "rb") as fp:
         if all([j == "REAL" for j in ikkf]):
@@ -286,10 +279,7 @@ def xepr(
                         )
                     if not os.path.exists(filename_ygf):
                         filename_ygf = _resolve_missing_xepr_companion(
-                            filename_ygf,
-                            exp_type,
-                            zenodo,
-                            zenodo_draft=zenodo_draft,
+                            filename_ygf, exp_type, zenodo
                         )
                 with open(filename_ygf, "rb") as fp:
                     y_axis = read_binary(fp, ">f8", count=y_points_calcd)
