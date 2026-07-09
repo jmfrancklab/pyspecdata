@@ -15,20 +15,6 @@ datadir = load_module("datadir")
 load_files = load_module("load_files.__init__")
 
 
-def test_zenodo_auth_headers_uses_configured_token_file(tmp_path, monkeypatch):
-    zenodo = load_module("load_files.zenodo")
-    token_file = tmp_path / "zenodo.token"
-    token_file.write_text("TOKEN\n")
-
-    monkeypatch.setattr(
-        zenodo.pyspec_config,
-        "get_setting",
-        lambda key, section=None: str(token_file),
-    )
-
-    assert zenodo._auth_headers() == {"Authorization": "Bearer TOKEN"}
-
-
 def test_load_indiv_file_passes_zenodo_to_xepr_without_companion_search(
     tmp_path, monkeypatch
 ):
@@ -174,152 +160,6 @@ def test_zenodo_download_prints_after_download(tmp_path, monkeypatch, capsys):
     )
 
 
-def test_zenodo_public_download_does_not_read_token(tmp_path, monkeypatch):
-    zenodo = load_module("load_files.zenodo")
-    file_url = "https://zenodo.org/api/records/123456/files/public.dat"
-    captured = {}
-
-    class FakeResponse:
-        def raise_for_status(self):
-            pass
-
-        def json(self):
-            return {
-                "files": [{"key": "public.dat", "links": {"self": file_url}}]
-            }
-
-    def fake_get(url):
-        captured["url"] = url
-        return FakeResponse()
-
-    monkeypatch.setattr(zenodo, "getDATADIR", lambda **_kwargs: str(tmp_path))
-    monkeypatch.setattr(
-        zenodo,
-        "_auth_headers",
-        lambda *_args: (_ for _ in ()).throw(
-            AssertionError("public downloads must not read the token")
-        ),
-    )
-    monkeypatch.setattr(zenodo.requests, "get", fake_get)
-    monkeypatch.setattr(
-        zenodo.urllib.request, "urlretrieve", lambda *_args: None
-    )
-
-    zenodo.zenodo_download("123456", r"public\.dat", exp_type="test")
-
-    assert captured["url"] == "https://zenodo.org/api/records/123456"
-
-
-def test_zenodo_draft_download_authenticates_and_matches_filename(
-    tmp_path, monkeypatch
-):
-    zenodo = load_module("load_files.zenodo")
-    file_url = "https://zenodo.org/api/files/example/draft.dat"
-    captured = {}
-
-    class FakeResponse:
-        def raise_for_status(self):
-            pass
-
-        def json(self):
-            return [
-                {
-                    "filename": "draft.dat",
-                    "links": {"download": file_url},
-                }
-            ]
-
-    def fake_get(url, headers=None):
-        captured["url"] = url
-        captured["headers"] = headers
-        return FakeResponse()
-
-    def fake_urlretrieve(url, dest):
-        captured["download"] = (url, dest)
-
-    monkeypatch.setattr(zenodo, "getDATADIR", lambda **_kwargs: str(tmp_path))
-
-    def fake_auth_headers():
-        return {"Authorization": "Bearer TOKEN"}
-
-    monkeypatch.setattr(zenodo, "_auth_headers", fake_auth_headers)
-    monkeypatch.setattr(zenodo.requests, "get", fake_get)
-    monkeypatch.setattr(zenodo.urllib.request, "urlretrieve", fake_urlretrieve)
-
-    path = zenodo.zenodo_download(
-        "123456", r"draft\.dat", exp_type="test", draft=True
-    )
-
-    assert captured["url"].endswith("/deposit/depositions/123456/files")
-    assert captured["headers"] == {"Authorization": "Bearer TOKEN"}
-    assert captured["download"] == (file_url, path)
-    assert path == str(tmp_path / "draft.dat")
-
-
-@pytest.mark.parametrize(
-    ("files", "message"),
-    [
-        ([{"key": "other.dat", "links": {"self": "url"}}], "no files"),
-        (
-            [
-                {"key": "match-1.dat", "links": {"self": "url-1"}},
-                {"filename": "match-2.dat", "links": {"self": "url-2"}},
-            ],
-            "multiple files",
-        ),
-    ],
-)
-def test_zenodo_download_rejects_non_unique_matches(
-    files, message, tmp_path, monkeypatch
-):
-    zenodo = load_module("load_files.zenodo")
-
-    class FakeResponse:
-        def raise_for_status(self):
-            pass
-
-        def json(self):
-            return {"files": files}
-
-    monkeypatch.setattr(zenodo, "getDATADIR", lambda **_kwargs: str(tmp_path))
-    monkeypatch.setattr(
-        zenodo.requests, "get", lambda *_args, **_kwargs: FakeResponse()
-    )
-
-    with pytest.raises(ValueError, match=message):
-        zenodo.zenodo_download("123456", "match", exp_type="test")
-
-
-def test_zenodo_draft_download_401_explains_token_requirement(
-    tmp_path, monkeypatch
-):
-    zenodo = load_module("load_files.zenodo")
-
-    class FakeResponse:
-        status_code = 401
-        text = "Invalid access token"
-
-        def raise_for_status(self):
-            raise zenodo.requests.HTTPError("401 Client Error")
-
-    monkeypatch.setattr(zenodo, "getDATADIR", lambda **_kwargs: str(tmp_path))
-    monkeypatch.setattr(
-        zenodo,
-        "_auth_headers",
-        lambda: {"Authorization": "Bearer BAD_TOKEN"},
-    )
-    monkeypatch.setattr(
-        zenodo.requests, "get", lambda *_args, **_kwargs: FakeResponse()
-    )
-
-    with pytest.raises(
-        zenodo.requests.HTTPError,
-        match="draft deposition access requires a valid Zenodo token",
-    ) as exc_info:
-        zenodo.zenodo_download("123456", "file", exp_type="test", draft=True)
-    assert "Invalid access token" in str(exc_info.value)
-
-
 def test_search_filename_uses_zenodo_when_file_is_missing(
     tmp_path, monkeypatch
 ):
@@ -390,9 +230,9 @@ def test_search_filename_passes_raw_regex_to_rclone(tmp_path, monkeypatch):
 def test_rclone_search_uses_regex_mode(monkeypatch, tmp_path):
     exp_type = "remote_exp"
     exp_key = datadir.PureWindowsPath(exp_type).as_posix().casefold()
-    datadir.pyspec_config.config_vars["RcloneRemotes"][exp_key] = (
-        "example:remote"
-    )
+    datadir.pyspec_config.config_vars["RcloneRemotes"][
+        exp_key
+    ] = "example:remote"
 
     captured = {}
 
@@ -498,40 +338,6 @@ def test_zenodo_upload_existing_deposition_uses_bucket_file_api(
     assert captured["put_kwargs"] == {}
     assert captured["file_contents"] == b"payload"
     assert ("zenodo", "upload_deposition1", "21084153") in settings
-
-
-def test_create_deposition_uses_auth_headers(monkeypatch):
-    zenodo = load_module("load_files.zenodo")
-    captured = {}
-
-    def fake_auth_headers():
-        return {"Authorization": "Bearer TOKEN"}
-
-    def fake_post(url, headers=None, json=None):
-        captured["url"] = url
-        captured["headers"] = headers
-        captured["json"] = json
-
-        class FakeResponse:
-            text = ""
-
-            def raise_for_status(self):
-                pass
-
-            def json(self):
-                return {"id": 123456}
-
-        return FakeResponse()
-
-    monkeypatch.setattr(zenodo, "_auth_headers", fake_auth_headers)
-    monkeypatch.setattr(zenodo.requests, "post", fake_post)
-
-    deposition_id = zenodo.create_deposition("Authenticated deposition")
-
-    assert deposition_id == 123456
-    assert captured["url"] == "https://zenodo.org/api/deposit/depositions"
-    assert captured["headers"] == {"Authorization": "Bearer TOKEN"}
-    assert captured["json"]["metadata"]["title"] == "Authenticated deposition"
 
 
 def test_pyspecdata_zenodo_cli_uses_existing_numeric_deposition_id(

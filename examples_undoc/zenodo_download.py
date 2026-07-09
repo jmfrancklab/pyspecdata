@@ -13,6 +13,8 @@ an unpublished draft, configure ``token_file`` in the ``[zenodo]`` section of
         "123456", "my_file.h5", exp_type="ODNP", draft=True
     )
 
+# TODO ☐: include this info in the zenodo upload function docstring as well.  Also, it doesn't go here -- it goes in the upload example.
+
 See Zenodo's `instructions for sharing a draft
 <https://help.zenodo.org/docs/share/user-sharing/#share-draft>`_ to grant
 another user access to an unpublished deposition.

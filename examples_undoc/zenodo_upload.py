@@ -16,6 +16,7 @@ it from ``~/.pyspecdata``::
 A new deposition record will be created automatically for the first file and
 the remaining files will be uploaded to that same deposition.  Keep token
 files local and never commit them to git.  See
+# TODO ☐: proper RST!
 https://developers.zenodo.org/#rest-api for API and authentication details.
 """
 

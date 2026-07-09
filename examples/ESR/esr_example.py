@@ -10,17 +10,16 @@ example to understand how
 pySpecData locates the file here.
 """
 
-import re
-
 import matplotlib.pyplot as plt
 import pyspecdata as psd
+
 # %%
 # Load some 1D ESR data with harmonic + phase info.
 # The data is initial organized into two dimensions -- `harmonic` and $B_0$.
 #
 
 d = psd.find_file(
-    "S175R1a.*DHPC.*today.*200304.DSC",
+    "S175R1a.*DHPC.*today.*200304.*",
     exp_type="francklab_esr/Sam",
     zenodo="21084153",
 )
@@ -45,7 +44,7 @@ plt.title("1D Data with Multiple Harmonics")
 # Next, let's load some power-saturation data
 
 d = psd.find_file(
-    re.escape("15N_S175R1a_pR_DHPC_Power_Sat_6G_200303.DSC"),
+    ".*Power.*Sat.*200303.*",
     exp_type="francklab_esr/Sam",
     zenodo="21084153",
 )

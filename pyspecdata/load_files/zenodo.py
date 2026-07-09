@@ -1,6 +1,8 @@
 """Transfer files between pyspecdata and Zenodo
 ------------------------------------------------
 
+# TODO ☐: this info will not show up in sphinx, as we have  it configured.  It needs to go into the FUNCTION docstrings.
+
 This module provides :func:`zenodo_download` for downloading files from
 published records or authenticated drafts, :func:`create_deposition` for
 creating a draft, and :func:`zenodo_upload` for uploading a file to a draft.
@@ -60,6 +62,7 @@ def _raise_for_status(response, action):
         raise requests.HTTPError(msg, response=response) from exc
 
 
+# TODO ☐: need explanation (inline comments inside this function) of why this changed
 def _auth_headers():
     """Return authorization headers for authenticated Zenodo API requests."""
     token_path = pyspec_config.get_setting("token_file", section="zenodo")
@@ -68,6 +71,7 @@ def _auth_headers():
     return {"Authorization": f"Bearer {token}"}
 
 
+# TODO ☐: b/c JF separated the public and draft download into 2 functions, this is not needed
 def _file_name(fileinfo):
     """Return a file name from public-record or draft file metadata."""
     # Published-record file metadata uses "key", while the draft deposition
@@ -75,6 +79,7 @@ def _file_name(fileinfo):
     return fileinfo.get("key") or fileinfo.get("filename")
 
 
+# TODO ☐: b/c JF separated the public and draft download into 2 functions, this is not needed
 def _file_download_url(fileinfo):
     """Return a download URL from public-record or draft file metadata."""
     links = fileinfo.get("links", {})
@@ -82,7 +87,43 @@ def _file_download_url(fileinfo):
     # record metadata commonly exposes the file URL as "self".
     return links.get("download") or links.get("self")
 
+# TODO ☐: JF added this
+def zenodo_download_draft(deposition, searchstring, exp_type=None):
+    r = requests.get(
+        f"https://zenodo.org/api/deposit/depositions/{deposition}/files",
+        headers=_auth_headers(),
+    )
+    try:
+        r.raise_for_status()
+    except requests.HTTPError as exc:
+        status_code = r.status_code
+        if status_code == 401:
+            detail = (
+                "draft deposition access requires a valid Zenodo token"
+            )
+        elif status_code == 403:
+            detail = (
+                "the Zenodo token does not have permission for this "
+                "deposition"
+            )
+        elif status_code == 404:
+            detail = (
+                "the deposition may not exist, may not belong to this "
+                "token, may not be a draft, or may be on the wrong "
+                "Zenodo host"
+            )
+        else:
+            detail = str(exc)
+        raise requests.HTTPError(f"{detail}\n{r.text}") from exc
+    # The draft file-list endpoint returns the list of file objects
+    # directly, rather than wrapping it in a top-level "files" field.
+    files = r.json()
 
+# TODO ☐: why do we need "draft"? Why can't it just use the draft
+#         mechanism if the number given is not public?? w/ the aim of
+#         enabling this, and also getting rid of the stupid private
+#         functions codex likes to create, I moved your code into the
+#         function above
 def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
     """Download the file from Zenodo ``deposition`` that matches
     ``searchstring`` and place it in the directory associated with
@@ -112,35 +153,7 @@ def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
     os.makedirs(dest_dir, exist_ok=True)
 
     if draft:
-        r = requests.get(
-            f"https://zenodo.org/api/deposit/depositions/{deposition}/files",
-            headers=_auth_headers(),
-        )
-        try:
-            r.raise_for_status()
-        except requests.HTTPError as exc:
-            status_code = r.status_code
-            if status_code == 401:
-                detail = (
-                    "draft deposition access requires a valid Zenodo token"
-                )
-            elif status_code == 403:
-                detail = (
-                    "the Zenodo token does not have permission for this "
-                    "deposition"
-                )
-            elif status_code == 404:
-                detail = (
-                    "the deposition may not exist, may not belong to this "
-                    "token, may not be a draft, or may be on the wrong "
-                    "Zenodo host"
-                )
-            else:
-                detail = str(exc)
-            raise requests.HTTPError(f"{detail}\n{r.text}") from exc
-        # The draft file-list endpoint returns the list of file objects
-        # directly, rather than wrapping it in a top-level "files" field.
-        files = r.json()
+        zenodo_download_draft(deposition, searchstring, exp_type=exp_type)
     else:
         r = requests.get(f"https://zenodo.org/api/records/{deposition}")
         r.raise_for_status()
@@ -196,6 +209,7 @@ def create_deposition(title):
 
     r = requests.post(
         "https://zenodo.org/api/deposit/depositions",
+        # TODO ☐: explanation of what happened to access_token is needed in inline comments here.
         headers=_auth_headers(),
         json={"metadata": metadata},
     )

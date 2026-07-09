@@ -480,9 +480,7 @@ def genconfig():
             token_layout.addWidget(qt_widgets.QLabel("Token file:"))
             self.zenodo_token_file_edit = qt_widgets.QLineEdit()
             self.zenodo_token_file_edit.setText(
-                self.config_parser.get(
-                    "zenodo", "token_file", fallback=""
-                )
+                self.config_parser.get("zenodo", "token_file", fallback="")
             )
             self.zenodo_token_file_edit.setCursorPosition(0)
             token_layout.addWidget(self.zenodo_token_file_edit)
