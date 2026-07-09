@@ -92,7 +92,7 @@ with psd.figlist_var() as fl:
             [dataWKBSA[list_of_runs[k]] - bg_data for k in conc_labels],
             "concentration",
         )
-        .set_axis(
+        .set_axis(  # naming and labeling the indirect axis we just created
             "concentration",
             np.array([float(j.replace("%", "")) for j in conc_labels]),
         )[wv:wv_range]
@@ -110,6 +110,8 @@ with psd.figlist_var() as fl:
         sp.latex(
             sum(
                 [
+                    # construct a symbolic polynomial function of
+                    # concentration
                     sp.symbols("c", real=True) ** j * sp.Float(c[j], 3)
                     for j in range(len(c))
                 ]

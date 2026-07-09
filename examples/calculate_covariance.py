@@ -14,7 +14,7 @@ with psd.figlist_var() as fl:
     for filenum, (thisfile, exp_type) in enumerate(
         [("230504_3p8mM_TEMPOL_stb_wt_4x.DSC", "francklab_esr/alex")]
     ):
-        # TODO: Zenodo ID does not work. .YGF file is missing from the 
+        # TODO: Zenodo ID does not work. .YGF file is missing from the
         # deposition. Need to fix this.
         d = psd.find_file(thisfile, exp_type=exp_type, zenodo="21084153")[
             "harmonic", 0
