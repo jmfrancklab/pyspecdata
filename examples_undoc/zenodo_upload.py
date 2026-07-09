@@ -15,9 +15,11 @@ it from ``~/.pyspecdata``::
 
 A new deposition record will be created automatically for the first file and
 the remaining files will be uploaded to that same deposition.  Keep token
-files local and never commit them to git.  See
-# TODO ☐: proper RST!
-https://developers.zenodo.org/#rest-api for API and authentication details.
+files local and never commit them to git.  See the `Zenodo REST API
+documentation <https://developers.zenodo.org/#rest-api>`_ for API and
+authentication details.  See Zenodo's `instructions for sharing a draft
+<https://help.zenodo.org/docs/share/user-sharing/#share-draft>`_ to grant
+another user access to an unpublished deposition.
 """
 
 from pyspecdata import search_filename, zenodo_upload
@@ -94,15 +96,11 @@ files_to_upload = [
         "francklab_esr/Sam",
     ),
     (
-        r"^"
-        + re.escape("15N_S175R1a_pR_DHPC_Power_Sat_6G_200303.DSC")
-        + r"$",
+        r"^" + re.escape("15N_S175R1a_pR_DHPC_Power_Sat_6G_200303.DSC") + r"$",
         "francklab_esr/Sam",
     ),
     (
-        r"^"
-        + re.escape("15N_S175R1a_pR_DHPC_Power_Sat_6G_200303.DTA")
-        + r"$",
+        r"^" + re.escape("15N_S175R1a_pR_DHPC_Power_Sat_6G_200303.DTA") + r"$",
         "francklab_esr/Sam",
     ),
     # examples/ESR/epr_u_domain.py

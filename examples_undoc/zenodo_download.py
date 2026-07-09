@@ -7,17 +7,17 @@ keyword of :func:`pyspecdata.search_filename`.
 
 Published records do not require authentication.  To download directly from
 an unpublished draft, configure ``token_file`` in the ``[zenodo]`` section of
-``~/.pyspecdata``:
+``~/.pyspecdata``::
+
+    [zenodo]
+    token_file = /path/to/zenodo.token
+
+Then call :func:`pyspecdata.load_files.zenodo.zenodo_download` with
+``draft=True``::
 
     zenodo_download(
         "123456", "my_file.h5", exp_type="ODNP", draft=True
     )
-
-# TODO ☐: include this info in the zenodo upload function docstring as well.  Also, it doesn't go here -- it goes in the upload example.
-
-See Zenodo's `instructions for sharing a draft
-<https://help.zenodo.org/docs/share/user-sharing/#share-draft>`_ to grant
-another user access to an unpublished deposition.
 
 This downloads the same files as the upload example.
 """

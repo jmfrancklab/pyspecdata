@@ -1,36 +1,9 @@
 """Transfer files between pyspecdata and Zenodo
 ------------------------------------------------
 
-# TODO ☐: this info will not show up in sphinx, as we have  it configured.  It needs to go into the FUNCTION docstrings.
-
 This module provides :func:`zenodo_download` for downloading files from
 published records or authenticated drafts, :func:`create_deposition` for
 creating a draft, and :func:`zenodo_upload` for uploading a file to a draft.
-
-It also supplies the :func:`cmd` function used by the installed
-``pyspecdata_zenodo`` command.  This command uploads every file listed in
-``./data_files.csv`` and accepts one required positional argument::
-
-    pyspecdata_zenodo DRAFT_ID_OR_TITLE
-
-If ``DRAFT_ID_OR_TITLE`` is a six-to-ten-digit positive integer, the files are
-uploaded to that existing draft deposition.  Any other value is used as the
-title of a new draft.
-
-Published records are downloaded through Zenodo's public records API and do
-not require authentication.  Draft downloads, deposition creation, and
-uploads read a Zenodo personal access token from the file configured in the
-``[zenodo]`` section of the pyspecdata configuration file::
-
-    [zenodo]
-    token_file = /path/to/zenodo.token
-
-The token must have the appropriate deposit permissions.  Keep the token file
-local and do not commit it to version control.
-
-See the `Zenodo REST API documentation
-<https://developers.zenodo.org/#rest-api>`_ for endpoint and authentication
-details.
 """
 
 import os
@@ -62,33 +35,29 @@ def _raise_for_status(response, action):
         raise requests.HTTPError(msg, response=response) from exc
 
 
-# TODO ☐: need explanation (inline comments inside this function) of why this changed
 def _auth_headers():
     """Return authorization headers for authenticated Zenodo API requests."""
+    # Zenodo accepts bearer-token authentication for the deposition API.
+    # Keeping the token in the Authorization header avoids putting it in
+    # request URLs and lets the same helper work for GET, POST, and PUT calls.
     token_path = pyspec_config.get_setting("token_file", section="zenodo")
     with open(os.path.expanduser(token_path)) as fp:
         token = fp.read().strip()
     return {"Authorization": f"Bearer {token}"}
 
 
-# TODO ☐: b/c JF separated the public and draft download into 2 functions, this is not needed
-def _file_name(fileinfo):
-    """Return a file name from public-record or draft file metadata."""
-    # Published-record file metadata uses "key", while the draft deposition
-    # API uses "filename"; fall back to the draft field when needed.
-    return fileinfo.get("key") or fileinfo.get("filename")
+def zenodo_download_draft(deposition):
+    """Return file metadata from an unpublished Zenodo draft deposition.
 
+    Draft metadata uses Zenodo's deposition API, which requires the personal
+    access token configured in ``~/.pyspecdata``::
 
-# TODO ☐: b/c JF separated the public and draft download into 2 functions, this is not needed
-def _file_download_url(fileinfo):
-    """Return a download URL from public-record or draft file metadata."""
-    links = fileinfo.get("links", {})
-    # Draft metadata can provide a dedicated "download" link, whereas public
-    # record metadata commonly exposes the file URL as "self".
-    return links.get("download") or links.get("self")
+        [zenodo]
+        token_file = /path/to/zenodo.token
 
-# TODO ☐: JF added this
-def zenodo_download_draft(deposition, searchstring, exp_type=None):
+    The draft file-list endpoint returns file metadata directly as a list and
+    names each file with ``filename``.
+    """
     r = requests.get(
         f"https://zenodo.org/api/deposit/depositions/{deposition}/files",
         headers=_auth_headers(),
@@ -117,13 +86,9 @@ def zenodo_download_draft(deposition, searchstring, exp_type=None):
         raise requests.HTTPError(f"{detail}\n{r.text}") from exc
     # The draft file-list endpoint returns the list of file objects
     # directly, rather than wrapping it in a top-level "files" field.
-    files = r.json()
+    return r.json()
 
-# TODO ☐: why do we need "draft"? Why can't it just use the draft
-#         mechanism if the number given is not public?? w/ the aim of
-#         enabling this, and also getting rid of the stupid private
-#         functions codex likes to create, I moved your code into the
-#         function above
+
 def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
     """Download the file from Zenodo ``deposition`` that matches
     ``searchstring`` and place it in the directory associated with
@@ -141,7 +106,9 @@ def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
     draft : bool, optional
         If ``True``, download from an unpublished draft deposition using the
         configured Zenodo token.  The default uses the public records API and
-        does not require authentication.
+        does not require authentication.  Draft mode is explicit so that a
+        misspelled or unavailable public record does not silently read a token
+        file and retry against the authenticated deposition API.
     Returns
     -------
     str
@@ -153,33 +120,44 @@ def zenodo_download(deposition, searchstring, exp_type=None, draft=False):
     os.makedirs(dest_dir, exist_ok=True)
 
     if draft:
-        zenodo_download_draft(deposition, searchstring, exp_type=exp_type)
+        files = zenodo_download_draft(deposition)
+        # Draft deposition file metadata is returned directly as a list.
+        # In that API, the filename is stored under "filename" and the
+        # authenticated download URL is stored under links["download"].
+        name_key = "filename"
+        url_key = "download"
+        deposition_label = "draft deposition"
     else:
         r = requests.get(f"https://zenodo.org/api/records/{deposition}")
         r.raise_for_status()
-        # A published record response contains its file objects under the
-        # top-level "files" field.
+        # Published-record metadata is a dictionary with a top-level "files"
+        # list.  In that API, the filename is stored under "key" and the
+        # public file URL is stored under links["self"].
         files = r.json().get("files", [])
+        name_key = "key"
+        url_key = "self"
+        deposition_label = "deposition"
+
     logging.debug("all the files are " + str(files))
     pattern = re.compile(searchstring)
-    matches = [f for f in files if pattern.search(_file_name(f) or "")]
+    matches = [f for f in files if pattern.search(f.get(name_key, ""))]
     if len(matches) == 0:
         raise ValueError(
-            f"no files matching {searchstring!r} in deposition {deposition}\n"
-            f"files: {[_file_name(f) for f in files]}"
+            f"no files matching {searchstring!r} in {deposition_label} "
+            f"{deposition}\nfiles: {[f.get(name_key) for f in files]}"
         )
     elif len(matches) > 1:
         raise ValueError(
-            f"multiple files match {searchstring!r} in deposition"
-            f" {deposition}: {[_file_name(f) for f in matches]}"
+            f"multiple files match {searchstring!r} in {deposition_label}"
+            f" {deposition}: {[f.get(name_key) for f in matches]}"
         )
     fileinfo = matches[0]
-    filename = _file_name(fileinfo)
-    url = _file_download_url(fileinfo)
+    filename = fileinfo.get(name_key)
+    url = fileinfo.get("links", {}).get(url_key)
     if url is None:
         raise ValueError(
-            f"no usable download link for {filename!r} in deposition "
-            f"{deposition}"
+            f"no usable download link for {filename!r} in "
+            f"{deposition_label} {deposition}"
         )
     dest = os.path.join(dest_dir, filename)
     urllib.request.urlretrieve(url, dest)
@@ -209,7 +187,9 @@ def create_deposition(title):
 
     r = requests.post(
         "https://zenodo.org/api/deposit/depositions",
-        # TODO ☐: explanation of what happened to access_token is needed in inline comments here.
+        # Older examples often pass "access_token" as a query parameter.
+        # Use the Authorization header instead so the token is not embedded
+        # in a URL that can be copied into logs, shell history, or tracebacks.
         headers=_auth_headers(),
         json={"metadata": metadata},
     )
@@ -219,6 +199,17 @@ def create_deposition(title):
 
 def zenodo_upload(local_path, title=None, deposition_id=None):
     """Upload ``local_path`` to Zenodo.
+
+    The upload uses the Zenodo deposition API and therefore requires a
+    personal access token with ``deposit:write`` scope.  Configure the file
+    containing this token in ``~/.pyspecdata``::
+
+        [zenodo]
+        token_file = /path/to/zenodo.token
+
+    See the `Zenodo REST API documentation
+    <https://developers.zenodo.org/#rest-api>`_ for API and authentication
+    details.
 
     Parameters
     ----------
