@@ -112,9 +112,9 @@ class _SquareRootPrettyFormatter(PrettyFormatter):
         else:
             division_fmt = "{}/{}"
 
-        # Work from Pint's unit/exponent pairs, not from rendered strings.  This
-        # makes W**0.5 display as √W while preserving Pint's stored W**0.5 unit,
-        # so √W*√W still simplifies to W and W**3*√W to W**3.5.
+        # Work from Pint's unit/exponent pairs, not from rendered strings.
+        # This makes W**0.5 display as √W while preserving Pint's stored
+        # W**0.5 unit, so √W*√W still simplifies to W and W**3*√W to W**3.5.
         as_ratio = babel_kwds.get("as_ratio", True)
         assert isinstance(as_ratio, bool)
         return formatter(
@@ -134,9 +134,9 @@ ureg.formatter._formatters["P"] = _SquareRootPrettyFormatter(ureg)
 # Older code replaced Q_ with a custom wrapper when Pint could not parse
 # compact square-root units such as "√W".  Registering this preprocessor keeps
 # Q_ as the single Pint Quantity definition while teaching every Pint parsing
-# path -- Q_, div_units, and det_unit_prefactor -- to accept compact square-root
-# units and Pint's pretty display strings.  The local pretty formatter restores
-# the legacy √W display without making √W a separate unit.
+# path -- Q_, div_units, and det_unit_prefactor -- to accept compact square-
+# root units and Pint's pretty display strings.  The local pretty formatter
+# restores the legacy √W display without making √W a separate unit.
 Q_ = ureg.Quantity
 
 
