@@ -17,9 +17,8 @@ import sympy as sp
 
 from conftest import load_module
 
-core = load_module("core")
 lmfitdata_module = load_module("lmfitdata")
-nddata = core.nddata
+nddata = lmfitdata_module.nddata
 lmfitdata = lmfitdata_module.lmfitdata
 
 
