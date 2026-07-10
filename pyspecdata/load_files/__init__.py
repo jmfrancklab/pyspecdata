@@ -5,8 +5,8 @@ which uses :module:`datadir` to search for the filename, then automatically
 identifies the file type and calls the appropriate module to load the data into
 an nddata.
 
-Currently, Bruker file formats (both ESR and NMR) are supported, as well as
-(at least some earlier iteration) of Magritek file formats.
+Currently, Bruker file formats (both ESR and NMR), CIQTEK JSON EPR files, and
+(at least some earlier iteration) of Magritek file formats are supported.
 
 Users/developers are very strongly encouraged to add support for new file
 types.
@@ -22,6 +22,7 @@ from . import prospa
 from . import bruker_esr
 from . import acert
 from . import load_cary
+from . import ciqtek
 from .open_subpath import open_subpath
 from ..datadir import getDATADIR, rclone_search
 from ..datadir import pyspec_config, log_fname
@@ -581,12 +582,7 @@ def load_file(*args, **kwargs):
         " manually or (once supported) by passing multiple expno values"
     )
 
-
-def _check_extension(filename):
-    "Just return the file extension in caps"
-    return filename.split(".")[-1].upper()
-
-
+# SINGLE_USE_EXCEPTION -- because it uses return to control the flow well
 def _check_signature(filename):
     """Check the filetype by its signature (the leading part of the file).
     If the first several characters are all ASCII, return the string ``TXT``.
@@ -603,6 +599,7 @@ def _check_signature(filename):
         b"\x89\x48\x44\x46\x0d\x0a\x1a\x0a": "HDF5",
         b"DOS  Format": "DOS Format",
         b"\x11Varian": "Cary UV",
+        b"7z\xbc\xaf'\x1c": "7-Zip",
     }
     max_sig_length = max(list(map(len, list(file_signatures.keys()))))
     with open(filename, "rb") as fp:
@@ -628,6 +625,7 @@ def _check_signature(filename):
                 return None
 
 
+# SINGLE_USE_EXCEPTION
 def load_indiv_file(
     filename,
     dimname="",
@@ -773,7 +771,8 @@ def load_indiv_file(
     else:
         logger.debug(strm("the path", filename, "is a file"))
         type_by_signature = _check_signature(filename)
-        type_by_extension = _check_extension(filename)
+        # Just return the file extension in caps
+        type_by_extension = filename.split(".")[-1].upper()
         logger.debug(strm("signature and extension checks are done"))
         if type_by_signature:
             logger.debug(strm("determining type by signature"))
@@ -834,8 +833,18 @@ def load_indiv_file(
                         "I'm not able to figure out what file type %s this is!"
                         % filename
                     )
+            elif type_by_signature == "7-Zip":
+                if ciqtek.is_ciqtek_file(filename):
+                    data = ciqtek.load_ciqtek(filename)
+                else:
+                    raise RuntimeError(
+                        "I'm not able to figure out what file type %s this is!"
+                        % filename
+                    )
             elif type_by_signature == "TXT":
-                if type_by_extension == "DSC":
+                if ciqtek.is_ciqtek_file(filename):
+                    data = ciqtek.load_ciqtek(filename)
+                elif type_by_extension == "DSC":
                     # DSC identifies the new-format XEpr parameter file, and
                     # DTA holds the spectrum; some 2D datasets also use YGF.
                     # The Bruker loader owns the companion-file mechanism.
@@ -990,6 +999,7 @@ __all__ = [
     "bruker_load_t1_axis",
     "bruker_load_title",
     "bruker_nmr",
+    "ciqtek",
     "cw",
     "find_file",
     "format_listofexps",
