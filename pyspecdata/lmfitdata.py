@@ -122,8 +122,9 @@ class lmfitdata(nddata):
         self.set_indices = None
         self.active_indices = None
         self.expression = None
-        # The symbolic model owns the fit and Jacobian callables, so changing it
-        # in-place would leave too much mutable symbolic state to reason about.
+        # The symbolic model owns the fit and Jacobian callables, so changing
+        # it in-place would leave too much mutable symbolic state to reason
+        # about.
         self._functional_form_locked = False
         return
 
@@ -137,8 +138,8 @@ class lmfitdata(nddata):
 
     @functional_form.setter
     def functional_form(self, this_expr):
-        """generate parameter descriptions and a numpy (lambda) function from a
-        sympy expresssion
+        """generate parameter descriptions and a numpy (lambda) function from
+        a sympy expresssion
 
         Parameters
         ==========
@@ -148,7 +149,8 @@ class lmfitdata(nddata):
         if self._functional_form_locked:
             raise ValueError(
                 "This lmfitdata object already has a functional_form. "
-                "Create a fresh lmfitdata object for a different symbolic form."
+                "Create a fresh lmfitdata object for a different symbolic "
+                "form."
             )
         assert issympy(
             this_expr
@@ -191,16 +193,6 @@ class lmfitdata(nddata):
             self.expression,
             modules=sympy_module_arg,
         )
-        # TODO ☐: this is not the right place to define this -- keep in jacobian, but add a conditional guard to only calculate it if it doesn't already exist (specifically, now we would calculate this here even if we called fit with use_jacobian=False, and then never explicitly asked for the jacobian)
-        self.jacobian_lambda = [
-            sp.lambdify(  # equivalent of fitfunc_multiarg_v2
-                self.variable_symbols + self.parameter_symbols,
-                j,
-                modules=sympy_module_arg,
-            )
-            for j in # what follows is the symbolic jacobian
-            (sp.diff(self.expression, j, 1) for j in self.parameter_symbols)
-        ]
         self._functional_form_locked = True
 
         self.guess_parameters = Parameters()
@@ -396,7 +388,8 @@ class lmfitdata(nddata):
         # error, axis, etc, to be fed to minimize.
         #
         # It also automatically converts complex data to real data, and
-        # does other things for error handling -- let's not just throw this out
+        # does other things for error handling -- let's not just throw this
+        # out
         #
         # I think that a lot of this could be copied with little modification
         #
@@ -478,9 +471,9 @@ class lmfitdata(nddata):
     def jacobian(self, pars, sigma=None):
         """compute the numeric Jacobian from the symbolic functional form
 
-        Note that, like residual, this is designed for use by lmfit, so that if
-        you want to actually *see* the Jacobian, you need to pass something a
-        bit more complicated, like this:
+        Note that, like residual, this is designed for use by lmfit, so that
+        if you want to actually *see* the Jacobian, you need to pass something
+        a bit more complicated, like this:
 
         >>> jac =
         >>> newfit.jacobian(newfit.fit_parameters).view(newfit.data.dtype)
@@ -489,16 +482,31 @@ class lmfitdata(nddata):
         parameters, and gives the complex view for complex data (since in a
         complex fit, we use view to treat real an imaginary parts the same)
         """
-        # self.jacobian_lambda is calculated once when we feed the functional form
+        if not hasattr(self, "jacobian_lambda"):
+            # {{{ Define the *function* only once
+            self.jacobian_lambda = [
+                sp.lambdify(  # equivalent of fitfunc_multiarg_v2
+                    self.variable_symbols + self.parameter_symbols,
+                    j,
+                    modules=sympy_module_arg,
+                )
+                for j in (
+                    sp.diff(self.expression, k, 1)
+                    for k in self.parameter_symbols
+                )
+            ]
+            # }}}
         jacobian_array = np.array(
             [
-                np.full_like(
-                    self.getaxis(self.fit_axis),
-                    raw_jacobian,
-                    dtype=float,
+                (
+                    np.full_like(
+                        self.getaxis(self.fit_axis),
+                        raw_jacobian,
+                        dtype=float,
+                    )
+                    if np.isscalar(raw_jacobian)
+                    else raw_jacobian
                 )
-                if np.isscalar(raw_jacobian)
-                else raw_jacobian
                 for jacobian_fn in self.jacobian_lambda
                 for raw_jacobian in [
                     jacobian_fn(
@@ -519,11 +527,18 @@ class lmfitdata(nddata):
             temp = self.copy(data=False)
             temp.data = jacobian_array
             temp.dimlabels = ["_jacobian_parameter"] + list(temp.dimlabels)
-            if isinstance(temp.axis_coords, list) and len(temp.axis_coords) > 0:
-                temp.axis_coords = [
-                    np.arange(jacobian_array.shape[0])
-                ] + list(temp.axis_coords)
-            # {{{ # TODO ☐: it's unclear what the purpose of this is -- just explain
+            if (
+                isinstance(temp.axis_coords, list)
+                and len(temp.axis_coords) > 0
+            ):
+                temp.axis_coords = [np.arange(jacobian_array.shape[0])] + list(
+                    temp.axis_coords
+                )
+            # {{{ keep axis metadata aligned with the added Jacobian row axis
+            #     The new leading dimension is just a parameter-row index, so
+            #     it has no coordinate errors or units.
+            #     Prepending None keeps the metadata lists parallel with
+            #     temp.dimlabels.
             if isinstance(temp.axis_coords_error, list):
                 temp.axis_coords_error = [None] + list(temp.axis_coords_error)
             if isinstance(temp.axis_coords_units, list):
@@ -532,7 +547,9 @@ class lmfitdata(nddata):
             temp = self.residual_transform(temp)
             jacobian_array = temp.data
             # }}}
-        # TODO ☐: explain what you  are doing here -- I think you are projecting out to include only parameters that are varying
+        # lmfit only expects Jacobian rows for parameters that are currently
+        # allowed to vary.  This keeps staged fits with fixed parameters from
+        # returning too many derivative rows.
         jacobian_array = jacobian_array[
             [pars[name].vary for name in self.parameter_names], :
         ]

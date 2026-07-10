@@ -1,4 +1,5 @@
 """Verify lmfitdata Jacobians against numerical finite differences."""
+
 import copy
 
 import numpy as np
@@ -34,7 +35,10 @@ def assert_symbolic_matches_numerical_jacobian(
             deltas = []
             slopes = []
             for multiple in (1.0, 2.0, 3.0):
-                delta = shifted_vector(base_value + multiple * step) - baseline_vector
+                delta = (
+                    shifted_vector(base_value + multiple * step)
+                    - baseline_vector
+                )
                 deltas.append(delta)
                 slopes.append(delta / (multiple * step))
             if (
@@ -151,7 +155,9 @@ def test_emma_voigt_transform_jacobian_matches_numerical():
         A
         * (-1j * 2 * np.pi * B)
         * sp.exp(1j * 2 * np.pi * Bcenter * B)
-        * sp.exp(-lambda_L * sp.pi * abs(B) - sp.pi**2 * abs(B) ** 2 * sigma**2)
+        * sp.exp(
+            -lambda_L * sp.pi * abs(B) - sp.pi**2 * abs(B) ** 2 * sigma**2
+        )
     )
     A_symbols = sp.symbols("A0:1", real=True)
     A_disp_symbols = sp.symbols("A_disp0:1", real=True)
@@ -167,7 +173,8 @@ def test_emma_voigt_transform_jacobian_matches_numerical():
         for j, amplitude in enumerate(amplitudes):
             lorentzian_FWHM = FWHM_symbols[j] * L_vs_G_frac_symbols[j]
             gaussian_FWHM = sp.sqrt(
-                (FWHM_symbols[j] - voigt_fwhm_coeff_symb * lorentzian_FWHM) ** 2
+                (FWHM_symbols[j] - voigt_fwhm_coeff_symb * lorentzian_FWHM)
+                ** 2
                 - voigt_fwhm_remainder_symb * lorentzian_FWHM**2
             )
             thefunction += voigt_line.subs(
@@ -182,9 +189,9 @@ def test_emma_voigt_transform_jacobian_matches_numerical():
 
     demo.ift("B", shift=True)
     demo = psd.lmfitdata(demo)
-    demo.functional_form = (
-        build_model(A_symbols) - sp.I * sp.sign(B) * build_model(A_disp_symbols)
-    )
+    demo.functional_form = build_model(A_symbols) - sp.I * sp.sign(
+        B
+    ) * build_model(A_disp_symbols)
 
     @demo.define_data_transform
     def my_data_transform(d_local):
