@@ -1,6 +1,6 @@
 from ..core import nddata
 from ..general_functions import strm, lsafen, read_binary
-from ..datadir import rclone_search
+from ..datadir import rclone_search, log_fname
 import numpy as np
 from numpy import r_
 import re
@@ -283,6 +283,15 @@ def xepr(
                         )
                 with open(filename_ygf, "rb") as fp:
                     y_axis = read_binary(fp, ">f8", count=y_points_calcd)
+                log_fname(
+                    *(
+                        ("data_files",)
+                        + tuple(
+                            os.path.split(os.path.normpath(filename_ygf))[::-1]
+                        )
+                        + (exp_type,)
+                    )
+                )
                 assert (
                     len(y_axis) == y_points_calcd
                 ), "Length of the power axis doesn't seem to match!"
@@ -503,7 +512,6 @@ def winepr(filename, dimname="", exp_type=None):
     return data
 
 
-# TODO ☐: if needed add exception for this (see comments elsewhere
 def winepr_load_acqu(filename):
     "Load the parameters for the winepr filename"
     with open(filename, "rU") as fp:  # the U automatically converts dos format
@@ -572,7 +580,6 @@ def winepr_load_acqu(filename):
     return v
 
 
-# TODO ☐: if needed add exception for this (see comments elsewhere
 def xepr_load_acqu(filename):
     """Load the Xepr acquisition parameter file, which should be a .dsc
     extension.
