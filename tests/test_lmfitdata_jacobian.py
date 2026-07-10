@@ -15,7 +15,12 @@ import copy
 import numpy as np
 import sympy as sp
 
-import pyspecdata as psd
+from conftest import load_module
+
+core = load_module("core")
+lmfitdata_module = load_module("lmfitdata")
+nddata = core.nddata
+lmfitdata = lmfitdata_module.lmfitdata
 
 
 # ---------------------------------------------------------------------------
@@ -23,8 +28,8 @@ import pyspecdata as psd
 # ---------------------------------------------------------------------------
 
 def _build_fit(axis, dim_name, expression, guesses):
-    fit = psd.lmfitdata(
-        psd.nddata(np.zeros_like(axis), [dim_name]).setaxis(dim_name, axis)
+    fit = lmfitdata(
+        nddata(np.zeros_like(axis), [dim_name]).setaxis(dim_name, axis)
     )
     fit.functional_form = expression
     fit.set_guess(**guesses)
