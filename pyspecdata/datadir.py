@@ -784,7 +784,7 @@ def proc_data_target_dir(exp_type):
     return data_target
 
 
-# TODO ☐: add exception for this
+# SINGLE_USE_EXCEPTION -- because it's used externally
 def getDATADIR(*args, **kwargs):
     r"""Used to find a directory containing data in a way that works
     seamlessly across different computers (and operating systems).

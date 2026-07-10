@@ -240,6 +240,7 @@ def mydiff(data, axis=-1):
 
 
 # }}}
+# SINGLE_USE_EXCEPTION -- public helper imported by lmfitdata
 def normal_attrs(obj):
     myattrs = [
         x
@@ -987,6 +988,7 @@ def plot(*args, **kwargs):
 
 
 # {{{ concatenate datalist along dimname
+# SINGLE_USE_EXCEPTION -- public API used by downstream scripts
 def concat(datalist, dimname, chop=False):
     """concatenate multiple datasets together along a new dimension.
 
@@ -2290,13 +2292,13 @@ class nddata(object):
 
     def div_units(self, *args, **kwargs):
         """
-        divide units of the data (or axis)
+        Divide units of the data (or axis)
         by the units that are given, and
         return the multiplier as a number.
 
         In other words, if you pass "a" and
         the units of your data are in "b",
-        then this returns x, such that (x
+        then this returns x = b/a, such that (x
         a)/(b) = 1.
 
         If the result is not dimensionless,

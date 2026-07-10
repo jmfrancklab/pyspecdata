@@ -6,6 +6,7 @@ from .core import nddata, normal_attrs, issympy, ndshape, dp
 from .general_functions import strm, pinvr
 import logging
 import asteval
+import warnings
 
 
 # {{{ functions and modules
@@ -382,12 +383,19 @@ class lmfitdata(nddata):
         # But you  should read through and see what the previous fit method is
         # doing and then copy over what you can
         sigma = self.get_error()
-        if sigma is not None:
+        if sigma is None:
             themin = Minimizer(
                 self.residual,
                 self.guess_parameters,
             )
         else:
+            if any(~np.isfinite(sigma)) or any(sigma == 0.0):
+                warnings.warn(
+                    "You have one or more errors set to zero or not"
+                    " finite.  That's really weird!  I'm going to set"
+                    " them to 1 so this runs, but you probably messed"
+                    " up."
+                )
             themin = Minimizer(
                 self.residual,
                 self.guess_parameters,
@@ -462,11 +470,6 @@ class lmfitdata(nddata):
         parameters, and gives the complex view for complex data (since in a
         complex fit, we use view to treat real an imaginary parts the same)
         """
-        if sigma is not None:
-            raise ValueError(
-                "Jacobian with generalized leastsq not yet supported (you have"
-                " error set, so I want to do generalized)"
-            )
         if not hasattr(self, "jacobian_symbolic"):
             self.jacobian_symbolic = [
                 sp.diff(self.expression, j, 1) for j in self.parameter_symbols
@@ -512,6 +515,13 @@ class lmfitdata(nddata):
                 raise ValueError(
                     "I don't understand the dtype", self.data.dtype
                 )
+        if sigma is not None:
+            normalization = np.sum(
+                1.0 / sigma[np.logical_and(sigma != 0.0, np.isfinite(sigma))]
+            )
+            sigma[sigma == 0.0] = 1
+            sigma[~np.isfinite(sigma)] = 1
+            jacobian_array = jacobian_array / sigma * normalization
         jacobian_array = jacobian_array.view(float)
         jacobian_array = jacobian_array[
             :, self.nan_mask
