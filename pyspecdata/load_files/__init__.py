@@ -573,11 +573,8 @@ def load_file(*args, **kwargs):
     )
 
 
-def _check_extension(filename):
-    "Just return the file extension in caps"
-    return filename.split(".")[-1].upper()
 
-
+# SINGLE_USE_EXCEPTION -- because it uses return to control the flow well
 def _check_signature(filename):
     """Check the filetype by its signature (the leading part of the file).
     If the first several characters are all ASCII, return the string ``TXT``.
@@ -620,6 +617,7 @@ def _check_signature(filename):
                 return None
 
 
+# SINGLE_USE_EXCEPTION
 def load_indiv_file(
     filename,
     dimname="",
@@ -764,7 +762,7 @@ def load_indiv_file(
     else:
         logger.debug(strm("the path", filename, "is a file"))
         type_by_signature = _check_signature(filename)
-        type_by_extension = _check_extension(filename)
+        type_by_extension = filename.split(".")[-1].upper() # Just return the file extension in caps
         logger.debug(strm("signature and extension checks are done"))
         if type_by_signature:
             logger.debug(strm("determining type by signature"))

@@ -490,6 +490,7 @@ def winepr(filename, dimname="", exp_type=None):
     return data
 
 
+# SINGLE_USE_EXCEPTION
 def winepr_load_acqu(filename):
     "Load the parameters for the winepr filename"
     with open(filename, "rU") as fp:  # the U automatically converts dos format
@@ -558,6 +559,7 @@ def winepr_load_acqu(filename):
     return v
 
 
+# SINGLE_USE_EXCEPTION
 def xepr_load_acqu(filename):
     """Load the Xepr acquisition parameter file, which should be a .dsc
     extension.
