@@ -191,7 +191,9 @@ def test_loads_local_ciqtek_exp_type_file():
         pytest.skip("ciqtek exp_type is not configured")
     ciqtek_dir = Path(ciqtek_dir).expanduser()
     if not ciqtek_dir.is_dir():
-        pytest.skip(f"configured ciqtek exp_type is not a directory: {ciqtek_dir}")
+        pytest.skip(
+            f"configured ciqtek exp_type is not a directory: {ciqtek_dir}"
+        )
 
     candidates = sorted(ciqtek_dir.rglob("*.epr"))
     candidates += sorted(ciqtek_dir.rglob("*.epr.7z"))
@@ -210,7 +212,9 @@ def test_loads_local_ciqtek_exp_type_file():
             continue
     else:
         if missing_7z:
-            pytest.skip("only compressed CIQTEK files were found and 7z is unavailable")
+            pytest.skip(
+                "only compressed CIQTEK files were found and 7z is unavailable"
+            )
         pytest.fail(f"no loadable CIQTEK .epr files found under {ciqtek_dir}")
 
     assert data.get_prop("source_format") == "CIQTEK JSON EPR"
