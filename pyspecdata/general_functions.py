@@ -11,6 +11,15 @@ import numpy as np
 import logging
 import re
 import pint
+from pint.delegates.formatter._compound_unit_helpers import (
+    localize_per,
+    prepare_compount_unit,
+)
+from pint.delegates.formatter._format_helpers import (
+    formatter,
+    pretty_fmt_exponent,
+)
+from pint.delegates.formatter.plain import PrettyFormatter
 import textwrap
 
 ureg = pint.UnitRegistry()
@@ -39,9 +48,7 @@ superscript_translation = str.maketrans(
         "⋅": ".",
     }
 )
-pretty_exponent_re = re.compile(
-    r"[⁺⁻]?[⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:⋅[⁰¹²³⁴⁵⁶⁷⁸⁹]+)?"
-)
+pretty_exponent_re = re.compile(r"[⁺⁻]?[⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:⋅[⁰¹²³⁴⁵⁶⁷⁸⁹]+)?")
 
 
 def _normalize_pretty_unit_string(unit_string):
@@ -62,11 +69,74 @@ def _normalize_pretty_unit_string(unit_string):
 
 
 ureg.preprocessors.append(_normalize_pretty_unit_string)
+
+
+def _use_square_root_for_half_power(terms):
+    """Display exact half powers as square roots without changing the units."""
+    for unit_name, exponent in terms:
+        if exponent == 0.5:
+            yield f"√{unit_name}", 1
+        elif exponent == -0.5:
+            yield f"√{unit_name}", -1
+        else:
+            yield unit_name, exponent
+
+
+class _SquareRootPrettyFormatter(PrettyFormatter):
+    """Pretty-print exact square-root units using the compact radical form."""
+
+    def format_unit(
+        self,
+        unit,
+        uspec="",
+        sort_func=None,
+        **babel_kwds,
+    ):
+        numerator, denominator = prepare_compount_unit(
+            unit,
+            uspec,
+            sort_func=sort_func,
+            **babel_kwds,
+            registry=self._registry,
+        )
+        numerator = _use_square_root_for_half_power(numerator)
+        denominator = _use_square_root_for_half_power(denominator)
+
+        if babel_kwds.get("locale", None):
+            length = babel_kwds.get("length") or (
+                "short" if "~" in uspec else "long"
+            )
+            division_fmt = localize_per(
+                length, babel_kwds.get("locale"), "{}/{}"
+            )
+        else:
+            division_fmt = "{}/{}"
+
+        # Work from Pint's unit/exponent pairs, not from rendered strings.  This
+        # makes W**0.5 display as √W while preserving Pint's stored W**0.5 unit,
+        # so √W*√W still simplifies to W and W**3*√W to W**3.5.
+        as_ratio = babel_kwds.get("as_ratio", True)
+        assert isinstance(as_ratio, bool)
+        return formatter(
+            numerator,
+            denominator,
+            as_ratio=as_ratio,
+            single_denominator=False,
+            product_fmt="·",
+            division_fmt=division_fmt,
+            power_fmt="{}{}",
+            parentheses_fmt="({})",
+            exp_call=pretty_fmt_exponent,
+        )
+
+
+ureg.formatter._formatters["P"] = _SquareRootPrettyFormatter(ureg)
 # Older code replaced Q_ with a custom wrapper when Pint could not parse
 # compact square-root units such as "√W".  Registering this preprocessor keeps
 # Q_ as the single Pint Quantity definition while teaching every Pint parsing
-# path -- Q_, div_units, and det_unit_prefactor -- to accept both those compact
-# square-root units and Pint's pretty display strings.
+# path -- Q_, div_units, and det_unit_prefactor -- to accept compact square-root
+# units and Pint's pretty display strings.  The local pretty formatter restores
+# the legacy √W display without making √W a separate unit.
 Q_ = ureg.Quantity
 
 
@@ -500,6 +570,7 @@ def lsafen(*string, **kwargs):
 def lsafe(*string, **kwargs):
     "Output properly escaped for latex"
     if len(string) > 1:
+
         def lsafewkargs(x):
             return lsafe(x, **kwargs)
 
