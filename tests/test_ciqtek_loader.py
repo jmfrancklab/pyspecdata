@@ -152,11 +152,14 @@ def test_load_indiv_file_dispatches_ciqtek_7z_by_magic(tmp_path, monkeypatch):
     payload = _payload([_line("Delay_0", 0, [0, 1, 0], [0, 0, 0])])
     archive.write_bytes(ciqtek.seven_zip_signature + b"test archive bytes")
 
-    def fake_read_text_from_7z(filename):
-        assert filename == str(archive)
-        return json.dumps(payload)
+    def fake_run(command, **kwargs):
+        assert command[-1] == str(archive)
+        return subprocess.CompletedProcess(
+            command, 0, stdout=json.dumps(payload).encode(), stderr=b""
+        )
 
-    monkeypatch.setattr(ciqtek, "_read_text_from_7z", fake_read_text_from_7z)
+    monkeypatch.setattr(ciqtek.shutil, "which", lambda _name: "7z")
+    monkeypatch.setattr(ciqtek.subprocess, "run", fake_run)
 
     assert ciqtek.is_ciqtek_file(str(archive))
     data = load_indiv_file(str(archive))

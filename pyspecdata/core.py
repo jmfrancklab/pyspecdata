@@ -240,6 +240,7 @@ def mydiff(data, axis=-1):
 
 
 # }}}
+# SINGLE_USE_EXCEPTION -- public helper imported by lmfitdata
 def normal_attrs(obj):
     myattrs = [
         x
@@ -987,6 +988,7 @@ def plot(*args, **kwargs):
 
 
 # {{{ concatenate datalist along dimname
+# SINGLE_USE_EXCEPTION -- public API used by downstream scripts
 def concat(datalist, dimname, chop=False):
     """concatenate multiple datasets together along a new dimension.
 

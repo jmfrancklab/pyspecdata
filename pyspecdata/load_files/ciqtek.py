@@ -67,28 +67,24 @@ def is_ciqtek_payload(payload):
     return True
 
 
-def _read_text_from_7z(filename):
-    seven_zip = shutil.which("7z") or shutil.which("7za")
-    if seven_zip is None:
-        raise Missing7Zip(
-            "Loading 7z-compressed CIQTEK EPR files requires the 7z "
-            "or 7za command. Please install 7zip/p7zip or provide "
-            "the uncompressed .epr file."
-        )
-    proc = subprocess.run(
-        [seven_zip, "x", "-so", filename],
-        check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    return proc.stdout.decode("utf-8")
-
-
 def _load_json_from_file(filename):
     with open(filename, "rb") as fp:
         signature = fp.read(len(seven_zip_signature))
     if signature == seven_zip_signature:
-        return json.loads(_read_text_from_7z(filename))
+        seven_zip = shutil.which("7z") or shutil.which("7za")
+        if seven_zip is None:
+            raise Missing7Zip(
+                "Loading 7z-compressed CIQTEK EPR files requires the 7z "
+                "or 7za command. Please install 7zip/p7zip or provide "
+                "the uncompressed .epr file."
+            )
+        proc = subprocess.run(
+            [seven_zip, "x", "-so", filename],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        return json.loads(proc.stdout.decode("utf-8"))
     with open(filename, encoding="utf-8") as fp:
         return json.load(fp)
 
@@ -104,34 +100,11 @@ def is_ciqtek_file(filename):
     return is_ciqtek_payload(payload)
 
 
-def _load_payload(filename):
+def load_ciqtek(filename):
+    """Load a CIQTEK JSON ``.epr`` file as an :class:`nddata` object."""
     payload = _load_json_from_file(filename)
     if not is_ciqtek_payload(payload):
         raise ValueError(strm(filename, "does not contain a CIQTEK EPR file"))
-    return payload
-
-
-def _common_param_axis(line_params):
-    if len(line_params) == 0:
-        return None, None
-    common_keys = set(line_params[0].keys())
-    for params in line_params[1:]:
-        common_keys &= set(params.keys())
-    if "delay" in common_keys:
-        axis_name = "delay"
-    elif len(common_keys) == 1:
-        axis_name = next(iter(common_keys))
-    else:
-        return None, None
-    raw_values = [params[axis_name] for params in line_params]
-    try:
-        axis_values = np.asarray(raw_values, dtype=np.double)
-    except Exception:
-        axis_values = np.asarray(raw_values)
-    return axis_name, axis_values
-
-
-def _load_lines(payload):
     line_data = payload["dataStore"]["lineDataList"]
     line_names = []
     line_params = []
@@ -193,28 +166,26 @@ def _load_lines(payload):
             for this_axis in g_axes[1:]
         ):
             g_axis = np.vstack(g_axes).T
-    return line_names, line_params, line_freqs, field_axis, g_axis, signals
-
-
-def load_ciqtek(filename):
-    """Load a CIQTEK JSON ``.epr`` file as an :class:`nddata` object."""
-    payload = _load_payload(filename)
-    (
-        line_names,
-        line_params,
-        line_freqs,
-        field_axis,
-        g_axis,
-        signals,
-    ) = _load_lines(payload)
     if len(signals) == 1:
         data = nddata(signals[0], [len(field_axis)], [b0_texstr])
         data.labels([b0_texstr], [field_axis])
     else:
-        indirect_name, indirect_axis = _common_param_axis(line_params)
-        if indirect_name is None:
+        common_keys = set(line_params[0].keys())
+        for params in line_params[1:]:
+            common_keys &= set(params.keys())
+        if "delay" in common_keys:
+            indirect_name = "delay"
+        elif len(common_keys) == 1:
+            indirect_name = next(iter(common_keys))
+        else:
             indirect_name = "indirect"
             indirect_axis = np.r_[0 : len(signals)]
+        if indirect_name != "indirect":
+            raw_values = [params[indirect_name] for params in line_params]
+            try:
+                indirect_axis = np.asarray(raw_values, dtype=np.double)
+            except Exception:
+                indirect_axis = np.asarray(raw_values)
         signal_array = np.vstack(signals).T
         data = nddata(
             signal_array,

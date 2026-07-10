@@ -12,12 +12,15 @@ import numpy as np
 import pyspecdata as psd
 
 Bname = r"$B_0$"
-filename = "384K_1mM_TEMPO_SFO5_pt5G_MAmp_25dB_100G_22scans_2D.epr"
 # To make the compressed version on Linux with maximum 7zip compression:
 # 7z a -t7z -mx=9 384K_1mM_TEMPO_SFO5_pt5G_MAmp_25dB_100G_22scans_2D.epr.7z \
 #     384K_1mM_TEMPO_SFO5_pt5G_MAmp_25dB_100G_22scans_2D.epr
 
-d = psd.find_file(re.escape(filename) + r"(\.7z)?$", exp_type="ciqtek")
+d = psd.find_file(
+    re.escape("384K_1mM_TEMPO_SFO5_pt5G_MAmp_25dB_100G_22scans_2D.epr")
+    + r"(\.7z)?$",
+    exp_type="ciqtek",
+)
 g_axis = d.get_prop("ciqtek_g_axis")
 g_axis = np.asarray(g_axis)
 if g_axis.ndim > 1:
@@ -41,10 +44,10 @@ g_ax.set_xticklabels(["%0.4f" % j for j in g_axis[g_tick_idx]])
 g_ax.set_xlabel("g")
 fig.tight_layout()
 
-indirect_dim = next(j for j in d.dimlabels if j != Bname)
-image_data = d.real.C.reorder([Bname, indirect_dim])
 plt.figure(2)
-image_data.pcolor(cmap="seismic", force_balanced_cmap=True)
+d.real.reorder(
+    [Bname, next(j for j in d.dimlabels if j != Bname)]
+).pcolor(cmap="seismic", force_balanced_cmap=True)
 plt.title("CIQTEK real signal image")
 
 plt.show()

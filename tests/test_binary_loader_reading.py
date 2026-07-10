@@ -2,6 +2,7 @@ import importlib
 import struct
 import sys
 import types
+from contextlib import ExitStack
 from pathlib import Path
 
 import numpy as np
@@ -9,7 +10,9 @@ import numpy as np
 from conftest import load_module
 
 pkg_root = Path(__file__).resolve().parents[1] / "pyspecdata"
-_module_names = [
+_module_cleanup = ExitStack()
+_missing = object()
+for _name in [
     "pyspecdata",
     "pyspecdata.core",
     "pyspecdata.datadir",
@@ -17,11 +20,14 @@ _module_names = [
     "pyspecdata.load_files",
     "pyspecdata.load_files.bruker_esr",
     "pyspecdata.load_files.load_cary",
-]
-_missing = object()
-_saved_modules = {
-    name: sys.modules.get(name, _missing) for name in _module_names
-}
+]:
+    _old_module = sys.modules.get(_name, _missing)
+    if _old_module is _missing:
+        _module_cleanup.callback(sys.modules.pop, _name, None)
+    else:
+        _module_cleanup.callback(
+            sys.modules.__setitem__, _name, _old_module
+        )
 
 pyspecdata_pkg = types.ModuleType("pyspecdata")
 pyspecdata_pkg.__path__ = [str(pkg_root)]
@@ -51,17 +57,6 @@ sys.modules.pop("pyspecdata.load_files.load_cary", None)
 
 load_module("general_functions")
 core = load_module("core", use_real_pint=True, use_real_h5py=True)
-<<<<<<< Updated upstream
-||||||| Stash base
-# {{{ loading only portions of pyspecdata that are actually used
-lmfitdata_mod = load_module(
-    "lmfitdata", use_real_pint=True, use_real_h5py=True
-)
-pyspecdata_pkg.nddata = core.nddata
-pyspecdata_pkg.ndshape = core.ndshape
-pyspecdata_pkg.lmfitdata = lmfitdata_mod.lmfitdata
-# }}}
-=======
 # {{{ loading only portions of pyspecdata that are actually used
 pyspecdata_pkg.nddata = core.nddata
 pyspecdata_pkg.ndshape = core.ndshape
@@ -69,15 +64,10 @@ pyspecdata_pkg.lmfitdata = load_module(
     "lmfitdata", use_real_pint=True, use_real_h5py=True
 ).lmfitdata
 # }}}
->>>>>>> Stashed changes
 bruker_esr = importlib.import_module("pyspecdata.load_files.bruker_esr")
 load_cary = importlib.import_module("pyspecdata.load_files.load_cary")
 
-for _name, _module in _saved_modules.items():
-    if _module is _missing:
-        sys.modules.pop(_name, None)
-    else:
-        sys.modules[_name] = _module
+_module_cleanup.close()
 
 
 def _write_xepr_descriptor(path, *body_lines):

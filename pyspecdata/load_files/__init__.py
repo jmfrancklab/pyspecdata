@@ -572,8 +572,6 @@ def load_file(*args, **kwargs):
         " manually or (once supported) by passing multiple expno values"
     )
 
-
-
 # SINGLE_USE_EXCEPTION -- because it uses return to control the flow well
 def _check_signature(filename):
     """Check the filetype by its signature (the leading part of the file).
@@ -762,7 +760,8 @@ def load_indiv_file(
     else:
         logger.debug(strm("the path", filename, "is a file"))
         type_by_signature = _check_signature(filename)
-        type_by_extension = filename.split(".")[-1].upper() # Just return the file extension in caps
+        # Just return the file extension in caps
+        type_by_extension = filename.split(".")[-1].upper()
         logger.debug(strm("signature and extension checks are done"))
         if type_by_signature:
             logger.debug(strm("determining type by signature"))
