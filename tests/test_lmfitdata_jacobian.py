@@ -1,6 +1,7 @@
 """Verify lmfitdata Jacobians against numerical finite differences."""
 
 import copy
+import time
 
 import numpy as np
 import pytest
@@ -234,6 +235,131 @@ def test_emma_voigt_transform_jacobian_matches_numerical():
         rtol=2e-3,
         atol=2e-3,
         label="Emma one-component transformed Voigt",
+    )
+
+
+def test_transformed_voigt_fit_is_faster_with_jacobian():
+    rng = np.random.default_rng(20260710)
+    B_axis = np.linspace(-8, 8, 2048)
+    B = sp.symbols("B", real=True)
+    A, lambda_L, Bcenter, sigma = sp.symbols(
+        "A lambda_L Bcenter sigma", real=True
+    )
+    voigt_line = (
+        A
+        * (-1j * 2 * np.pi * B)
+        * sp.exp(1j * 2 * np.pi * Bcenter * B)
+        * sp.exp(
+            -lambda_L * sp.pi * abs(B) - sp.pi**2 * abs(B) ** 2 * sigma**2
+        )
+    )
+    A_symbols = sp.symbols("A0:3", real=True)
+    Bcenter_symbols = sp.symbols("Bcenter0:3", real=True)
+    FWHM_symbols = sp.symbols("FWHM0:3", real=True)
+    L_vs_G_frac_symbols = sp.symbols("L_vs_G_frac0:3", real=True)
+    voigt_fwhm_coeff_symb = sp.Float(0.5346)
+    voigt_fwhm_remainder_symb = (sp.Integer(1) - voigt_fwhm_coeff_symb) ** 2
+    thefunction = 0
+    for j, amplitude in enumerate(A_symbols):
+        lorentzian_FWHM = FWHM_symbols[j] * L_vs_G_frac_symbols[j]
+        gaussian_FWHM = sp.sqrt(
+            (FWHM_symbols[j] - voigt_fwhm_coeff_symb * lorentzian_FWHM) ** 2
+            - voigt_fwhm_remainder_symb * lorentzian_FWHM**2
+        )
+        thefunction += voigt_line.subs(
+            {A: amplitude, Bcenter: Bcenter_symbols[j]}
+        ).subs(
+            {
+                lambda_L: lorentzian_FWHM,
+                sigma: gaussian_FWHM / (2 * sp.sqrt(sp.log(2))),
+            }
+        )
+    source = psd.nddata(np.zeros_like(B_axis), "B").labels("B", B_axis)
+    source.ift("B", shift=True)
+    template = psd.lmfitdata(source.C)
+    template.functional_form = thefunction
+    true_values = {
+        "A0": 1.0,
+        "A1": 0.8,
+        "A2": 1.15,
+        "Bcenter0": -2.4,
+        "Bcenter1": 0.05,
+        "Bcenter2": 2.35,
+        "FWHM0": 0.9,
+        "FWHM1": 1.05,
+        "FWHM2": 0.95,
+        "L_vs_G_frac0": 0.35,
+        "L_vs_G_frac1": 0.55,
+        "L_vs_G_frac2": 0.45,
+    }
+    raw_clean = template.fitfunc_multiarg_v2(
+        *(template.getaxis(k) for k in template.variable_names),
+        **true_values,
+    )
+    noise_level = 1e-3 * np.max(np.abs(raw_clean))
+    source.data = raw_clean + noise_level * (
+        rng.normal(size=raw_clean.shape)
+        + 1j * rng.normal(size=raw_clean.shape)
+    )
+    results = {}
+    for use_jacobian in (False, True):
+        fit = psd.lmfitdata(source.C)
+        fit.functional_form = thefunction
+
+        @fit.define_data_transform
+        def my_data_transform(d_local):
+            d_local["B":0] *= 0.5
+            d_local.ft("B")
+            return d_local.real
+
+        @fit.define_residual_transform
+        def my_residual_transform(d_local):
+            h_m = Q_(0.3, "G").to("G").magnitude
+            d_local *= d_local.fromaxis(
+                "B",
+                lambda B_axis: jv(0, abs(h_m * B_axis * np.pi))
+                + jv(2, abs(h_m * B_axis * np.pi)),
+            )
+            d_local["B":0] *= 0.5
+            d_local.ft("B")
+            return d_local.real
+
+        guesses = {}
+        for j in range(3):
+            guesses[f"A{j}"] = {
+                "value": true_values[f"A{j}"] * (1.0 + 0.08 * (-1) ** j)
+            }
+            guesses[f"Bcenter{j}"] = {
+                "value": true_values[f"Bcenter{j}"] + 0.08 * (-1) ** j,
+                "min": true_values[f"Bcenter{j}"] - 0.5,
+                "max": true_values[f"Bcenter{j}"] + 0.5,
+            }
+            guesses[f"FWHM{j}"] = {
+                "value": true_values[f"FWHM{j}"] * 1.12,
+                "min": 0.3,
+                "max": 2.0,
+            }
+            guesses[f"L_vs_G_frac{j}"] = {
+                "value": min(true_values[f"L_vs_G_frac{j}"] + 0.08, 0.95),
+                "min": 0,
+                "max": 1,
+            }
+        fit.set_guess(guesses)
+        start = time.perf_counter()
+        fit.fit(use_jacobian=use_jacobian)
+        elapsed = time.perf_counter() - start
+        residual_norm = np.linalg.norm(fit.residual(fit.fit_parameters))
+        results[use_jacobian] = (elapsed, residual_norm)
+    no_jacobian_time, no_jacobian_residual = results[False]
+    jacobian_time, jacobian_residual = results[True]
+    assert jacobian_residual <= no_jacobian_residual * (1 + 1e-4), (
+        f"jacobian residual {jacobian_residual} is worse than "
+        f"non-jacobian residual {no_jacobian_residual}"
+    )
+    assert jacobian_time <= no_jacobian_time / 1.5, (
+        f"jacobian fit took {jacobian_time:.6g} s, but needed to be at most "
+        f"{no_jacobian_time / 1.5:.6g} s based on non-jacobian time "
+        f"{no_jacobian_time:.6g} s"
     )
 
 
