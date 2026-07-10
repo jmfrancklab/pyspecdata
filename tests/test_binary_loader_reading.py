@@ -2,6 +2,7 @@ import importlib
 import struct
 import sys
 import types
+from contextlib import ExitStack
 from pathlib import Path
 
 import numpy as np
@@ -9,6 +10,25 @@ import numpy as np
 from conftest import load_module
 
 pkg_root = Path(__file__).resolve().parents[1] / "pyspecdata"
+_module_cleanup = ExitStack()
+_missing = object()
+for _name in [
+    "pyspecdata",
+    "pyspecdata.core",
+    "pyspecdata.datadir",
+    "pyspecdata.general_functions",
+    "pyspecdata.load_files",
+    "pyspecdata.load_files.bruker_esr",
+    "pyspecdata.load_files.load_cary",
+]:
+    _old_module = sys.modules.get(_name, _missing)
+    if _old_module is _missing:
+        _module_cleanup.callback(sys.modules.pop, _name, None)
+    else:
+        _module_cleanup.callback(
+            sys.modules.__setitem__, _name, _old_module
+        )
+
 pyspecdata_pkg = types.ModuleType("pyspecdata")
 pyspecdata_pkg.__path__ = [str(pkg_root)]
 sys.modules["pyspecdata"] = pyspecdata_pkg
@@ -37,8 +57,17 @@ sys.modules.pop("pyspecdata.load_files.load_cary", None)
 
 load_module("general_functions")
 core = load_module("core", use_real_pint=True, use_real_h5py=True)
+# {{{ loading only portions of pyspecdata that are actually used
+pyspecdata_pkg.nddata = core.nddata
+pyspecdata_pkg.ndshape = core.ndshape
+pyspecdata_pkg.lmfitdata = load_module(
+    "lmfitdata", use_real_pint=True, use_real_h5py=True
+).lmfitdata
+# }}}
 bruker_esr = importlib.import_module("pyspecdata.load_files.bruker_esr")
 load_cary = importlib.import_module("pyspecdata.load_files.load_cary")
+
+_module_cleanup.close()
 
 
 def _write_xepr_descriptor(path, *body_lines):
@@ -49,7 +78,7 @@ def _write_big_endian_array(path, values, dtype):
     arr = np.asarray(values, dtype=np.dtype(dtype))
     path.write_bytes(arr.tobytes())
 
-
+# SINGLE_USE_EXCEPTION
 def _write_fake_cary_file(path, x_values, y_values, spectrum_name="fake_uv"):
     x_values = np.asarray(x_values, dtype="<f4")
     y_values = np.asarray(y_values, dtype="<f4")

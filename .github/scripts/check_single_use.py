@@ -228,6 +228,11 @@ def main(argv: list[str] | None = None) -> int:
             continue
 
         lines = source.splitlines()
+        single_use_exceptions = {
+            i + 2
+            for i, line in enumerate(lines)
+            if line.lstrip().startswith("# SINGLE_USE_EXCEPTION")
+        }
         preamble_limit = len(lines)
         for stmt in tree.body:
             if (
@@ -288,6 +293,8 @@ def main(argv: list[str] | None = None) -> int:
             if len(definition_lines) != 1 or len(use_lines) != 1:
                 continue
             definition_line = definition_lines[0]
+            if definition_line in single_use_exceptions:
+                continue
             # Unpacking is a normal way to pull out the relevant piece from a
             # function that returns more than one value, so don't warn on
             # single-use names introduced by tuple/list unpacking.
@@ -332,6 +339,8 @@ def main(argv: list[str] | None = None) -> int:
             ):
                 continue
             definition_line = definition_lines[0]
+            if definition_line in single_use_exceptions:
+                continue
             violations.append(
                 Violation(
                     path=str(path),
