@@ -122,6 +122,9 @@ class lmfitdata(nddata):
         self.set_indices = None
         self.active_indices = None
         self.expression = None
+        # The symbolic model owns the fit and Jacobian callables, so changing it
+        # in-place would leave too much mutable symbolic state to reason about.
+        self._functional_form_locked = False
         return
 
     @property
@@ -141,6 +144,12 @@ class lmfitdata(nddata):
         ==========
         this_expr: sympy expression
         """
+        # A new symbolic form should use a fresh lmfitdata object.
+        if self._functional_form_locked:
+            raise ValueError(
+                "This lmfitdata object already has a functional_form. "
+                "Create a fresh lmfitdata object for a different symbolic form."
+            )
         assert issympy(
             this_expr
         ), "for now, the functional form must be a sympy expression"
@@ -182,6 +191,17 @@ class lmfitdata(nddata):
             self.expression,
             modules=sympy_module_arg,
         )
+        # TODO ☐: this is not the right place to define this -- keep in jacobian, but add a conditional guard to only calculate it if it doesn't already exist (specifically, now we would calculate this here even if we called fit with use_jacobian=False, and then never explicitly asked for the jacobian)
+        self.jacobian_lambda = [
+            sp.lambdify(  # equivalent of fitfunc_multiarg_v2
+                self.variable_symbols + self.parameter_symbols,
+                j,
+                modules=sympy_module_arg,
+            )
+            for j in # what follows is the symbolic jacobian
+            (sp.diff(self.expression, j, 1) for j in self.parameter_symbols)
+        ]
+        self._functional_form_locked = True
 
         self.guess_parameters = Parameters()
         for this_name in self.parameter_names:
@@ -456,8 +476,7 @@ class lmfitdata(nddata):
         return
 
     def jacobian(self, pars, sigma=None):
-        """cache the symbolic jacobian and/or use it to compute the numeric
-        result
+        """compute the numeric Jacobian from the symbolic functional form
 
         Note that, like residual, this is designed for use by lmfit, so that if
         you want to actually *see* the Jacobian, you need to pass something a
@@ -470,29 +489,16 @@ class lmfitdata(nddata):
         parameters, and gives the complex view for complex data (since in a
         complex fit, we use view to treat real an imaginary parts the same)
         """
-        if not hasattr(self, "jacobian_symbolic"):
-            self.jacobian_symbolic = [
-                sp.diff(self.expression, j, 1) for j in self.parameter_symbols
-            ]
-            self.jacobian_lambda = [
-                sp.lambdify(  # equivalent of fitfunc_multiarg_v2
-                    self.variable_symbols + self.parameter_symbols,
-                    j,
-                    modules=sympy_module_arg,
-                )
-                for j in self.jacobian_symbolic
-            ]
+        # self.jacobian_lambda is calculated once when we feed the functional form
         jacobian_array = np.array(
             [
-                self._apply_residual_transform(
-                    np.full_like(
-                        self.getaxis(self.fit_axis),
-                        raw_jacobian,
-                        dtype=float,
-                    )
-                    if np.isscalar(raw_jacobian)
-                    else raw_jacobian
+                np.full_like(
+                    self.getaxis(self.fit_axis),
+                    raw_jacobian,
+                    dtype=float,
                 )
+                if np.isscalar(raw_jacobian)
+                else raw_jacobian
                 for jacobian_fn in self.jacobian_lambda
                 for raw_jacobian in [
                     jacobian_fn(
@@ -504,16 +510,42 @@ class lmfitdata(nddata):
                 ]
             ]
         )
+        if self.residual_transform is not None:
+            # {{{ Transform all derivative rows together.
+            #     The leading dimension is only a row index; the residual
+            #     transform still acts on the data axes exactly as it does for
+            #     residual(), with the original Fourier metadata preserved by
+            #     copying this object.
+            temp = self.copy(data=False)
+            temp.data = jacobian_array
+            temp.dimlabels = ["_jacobian_parameter"] + list(temp.dimlabels)
+            if isinstance(temp.axis_coords, list) and len(temp.axis_coords) > 0:
+                temp.axis_coords = [
+                    np.arange(jacobian_array.shape[0])
+                ] + list(temp.axis_coords)
+            # {{{ # TODO ☐: it's unclear what the purpose of this is -- just explain
+            if isinstance(temp.axis_coords_error, list):
+                temp.axis_coords_error = [None] + list(temp.axis_coords_error)
+            if isinstance(temp.axis_coords_units, list):
+                temp.axis_coords_units = [None] + list(temp.axis_coords_units)
+            # }}}
+            temp = self.residual_transform(temp)
+            jacobian_array = temp.data
+            # }}}
+        # TODO ☐: explain what you  are doing here -- I think you are projecting out to include only parameters that are varying
+        jacobian_array = jacobian_array[
+            [pars[name].vary for name in self.parameter_names], :
+        ]
         if np.issubdtype(
-            self.data.dtype, np.complexfloating
+            self.transformed_data.dtype, np.complexfloating
         ) and not np.issubdtype(jacobian_array.dtype, np.complexfloating):
-            if self.data.dtype == np.complex64:
+            if self.transformed_data.dtype == np.complex64:
                 jacobian_array = np.complex64(jacobian_array)
-            elif self.data.dtype == np.complex128:
+            elif self.transformed_data.dtype == np.complex128:
                 jacobian_array = np.complex128(jacobian_array)
             else:
                 raise ValueError(
-                    "I don't understand the dtype", self.data.dtype
+                    "I don't understand the dtype", self.transformed_data.dtype
                 )
         if sigma is not None:
             normalization = np.sum(
