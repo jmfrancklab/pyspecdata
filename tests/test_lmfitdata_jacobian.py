@@ -144,6 +144,30 @@ def test_jacobian_returns_only_varying_parameter_rows():
     )
 
 
+def test_nonlinear_residual_transform_jacobian_matches_numerical():
+    x, A = sp.symbols("x A", real=True)
+
+    fit = build_fit(
+        np.linspace(0.2, 1.4, 31),
+        "x",
+        A * x,
+        {"A": {"value": 2.0}},
+    )
+
+    @fit.define_residual_transform
+    def square_transform(d_local):
+        d_local.data = d_local.data**2
+        return d_local
+
+    assert_symbolic_matches_numerical_jacobian(
+        fit,
+        copy.deepcopy(fit.guess_parameters),
+        rtol=3e-4,
+        atol=3e-4,
+        label="nonlinear square residual transform",
+    )
+
+
 def test_emma_voigt_transform_jacobian_matches_numerical():
     B_axis = np.linspace(-8, 8, 2048)
     demo = psd.nddata(np.zeros_like(B_axis), "B").labels("B", B_axis)
@@ -205,8 +229,10 @@ def test_emma_voigt_transform_jacobian_matches_numerical():
         h_m = Q_(mod_amp, "G").to("G").magnitude
         d_local *= d_local.fromaxis(
             "B",
-            lambda B_axis: jv(0, abs(h_m * B_axis * np.pi))
-            + jv(2, abs(h_m * B_axis * np.pi)),
+            lambda B_axis: (
+                jv(0, abs(h_m * B_axis * np.pi))
+                + jv(2, abs(h_m * B_axis * np.pi))
+            ),
         )
         d_local["B":0] *= 0.5
         d_local.ft("B")
@@ -317,8 +343,10 @@ def test_transformed_voigt_fit_is_faster_with_jacobian():
             h_m = Q_(0.3, "G").to("G").magnitude
             d_local *= d_local.fromaxis(
                 "B",
-                lambda B_axis: jv(0, abs(h_m * B_axis * np.pi))
-                + jv(2, abs(h_m * B_axis * np.pi)),
+                lambda B_axis: (
+                    jv(0, abs(h_m * B_axis * np.pi))
+                    + jv(2, abs(h_m * B_axis * np.pi))
+                ),
             )
             d_local["B":0] *= 0.5
             d_local.ft("B")
