@@ -9,6 +9,20 @@ import numpy as np
 from conftest import load_module
 
 pkg_root = Path(__file__).resolve().parents[1] / "pyspecdata"
+_module_names = [
+    "pyspecdata",
+    "pyspecdata.core",
+    "pyspecdata.datadir",
+    "pyspecdata.general_functions",
+    "pyspecdata.load_files",
+    "pyspecdata.load_files.bruker_esr",
+    "pyspecdata.load_files.load_cary",
+]
+_missing = object()
+_saved_modules = {
+    name: sys.modules.get(name, _missing) for name in _module_names
+}
+
 pyspecdata_pkg = types.ModuleType("pyspecdata")
 pyspecdata_pkg.__path__ = [str(pkg_root)]
 sys.modules["pyspecdata"] = pyspecdata_pkg
@@ -39,6 +53,12 @@ load_module("general_functions")
 core = load_module("core", use_real_pint=True, use_real_h5py=True)
 bruker_esr = importlib.import_module("pyspecdata.load_files.bruker_esr")
 load_cary = importlib.import_module("pyspecdata.load_files.load_cary")
+
+for _name, _module in _saved_modules.items():
+    if _module is _missing:
+        sys.modules.pop(_name, None)
+    else:
+        sys.modules[_name] = _module
 
 
 def _write_xepr_descriptor(path, *body_lines):

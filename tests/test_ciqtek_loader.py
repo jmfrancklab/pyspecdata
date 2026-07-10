@@ -12,6 +12,9 @@ from pyspecdata.load_files import ciqtek, load_indiv_file
 BNAME = r"$B_0$"
 FIELDS = [3346.0, 3396.0, 3446.0]
 G_AXIS = [2.03795, 2.00750, 1.97881]
+CIQTEK_EXAMPLE_FILENAME = (
+    "384K_1mM_TEMPO_SFO5_pt5G_MAmp_25dB_100G_22scans_2D.epr"
+)
 
 
 def _line(name, delay, real_values, imag_values):
@@ -25,7 +28,11 @@ def _line(name, delay, real_values, imag_values):
     }
 
 
-def _payload(lines, experiment_type="CW EPR/2D Field-Delay Sweep"):
+def _payload(
+    lines,
+    experiment_type="CW EPR/2D Field-Delay Sweep",
+    filename="ciqtek_test_file",
+):
     return {
         "_dataVersion": "V2.0",
         "_loadExperimentData": False,
@@ -39,7 +46,7 @@ def _payload(lines, experiment_type="CW EPR/2D Field-Delay Sweep"):
             "zAxisName": "",
         },
         "devicename": "EPR200_2.0",
-        "filename": "ciqtek_test_file",
+        "filename": filename,
         "name": "CWEPR-test",
         "setting": {
             "frequency": 9.54314,
@@ -176,18 +183,69 @@ def test_non_ciqtek_json_epr_is_not_claimed(tmp_path):
         load_indiv_file(str(path))
 
 
-def test_ciqtek_gallery_example_runs(tmp_path):
+def test_loads_local_ciqtek_exp_type_file():
+    from pyspecdata.datadir import pyspec_config
+
+    ciqtek_dir = pyspec_config.get_setting("ciqtek", section="ExpTypes")
+    if ciqtek_dir is None:
+        pytest.skip("ciqtek exp_type is not configured")
+    ciqtek_dir = Path(ciqtek_dir).expanduser()
+    if not ciqtek_dir.is_dir():
+        pytest.skip(f"configured ciqtek exp_type is not a directory: {ciqtek_dir}")
+
+    candidates = sorted(ciqtek_dir.rglob("*.epr"))
+    candidates += sorted(ciqtek_dir.rglob("*.epr.7z"))
+    if not candidates:
+        pytest.skip(f"no CIQTEK .epr files found under {ciqtek_dir}")
+
+    missing_7z = False
+    for path in candidates:
+        try:
+            if not ciqtek.is_ciqtek_file(str(path)):
+                continue
+            data = load_indiv_file(str(path))
+            break
+        except ciqtek.Missing7Zip:
+            missing_7z = True
+            continue
+    else:
+        if missing_7z:
+            pytest.skip("only compressed CIQTEK files were found and 7z is unavailable")
+        pytest.fail(f"no loadable CIQTEK .epr files found under {ciqtek_dir}")
+
+    assert data.get_prop("source_format") == "CIQTEK JSON EPR"
+    assert BNAME in data.dimlabels
+    assert data.data.size > 0
+
+
+def test_ciqtek_gallery_example_runs_with_temporary_exp_type(tmp_path):
     repo_root = Path(__file__).resolve().parents[1]
     example = repo_root / "examples/ESR/ciqtek_example.py"
-    local_data = (
-        Path.home()
-        / "exp_data"
-        / "ciqtek"
-        / "384K_1mM_TEMPO_SFO5_pt5G_MAmp_25dB_100G_22scans_2D.epr"
+    temp_home = tmp_path / "home"
+    temp_home.mkdir()
+    ciqtek_dir = tmp_path / "ciqtek"
+    ciqtek_dir.mkdir()
+    _write_payload(
+        ciqtek_dir / CIQTEK_EXAMPLE_FILENAME,
+        _payload(
+            [
+                _line("Delay_0", 0, [0.0, 1.0, 0.2], [0.0, 0.2, 0.1]),
+                _line("Delay_600", 600, [0.1, 0.8, 0.3], [0.1, 0.3, 0.0]),
+                _line("Delay_1200", 1200, [-0.1, 0.6, 0.4], [0.0, 0.4, -0.1]),
+            ],
+            filename=CIQTEK_EXAMPLE_FILENAME,
+        ),
     )
-    if not local_data.exists():
-        pytest.skip("local CIQTEK example data is not present")
+    (temp_home / ".pyspecdata").write_text(
+        "[General]\n"
+        f"data_directory = {tmp_path}\n"
+        "\n"
+        "[ExpTypes]\n"
+        f"ciqtek = {ciqtek_dir}\n",
+        encoding="utf-8",
+    )
     env = os.environ.copy()
+    env["HOME"] = str(temp_home)
     env["MPLBACKEND"] = "Agg"
     env["MPLCONFIGDIR"] = str(tmp_path)
     env["PYTHONPATH"] = str(repo_root)
