@@ -625,6 +625,12 @@ def _check_signature(filename):
                 return None
 
 
+# SINGLE_USE_EXCEPTION -- kept as a patch point for loader dispatch tests
+def _check_extension(filename):
+    """Return the filename extension in uppercase for filetype dispatch."""
+    return filename.split(".")[-1].upper()
+
+
 # SINGLE_USE_EXCEPTION
 def load_indiv_file(
     filename,
@@ -771,8 +777,7 @@ def load_indiv_file(
     else:
         logger.debug(strm("the path", filename, "is a file"))
         type_by_signature = _check_signature(filename)
-        # Just return the file extension in caps
-        type_by_extension = filename.split(".")[-1].upper()
+        type_by_extension = _check_extension(filename)
         logger.debug(strm("signature and extension checks are done"))
         if type_by_signature:
             logger.debug(strm("determining type by signature"))
