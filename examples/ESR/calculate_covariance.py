@@ -16,7 +16,7 @@ with psd.figlist_var() as fl:
     ):
         # TODO: Zenodo ID does not work. .YGF file is missing from the
         # deposition. Need to fix this.
-        d = psd.find_file(thisfile, exp_type=exp_type, zenodo="21084153")[
+        d = psd.find_file(thisfile, exp_type=exp_type, zenodo="21287247")[
             "harmonic", 0
         ]
         d.set_units(fieldaxis, "T").set_axis(fieldaxis, lambda x: x * 1e-4)

@@ -21,7 +21,7 @@ import pyspecdata as psd
 d = psd.find_file(
     "S175R1a.*DHPC.*today.*200304.*",
     exp_type="francklab_esr/Sam",
-    zenodo="21084153",
+    zenodo="21287247",
 )
 print(d.shape)
 print(
@@ -47,7 +47,7 @@ plt.title("1D Data with Multiple Harmonics")
 d = psd.find_file(
     ".*Power.*Sat.*200303.*",
     exp_type="francklab_esr/Sam",
-    zenodo="21084153",
+    zenodo="21287247",
 )
 d.chunk_auto("harmonic", "phase")
 plt.figure(2)
