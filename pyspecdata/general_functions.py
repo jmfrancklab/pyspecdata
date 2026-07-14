@@ -346,6 +346,7 @@ else:
     print_log_info = True
 
 
+# SINGLE_USE_EXCEPTION -- exported API
 def init_logging(
     level=logging.DEBUG,
     stdout_level=logging.INFO,
@@ -419,6 +420,7 @@ def init_logging(
     return logger
 
 
+# SINGLE_USE_EXCEPTION -- exported API
 def strm(*args):
     return " ".join(map(str, args))
 
@@ -451,6 +453,7 @@ def read_binary(fp, dtype, count=None):
 exp_re = re.compile(r"(.*)e([+\-])0*([0-9]+)")
 
 
+# SINGLE_USE_EXCEPTION -- exported API
 def reformat_exp(arg):
     """reformat scientific notation in a nice latex format -- used in both pdf
     and jupyter notebooks"""
@@ -469,6 +472,7 @@ def reformat_exp(arg):
         return arg
 
 
+# SINGLE_USE_EXCEPTION -- exported API
 def complex_str(arg, fancy_format=False, format_code="%.4g"):
     "render a complex string -- leaving out imaginary if it's real"
     retval = [format_code % arg.real]
@@ -570,10 +574,7 @@ def lsafen(*string, **kwargs):
 def lsafe(*string, **kwargs):
     "Output properly escaped for latex"
     if len(string) > 1:
-
-        def lsafewkargs(x):
-            return lsafe(x, **kwargs)
-
+        lsafewkargs = lambda x: lsafe(x, **kwargs)
         return " ".join(list(map(lsafewkargs, string)))
     else:
         string = string[0]
@@ -652,6 +653,7 @@ def box_muller(length, return_complex=True):
         return (n1) * 0.5
 
 
+# SINGLE_USE_EXCEPTION -- exported API
 def dp(number, decimalplaces=2, scientific=False, max_front=3):
     """format out to a certain decimal places, potentially in scientific
     notation
