@@ -177,7 +177,6 @@ def zenodo_download(deposition, searchstring, exp_type=None):
     return dest
 
 
-# TODO ☐: the following is fine -- if it doesn't pass the single-use test, then ask codex to edit the single use linter so that it respects the following keyword:
 # SINGLE_USE_EXCEPTION (exported by __all__, even though it's also used above)
 def create_deposition(title):
     """Create a new Zenodo deposition using ``title``.
@@ -213,9 +212,9 @@ def create_deposition(title):
 def zenodo_upload(local_path, title=None, deposition_id=None):
     """Upload ``local_path`` to Zenodo.
 
-    A new deposition record will be created automatically for the first file and
-    the remaining files will be uploaded to that same deposition.  Keep token
-    files local and never commit them to git.
+    A new deposition record will be created automatically for the first file
+    and the remaining files will be uploaded to that same deposition.  Keep
+    token files local and never commit them to git.
 
     To share a draft (unpublished record), click ``Share`` on the right side
     and add your collaborator, who must also have a Zenodo account.

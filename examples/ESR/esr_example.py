@@ -45,7 +45,7 @@ plt.title("1D Data with Multiple Harmonics")
 # Next, let's load some power-saturation data
 
 d = psd.find_file(
-    ".*Power.*Sat.*200303.*",
+    ".*Power.*Sat_200303.*",
     exp_type="francklab_esr/Sam",
     zenodo="21287247",
 )

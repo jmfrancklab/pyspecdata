@@ -1,4 +1,5 @@
 import os
+import logging
 import sys
 import types
 import pytest
@@ -172,7 +173,7 @@ def test_zenodo_download_prints_after_download(tmp_path, monkeypatch, capsys):
 
 
 def test_zenodo_download_falls_back_to_draft_and_authenticates_file_download(
-    tmp_path, monkeypatch, capsys
+    tmp_path, monkeypatch, capsys, caplog
 ):
     zenodo = load_module("load_files.zenodo")
     base_dir = tmp_path / "experiment"
@@ -240,6 +241,7 @@ def test_zenodo_download_falls_back_to_draft_and_authenticates_file_download(
     monkeypatch.setattr(zenodo.requests, "get", fake_get)
     monkeypatch.setattr(zenodo.urllib.request, "urlopen", fake_urlopen)
 
+    caplog.set_level(logging.DEBUG)
     path = zenodo.zenodo_download(
         "123456", r"draft\.dat$", exp_type="remote_exp"
     )
@@ -257,10 +259,13 @@ def test_zenodo_download_falls_back_to_draft_and_authenticates_file_download(
     assert calls["url"] == file_url
     assert calls["headers"] == {"Authorization": "Bearer fake"}
     assert (
+        "Zenodo public record was not found.  This may be an unpublished "
+        "draft deposition; trying the authenticated draft API."
+        in caplog.text
+    )
+    assert (
         capsys.readouterr().out
-        == "Zenodo public record was not found.  This may be an unpublished "
-        "draft deposition; trying the authenticated draft API.\n"
-        f"Downloaded from zenodo '{file_url}' to {path}\n"
+        == f"Downloaded from zenodo '{file_url}' to {path}\n"
     )
 
 
