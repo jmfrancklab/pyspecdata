@@ -14,8 +14,7 @@ if getattr(pint, "__pyspec_stub__", False):
 
 # Load dependencies via the test loader (ensures real Pint is imported)
 gf = load_module("general_functions", use_real_pint=True)
-core = load_module("core", use_real_pint=True)
-nddata = core.nddata
+nddata = load_module("core", use_real_pint=True).nddata
 
 
 def test_voltage_times_current_yields_power_units():
