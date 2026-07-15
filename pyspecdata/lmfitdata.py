@@ -481,6 +481,12 @@ class lmfitdata(nddata):
         which assumes that I have run the fit, and so have access to the fit
         parameters, and gives the complex view for complex data (since in a
         complex fit, we use view to treat real an imaginary parts the same)
+
+        If residual_transform is set, this applies the transform to df/dp.
+        This is correct for linear transforms, such as Fourier transforms,
+        fixed weighting, slicing, and real projection.  Nonlinear transforms
+        require the derivative of the transform itself, so they are not
+        supported by this symbolic Jacobian path.
         """
         if not hasattr(self, "jacobian_lambda"):
             # {{{ Define the *function* only once
