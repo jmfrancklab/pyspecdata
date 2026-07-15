@@ -140,7 +140,10 @@ def zenodo_download(deposition, searchstring, exp_type=None):
 
     logging.debug("all the files are " + str(files))
     pattern = re.compile(searchstring)
-    matches = [f for f in files if pattern.search(f.get(name_key, ""))]
+    # TODO ☐: to understand my change here, see next comment -- ask it
+    #         to check this and point out that if this works as
+    #         expected, it's objectively better vs. the get syntax.
+    matches = [f for f in files if name_key in f and pattern.search(f[name_key])]
     if len(matches) == 0:
         raise ValueError(
             f"no files matching {searchstring!r} in {deposition_label} "
@@ -152,6 +155,10 @@ def zenodo_download(deposition, searchstring, exp_type=None):
             f" {deposition}: {[f.get(name_key) for f in matches]}"
         )
     fileinfo = matches[0]
+    # TODO ☐: codex is doing its stupid thing where it makes a .get(
+    #         call instead of using the natural dictionary-like item
+    #         selection. (here, it specifically changed good code to
+    #         bad).  Ask it to fix this throughout all of its changes.
     filename = fileinfo.get(name_key)
     url = fileinfo.get("links", {}).get(url_key)
     if url is None:
@@ -159,6 +166,7 @@ def zenodo_download(deposition, searchstring, exp_type=None):
             f"no usable download link for {filename!r} in "
             f"{deposition_label} {deposition}"
         )
+    # TODO ☐: this would be simpler if we used pathlib
     dest = os.path.join(dest_dir, filename)
     # urlretrieve cannot attach the Authorization header needed by draft
     # content links, so use urlopen for both public and draft downloads.

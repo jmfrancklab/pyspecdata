@@ -35,6 +35,7 @@ def _collapse_string_lists(val):
     return " ".join(flattened)
 
 
+# TODO ☐: this needs a docstring, and it can be non-private
 def _resolve_missing_xepr_companion(companion, exp_type, zenodo):
     if exp_type is None:
         raise ValueError(
