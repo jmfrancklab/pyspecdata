@@ -35,8 +35,24 @@ def _collapse_string_lists(val):
     return " ".join(flattened)
 
 
-# TODO ☐: this needs a docstring, and it can be non-private
-def _resolve_missing_xepr_companion(companion, exp_type, zenodo):
+def resolve_missing_xepr_companion(companion, exp_type, zenodo):
+    """Find or download an XEPR companion file.
+
+    Parameters
+    ----------
+    companion : str
+        Path to the missing XEPR companion file.
+    exp_type : str
+        Experiment type used to determine where remote data should be stored.
+    zenodo : str or None
+        Deposition number on Zenodo.  If provided, download the companion file
+        from this deposition.  Otherwise, search configured rclone remotes.
+
+    Returns
+    -------
+    str
+        Path to the resolved companion file.
+    """
     if exp_type is None:
         raise ValueError(
             "I could probably find "
@@ -130,7 +146,7 @@ def xepr(
     # }}}
     # {{{ load the data
     if not os.path.exists(filename_spc):
-        filename_spc = _resolve_missing_xepr_companion(
+        filename_spc = resolve_missing_xepr_companion(
             filename_spc, exp_type, zenodo
         )
     with open(filename_spc, "rb") as fp:
@@ -279,7 +295,7 @@ def xepr(
                             filename_ygf[:-4] + filename_ygf[-4:].lower()
                         )
                     if not os.path.exists(filename_ygf):
-                        filename_ygf = _resolve_missing_xepr_companion(
+                        filename_ygf = resolve_missing_xepr_companion(
                             filename_ygf, exp_type, zenodo
                         )
                 with open(filename_ygf, "rb") as fp:
