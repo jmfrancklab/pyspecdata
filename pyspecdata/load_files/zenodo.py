@@ -14,6 +14,7 @@ import datetime
 import argparse
 import csv
 import shutil
+from pathlib import Path
 from ..datadir import getDATADIR, pyspec_config
 import logging
 import requests
@@ -131,7 +132,7 @@ def zenodo_download(deposition, searchstring, exp_type=None):
         #     "files" list.
         #     In that API, the filename is stored under "key" and the public
         #     file URL is stored under links["self"].
-        files = r.json().get("files", [])
+        files = r.json()["files"]
         name_key = "key"
         url_key = "self"
         deposition_label = "deposition"
@@ -140,26 +141,28 @@ def zenodo_download(deposition, searchstring, exp_type=None):
 
     logging.debug("all the files are " + str(files))
     pattern = re.compile(searchstring)
-    matches = [f for f in files if pattern.search(f.get(name_key, ""))]
+    matches = [
+        f for f in files if name_key in f and pattern.search(f[name_key])
+    ]
     if len(matches) == 0:
         raise ValueError(
             f"no files matching {searchstring!r} in {deposition_label} "
-            f"{deposition}\nfiles: {[f.get(name_key) for f in files]}"
+            f"{deposition}\nfiles: {[f[name_key] for f in files]}"
         )
     elif len(matches) > 1:
         raise ValueError(
             f"multiple files match {searchstring!r} in {deposition_label}"
-            f" {deposition}: {[f.get(name_key) for f in matches]}"
+            f" {deposition}: {[f[name_key] for f in matches]}"
         )
     fileinfo = matches[0]
-    filename = fileinfo.get(name_key)
-    url = fileinfo.get("links", {}).get(url_key)
+    filename = fileinfo[name_key]
+    url = fileinfo["links"][url_key]
     if url is None:
         raise ValueError(
             f"no usable download link for {filename!r} in "
             f"{deposition_label} {deposition}"
         )
-    dest = os.path.join(dest_dir, filename)
+    dest = Path(dest_dir) / filename
     # urlretrieve cannot attach the Authorization header needed by draft
     # content links, so use urlopen for both public and draft downloads.
     download_url = url
@@ -174,7 +177,7 @@ def zenodo_download(deposition, searchstring, exp_type=None):
         shutil.copyfileobj(response, fp)
     logging.debug(f"downloading zenodo '{url}' to '{dest}'")
     print(f"Downloaded from zenodo '{url}' to {dest}")
-    return dest
+    return str(dest)
 
 
 # SINGLE_USE_EXCEPTION (exported by __all__, even though it's also used above)
