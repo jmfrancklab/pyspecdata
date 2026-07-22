@@ -11,6 +11,7 @@ from ..core import nddata
 import os, logging
 
 
+# SINGLE_USE_EXCEPTION -- control-flow clarity
 def load_bindata(fp, param):
     x_mode_rep = "nm;Å;cm-1;°".split(";")
     y_mode_rep = (
@@ -53,6 +54,7 @@ def load_bindata(fp, param):
     return retval
 
 
+# SINGLE_USE_EXCEPTION -- control-flow clarity
 def load_header(fp, param):
     retval = np.fromfile(
         fp,

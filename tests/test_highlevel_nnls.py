@@ -6,18 +6,6 @@ from numpy import linspace, r_, exp, sqrt
 from numpy.random import seed
 
 
-def _load_real_pyspecdata_modules():
-    """Reload the installed package so `_nnls` stubs from other tests don't
-    leak in."""
-    sys.modules.pop("_nnls", None)
-    for name in list(sys.modules):
-        if name == "pyspecdata" or name.startswith("pyspecdata."):
-            sys.modules.pop(name, None)
-    core = importlib.import_module("pyspecdata.core")
-    matrix_math = importlib.import_module("pyspecdata.matrix_math")
-    general_functions = importlib.import_module("pyspecdata.general_functions")
-    return core, matrix_math.venk_nnls, general_functions.init_logging
-
 # ensure submodules are reloaded fresh for this test
 mu1 = 0.5
 sigma1 = 0.3
@@ -25,7 +13,17 @@ sigma1 = 0.3
 
 def test_highlevel_nnls():
     seed(1234)
-    core, venk_nnls, init_logging = _load_real_pyspecdata_modules()
+    # Reload the installed package so `_nnls` stubs from other tests don't leak
+    # in.
+    sys.modules.pop("_nnls", None)
+    for name in list(sys.modules):
+        if name == "pyspecdata" or name.startswith("pyspecdata."):
+            sys.modules.pop(name, None)
+    core = importlib.import_module("pyspecdata.core")
+    matrix_math = importlib.import_module("pyspecdata.matrix_math")
+    init_logging = importlib.import_module(
+        "pyspecdata.general_functions"
+    ).init_logging
     nddata = core.nddata
     init_logging("debug")
     vd_list = nddata(linspace(5e-4, 10, 25), "vd")
@@ -62,7 +60,7 @@ def test_highlevel_nnls():
         logT1,
         lambda x, y: 1 - 2 * exp(-x / 10 ** (y)),
         l=sqrt(solution.get_prop("opt_alpha")),
-        method=venk_nnls,
+        method=matrix_math.venk_nnls,
     )
     diff = np.linalg.norm(solution_stackcalc.data - solution_venk.data)
     assert diff < 0.054 * np.linalg.norm(

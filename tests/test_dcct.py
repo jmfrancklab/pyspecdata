@@ -2,14 +2,13 @@ from collections import OrderedDict
 import sys
 import types
 
-import matplotlib
-
-matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import sympy as s
 
 from conftest import load_module
+
+plt.switch_backend("Agg")
 
 sys.modules.setdefault("_nnls", types.ModuleType("_nnls"))
 
