@@ -273,6 +273,7 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
         headers=headers,
     )
     _raise_for_status(r, f"failed to fetch Zenodo deposition {deposition_id}")
+    # TODO ☐: codex missed this
     bucket_url = r.json().get("links", {}).get("bucket")
     if bucket_url is None:
         raise ValueError(
@@ -289,6 +290,7 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
     info = r.json()
     print(
         "Uploaded",
+        # TODO ☐: codex missed this
         info.get("key", info.get("filename", info.get("name", filename))),
     )
     print("View deposition at", f"https://zenodo.org/uploads/{deposition_id}")
