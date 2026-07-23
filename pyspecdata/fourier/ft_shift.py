@@ -412,6 +412,8 @@ def ft_clear_startpoints(self, axis, t=None, f=None, nearest=None):
     else:
         if t == "reset":
             t = None
+        # {{{ determine the Δt value, whether we are in the time or
+        #     frequency domain
         if self.get_ft_prop(axis):
             # axis is in frequency domain
             N = len(self.getaxis(axis))
@@ -423,6 +425,7 @@ def ft_clear_startpoints(self, axis, t=None, f=None, nearest=None):
         else:
             # axis in time domain
             dt = np.diff(self.getaxis(axis)[r_[0, 1]]).item()
+        # }}}
         orig_t = self.get_ft_prop(axis, ["start", "time"])
         if orig_t is None and not self.get_ft_prop(axis):
             orig_t = self.getaxis(axis)[0]

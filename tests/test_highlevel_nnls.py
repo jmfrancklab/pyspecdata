@@ -13,8 +13,8 @@ sigma1 = 0.3
 
 def test_highlevel_nnls():
     seed(1234)
-    # Reload the installed package so `_nnls` stubs from other tests don't leak
-    # in.
+    # {{{ Reload the installed package so `_nnls` stubs from other tests
+    #     don't leak in.
     sys.modules.pop("_nnls", None)
     for name in list(sys.modules):
         if name == "pyspecdata" or name.startswith("pyspecdata."):
@@ -24,6 +24,7 @@ def test_highlevel_nnls():
     init_logging = importlib.import_module(
         "pyspecdata.general_functions"
     ).init_logging
+    # }}}
     nddata = core.nddata
     init_logging("debug")
     vd_list = nddata(linspace(5e-4, 10, 25), "vd")

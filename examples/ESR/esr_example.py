@@ -16,7 +16,7 @@ import pyspecdata as psd
 # %%
 # Load some 1D ESR data with harmonic + phase info.
 # The data is initial organized into two dimensions -- `harmonic` and $B_0$.
-#
+# 
 
 d = psd.find_file(
     "S175R1a.*DHPC.*today.*200304.*",

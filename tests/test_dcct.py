@@ -5,7 +5,6 @@ import types
 import matplotlib.pyplot as plt
 import numpy as np
 import sympy as s
-
 from conftest import load_module
 
 plt.switch_backend("Agg")

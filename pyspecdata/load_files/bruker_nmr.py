@@ -477,8 +477,9 @@ def series(file_reference, *subpath, **kwargs):
     t1axis = r_[0:td1]
     mylabels = [t1axis] + [t2axis]
     data.labels(mydimnames, mylabels)
-    # use the canned routine to calculate the first order phase shift
-    shiftpoints = int(det_phcorr(v))
+    shiftpoints = int(
+        det_phcorr(v)
+    )  # use the canned routine to calculate the first order phase shift
     data.set_axis("t2", lambda x: x - shiftpoints / v["SW_h"])
     data.set_units("t2", "s")
     data.set_units("digital")
@@ -566,8 +567,9 @@ def load_1D(file_reference, *subpath, **kwargs):
     v = load_acqu(file_reference, *subpath)
     td2 = int(v["TD"])
     td1 = 1
-    # round up to 256 points, which is how it's stored
-    td2_zf = int(np.ceil(td2 / 256.0) * 256)
+    td2_zf = int(
+        np.ceil(td2 / 256.0) * 256
+    )  # round up to 256 points, which is how it's stored
     fp = open_subpath(file_reference, *(subpath + ("fid",)), mode="rb")
     if int(v["BYTORDA"]) == 1:
         data = read_binary(fp, np.dtype(">i4"))
@@ -583,8 +585,9 @@ def load_1D(file_reference, *subpath, **kwargs):
     t2axis = 1.0 / v["SW_h"] * r_[1 : td2 // 2 + 1]
     t1axis = r_[1]
     data.labels([dimname, "t2"], [t1axis, t2axis])
-    # use the canned routine to calculate the second order phase shift
-    shiftpoints = int(det_phcorr(v))
+    shiftpoints = int(
+        det_phcorr(v)
+    )  # use the canned routine to calculate the second order phase shift
     # print 'shiftpoints = ',shiftpoints
     data.set_axis("t2", lambda x: x - shiftpoints / v["SW_h"])
     logger.debug("yes, I called with %d shiftpoints" % shiftpoints)
@@ -648,13 +651,15 @@ def load_acqu(file_reference, *subpath, **kwargs):
         [("whichdim", ""), ("return_s", True)], kwargs
     )
     if return_s:
-        # This is what I am initially doing, and what works with the matched
-        # filtering, etc, as is, but it's actually wrong.
-        subpath += ("acqu" + whichdim + "s",)
+        subpath += (
+            "acqu" + whichdim + "s",
+        )  # this is what I am initially doing, and what works with the matched
+        #    filtering, etc, as is, but it's actually wrong
     else:
-        # This is actually right, but doesn't work with the matched filtering,
-        # etc.
-        subpath += ("acqu" + whichdim,)
+        subpath += (
+            "acqu" + whichdim,
+        )  # this is actually right, but doesn't work with the matched
+        #    filtering, etc.
     return load_jcamp(file_reference, *subpath)
 
 
@@ -687,8 +692,9 @@ def load_jcamp(file_reference, *subpath):
     j = 0
     retval = match_line(lines[j], number_re, string_re, array_re)
     j = j + 1
-    # always grab the second line
-    retval2 = match_line(lines[j], number_re, string_re, array_re)
+    retval2 = match_line(
+        lines[j], number_re, string_re, array_re
+    )  # always grab the second line
     while j < len(lines):
         isdata = False
         if retval[0] == 1 or retval[0] == 2:
