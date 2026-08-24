@@ -14,8 +14,7 @@ if getattr(pint, "__pyspec_stub__", False):
 
 # Load dependencies via the test loader (ensures real Pint is imported)
 gf = load_module("general_functions", use_real_pint=True)
-core = load_module("core", use_real_pint=True)
-nddata = core.nddata
+nddata = load_module("core", use_real_pint=True).nddata
 
 
 def test_voltage_times_current_yields_power_units():
@@ -38,6 +37,37 @@ def test_fourier_transform_updates_time_units_to_frequency():
 def test_scan_unit_is_registered():
     quantity = gf.Q_(1, "cyc / scan")
     assert quantity.check(gf.Q_(1, "cyc") / gf.Q_(1, "scan"))
+
+
+def test_compact_square_root_unit_is_parseable():
+    assert gf.Q_(1, "s√W").check(gf.Q_(1, "s * W**0.5"))
+
+
+def test_pretty_unit_string_is_parseable():
+    pretty = gf.Q_(1, "g⁰⋅⁵·µm/s⁰⋅⁵")
+    parseable = gf.Q_(1, "g**0.5 * um / s**0.5")
+    assert pretty.check(parseable)
+    assert gf.det_unit_prefactor("g⁰⋅⁵·µm/s⁰⋅⁵") == -9
+
+
+def test_div_units_accepts_pretty_unit_labels():
+    d = nddata(np.ones(2), "beta")
+    d.setaxis("beta", np.r_[0:2])
+    d.set_units("beta", "g⁰⋅⁵·µm/s⁰⋅⁵")
+    assert np.isclose(d.div_units("beta", "s * W**0.5"), np.sqrt(1e-3) * 1e-6)
+
+
+def test_sqrt_formatting():
+    assert "{:~P}".format(gf.Q_("W**(0.5)")) == "1.0 √W"
+
+
+def test_compact_square_root_unit_matches_half_power_unit():
+    assert gf.Q_("√W").check(gf.Q_("W**0.5"))
+
+
+def test_compact_square_root_unit_uses_normal_unit_algebra():
+    assert (gf.Q_("√W") * gf.Q_("√W")).to("W").magnitude == 1
+    assert (gf.Q_("W**3") * gf.Q_("√W")).check(gf.Q_("W**3.5"))
 
 
 def test_inverse_fourier_transform_accepts_cycles_per_scan_units():

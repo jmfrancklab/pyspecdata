@@ -207,6 +207,7 @@ def place_labels(
         label_placed[this_label_num] = 1
 
 
+# SINGLE_USE_EXCEPTION -- exported API
 def DCCT(
     this_nddata,
     fig=None,

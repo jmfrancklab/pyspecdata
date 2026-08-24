@@ -214,13 +214,6 @@ def grab_script_string(scriptnum_as_str):
     return script_string
 
 
-def check_image_path():
-    image_path = os.path.sep.join([os.getcwd(), "auto_figures"])
-    if not os.path.exists(image_path):
-        os.mkdir(image_path)
-    return
-
-
 def get_scripts_dir():
     script_path = os.path.sep.join([os.getcwd(), "scripts", ""])
     if not os.path.exists(script_path):
@@ -238,6 +231,7 @@ def sha_string(script):
     return "".join(["%016x" % x for x in list(hasharray)])
 
 
+# SINGLE_USE_EXCEPTION -- control-flow clarity
 def cache_output_if_needed(
     scriptnum_as_str, hashstring, showcode=False, show_error=True
 ):
@@ -385,7 +379,9 @@ def main():
     and checks whether or not it should be run if a command line argument of
     "flush" is passed, it flushes that script number from the cache
     """
-    check_image_path()
+    image_path = os.path.sep.join([os.getcwd(), "auto_figures"])
+    if not os.path.exists(image_path):
+        os.mkdir(image_path)
     if len(sys.argv) > 2:
         if sys.argv[1] == "flush":
             if len(sys.argv) == 3:

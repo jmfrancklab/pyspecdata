@@ -412,7 +412,20 @@ def ft_clear_startpoints(self, axis, t=None, f=None, nearest=None):
     else:
         if t == "reset":
             t = None
-        dt = _get_ft_dt(self, axis)
+        # {{{ determine the Δt value, whether we are in the time or
+        #     frequency domain
+        if self.get_ft_prop(axis):
+            # axis is in frequency domain
+            N = len(self.getaxis(axis))
+            dt = (
+                (N)
+                / (N + 1)
+                / np.diff(self.getaxis(axis)[r_[0, -1]]).item()
+            )
+        else:
+            # axis in time domain
+            dt = np.diff(self.getaxis(axis)[r_[0, 1]]).item()
+        # }}}
         orig_t = self.get_ft_prop(axis, ["start", "time"])
         if orig_t is None and not self.get_ft_prop(axis):
             orig_t = self.getaxis(axis)[0]
@@ -462,17 +475,6 @@ def _get_ft_df(self, axis):
         # axis in time domain
         N = len(self.getaxis(axis))
         return (N) / (N + 1) / np.diff(self.getaxis(axis)[r_[0, -1]]).item()
-
-
-def _get_ft_dt(self, axis):
-    if self.get_ft_prop(axis):
-        # axis is in frequency domain
-        N = len(self.getaxis(axis))
-        return (N) / (N + 1) / np.diff(self.getaxis(axis)[r_[0, -1]]).item()
-    else:
-        # axis in time domain
-        return np.diff(self.getaxis(axis)[r_[0, 1]]).item()
-
 
 def _find_index(u, origin=0.0, tolerance=1e-4, verbose=False):
     (

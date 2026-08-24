@@ -11,7 +11,26 @@ from ..core import nddata
 import os, logging
 
 
+# SINGLE_USE_EXCEPTION -- control-flow clarity
 def load_bindata(fp, param):
+    """Loads the actual binary data containing the spectrum
+
+    Parameters
+    ==========
+    fp : File
+        Open file object that we assume has already been processed by
+        load_header
+    param : dict
+        Contains the information about the spectrum size, etc, that were
+        read using load_header
+
+    Returns
+    =======
+    retval : nddata
+        An nddata where the .data comes from the binary data.
+        This nddata is still subject to post-processing (why??) before
+        the user interacts with it.
+    """
     x_mode_rep = "nm;Å;cm-1;°".split(";")
     y_mode_rep = (
         "Abs;%T;Absorptivity;%R;4?;5?;Log(Abs);Absolute"
@@ -53,7 +72,25 @@ def load_bindata(fp, param):
     return retval
 
 
+# SINGLE_USE_EXCEPTION -- control-flow clarity
 def load_header(fp, param):
+    """Loads the header that describes the size, etc, of the spectrum
+
+    Parameters
+    ==========
+    fp : File
+        Open file object, with curpos at the start of the file.
+    param : dict
+        A dictionary that will be modified before being returned.
+        At this stage, it has limited information about the overall size
+        of the file.
+
+    Returns
+    =======
+    param : dict
+        Contains the information about the spectrum size, etc, that were
+        read using load_header
+    """
     retval = np.fromfile(
         fp,
         dtype=[
