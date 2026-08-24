@@ -91,13 +91,14 @@ except Exception:
         if not isinstance(unit_string, str):
             return unit_string
         unit_string = sqrt_at_end_re.sub(r"*√", unit_string)
-        unit_string = sqrt_at_start.sub(
+        unit_string = sqrt_at_start_re.sub(
             r"\1**0.5",
             unit_string,
         )
         unit_string = pretty_exponent_re.sub(
-            lambda match: "**"
-            + match.group(0).translate(superscript_translation),
+            lambda match: (
+                "**" + match.group(0).translate(superscript_translation)
+            ),
             unit_string,
         )
         return unit_string.replace("·", "*").replace("µ", "u")
