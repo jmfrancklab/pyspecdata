@@ -1,7 +1,6 @@
 from collections import OrderedDict
 import sys
 import types
-
 import matplotlib.pyplot as plt
 import numpy as np
 import sympy as s

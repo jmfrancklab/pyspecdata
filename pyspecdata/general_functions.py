@@ -27,116 +27,6 @@ ureg.define("cycle = [cyc] = cyc")  # 'cycle' is a new dimension
 ureg.define("scan = [scan]")  # experimental count is its own dimension
 ureg.define("rad = cyc*2*pi")  # 'cycle' is a new dimension
 ureg.define("Hz = cyc / s")  # Redefine 'Hz' to be cycles per second
-
-# Pint runs preprocessors on every unit string it parses.  Precompile the
-# translation table and regex once so that accepting pretty unit labels does
-# not add avoidable overhead to repeated unit operations.
-superscript_translation = str.maketrans(
-    {
-        "⁰": "0",
-        "¹": "1",
-        "²": "2",
-        "³": "3",
-        "⁴": "4",
-        "⁵": "5",
-        "⁶": "6",
-        "⁷": "7",
-        "⁸": "8",
-        "⁹": "9",
-        "⁺": "+",
-        "⁻": "-",
-        "⋅": ".",
-    }
-)
-pretty_exponent_re = re.compile(r"[⁺⁻]?[⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:⋅[⁰¹²³⁴⁵⁶⁷⁸⁹]+)?")
-
-
-def _normalize_pretty_unit_string(unit_string):
-    """Translate pretty Pint unit text back into parseable unit syntax."""
-    if not isinstance(unit_string, str):
-        return unit_string
-    unit_string = re.sub(r"(?<=[A-Za-z0-9_\)])√", r"*√", unit_string)
-    unit_string = re.sub(
-        r"√\s*([A-Za-z_][A-Za-z0-9_]*)",
-        r"\1**0.5",
-        unit_string,
-    )
-    unit_string = pretty_exponent_re.sub(
-        lambda match: "**" + match.group(0).translate(superscript_translation),
-        unit_string,
-    )
-    return unit_string.replace("·", "*").replace("µ", "u")
-
-
-ureg.preprocessors.append(_normalize_pretty_unit_string)
-
-
-def _use_square_root_for_half_power(terms):
-    """Display exact half powers as square roots without changing the units."""
-    for unit_name, exponent in terms:
-        if exponent == 0.5:
-            yield f"√{unit_name}", 1
-        elif exponent == -0.5:
-            yield f"√{unit_name}", -1
-        else:
-            yield unit_name, exponent
-
-
-class _SquareRootPrettyFormatter(PrettyFormatter):
-    """Pretty-print exact square-root units using the compact radical form."""
-
-    def format_unit(
-        self,
-        unit,
-        uspec="",
-        sort_func=None,
-        **babel_kwds,
-    ):
-        numerator, denominator = prepare_compount_unit(
-            unit,
-            uspec,
-            sort_func=sort_func,
-            **babel_kwds,
-            registry=self._registry,
-        )
-        numerator = _use_square_root_for_half_power(numerator)
-        denominator = _use_square_root_for_half_power(denominator)
-
-        if babel_kwds.get("locale", None):
-            length = babel_kwds.get("length") or (
-                "short" if "~" in uspec else "long"
-            )
-            division_fmt = localize_per(
-                length, babel_kwds.get("locale"), "{}/{}"
-            )
-        else:
-            division_fmt = "{}/{}"
-
-        # Work from Pint's unit/exponent pairs, not from rendered strings.
-        # This makes W**0.5 display as √W while preserving Pint's stored
-        # W**0.5 unit, so √W*√W still simplifies to W and W**3*√W to W**3.5.
-        as_ratio = babel_kwds.get("as_ratio", True)
-        assert isinstance(as_ratio, bool)
-        return formatter(
-            numerator,
-            denominator,
-            as_ratio=as_ratio,
-            single_denominator=False,
-            product_fmt="·",
-            division_fmt=division_fmt,
-            power_fmt="{}{}",
-            parentheses_fmt="({})",
-            exp_call=pretty_fmt_exponent,
-        )
-
-
-ureg.formatter._formatters["P"] = _SquareRootPrettyFormatter(ureg)
-# Older code replaced Q_ with a custom wrapper when Pint could not parse
-# compact square-root units such as "√W".  Registering this preprocessor keeps
-# Q_ as the single Pint Quantity definition while teaching every Pint parsing
-# path -- Q_, div_units, and det_unit_prefactor -- to accept compact square-
-# root units and Pint's pretty display strings.  The local pretty formatter
-# restores the legacy √W display without making √W a separate unit.
 Q_ = ureg.Quantity
 
 
@@ -160,6 +50,119 @@ def nicedef(self):
 
 
 Q_.to_nice = nicedef
+try:
+    if "√" in str(Q_("√W")):
+        pass
+    else:
+        raise ValueError("not interpreting sqrt!")
+except Exception:
+    logging.debug("Hacking the pint implementation in place")
+    # {{{ in order to handle the sqrt properly, we re need to re-work
+    #     ALL the exponent machinery in pint, going to and from pretty print.
+    #     Having a PR against pint is still the better solution, but
+    #     this was better vs. the previous partially hacked solution.
+    superscript_translation = str.maketrans(
+        {
+            "⁰": "0",
+            "¹": "1",
+            "²": "2",
+            "³": "3",
+            "⁴": "4",
+            "⁵": "5",
+            "⁶": "6",
+            "⁷": "7",
+            "⁸": "8",
+            "⁹": "9",
+            "⁺": "+",
+            "⁻": "-",
+            "⋅": ".",
+        }
+    )
+    # Pint runs preprocessors on every unit string it parses.
+    # Precompile the translation table and regex once so that accepting
+    # pretty unit labels does not add avoidable overhead to repeated unit
+    # operations.
+    pretty_exponent_re = re.compile(r"[⁺⁻]?[⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:⋅[⁰¹²³⁴⁵⁶⁷⁸⁹]+)?")
+    sqrt_at_end_re = re.compile(r"(?<=[A-Za-z0-9_\)])√")
+    sqrt_at_start_re = re.compile(r"√\s*([A-Za-z_][A-Za-z0-9_]*)")
+
+    def _normalize_pretty_unit_string(unit_string):
+        """Translate pretty Pint unit text back into parseable unit syntax."""
+        if not isinstance(unit_string, str):
+            return unit_string
+        unit_string = sqrt_at_end_re.sub(r"*√", unit_string)
+        unit_string = sqrt_at_start.sub(
+            r"\1**0.5",
+            unit_string,
+        )
+        unit_string = pretty_exponent_re.sub(
+            lambda match: "**"
+            + match.group(0).translate(superscript_translation),
+            unit_string,
+        )
+        return unit_string.replace("·", "*").replace("µ", "u")
+
+    ureg.preprocessors.append(_normalize_pretty_unit_string)
+
+    def _use_square_root_for_half_power(terms):
+        """Display exact half powers as square roots without changing the units."""
+        for unit_name, exponent in terms:
+            if exponent == 0.5:
+                yield f"√{unit_name}", 1
+            elif exponent == -0.5:
+                yield f"√{unit_name}", -1
+            else:
+                yield unit_name, exponent
+
+    class _SquareRootPrettyFormatter(PrettyFormatter):
+        """Pretty-print exact square-root units using the compact radical form."""
+
+        def format_unit(
+            self,
+            unit,
+            uspec="",
+            sort_func=None,
+            **babel_kwds,
+        ):
+            numerator, denominator = prepare_compount_unit(
+                unit,
+                uspec,
+                sort_func=sort_func,
+                **babel_kwds,
+                registry=self._registry,
+            )
+            numerator = _use_square_root_for_half_power(numerator)
+            denominator = _use_square_root_for_half_power(denominator)
+
+            if babel_kwds.get("locale", None):
+                length = babel_kwds.get("length") or (
+                    "short" if "~" in uspec else "long"
+                )
+                division_fmt = localize_per(
+                    length, babel_kwds.get("locale"), "{}/{}"
+                )
+            else:
+                division_fmt = "{}/{}"
+
+            # Work from Pint's unit/exponent pairs, not from rendered strings.
+            # This makes W**0.5 display as √W while preserving Pint's stored
+            # W**0.5 unit, so √W*√W still simplifies to W and W**3*√W to W**3.5.
+            as_ratio = babel_kwds.get("as_ratio", True)
+            assert isinstance(as_ratio, bool)
+            return formatter(
+                numerator,
+                denominator,
+                as_ratio=as_ratio,
+                single_denominator=False,
+                product_fmt="·",
+                division_fmt=division_fmt,
+                power_fmt="{}{}",
+                parentheses_fmt="({})",
+                exp_call=pretty_fmt_exponent,
+            )
+
+    ureg.formatter._formatters["P"] = _SquareRootPrettyFormatter(ureg)
+    # }}}
 
 
 # the following is equivalent to √(μ₀/4π)

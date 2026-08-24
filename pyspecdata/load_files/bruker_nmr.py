@@ -321,7 +321,6 @@ def det_phcorr(v):
                 ],
             ]
         )
-        # the -1 is because this is an index, and copied from matlab code!!!
         decimarray = np.array(
             [
                 2,
@@ -343,7 +342,8 @@ def det_phcorr(v):
                 512,
                 768,
                 1024,
-            ]
+            ]  # the -1 is because this is an index, and copied from
+            #    matlab code!!!
         )
         dspfvs = v["DSPFVS"]
         decim = v["DECIM"]
@@ -437,8 +437,9 @@ def series(file_reference, *subpath, **kwargs):
     td2 = int(v["TD"])
     rg = det_rg(float(v["RG"]))
     td1 = int(v2["TD"])
-    # round up to 256 points, which is how it's stored
-    td2_zf = int(np.ceil(td2 / 256.0) * 256)
+    td2_zf = int(
+        np.ceil(td2 / 256.0) * 256
+    )  # round up to 256 points, which is how it's stored
     fp = open_subpath(file_reference, *(subpath + ("ser",)), mode="rb")
     if int(v["BYTORDA"]) == 1:
         data = read_binary(fp, np.dtype(">i4"))

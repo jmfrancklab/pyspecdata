@@ -74,7 +74,7 @@ def load_bindata(fp, param):
 
 # SINGLE_USE_EXCEPTION -- control-flow clarity
 def load_header(fp, param):
-    """Loads the header that describes the size, etc, of the sepctrum
+    """Loads the header that describes the size, etc, of the spectrum
 
     Parameters
     ==========
