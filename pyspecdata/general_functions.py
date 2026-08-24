@@ -106,7 +106,8 @@ except Exception:
     ureg.preprocessors.append(_normalize_pretty_unit_string)
 
     def _use_square_root_for_half_power(terms):
-        """Display exact half powers as square roots without changing the units."""
+        """Display exact half powers as square roots without changing the
+        units."""
         for unit_name, exponent in terms:
             if exponent == 0.5:
                 yield f"√{unit_name}", 1
@@ -116,7 +117,8 @@ except Exception:
                 yield unit_name, exponent
 
     class _SquareRootPrettyFormatter(PrettyFormatter):
-        """Pretty-print exact square-root units using the compact radical form."""
+        """Pretty-print exact square-root units using the compact radical
+        form."""
 
         def format_unit(
             self,
@@ -147,7 +149,8 @@ except Exception:
 
             # Work from Pint's unit/exponent pairs, not from rendered strings.
             # This makes W**0.5 display as √W while preserving Pint's stored
-            # W**0.5 unit, so √W*√W still simplifies to W and W**3*√W to W**3.5.
+            # W**0.5 unit, so √W*√W still simplifies to W and W**3*√W to
+            # W**3.5.
             as_ratio = babel_kwds.get("as_ratio", True)
             assert isinstance(as_ratio, bool)
             return formatter(
