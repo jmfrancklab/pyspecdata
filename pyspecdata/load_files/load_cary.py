@@ -11,125 +11,6 @@ from ..core import nddata
 import os, logging
 
 
-# SINGLE_USE_EXCEPTION -- control-flow clarity
-def load_bindata(fp, param):
-    """Loads the actual binary data containing the spectrum
-
-    Parameters
-    ==========
-    fp : File
-        Open file object that we assume has already been processed by
-        load_header
-    param : dict
-        Contains the information about the spectrum size, etc, that were
-        read using load_header
-
-    Returns
-    =======
-    retval : nddata
-        An nddata where the .data comes from the binary data.
-        This nddata is still subject to post-processing (why??) before
-        the user interacts with it.
-    """
-    x_mode_rep = "nm;Å;cm-1;°".split(";")
-    y_mode_rep = (
-        "Abs;%T;Absorptivity;%R;4?;5?;Log(Abs);Absolute"
-        " %R;F(R);Log(F(R));Log(1/R)".split(";")
-    )
-    factoreV_list = [1239.8424, 1239.8424, 12398.424, 8065.54429, 0]
-    x_unit = x_mode_rep[int(param["x_mode"])]
-    factoreV = factoreV_list[int(param["x_mode"])]
-    y_unit = y_mode_rep[int(param["y_mode"])]
-    # I'm not creating the spec_counter variable that is is
-    # tmps = str(param['spec_counter'])+"_"+param['spectrum_name']+"_"+x_unit
-    logging.debug(
-        strm(
-            "about to read",
-            param["points"],
-            "double points, with x units",
-            x_unit,
-            "and y unit",
-            y_unit,
-        )
-    )
-    current_pos = fp.tell()
-    logging.debug(strm("factoreV",factoreV,"current_pos",current_pos))
-    logging.debug(strm("inside bindata, position is", fp.tell()))
-    # for j in range(500):
-    #    fp.seek(current_pos+j,0)
-    #    result = np.fromfile(fp, dtype='<f4', count=1)
-    #    if result>1 and result<1000:
-    #        logging.debug(strm("try",j,"offset",result))
-    retval = np.fromfile(
-        fp, dtype=[("x", "<f4"), ("y", "<f4")], count=param["points"]
-    )
-    # logging.debug(retval)
-    retval = (
-        nddata(retval["y"], r"$\lambda$")
-        .set_axis(r"$\lambda$", retval["x"])
-        .set_units(r"$\lambda$", x_unit)
-    )  # .set_units(y_unit)
-    return retval
-
-
-# SINGLE_USE_EXCEPTION -- control-flow clarity
-def load_header(fp, param):
-    """Loads the header that describes the size, etc, of the spectrum
-
-    Parameters
-    ==========
-    fp : File
-        Open file object, with curpos at the start of the file.
-    param : dict
-        A dictionary that will be modified before being returned.
-        At this stage, it has limited information about the overall size
-        of the file.
-
-    Returns
-    =======
-    param : dict
-        Contains the information about the spectrum size, etc, that were
-        read using load_header
-    """
-    retval = np.fromfile(
-        fp,
-        dtype=[
-            ("softversion", "<u4"),
-            ("tmp1", "<u4"),
-            ("end_x", "<i4"),
-            ("start_x", "<i4"),
-            ("V_min", "<i4"),
-            ("V_max", "<i4"),
-            ("points", "<u4"),
-            ("tmp2", "<i4"),
-            ("tmp3", "<u2"),
-            ("tmp4", "<u2"),
-            ("tmp5", "<i4"),
-            ("spectrum_number", "<i4"),
-            ("tmp6", "<f4"),
-            ("tmp7", "<i4"),
-            ("tmp8", "<f4"),
-            ("tmp9", "<i4"),
-            ("x_mode", "<f4"),
-            ("y_mode", "<f4"),
-        ],
-        count=1,
-    )
-    if param["Tstore_type"] == "TContinuumStore":
-        fp.seek(789 + param["blockoffset"] + 4 + 2, 0)
-    else:
-        raise ValueError(
-            strm("not yet set up for Tstore_type", param["Tstore_type"])
-        )
-    param.update(dict(zip(retval.dtype.fields, retval.item())))
-    spectrum_name = np.fromfile(fp, dtype="S256", count=1).item()
-    spectrum_name = spectrum_name[0 : spectrum_name.find(b"\x00")].decode(
-        "ascii"
-    )
-    param["spectrum_name"] = spectrum_name
-    return param
-
-
 def load_cary(filename):
     filesize = os.stat(filename).st_size
     logging.debug(strm("filesize", filesize))
@@ -158,8 +39,7 @@ def load_cary(filename):
             except Exception:
                 raise IOError(
                     strm(
-                        "problem decoding or assigning Tstore type",
-                        repr(temp)
+                        "problem decoding or assigning Tstore type", repr(temp)
                     )
                 )
             logging.debug('Tstore_type "%s"' % param["Tstore_type"])
@@ -167,9 +47,89 @@ def load_cary(filename):
             param["blocklen"] = np.fromfile(fp, dtype="<u4", count=1).item()
             if param["Tstore_type"] == "TContinuumStore":
                 # line 106
-                param = load_header(fp, param)
+                # {{{ load the header describing this spectrum
+                header = np.fromfile(
+                    fp,
+                    dtype=[
+                        ("softversion", "<u4"),
+                        ("tmp1", "<u4"),
+                        ("end_x", "<i4"),
+                        ("start_x", "<i4"),
+                        ("V_min", "<i4"),
+                        ("V_max", "<i4"),
+                        ("points", "<u4"),
+                        ("tmp2", "<i4"),
+                        ("tmp3", "<u2"),
+                        ("tmp4", "<u2"),
+                        ("tmp5", "<i4"),
+                        ("spectrum_number", "<i4"),
+                        ("tmp6", "<f4"),
+                        ("tmp7", "<i4"),
+                        ("tmp8", "<f4"),
+                        ("tmp9", "<i4"),
+                        ("x_mode", "<f4"),
+                        ("y_mode", "<f4"),
+                    ],
+                    count=1,
+                )
+                fp.seek(789 + param["blockoffset"] + 4 + 2, 0)
+                param.update(dict(zip(header.dtype.fields, header.item())))
+                spectrum_name = np.fromfile(fp, dtype="S256", count=1).item()
+                param["spectrum_name"] = spectrum_name[
+                    0 : spectrum_name.find(b"\x00")
+                ].decode("ascii")
+                # }}}
                 logging.debug(strm("param:", param))
-                data = load_bindata(fp, param)
+                # {{{ load the binary x and y values for this spectrum
+                x_mode_rep = "nm;Å;cm-1;°".split(";")
+                y_mode_rep = (
+                    "Abs;%T;Absorptivity;%R;4?;5?;Log(Abs);Absolute"
+                    " %R;F(R);Log(F(R));Log(1/R)".split(";")
+                )
+                factoreV_list = [
+                    1239.8424,
+                    1239.8424,
+                    12398.424,
+                    8065.54429,
+                    0,
+                ]
+                x_unit = x_mode_rep[int(param["x_mode"])]
+                factoreV = factoreV_list[int(param["x_mode"])]
+                y_unit = y_mode_rep[int(param["y_mode"])]
+                # I'm not creating the spec_counter variable that is is
+                # tmps = str(param['spec_counter']) + "_" + \
+                #     param['spectrum_name'] + "_" + x_unit
+                logging.debug(
+                    strm(
+                        "about to read",
+                        param["points"],
+                        "double points, with x units",
+                        x_unit,
+                        "and y unit",
+                        y_unit,
+                    )
+                )
+                current_pos = fp.tell()
+                logging.debug(
+                    strm("factoreV", factoreV, "current_pos", current_pos)
+                )
+                logging.debug(strm("inside bindata, position is", fp.tell()))
+                # for j in range(500):
+                #     fp.seek(current_pos+j, 0)
+                #     result = np.fromfile(fp, dtype='<f4', count=1)
+                #     if result > 1 and result < 1000:
+                #         logging.debug(strm("try", j, "offset", result))
+                data = np.fromfile(
+                    fp,
+                    dtype=[("x", "<f4"), ("y", "<f4")],
+                    count=param["points"],
+                )
+                data = (
+                    nddata(data["y"], r"$\lambda$")
+                    .set_axis(r"$\lambda$", data["x"])
+                    .set_units(r"$\lambda$", x_unit)
+                )
+                # }}}
                 # data.name(param['spectrum_name'])
                 names.append(param["spectrum_name"])
                 alldata.append(data)
