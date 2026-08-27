@@ -122,6 +122,10 @@ class lmfitdata(nddata):
         self.set_indices = None
         self.active_indices = None
         self.expression = None
+        # The symbolic model owns the fit and Jacobian callables, so changing
+        # it in-place would leave too much mutable symbolic state to reason
+        # about.
+        self._functional_form_locked = False
         return
 
     @property
@@ -134,13 +138,20 @@ class lmfitdata(nddata):
 
     @functional_form.setter
     def functional_form(self, this_expr):
-        """generate parameter descriptions and a numpy (lambda) function from a
-        sympy expresssion
+        """generate parameter descriptions and a numpy (lambda) function from
+        a sympy expresssion
 
         Parameters
         ==========
         this_expr: sympy expression
         """
+        # A new symbolic form should use a fresh lmfitdata object.
+        if self._functional_form_locked:
+            raise ValueError(
+                "This lmfitdata object already has a functional_form. "
+                "Create a fresh lmfitdata object for a different symbolic "
+                "form."
+            )
         assert issympy(
             this_expr
         ), "for now, the functional form must be a sympy expression"
@@ -182,6 +193,7 @@ class lmfitdata(nddata):
             self.expression,
             modules=sympy_module_arg,
         )
+        self._functional_form_locked = True
 
         self.guess_parameters = Parameters()
         for this_name in self.parameter_names:
@@ -376,7 +388,8 @@ class lmfitdata(nddata):
         # error, axis, etc, to be fed to minimize.
         #
         # It also automatically converts complex data to real data, and
-        # does other things for error handling -- let's not just throw this out
+        # does other things for error handling -- let's not just throw this
+        # out
         #
         # I think that a lot of this could be copied with little modification
         #
@@ -456,12 +469,11 @@ class lmfitdata(nddata):
         return
 
     def jacobian(self, pars, sigma=None):
-        """cache the symbolic jacobian and/or use it to compute the numeric
-        result
+        """compute the numeric Jacobian from the symbolic functional form
 
-        Note that, like residual, this is designed for use by lmfit, so that if
-        you want to actually *see* the Jacobian, you need to pass something a
-        bit more complicated, like this:
+        Note that, like residual, this is designed for use by lmfit, so that
+        if you want to actually *see* the Jacobian, you need to pass something
+        a bit more complicated, like this:
 
         >>> jac =
         >>> newfit.jacobian(newfit.fit_parameters).view(newfit.data.dtype)
@@ -469,22 +481,30 @@ class lmfitdata(nddata):
         which assumes that I have run the fit, and so have access to the fit
         parameters, and gives the complex view for complex data (since in a
         complex fit, we use view to treat real an imaginary parts the same)
+
+        If residual_transform is set, this applies the transform to df/dp.
+        This is correct for linear transforms, such as Fourier transforms,
+        fixed weighting, slicing, and real projection.  Nonlinear transforms
+        require the derivative of the transform itself, so they are not
+        supported by this symbolic Jacobian path.
         """
-        if not hasattr(self, "jacobian_symbolic"):
-            self.jacobian_symbolic = [
-                sp.diff(self.expression, j, 1) for j in self.parameter_symbols
-            ]
+        if not hasattr(self, "jacobian_lambda"):
+            # {{{ Define the *function* only once
             self.jacobian_lambda = [
                 sp.lambdify(  # equivalent of fitfunc_multiarg_v2
                     self.variable_symbols + self.parameter_symbols,
                     j,
                     modules=sympy_module_arg,
                 )
-                for j in self.jacobian_symbolic
+                for j in (
+                    sp.diff(self.expression, k, 1)
+                    for k in self.parameter_symbols
+                )
             ]
+            # }}}
         jacobian_array = np.array(
             [
-                self._apply_residual_transform(
+                (
                     np.full_like(
                         self.getaxis(self.fit_axis),
                         raw_jacobian,
@@ -504,16 +524,51 @@ class lmfitdata(nddata):
                 ]
             ]
         )
+        if self.residual_transform is not None:
+            # {{{ Transform all derivative rows together.
+            #     The leading dimension is only a row index; the residual
+            #     transform still acts on the data axes exactly as it does for
+            #     residual(), with the original Fourier metadata preserved by
+            #     copying this object.
+            temp = self.copy(data=False)
+            temp.data = jacobian_array
+            temp.dimlabels = ["_jacobian_parameter"] + list(temp.dimlabels)
+            if (
+                isinstance(temp.axis_coords, list)
+                and len(temp.axis_coords) > 0
+            ):
+                temp.axis_coords = [np.arange(jacobian_array.shape[0])] + list(
+                    temp.axis_coords
+                )
+            # {{{ keep axis metadata aligned with the added Jacobian row axis
+            #     The new leading dimension is just a parameter-row index, so
+            #     it has no coordinate errors or units.
+            #     Prepending None keeps the metadata lists parallel with
+            #     temp.dimlabels.
+            if isinstance(temp.axis_coords_error, list):
+                temp.axis_coords_error = [None] + list(temp.axis_coords_error)
+            if isinstance(temp.axis_coords_units, list):
+                temp.axis_coords_units = [None] + list(temp.axis_coords_units)
+            # }}}
+            temp = self.residual_transform(temp)
+            jacobian_array = temp.data
+            # }}}
+        # lmfit only expects Jacobian rows for parameters that are currently
+        # allowed to vary.  This keeps staged fits with fixed parameters from
+        # returning too many derivative rows.
+        jacobian_array = jacobian_array[
+            [pars[name].vary for name in self.parameter_names], :
+        ]
         if np.issubdtype(
-            self.data.dtype, np.complexfloating
+            self.transformed_data.dtype, np.complexfloating
         ) and not np.issubdtype(jacobian_array.dtype, np.complexfloating):
-            if self.data.dtype == np.complex64:
+            if self.transformed_data.dtype == np.complex64:
                 jacobian_array = np.complex64(jacobian_array)
-            elif self.data.dtype == np.complex128:
+            elif self.transformed_data.dtype == np.complex128:
                 jacobian_array = np.complex128(jacobian_array)
             else:
                 raise ValueError(
-                    "I don't understand the dtype", self.data.dtype
+                    "I don't understand the dtype", self.transformed_data.dtype
                 )
         if sigma is not None:
             normalization = np.sum(
