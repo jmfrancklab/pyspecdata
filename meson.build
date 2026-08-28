@@ -145,6 +145,7 @@ scripts = [
     ['pdflatex_notebook_view_wrapper', 'pyspecdata.latexscripts', 'wrapviewer'],
     ['pyspecdata_dataconfig', 'pyspecdata.datadir', 'genconfig'],
     ['pyspecdata_register_dir', 'pyspecdata.datadir', 'register_directory'],
+    ['pyspecdata_zenodo', 'pyspecdata.load_files.zenodo', 'cmd'],
 ]
 
 foreach script : scripts

@@ -25,9 +25,7 @@ for _name in [
     if _old_module is _missing:
         _module_cleanup.callback(sys.modules.pop, _name, None)
     else:
-        _module_cleanup.callback(
-            sys.modules.__setitem__, _name, _old_module
-        )
+        _module_cleanup.callback(sys.modules.__setitem__, _name, _old_module)
 
 pyspecdata_pkg = types.ModuleType("pyspecdata")
 pyspecdata_pkg.__path__ = [str(pkg_root)]
@@ -44,7 +42,9 @@ class _DummyConfig:
 
 datadir_stub = types.ModuleType("pyspecdata.datadir")
 datadir_stub.pyspec_config = _DummyConfig()
+datadir_stub.getDATADIR = lambda exp_type=None: ""
 datadir_stub.rclone_search = lambda *args, **kwargs: None
+datadir_stub.log_fname = lambda *args, **kwargs: None
 sys.modules["pyspecdata.datadir"] = datadir_stub
 
 load_files_pkg = types.ModuleType("pyspecdata.load_files")
@@ -77,6 +77,7 @@ def _write_xepr_descriptor(path, *body_lines):
 def _write_big_endian_array(path, values, dtype):
     arr = np.asarray(values, dtype=np.dtype(dtype))
     path.write_bytes(arr.tobytes())
+
 
 # SINGLE_USE_EXCEPTION
 def _write_fake_cary_file(path, x_values, y_values, spectrum_name="fake_uv"):
@@ -178,6 +179,35 @@ def test_xepr_dsc_entrypoint_reads_chunkable_harmonics(tmp_path):
     np.testing.assert_allclose(data.data.shape, (4, 1, 2))
 
 
+def test_xepr_uses_zenodo_for_missing_dta_companion(tmp_path, monkeypatch):
+    zenodo = importlib.import_module("pyspecdata.load_files.zenodo")
+    dsc = tmp_path / "remote_esr.DSC"
+    dta = tmp_path / "remote_esr.DTA"
+    _write_xepr_descriptor(
+        dsc,
+        "IKKF REAL",
+        "XPTS 4",
+        "XWID 3",
+        "XMIN 1",
+        "XNAM Field",
+        "XUNI 'G'",
+        "Enable1stHarm 1",
+    )
+    calls = []
+
+    def fake_zenodo_download(deposition, searchstring, exp_type=None):
+        calls.append((deposition, searchstring, exp_type))
+        _write_big_endian_array(dta, np.arange(4, dtype=float), ">f8")
+        return str(dta)
+
+    monkeypatch.setattr(zenodo, "zenodo_download", fake_zenodo_download)
+
+    data = bruker_esr.xepr(str(dsc), exp_type="remote_exp", zenodo="21084153")
+
+    assert calls == [("21084153", r"^remote_esr\.DTA$", "remote_exp")]
+    np.testing.assert_allclose(data.data, np.arange(4, dtype=float))
+
+
 def test_xepr_dta_entrypoint_reads_power_axis_from_ygf(tmp_path):
     dsc = tmp_path / "fake_power.DSC"
     dta = tmp_path / "fake_power.DTA"
@@ -214,6 +244,80 @@ def test_xepr_dta_entrypoint_reads_power_axis_from_ygf(tmp_path):
     np.testing.assert_allclose(
         data.getaxis("Microwave Power"),
         np.array([-29.0, -19.0, -9.0]),
+    )
+
+
+def test_xepr_logs_ygf_companion(tmp_path, monkeypatch):
+    dsc = tmp_path / "fake_power.DSC"
+    dta = tmp_path / "fake_power.DTA"
+    ygf = tmp_path / "fake_power.YGF"
+    _write_xepr_descriptor(
+        dsc,
+        "IKKF REAL",
+        "XPTS 4",
+        "XWID 3",
+        "XMIN 1",
+        "XNAM Field",
+        "XUNI 'G'",
+        "YPTS 3",
+        "YTYP IGD",
+        "YNAM 'Microwave Power'",
+        "YUNI 'W'",
+        "Enable1stHarm 1",
+    )
+    _write_big_endian_array(dta, np.arange(12, dtype=float), ">f8")
+    _write_big_endian_array(ygf, np.array([1e-3, 1e-2, 1e-1]), ">f8")
+    calls = []
+    # pytest supplies monkeypatch as a fixture.
+    # xepr looks up log_fname in the bruker_esr module because it was
+    # imported there, so temporarily replace that name with a recorder.
+    # pytest restores the original after this test, preventing the
+    # replacement from affecting other tests.
+    monkeypatch.setattr(
+        bruker_esr, "log_fname", lambda *args: calls.append(args)
+    )
+    bruker_esr.xepr(str(dsc), exp_type="test_exp")
+    assert calls == [
+        ("data_files", "fake_power.YGF", str(tmp_path), "test_exp")
+    ]
+
+
+def test_xepr_uses_zenodo_for_missing_ygf_companion(tmp_path, monkeypatch):
+    zenodo = importlib.import_module("pyspecdata.load_files.zenodo")
+    dsc = tmp_path / "remote_power.DSC"
+    dta = tmp_path / "remote_power.DTA"
+    ygf = tmp_path / "remote_power.YGF"
+    _write_xepr_descriptor(
+        dsc,
+        "IKKF REAL",
+        "XPTS 4",
+        "XWID 3",
+        "XMIN 1",
+        "XNAM Field",
+        "XUNI 'G'",
+        "YPTS 3",
+        "YTYP IGD",
+        "YNAM 'Microwave Power'",
+        "YUNI 'W'",
+        "Enable1stHarm 1",
+        "Enable1stHarm90 1",
+    )
+    _write_big_endian_array(dta, np.arange(24, dtype=float), ">f8")
+    calls = []
+
+    def fake_zenodo_download(deposition, searchstring, exp_type=None):
+        calls.append((deposition, searchstring, exp_type))
+        _write_big_endian_array(ygf, np.array([1e-3, 1e-2, 1e-1]), ">f8")
+        return str(ygf)
+
+    monkeypatch.setattr(zenodo, "zenodo_download", fake_zenodo_download)
+
+    data = bruker_esr.xepr(str(dsc), exp_type="remote_exp", zenodo="21084153")
+
+    assert calls == [("21084153", r"^remote_power\.YGF$", "remote_exp")]
+    np.testing.assert_allclose(
+        data.getaxis("Microwave Power"),
+        np.array([-30.0, -20.0, -10.0]),
     )
 
 

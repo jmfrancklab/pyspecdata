@@ -284,7 +284,12 @@ def genconfig():
     config_parser = configparser.ConfigParser()
     if os.path.exists(filename):
         config_parser.read(filename, encoding="utf-8")
-    for section_name in ["General", "ExpTypes", "RcloneRemotes"]:
+    for section_name in [
+        "General",
+        "ExpTypes",
+        "RcloneRemotes",
+        "zenodo",
+    ]:
         if not config_parser.has_section(section_name):
             config_parser.add_section(section_name)
     sort_config_sections(config_parser)
@@ -325,6 +330,7 @@ def genconfig():
             main_layout.addWidget(self.tab_widget)
             self.create_files_tab()
             self.create_variables_tab()
+            self.create_zenodo_tab()
             button_layout = qt_widgets.QHBoxLayout()
             button_layout.addStretch(1)
             self.save_button = qt_widgets.QPushButton("Save")
@@ -457,6 +463,51 @@ def genconfig():
                 lambda: self.add_general_row("", "")
             )
             self.tab_widget.addTab(variables_tab, "Variables")
+
+        def create_zenodo_tab(self):
+            "create the tab that manages the Zenodo token file"
+            zenodo_tab = qt_widgets.QWidget()
+            zenodo_layout = qt_widgets.QVBoxLayout(zenodo_tab)
+            zenodo_layout.addWidget(
+                qt_widgets.QLabel(
+                    "Select the local file containing your Zenodo personal "
+                    "access token. The token file must stay local and must "
+                    "not be committed to version control. See "
+                    "https://developers.zenodo.org/#rest-api"
+                )
+            )
+            token_layout = qt_widgets.QHBoxLayout()
+            token_layout.addWidget(qt_widgets.QLabel("Token file:"))
+            self.zenodo_token_file_edit = qt_widgets.QLineEdit()
+            self.zenodo_token_file_edit.setText(
+                self.config_parser.get("zenodo", "token_file", fallback="")
+            )
+            self.zenodo_token_file_edit.setCursorPosition(0)
+            token_layout.addWidget(self.zenodo_token_file_edit)
+            self.zenodo_browse_button = qt_widgets.QToolButton()
+            self.zenodo_browse_button.setIcon(
+                self.style().standardIcon(qt_widgets.QStyle.SP_DirOpenIcon)
+            )
+            token_layout.addWidget(self.zenodo_browse_button)
+            self.zenodo_browse_button.clicked.connect(
+                lambda: self.select_zenodo_token_file(
+                    self.zenodo_token_file_edit
+                )
+            )
+            zenodo_layout.addLayout(token_layout)
+            zenodo_layout.addStretch(1)
+            self.tab_widget.addTab(zenodo_tab, "Zenodo")
+
+        def select_zenodo_token_file(self, target_edit):
+            "browse for a file containing a Zenodo personal access token"
+            chosen, _selected_filter = qt_widgets.QFileDialog.getOpenFileName(
+                self,
+                "Select Zenodo token file",
+                target_edit.text(),
+            )
+            if chosen:
+                target_edit.setText(chosen)
+                target_edit.setCursorPosition(0)
 
         def add_general_row(self, key, value):
             "add a single general variable row"
@@ -637,12 +688,24 @@ def genconfig():
             for key in sorted(remote_values.keys()):
                 new_config.set("RcloneRemotes", key, remote_values[key])
             for section in self.config_parser.sections():
-                if section in ["General", "ExpTypes", "RcloneRemotes"]:
+                if section in [
+                    "General",
+                    "ExpTypes",
+                    "RcloneRemotes",
+                    "zenodo",
+                ]:
                     continue
                 if not new_config.has_section(section):
                     new_config.add_section(section)
                 for key, value in self.config_parser.items(section):
                     new_config.set(section, key, value)
+            new_config.add_section("zenodo")
+            for key, value in self.config_parser.items("zenodo"):
+                if key != "token_file":
+                    new_config.set("zenodo", key, value)
+            token_path = self.zenodo_token_file_edit.text().strip()
+            if token_path != "":
+                new_config.set("zenodo", "token_file", token_path)
             pyspec_config.write_sorted_config(new_config)
             self.accept()
 

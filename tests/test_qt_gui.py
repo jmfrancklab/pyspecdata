@@ -249,6 +249,10 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
         def getExistingDirectory(*args, **kwargs):
             return ""
 
+        @staticmethod
+        def getOpenFileName(*args, **kwargs):
+            return "", ""
+
     class StubSizePolicy:
         Minimum = 0
         Expanding = 1
@@ -294,6 +298,12 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
         assert self.data_directory_edit.cursor_position == 0
         assert self.files_add_button.text == "Add Entry"
         assert self.variables_add_button.text == "Add Entry"
+        assert self.zenodo_token_file_edit.cursor_position == 0
+        assert [name for _widget, name in self.tab_widget.tabs] == [
+            "Files",
+            "Variables",
+            "Zenodo",
+        ]
         header_widget = self.files_layout.items[0]
         header_labels = [
             widget._text
@@ -349,6 +359,18 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
         extra_general = self.general_entries[-1]
         extra_general["key_edit"].setText("new_variable")
         extra_general["value_edit"].setText("42")
+        original_get_open_file_name = (
+            stub_widgets.QFileDialog.getOpenFileName
+        )
+        stub_widgets.QFileDialog.getOpenFileName = staticmethod(
+            lambda *args, **kwargs: ("/tmp/zenodo.token", "")
+        )
+        self.zenodo_browse_button.click()
+        assert self.zenodo_token_file_edit.text() == "/tmp/zenodo.token"
+        assert self.zenodo_token_file_edit.cursor_position == 0
+        stub_widgets.QFileDialog.getOpenFileName = (
+            original_get_open_file_name
+        )
         self.data_directory_edit.setText("/tmp/data_dir")
         self.save_button.click()
         return 1
@@ -376,5 +398,7 @@ def test_genconfig_with_qt(monkeypatch, tmp_path, request):
     assert config.has_section("zenodo"), (
         "Existing sections outside the editor must remain."
     )
+    assert config.get("zenodo", "upload_number") == "4"
+    assert config.get("zenodo", "token_file") == "/tmp/zenodo.token"
     exp_keys = [key for key, _ in config.items("ExpTypes")]
     assert exp_keys == sorted(exp_keys)
