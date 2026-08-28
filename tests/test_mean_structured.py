@@ -3,8 +3,7 @@ from conftest import load_module
 
 load_module("general_functions")
 load_module("ndshape")
-core = load_module("core")
-nddata = core.nddata
+nddata = load_module("core").nddata
 
 
 def test_mean_structured_sets_std_per_field():

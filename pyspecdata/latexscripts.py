@@ -214,13 +214,6 @@ def grab_script_string(scriptnum_as_str):
     return script_string
 
 
-def check_image_path():
-    image_path = os.path.sep.join([os.getcwd(), "auto_figures"])
-    if not os.path.exists(image_path):
-        os.mkdir(image_path)
-    return
-
-
 def get_scripts_dir():
     script_path = os.path.sep.join([os.getcwd(), "scripts", ""])
     if not os.path.exists(script_path):
@@ -236,102 +229,6 @@ def sha_string(script):
     hasharray = numpy.ndarray(len(digest) // 8, dtype=">u8", buffer=digest)
     del s
     return "".join(["%016x" % x for x in list(hasharray)])
-
-
-def cache_output_if_needed(
-    scriptnum_as_str, hashstring, showcode=False, show_error=True
-):
-    r"""if needed, run the python script numbered by scriptnum_as_str that
-    hashes to hashstring, and output the result to the cache ONLY"""
-    output_fname = cached_filename(hashstring)
-    script_fname = script_filename(scriptnum_as_str)
-    # {{{ interpret the "NOerr" directive
-    with open(script_fname, "r", encoding="utf-8") as fp:
-        firstline = fp.readline()
-        if firstline.startswith("### NOerr"):
-            show_error = False
-    # }}}
-    if os.path.exists(output_fname):
-        print(output_fname, "already exists, so I will just use it")
-    else:
-        print("no cached file")
-        if not os.path.exists(os.path.dirname(output_fname)):
-            os.makedirs(os.path.dirname(output_fname))
-        fp_out = open(output_fname, "w", encoding="utf-8")
-        # fp_out.write(r'{\color{red}script: %d}'%script_number+'\n')
-        temp = os.environ
-        print("about to run python")
-        python_name = "python"
-        if os.name == "posix":
-            temp.update({"PYTHON_DATA_DIR": getDATADIR()})
-            # on mac, we frequently want to use python2
-            if find_executable("python2"):
-                python_name = "python2"
-            proc = Popen(
-                [python_name, "-W", "ignore", script_fname],
-                stdout=PIPE,
-                stdin=PIPE,
-                stderr=PIPE,
-                env=temp,
-            )
-        else:  # windows should give os.name == 'nt'
-            temp.update(
-                {
-                    "MPLCONFIGDIR": os.getcwd() + "/.matplotlib",
-                    "PYTHON_DATA_DIR": getDATADIR(),
-                }
-            )
-            proc = Popen(
-                [python_name, "-W", "ignore", script_fname],
-                stdout=PIPE,
-                stdin=PIPE,
-                stderr=PIPE,
-                env=temp,
-            )
-        stdoutdata, stderrdata = [
-            j.decode("utf-8") for j in proc.communicate()
-        ]
-        print("ran python")
-        if os.name != "posix":
-            stdoutdata = stdoutdata.replace("\r", "")
-            if stderrdata is not None:
-                stderrdata = stderrdata.replace("\r", "")
-        # fp_out.write('File has not been run, output:\n\n')
-        fp_out.write(
-            "%%% Generated automatically by python for script {:s} hashstring"
-            " {:s}".format(scriptnum_as_str, hashstring)
-        )
-        fp_out.write("\n")
-        fp_out.write(stdoutdata)
-        # fp_out.write('\n\n$\\Rightarrow$ end of output\n\n')
-        if show_error:
-            if stderrdata is not None and len(stderrdata) > 0:
-                fp_out.write(
-                    "\\quad\\\\ {\\small {\\color{red} {\\tt"
-                    " ERRORS---------------------} "
-                    + r"\makeatletter\fn{scripts/\thepy@codenum.py}"
-                    + r"\makeatother"
-                    + "}}\\\\\n"
-                )
-                fp_out.write(
-                    "\n\nThe current directory is \\verb|%s|\n\n" % os.getcwd()
-                )
-                fp_out.write(
-                    "\n\nThe data directory was set to: \\verb|"
-                    + getDATADIR()
-                    + "|\n\n"
-                )
-                fp_out.write("\\begin{tiny}\n")
-                fp_out.write("\\begin{verbatim}\n")
-                fp_out.write(stderrdata)
-                fp_out.write("\\end{verbatim}\n")
-                fp_out.write("\\end{tiny}\n")
-                fp_out.write(
-                    "{\\small {\\color{red} {\\tt"
-                    " ---------------------------}}}\\\\\n"
-                )
-        fp_out.close()
-        return
 
 
 def flush_script(number):
@@ -385,7 +282,9 @@ def main():
     and checks whether or not it should be run if a command line argument of
     "flush" is passed, it flushes that script number from the cache
     """
-    check_image_path()
+    image_path = os.path.sep.join([os.getcwd(), "auto_figures"])
+    if not os.path.exists(image_path):
+        os.mkdir(image_path)
     if len(sys.argv) > 2:
         if sys.argv[1] == "flush":
             if len(sys.argv) == 3:
@@ -410,7 +309,98 @@ def main():
             "which has hash",
             hashstring,
         )
-        cache_output_if_needed(scriptnum_as_str, hashstring)
+        # {{{ generate and cache output for this script when needed
+        output_fname = cached_filename(hashstring)
+        script_fname = script_filename(scriptnum_as_str)
+        show_error = True
+        # {{{ interpret the "NOerr" directive
+        with open(script_fname, "r", encoding="utf-8") as fp:
+            firstline = fp.readline()
+            if firstline.startswith("### NOerr"):
+                show_error = False
+        # }}}
+        if os.path.exists(output_fname):
+            print(output_fname, "already exists, so I will just use it")
+        else:
+            print("no cached file")
+            if not os.path.exists(os.path.dirname(output_fname)):
+                os.makedirs(os.path.dirname(output_fname))
+            fp_out = open(output_fname, "w", encoding="utf-8")
+            # fp_out.write(r'{\color{red}script: %d}'%script_number+'\n')
+            temp = os.environ
+            print("about to run python")
+            python_name = "python"
+            if os.name == "posix":
+                temp.update({"PYTHON_DATA_DIR": getDATADIR()})
+                # on mac, we frequently want to use python2
+                if find_executable("python2"):
+                    python_name = "python2"
+                proc = Popen(
+                    [python_name, "-W", "ignore", script_fname],
+                    stdout=PIPE,
+                    stdin=PIPE,
+                    stderr=PIPE,
+                    env=temp,
+                )
+            else:  # windows should give os.name == 'nt'
+                temp.update(
+                    {
+                        "MPLCONFIGDIR": os.getcwd() + "/.matplotlib",
+                        "PYTHON_DATA_DIR": getDATADIR(),
+                    }
+                )
+                proc = Popen(
+                    [python_name, "-W", "ignore", script_fname],
+                    stdout=PIPE,
+                    stdin=PIPE,
+                    stderr=PIPE,
+                    env=temp,
+                )
+            stdoutdata, stderrdata = [
+                j.decode("utf-8") for j in proc.communicate()
+            ]
+            print("ran python")
+            if os.name != "posix":
+                stdoutdata = stdoutdata.replace("\r", "")
+                if stderrdata is not None:
+                    stderrdata = stderrdata.replace("\r", "")
+            # fp_out.write('File has not been run, output:\n\n')
+            fp_out.write(
+                "%%% Generated automatically by python for script {:s} "
+                "hashstring {:s}".format(scriptnum_as_str, hashstring)
+            )
+            fp_out.write("\n")
+            fp_out.write(stdoutdata)
+            # fp_out.write('\n\n$\\Rightarrow$ end of output\n\n')
+            if show_error:
+                if stderrdata is not None and len(stderrdata) > 0:
+                    fp_out.write(
+                        "\\quad\\\\ {\\small {\\color{red} {\\tt"
+                        " ERRORS---------------------} "
+                        + r"\makeatletter\fn{scripts/\thepy@codenum.py}"
+                        + r"\makeatother"
+                        + "}}\\\\\n"
+                    )
+                    fp_out.write(
+                        "\n\nThe current directory is \\verb|%s|\n\n"
+                        % os.getcwd()
+                    )
+                    fp_out.write(
+                        "\n\nThe data directory was set to: \\verb|"
+                        + getDATADIR()
+                        + "|\n\n"
+                    )
+                    fp_out.write("\\begin{tiny}\n")
+                    fp_out.write("\\begin{verbatim}\n")
+                    fp_out.write(stderrdata)
+                    fp_out.write("\\end{verbatim}\n")
+                    fp_out.write("\\end{tiny}\n")
+                    fp_out.write(
+                        "{\\small {\\color{red} {\\tt"
+                        " ---------------------------}}}\\\\\n"
+                    )
+            fp_out.close()
+        # }}}
         # always pull the  output from the cache
         sh_copy2(cached_filename(hashstring), get_scripts_dir() + outname)
     fp.close()

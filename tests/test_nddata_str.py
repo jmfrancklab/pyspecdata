@@ -4,8 +4,7 @@ from conftest import load_module
 
 load_module("general_functions")
 load_module("ndshape")
-core = load_module("core")
-nddata = core.nddata
+nddata = load_module("core").nddata
 
 
 def build_0d_plain():
@@ -37,6 +36,7 @@ def build_0d_structured_with_error():
     return x
 
 
+# SINGLE_USE_EXCEPTION -- test patch point
 def build_1d_plain():
     x = nddata(np.array([1.0, 2.0, 3.0]), "t")
     x.setaxis("t", np.array([0.0, 1.0, 2.0]))
@@ -50,6 +50,7 @@ def build_1d_plain_with_errors():
     return x
 
 
+# SINGLE_USE_EXCEPTION -- test patch point
 def build_1d_structured_data():
     data = np.zeros(3, dtype=[("a", "f8"), ("b", "f8")])
     data["a"] = [1.0, 2.0, 3.0]
@@ -69,6 +70,7 @@ def build_1d_structured_data_with_errors():
     return x
 
 
+# SINGLE_USE_EXCEPTION -- test patch point
 def build_1d_structured_axis():
     x = nddata(np.array([1.0, 2.0, 3.0]), "t")
     axis = np.zeros(3, dtype=[("f", "f8"), ("p", "f8")])
