@@ -59,6 +59,7 @@ def search_filename(
     directory indicated by `exp_type`
     (For information on how to set up the file searching mechanism, see
     :func:`~pyspecdata.datadir.register_directory`).
+    Returns the full path or paths to matching files.
 
     Used to find data in a way that works seamlessly across different computers
     (and operating systems).
