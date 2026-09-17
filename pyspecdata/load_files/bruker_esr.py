@@ -1,6 +1,6 @@
 from ..core import nddata
-from ..general_functions import strm, lsafen
-from ..datadir import rclone_search
+from ..general_functions import strm, lsafen, read_binary
+from ..datadir import rclone_search, log_fname
 import numpy as np
 from numpy import r_
 import re
@@ -35,14 +35,64 @@ def _collapse_string_lists(val):
     return " ".join(flattened)
 
 
-def xepr(filename, exp_type=None, dimname="", verbose=False):
+def resolve_missing_xepr_companion(companion, exp_type, zenodo):
+    """Find or download an XEPR companion file.
+
+    Parameters
+    ----------
+    companion : str
+        Path to the missing XEPR companion file.
+    exp_type : str
+        Experiment type used to determine where remote data should be stored.
+    zenodo : str or None
+        Deposition number on Zenodo.  If provided, download the companion file
+        from this deposition.  Otherwise, search configured rclone remotes.
+
+    Returns
+    -------
+    str
+        Path to the resolved companion file.
+    """
+    if exp_type is None:
+        raise ValueError(
+            "I could probably find "
+            "your file remotely, but you called with "
+            "exp_type None!"
+        )
+    if zenodo is not None:
+        from .zenodo import zenodo_download
+
+        return zenodo_download(
+            zenodo,
+            rf"^{re.escape(os.path.basename(companion))}$",
+            exp_type=exp_type,
+        )
+    rclone_search(
+        os.path.split(companion)[-1],
+        exp_type,
+        os.path.split(companion)[0],
+    )
+    return companion
+
+
+def xepr(
+    filename,
+    exp_type=None,
+    dimname="",
+    zenodo=None,
+):
     """For opening Xepr files.
 
     Parameters
     ----------
     filename : str
         The filename that ends with ``.DSC``, ``.DTA``, or ``.YGF``.
+    zenodo : str, optional
+        Deposition number on Zenodo.  If a required companion file is not
+        present locally, download it from this deposition instead of searching
+        rclone remotes.
     """
+
     # {{{ determine the pair of filenames that we need
     filename = (
         filename[:-4] + filename[-4:].upper()
@@ -53,8 +103,8 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
         filename_spc, filename_par = filename.replace(".DSC", ".DTA"), filename
     elif filename[-4:] == ".YGF":
         filename_spc, filename_par = filename.replace(
-            ".YGF", ".DSC"
-        ), filename.replace(".YGF", ".DTA")
+            ".YGF", ".DTA"
+        ), filename.replace(".YGF", ".DSC")
     else:
         raise ValueError(
             strm(
@@ -96,24 +146,14 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
     # }}}
     # {{{ load the data
     if not os.path.exists(filename_spc):
-        # because the spc isn't part of the original search, we
-        # need to log the fact that it's missing manually
-        if exp_type is None:
-            raise ValueError(
-                "I could probably find "
-                "your file remotely, but you called with "
-                "exp_type None!"
-            )
-        rclone_search(
-            os.path.split(filename_spc)[-1],
-            exp_type,
-            os.path.split(filename_spc)[0],
+        filename_spc = resolve_missing_xepr_companion(
+            filename_spc, exp_type, zenodo
         )
     with open(filename_spc, "rb") as fp:
         if all([j == "REAL" for j in ikkf]):
-            data = np.frombuffer(fp.read(), ">f8")
+            data = read_binary(fp, ">f8")
         elif all([j == "CPLX" for j in ikkf]):
-            data = np.frombuffer(fp.read(), ">c16")
+            data = read_binary(fp, ">c16")
         else:
             raise ValueError(
                 "the data type (IKKF) is givn as "
@@ -255,22 +295,20 @@ def xepr(filename, exp_type=None, dimname="", verbose=False):
                             filename_ygf[:-4] + filename_ygf[-4:].lower()
                         )
                     if not os.path.exists(filename_ygf):
-                        # because the spc isn't part of the original search, we
-                        # need to log the fact that it's missing manually
-                        if exp_type is None:
-                            raise ValueError(
-                                "I could probably find "
-                                "your file remotely, but you called with "
-                                "exp_type None!"
-                            )
-                        rclone_search(
-                            os.path.split(filename_ygf)[-1],
-                            exp_type,
-                            os.path.split(filename_ygf)[0],
+                        filename_ygf = resolve_missing_xepr_companion(
+                            filename_ygf, exp_type, zenodo
                         )
                 with open(filename_ygf, "rb") as fp:
-                    y_axis = fp.read()
-                y_axis = np.frombuffer(y_axis, ">f8")
+                    y_axis = read_binary(fp, ">f8", count=y_points_calcd)
+                log_fname(
+                    *(
+                        ("data_files",)
+                        + tuple(
+                            os.path.split(os.path.normpath(filename_ygf))[::-1]
+                        )
+                        + (exp_type,)
+                    )
+                )
                 assert (
                     len(y_axis) == y_points_calcd
                 ), "Length of the power axis doesn't seem to match!"
@@ -444,8 +482,7 @@ def winepr(filename, dimname="", exp_type=None):
             os.path.split(filename_spc)[-1],
         )
     with open(filename_spc, "rb") as fp:
-        data = fp.read()
-    data = np.frombuffer(data, "<f4")
+        data = read_binary(fp, "<f4")
     # }}}
     # load the parameters
     v = winepr_load_acqu(filename_par)
@@ -492,6 +529,7 @@ def winepr(filename, dimname="", exp_type=None):
     return data
 
 
+# SINGLE_USE_EXCEPTION
 def winepr_load_acqu(filename):
     "Load the parameters for the winepr filename"
     with open(filename, "rU") as fp:  # the U automatically converts dos format
@@ -560,6 +598,7 @@ def winepr_load_acqu(filename):
     return v
 
 
+# SINGLE_USE_EXCEPTION
 def xepr_load_acqu(filename):
     """Load the Xepr acquisition parameter file, which should be a .dsc
     extension.

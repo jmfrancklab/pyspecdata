@@ -1,11 +1,12 @@
 # just put this in the package
 import sympy as sp
-from lmfit import Parameters, Minimizer
+from lmfit import Parameters, Minimizer, fit_report
 import numpy as np
 from .core import nddata, normal_attrs, issympy, ndshape, dp
 from .general_functions import strm, pinvr
 import logging
 import asteval
+import warnings
 
 
 # {{{ functions and modules
@@ -102,7 +103,9 @@ class lmfitdata(nddata):
             # move nddata attributes into the current instance
             myattrs = normal_attrs(args[0])
             for j in range(0, len(myattrs)):
-                self.__setattr__(myattrs[j], args[0].__getattribute__(myattrs[j]))
+                self.__setattr__(
+                    myattrs[j], args[0].__getattribute__(myattrs[j])
+                )
         else:
             nddata.__init__(self, *args, **kwargs)
         if fit_axis is None:
@@ -138,9 +141,9 @@ class lmfitdata(nddata):
         ==========
         this_expr: sympy expression
         """
-        assert issympy(this_expr), (
-            "for now, the functional form must be a sympy expression"
-        )
+        assert issympy(
+            this_expr
+        ), "for now, the functional form must be a sympy expression"
         self.expression = this_expr
         # {{{ decide which symbols are parameters vs. variables
         #     here, I discriminate "names" which are strings from "symbols"
@@ -223,17 +226,26 @@ class lmfitdata(nddata):
                         and "max" in guesses[this_name].keys()
                         and "value" in guesses[this_name].keys()
                     ):
-                        aeval = asteval.Interpreter(symtable=guesses[this_name])
+                        aeval = asteval.Interpreter(
+                            symtable=guesses[this_name]
+                        )
                         temp = aeval("2*(value-min)/(max-min)-1")
                         Pinternal = np.arcsin(temp)
                         assert abs(Pinternal / np.pi) < 0.48, (
                             "Your guess is too close to your"
-                            f" bounds!!\n(P_internal/π for {this_name} is"
-                            f" {Pinternal / np.pi})\n(this will play havoc with"
+                            " bounds!!\n"
+                            f"{this_name} → ({guesses[this_name]['min']},"
+                            f"{guesses[this_name]['value']},"
+                            f"{guesses[this_name]['max']})"
+                            f"(P_internal/π for {this_name} is"
+                            f" {Pinternal / np.pi})\n(this will"
+                            " play havoc with"
                             " the minuit boundaries used by lmfit)"
                         )
                     for k, v in guesses[this_name].items():
-                        if k != "print":  # appears to be a method -- not deepcopyable
+                        if (
+                            k != "print"
+                        ):  # appears to be a method -- not deepcopyable
                             setattr(self.guess_parameters[this_name], k, v)
                             self.guess_dict[this_name][k] = v
                 elif np.isscalar(guesses[this_name]):
@@ -254,9 +266,12 @@ class lmfitdata(nddata):
         guess_parameters"""
         if hasattr(self, "guess_dict"):
             self.guess_dictionary = {
-                k: self.guess_parameters[k].value for k in self.guess_parameters.keys()
+                k: self.guess_parameters[k].value
+                for k in self.guess_parameters.keys()
             }
-            return [self.guess_parameters[k].value for k in self.parameter_names]
+            return [
+                self.guess_parameters[k].value for k in self.parameter_names
+            ]
         else:
             return [1.0] * len(self.variable_names)
 
@@ -343,7 +358,9 @@ class lmfitdata(nddata):
         ).flatten()
         newdata.name(str(self.name()))
         logging.debug(
-            strm("Is residual transform none?", self.residual_transform is None)
+            strm(
+                "Is residual transform none?", self.residual_transform is None
+            )
         )
         return (
             newdata
@@ -366,12 +383,19 @@ class lmfitdata(nddata):
         # But you  should read through and see what the previous fit method is
         # doing and then copy over what you can
         sigma = self.get_error()
-        if sigma is not None:
+        if sigma is None:
             themin = Minimizer(
                 self.residual,
                 self.guess_parameters,
             )
         else:
+            if any(~np.isfinite(sigma)) or any(sigma == 0.0):
+                warnings.warn(
+                    "You have one or more errors set to zero or not"
+                    " finite.  That's really weird!  I'm going to set"
+                    " them to 1 so this runs, but you probably messed"
+                    " up."
+                )
             themin = Minimizer(
                 self.residual,
                 self.guess_parameters,
@@ -389,6 +413,9 @@ class lmfitdata(nddata):
         del self.fit_output.call_kws  # not deepcopyable
         # }}}
         return self
+
+    def fit_report(self):
+        return fit_report(self.fit_output)
 
     def pinvr_step(self, sigma=None):
         r"""Use regularized Pseudo-inverse to (partly) solve:
@@ -443,11 +470,6 @@ class lmfitdata(nddata):
         parameters, and gives the complex view for complex data (since in a
         complex fit, we use view to treat real an imaginary parts the same)
         """
-        if sigma is not None:
-            raise ValueError(
-                "Jacobian with generalized leastsq not yet supported (you have"
-                " error set, so I want to do generalized)"
-            )
         if not hasattr(self, "jacobian_symbolic"):
             self.jacobian_symbolic = [
                 sp.diff(self.expression, j, 1) for j in self.parameter_symbols
@@ -463,24 +485,43 @@ class lmfitdata(nddata):
         jacobian_array = np.array(
             [
                 self._apply_residual_transform(
-                    j(
+                    np.full_like(
+                        self.getaxis(self.fit_axis),
+                        raw_jacobian,
+                        dtype=float,
+                    )
+                    if np.isscalar(raw_jacobian)
+                    else raw_jacobian
+                )
+                for jacobian_fn in self.jacobian_lambda
+                for raw_jacobian in [
+                    jacobian_fn(
                         *(self.getaxis(k) for k in self.variable_names),
                         **pars.valuesdict(),
                     )
-                )  # function elements on the outside, so parameters can go on the
-                #    inside
-                for j in self.jacobian_lambda
+                    # function elements on the outside, so parameters can
+                    # go on the inside
+                ]
             ]
         )
-        if np.issubdtype(self.data.dtype, np.complexfloating) and not np.issubdtype(
-            jacobian_array.dtype, np.complexfloating
-        ):
+        if np.issubdtype(
+            self.data.dtype, np.complexfloating
+        ) and not np.issubdtype(jacobian_array.dtype, np.complexfloating):
             if self.data.dtype == np.complex64:
                 jacobian_array = np.complex64(jacobian_array)
             elif self.data.dtype == np.complex128:
                 jacobian_array = np.complex128(jacobian_array)
             else:
-                raise ValueError("I don't understand the dtype", self.data.dtype)
+                raise ValueError(
+                    "I don't understand the dtype", self.data.dtype
+                )
+        if sigma is not None:
+            normalization = np.sum(
+                1.0 / sigma[np.logical_and(sigma != 0.0, np.isfinite(sigma))]
+            )
+            sigma[sigma == 0.0] = 1
+            sigma[~np.isfinite(sigma)] = 1
+            jacobian_array = jacobian_array / sigma * normalization
         jacobian_array = jacobian_array.view(float)
         jacobian_array = jacobian_array[
             :, self.nan_mask
@@ -694,7 +735,9 @@ class lmfitdata(nddata):
         #     way the function looks.  Though this is a pain, it's
         #     better.
         for j in range(0, len(self.parameter_names)):
-            symbol = sp.printing.latex(self.parameter_symbols[j]).replace("$", "")
+            symbol = sp.printing.latex(self.parameter_symbols[j]).replace(
+                "$", ""
+            )
             logging.debug(strm('DEBUG: replacing symbol "', symbol, '"'))
             location = retval.find(symbol)
             while location != -1:

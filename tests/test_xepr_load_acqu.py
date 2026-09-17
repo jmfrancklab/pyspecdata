@@ -4,6 +4,20 @@ import types
 from pathlib import Path
 
 pkg_root = Path(__file__).resolve().parents[1] / "pyspecdata"
+_missing = object()
+# SINGLE_USE_EXCEPTION -- needs to be done here for test (most likely)
+_saved_modules = {
+    name: sys.modules.get(name, _missing)
+    for name in [
+        "pyspecdata",
+        "pyspecdata.core",
+        "pyspecdata.datadir",
+        "pyspecdata.general_functions",
+        "pyspecdata.load_files",
+        "pyspecdata.load_files.bruker_esr",
+    ]
+}
+
 # create stub package to avoid heavy imports
 pyspecdata_pkg = types.ModuleType("pyspecdata")
 pyspecdata_pkg.__path__ = [str(pkg_root)]
@@ -16,6 +30,7 @@ sys.modules.setdefault("pyspecdata.core", core_stub)
 gen_stub = types.ModuleType("pyspecdata.general_functions")
 gen_stub.strm = lambda *args, **kwargs: ""
 gen_stub.lsafen = lambda x: x
+gen_stub.read_binary = lambda *args, **kwargs: None
 sys.modules.setdefault("pyspecdata.general_functions", gen_stub)
 
 datadir_stub = types.ModuleType("pyspecdata.datadir")
@@ -26,8 +41,15 @@ load_files_pkg = types.ModuleType("pyspecdata.load_files")
 load_files_pkg.__path__ = [str(pkg_root / "load_files")]
 sys.modules.setdefault("pyspecdata.load_files", load_files_pkg)
 
-bruker_esr = importlib.import_module("pyspecdata.load_files.bruker_esr")
-xepr_load_acqu = bruker_esr.xepr_load_acqu
+xepr_load_acqu = importlib.import_module(
+    "pyspecdata.load_files.bruker_esr"
+).xepr_load_acqu
+
+for _name, _module in _saved_modules.items():
+    if _module is _missing:
+        sys.modules.pop(_name, None)
+    else:
+        sys.modules[_name] = _module
 
 
 def test_line_continuation(tmp_path):

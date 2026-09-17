@@ -48,7 +48,7 @@ def convolve(
         In contrast, for example, if you have frequency-domain data that
         is entirely real (like a power spectral density) then you want to
         set enforce_causality to False.
-
+        
         It is ignored if you call a convolution on time-domain data.
     """
     if convfunc == "gaussian":

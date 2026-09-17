@@ -37,7 +37,6 @@ from .matrix_math.dot import dot as MM_dot
 from .matrix_math.dot import matmul as MM_matmul
 from .matrix_math.dot import along as MM_along
 from .matrix_math.nnls import nnls as MM_nnls
-from os import environ
 import numpy as np
 import sympy as sp
 from numpy import r_, c_, nan, inf, pi
@@ -241,6 +240,7 @@ def mydiff(data, axis=-1):
 
 
 # }}}
+# SINGLE_USE_EXCEPTION -- public helper imported by lmfitdata
 def normal_attrs(obj):
     myattrs = [
         x
@@ -762,7 +762,7 @@ def plot(*args, **kwargs):
         if (
             (np.size(b) > 3)
             and all(abs((b - b[0]) / b[0]) < 1e-4)
-            and not ("nosemilog" in list(kwargs.keys()))
+            and "nosemilog" not in list(kwargs.keys())
         ):
             if "plottype" not in list(kwargs.keys()):
                 myplotfunc = ax.semilogx
@@ -988,6 +988,7 @@ def plot(*args, **kwargs):
 
 
 # {{{ concatenate datalist along dimname
+# SINGLE_USE_EXCEPTION -- public API used by downstream scripts
 def concat(datalist, dimname, chop=False):
     """concatenate multiple datasets together along a new dimension.
 
@@ -1568,6 +1569,39 @@ class nddata(object):
             )
 
     def __str__(self):
+        def format_scalar(val, err=None):
+            "format the scalar, including the ± for the error"
+            if getattr(val, "dtype", None) is not None and val.dtype.names:
+                return (
+                    "("
+                    + ", ".join(
+                        "%s=%s"
+                        % (
+                            field_name,
+                            format_scalar(
+                                val[field_name],
+                                None if err is None else err[field_name],
+                            ),
+                        )
+                        for field_name in val.dtype.names
+                    )
+                    + ")"
+                )
+            # {{{ if 1d len 1, etc, convert to true scalars
+            if hasattr(val, "item"):
+                val = val.item()
+            if err is not None and hasattr(err, "item"):
+                err = err.item()
+            # }}}
+            if err is not None:
+                oom_err = int(np.floor(np.log10(err)))  # int takes floor
+                oom_val = int(np.floor(np.log10(val)))  # int takes floor
+                return ("%#0." + str(oom_val - oom_err + 1) + "g ± %#0.2g") % (
+                    val,
+                    err,
+                )
+            return "%#0.5g" % val
+
         def show_array(x, indent=""):
             x = repr(x)
             if x.startswith("np.array("):
@@ -1579,16 +1613,19 @@ class nddata(object):
 
         if self.data.size < 2:
             val = self.data.item()
+            if self.data.dtype.names is not None:
+                # self.data is always a NumPy array here, so checking
+                # dtype.names directly is enough to detect structured dtypes.
+                # For 0D structured arrays, item() returns a plain tuple,
+                # but self.data[()] preserves field access for formatting.
+                val = self.data[()]
             err = self.get_error()
             if err is not None:
-                err = err.item()
-                oom_err = int(np.floor(np.log10(err)))  # int takes floor
-                oom_val = int(np.floor(np.log10(val)))  # int takes floor
-                retval = (
-                    "%#0." + str(oom_val - oom_err + 1) + "g ± %#0.2g"
-                ) % (val, err)
-            else:
-                retval = "%#0.5g" % val
+                if err.dtype.names is not None:
+                    err = err[()]
+                else:
+                    err = err.item()
+            retval = format_scalar(val, err)
             myunits = self.get_units()
             if myunits is not None:
                 # say we have m^2 -- we want this rendered as m², and pint
@@ -2255,13 +2292,13 @@ class nddata(object):
 
     def div_units(self, *args, **kwargs):
         """
-        divide units of the data (or axis)
+        Divide units of the data (or axis)
         by the units that are given, and
         return the multiplier as a number.
 
         In other words, if you pass "a" and
         the units of your data are in "b",
-        then this returns x, such that (x
+        then this returns x = b/a, such that (x
         a)/(b) = 1.
 
         If the result is not dimensionless,
@@ -3648,6 +3685,8 @@ class nddata(object):
 
     def mean_all_but(self, listofdims):
         "take the mean over all dimensions not in the list"
+        if type(listofdims) is str:
+            listofdims = [listofdims]
         for dimname in list(
             self.dimlabels
         ):  # I can't be popping from the list as I iterate over it
@@ -3718,6 +3757,38 @@ class nddata(object):
         if isinstance(axes, str):
             axes = [axes]
         # }}}
+        structured_dtype = None
+        field_names = None
+        if self.data.dtype.names is not None:
+            field_names = self.data.dtype.names
+            promoted_field_dtypes = []
+            for thisfield in field_names:
+                thisdtype = self.data.dtype.fields[thisfield][0]
+                if np.issubdtype(thisdtype, np.integer):
+                    thisdtype = np.dtype("float64")
+                promoted_field_dtypes.append(thisdtype)
+            # At this point, promoted_field_dtypes contains the types of
+            # the fields AFTER promotion
+            # We do not need to run result_type because it won't give
+            # more than float64, UNLESS something is complex128, which we
+            # do NOT want to use.
+            structured_dtype = np.dtype(
+                list(zip(field_names, promoted_field_dtypes))
+            )
+            # we do not want a loop, and we do not want to copy the data.
+            # We just want a new view
+            before = len(self.data.shape)
+            # the following line actually does the type
+            # conversion/promotion (converts int to float)
+            self.data = self.data.astype(structured_dtype).view(
+                # and the view turns the fields into new dimension
+                (np.dtype("f8"), structured_dtype.itemsize // 8)
+            )
+            assert len(self.data.shape) == before + 1
+            if self.data_error is not None:
+                self.data_error = self.data_error.astype(
+                    structured_dtype
+                ).view((np.dtype("f8"), structured_dtype.itemsize // 8))
         for j in range(0, len(axes)):
             try:
                 thisindex = self.dimlabels.index(axes[j])
@@ -3756,6 +3827,22 @@ class nddata(object):
                 )  # set the error to the standard deviation
             self._pop_axis_info(thisindex)
             logger.debug(strm("return error is", return_error))
+        if structured_dtype is not None:
+            # here, we drop the new, innermost dimension that was used to
+            # store the fields, and expand the next one to accommodate
+            # all the fields
+            if len(self.data.shape) == 1:
+                # was zero-d to begin with
+                newshape = self.data.shape
+            else:
+                newshape = self.data.shape[:-2] + (
+                    self.data.shape[-2] * self.data.shape[-1],
+                )
+            self.data = self.data.reshape(newshape).view(structured_dtype)
+            if self.data_error is not None:
+                self.data_error = self.data_error.reshape(newshape).view(
+                    structured_dtype
+                )
         return self
 
     def mean_nopop(self, axis):
@@ -5241,8 +5328,22 @@ class nddata(object):
             axis = axis[0]
         else:
             raise ValueError(
-                "not a valid argument to set_axis -- look at the documentation!"
+                "not a valid argument to set_axis -- look at the"
+                " documentation!"
             )
+        # TODO ☐: initializing these to a random object instance is very weird.
+        #         If you need to, initialize them to None, which I feel is more
+        #         standard. Also, with the changes that you are introducing,
+        #         you need to explain your strategy, and why two different
+        #         variables are needed here (why can't we just get away with
+        #         one, and if it's None, then there is no error/units
+        #         information to be set -- this also works naturally with the
+        #         general code strategy here that None means "unset" and might
+        #         help to reduce your lines)
+        keep_axis_error = object()
+        keep_axis_units = object()
+        new_axis_error = keep_axis_error
+        new_axis_units = keep_axis_units
         if axis == "INDEX":
             raise ValueError(
                 "Axes that are called INDEX are special, and you are not"
@@ -5252,23 +5353,69 @@ class nddata(object):
             x = self.getaxis(axis)
             x[:] = value(x.copy())
             return self
+        elif isinstance(value, nddata):
+            if len(value.dimlabels) != 1:
+                raise ValueError(
+                    strm(
+                        "When setting axis",
+                        axis,
+                        "from an nddata, the rhs must have exactly one"
+                        " dimension, but it has",
+                        value.dimlabels,
+                    )
+                )
+            if value.dimlabels[0] != axis:
+                raise ValueError(
+                    strm(
+                        "When setting axis",
+                        axis,
+                        "from an nddata, the rhs dimension must also be",
+                        axis,
+                        "but it is",
+                        value.dimlabels[0],
+                    )
+                )
+            new_axis_error = value.get_error()
+            new_axis_units = value.get_units()
+            value = value.data
         elif type(value) in [float, int, np.double, np.float64]:
             value = np.linspace(0.0, value, self.axlen(axis))
         elif isinstance(value, list):
             value = np.array(value)
         if self.axis_coords is None or len(self.axis_coords) == 0:
             self.axis_coords = [None] * len(self.dimlabels)
+        if self.axis_coords_error is None or len(self.axis_coords_error) == 0:
             self.axis_coords_error = [None] * len(self.dimlabels)
+        if self.axis_coords_units is None or len(self.axis_coords_units) == 0:
+            self.axis_coords_units = [None] * len(self.dimlabels)
+        axis_idx = self.axn(axis)
+        preserve_axis_error = (
+            value is not None
+            and new_axis_error is keep_axis_error
+            and value is self.axis_coords[axis_idx]
+        )
         if value is None:
-            self.axis_coords[self.axn(axis)] = None
+            self.axis_coords[axis_idx] = None
         else:
             a = len(value)
-            b = self.data.shape[self.axn(axis)]
+            b = self.data.shape[axis_idx]
             assert a == b, (
                 "Along the axis %s, the length of the axis you passed (%d)"
                 " doesn't match the size of the data (%d)." % (axis, a, b)
             )
-            self.axis_coords[self.axn(axis)] = value
+            self.axis_coords[axis_idx] = value
+        # TODO ☐: couldn't a lot of the conditionals here be grouped with the
+        #         conditionals above?  It seems like the code could be more
+        #         compact if you organized it better.
+        if new_axis_error is keep_axis_error:
+            if not preserve_axis_error:
+                self.axis_coords_error[axis_idx] = None
+        elif new_axis_error is None:
+            self.axis_coords_error[axis_idx] = None
+        else:
+            self.set_error(axis, new_axis_error)
+        if new_axis_units is not keep_axis_units:
+            self.set_units(axis, new_axis_units)
         return self
 
     def shear(
@@ -5735,14 +5882,15 @@ class nddata(object):
                     shapesout = np.round(shapesout)
                 shapesout = [shapesout] * len(axesout)
             elif isinstance(otherargs[0], dict):
-                axesout, shapesout = list(otherargs[0].keys()), list(
-                    otherargs[0].values()
+                axesout, shapesout = (
+                    list(otherargs[0].keys()),
+                    list(otherargs[0].values()),
                 )
             else:
                 raise ValueError("I don't know how to deal with this type!")
         else:
             raise ValueError("otherargs must be one or two arguments!")
-        if not type(axesout[0]) is str:
+        if type(axesout[0]) is not str:
             raise ValueError(
                 "the second argument should give the list of new axes that"
                 f" are created by chunking '{axisin}'"
@@ -5882,7 +6030,7 @@ class nddata(object):
             # {{{ actually reorder the data and error -- perhaps a view would
             #     be more efficient here
             old_data = self.data
-            has_data_error = not (self.get_error() is None)
+            has_data_error = self.get_error() is not None
             self.data = np.empty(new_shape, dtype=self.data.dtype)
             if has_data_error:
                 old_error = self.get_error()

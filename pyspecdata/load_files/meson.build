@@ -2,6 +2,7 @@ py_sources=[
 'acert.py',
 'bruker_esr.py',
 'bruker_nmr.py',
+'ciqtek.py',
 '__init__.py',
 'load_cary.py',
 'open_subpath.py',

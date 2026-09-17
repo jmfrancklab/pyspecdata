@@ -1,20 +1,56 @@
-"""Download a file from Zenodo using :func:`search_filename`
------------------------------------------------------------
+"""Download files from Zenodo using :func:`search_filename`
+----------------------------------------------------------
 
 This example shows how to retrieve a file from Zenodo when it is not already
 present locally.  The download occurs transparently via the ``zenodo``
 keyword of :func:`pyspecdata.search_filename`.
 
-This downloads the same file as the upload example.
+This is done using :func:`pyspecdata.load_files.zenodo.zenodo_download`
+(click for more details)
+
+    zenodo_download(
+        "123456", "my_file.h5", exp_type="ODNP"
+    )
+This downloads the same files as the upload example.
 """
+
+import os
+import re
 
 from pyspecdata import search_filename
 
-path = search_filename(
-    "Pure_T177R1a_pR_210615.BSW",
-    exp_type="UV_Vis/proteorhodopsin",
-    unique=True,
-    zenodo="15636512",
-)
+# {{{ changeable parameters
+REMOVE_LOCAL_COPIES = False
 
-print(f"Downloaded to {path}")
+files_to_download = {
+    "21041480": [
+        (".*T177R1a_pR_210615.*", "UV_Vis/proteorhodopsin"),
+        (
+            re.escape("221110_BSAexerciseWK_0p07-0percentBSAcalibration.BSW"),
+            "UV_Vis/BSA_Exercise",
+        ),
+        (re.escape("200703_Ellman_before_SL.DSW"), "UV_Vis/Ellmans_Assay"),
+        (".*Ras_Stability4.*", "UV_Vis/Ras_stability/200803_RT"),
+    ],
+}
+# }}}
+
+for deposition, files in files_to_download.items():
+    for search_str, exp_type in files:
+        if REMOVE_LOCAL_COPIES:
+            try:
+                path = search_filename(
+                    search_str, exp_type=exp_type, unique=True
+                )
+            except RuntimeError:
+                pass
+            else:
+                os.unlink(path)
+                print(f"Removed local copy {path}")
+        path = search_filename(
+            search_str,
+            exp_type=exp_type,
+            unique=True,
+            zenodo=deposition,
+        )
+        print("Found at", path)
