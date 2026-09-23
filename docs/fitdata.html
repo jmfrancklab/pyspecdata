@@ -8,21 +8,21 @@
     <title>the lmfitdata class &#8212; pySpecData 0.9.6 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=832af5b0" />
-    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css?v=7f9a90b1" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=2b30a6e6" />
     <script src="_static/documentation_options.js?v=564a08b9"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <link rel="icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="List of Modules and Sub-Packages" href="modules.html" />
-    <link rel="prev" title="Fourier Functions" href="fourier.html" />
+    <link rel="prev" title="Finding Files" href="find_files.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -78,18 +78,18 @@ illustrated here.</p>
 </figure>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.lmfitdata.</span></span><span class="sig-name descname"><span class="pre">lmfitdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pyspecdata.lmfitdata.</span></span><span class="sig-name descname"><span class="pre">lmfitdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata" title="Link to this definition">¶</a></dt>
 <dd><p>Inherits from an nddata and enables curve fitting through use of a
 sympy expression.</p>
 <p>The user creates a lmfitdata class object from an existing nddata
 class object, and on this lmfitdata object can define the
-<a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.functional_form" title="pyspecdata.lmfitdata.functional_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">functional_form()</span></code></a> of the curve it would like to fit to the
+<a class="reference internal" href="#pyspecdata.lmfitdata.lmfitdata.functional_form" title="pyspecdata.lmfitdata.lmfitdata.functional_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">functional_form()</span></code></a> of the curve it would like to fit to the
 data of the original nddata.
 This functional form must be provided as a sympy expression, with
 one of its variables matching the name of the dimension that the
 user would like to fit to.</p>
 <figure class="align-center" id="id4">
-<img alt="_images/image641.png" src="_images/image641.png" />
+<img alt="_images/image64.png" src="_images/image64.png" />
 <figcaption>
 <p><span class="caption-text">A typical T₁ relaxation fit produced with <code class="docutils literal notranslate"><span class="pre">lmfitdata</span></code>.
 See the gallery for more complete examples.</span><a class="headerlink" href="#id4" title="Link to this image">¶</a></p>
@@ -158,7 +158,7 @@ fit</p>
 passed</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -171,7 +171,7 @@ passed</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.function_string">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">function_string</span></span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.function_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">function_string</span></span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.function_string" title="Link to this definition">¶</a></dt>
 <dd><p>A property of the myfitclass class which stores a string
 output of the functional form of the desired fit expression
 provided in func:<cite>functional_form</cite> in LaTeX format</p>
@@ -179,7 +179,7 @@ provided in func:<cite>functional_form</cite> in LaTeX format</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.functional_form">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">functional_form</span></span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.functional_form" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">functional_form</span></span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.functional_form" title="Link to this definition">¶</a></dt>
 <dd><p>A property of the myfitclass class which is set by the user,
 takes as input a sympy expression of the desired fit
 expression</p>
@@ -292,7 +292,7 @@ guesses, or as the kwargs themselves (i.e.
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.transformed_data">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transformed_data</span></span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.transformed_data" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">transformed_data</span></span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.transformed_data" title="Link to this definition">¶</a></dt>
 <dd><p>If we do something like fit a lorentzian or voigt lineshape,
 it makes more sense to define our fit function in the time domain,
 but to calculate the residuals and to evaluate in the frequency
@@ -321,14 +321,12 @@ decorator)</p>
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
-<p class="logo">
-  <a href="index.html">
-    <img class="logo" src="_static/pyspec_path_equaltip.png" alt="Logo" />
-    
-  </a>
-</p>
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pyspec_path_equaltip.png" alt="Logo of pySpecData"/>
+            </a></p>
+<h1 class="logo"><a href="index.html">pySpecData</a></h1>
 
 
 
@@ -340,6 +338,7 @@ decorator)</p>
 <h3>Navigation</h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="find_files.html">Finding Files</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">the lmfitdata class</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#pyspecdata.lmfitdata.lmfitdata"><code class="docutils literal notranslate"><span class="pre">lmfitdata</span></code></a></li>
 </ul>
@@ -353,17 +352,21 @@ decorator)</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="auto_api/modules.html">pyspecdata</a></li>
+</ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="fourier.html" title="previous chapter">Fourier Functions</a></li>
+      <li>Previous: <a href="find_files.html" title="previous chapter">Finding Files</a></li>
       <li>Next: <a href="modules.html" title="next chapter">List of Modules and Sub-Packages</a></li>
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
@@ -371,7 +374,7 @@ decorator)</p>
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -389,7 +392,7 @@ decorator)</p>
       &#169;2016, John M. Franck.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

@@ -8,19 +8,20 @@
     <title>pyspecdata.plot_funcs package &#8212; pySpecData 0.9.6 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=832af5b0" />
-    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css?v=7f9a90b1" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=2b30a6e6" />
     <script src="../_static/documentation_options.js?v=564a08b9"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <link rel="icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="pyspecdata.matrix_math package" href="pyspecdata.matrix_math.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -43,41 +44,41 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
 </section>
-<section id="module-pyspecdata.plot_funcs.DCCT_function">
-<span id="pyspecdata-plot-funcs-dcct-function-module"></span><h2>pyspecdata.plot_funcs.DCCT_function module<a class="headerlink" href="#module-pyspecdata.plot_funcs.DCCT_function" title="Link to this heading">¶</a></h2>
+<section id="pyspecdata-plot-funcs-dcct-function-module">
+<h2>pyspecdata.plot_funcs.DCCT_function module<a class="headerlink" href="#pyspecdata-plot-funcs-dcct-function-module" title="Link to this heading">¶</a></h2>
 <p>Domain Colored Coherence Transfer (DCCT) plots coherence pathways.</p>
-<p>See <a class="reference internal" href="#pyspecdata.plot_funcs.image.imagehsv" title="pyspecdata.plot_funcs.image.imagehsv"><code class="xref py py-func docutils literal notranslate"><span class="pre">pyspecdata.plot_funcs.image.imagehsv()</span></code></a> for examples of domain
+<p>See <code class="xref py py-func docutils literal notranslate"><span class="pre">pyspecdata.plot_funcs.image.imagehsv()</span></code> for examples of domain
 colored spin-echo data.  This routine displays coherence pathways using
 domain coloring.</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.plot_funcs.DCCT_function.DCCT">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.DCCT_function.</span></span><span class="sig-name descname"><span class="pre">DCCT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">this_nddata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.05,</span> <span class="pre">0.1,</span> <span class="pre">0.9,</span> <span class="pre">0.8]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horiz_label_spacer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">35</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shareaxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diagnostic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pass_frq_slice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_coh_jump</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'t2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_aliasing_calc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.DCCT_function.DCCT" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.DCCT_function.</span></span><span class="sig-name descname"><span class="pre">DCCT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">this_nddata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.05,</span> <span class="pre">0.1,</span> <span class="pre">0.9,</span> <span class="pre">0.8]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horiz_label_spacer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">35</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shareaxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diagnostic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pass_frq_slice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_coh_jump</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'t2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_aliasing_calc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>DCCT plot.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>this_nddata</strong> (<a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – data being plotted</p></li>
+<li><p><strong>this_nddata</strong> (<a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata"><em>nddata</em></a>) – data being plotted</p></li>
 <li><p><strong>fig</strong> (<em>figure</em>) – size/type of figure to be plotted on</p></li>
 <li><p><strong>custom_scaling</strong> (<em>boolean</em>) – allows user to scale the intensity of data presented</p></li>
-<li><p><strong>bbox</strong> (<em>matplotlib.girdspec.SubplotSpec</em>) – <p>contains the following:
-:bbox[0]: int</p>
-<blockquote>
-<div><p>Left hand side padding between the left side of the figure
-and the left side of the decorations.</p>
-</div></blockquote>
+<li><p><strong>bbox</strong> (<em>matplotlib.girdspec.SubplotSpec</em>) – <p>contains the following:</p>
 <dl class="field-list simple">
-<dt class="field-odd">bbox[1]<span class="colon">:</span></dt>
+<dt class="field-odd">bbox[0]<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int
+Left hand side padding between the left side of the figure
+and the left side of the decorations.</p>
+</dd>
+<dt class="field-even">bbox[1]<span class="colon">:</span></dt>
+<dd class="field-even"><p>int
 Distance between the bottom of the figure and the bottom of the
 lowest axes object (in Figure coordinates)</p>
 </dd>
-<dt class="field-even">bbox[2]<span class="colon">:</span></dt>
-<dd class="field-even"><p>int
+<dt class="field-odd">bbox[2]<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int
 Distance between the right most side of the axes objects and the
 left most side of the decorations (in Figure coordinates)</p>
 </dd>
-<dt class="field-odd">bbox[3]<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int
+<dt class="field-even">bbox[3]<span class="colon">:</span></dt>
+<dd class="field-even"><p>int
 Distance from bottom of the bottom axes object to top of top
 axes object</p>
 </dd>
@@ -114,44 +115,44 @@ this function for scaled translations</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.plot_funcs.DCCT_function.decorate_axes">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.DCCT_function.</span></span><span class="sig-name descname"><span class="pre">decorate_axes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">my_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remaining_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordered_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_placed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horiz_label_spacer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transDispTranslated</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transXdispYfig</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.DCCT_function.decorate_axes" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.DCCT_function.</span></span><span class="sig-name descname"><span class="pre">decorate_axes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">my_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remaining_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordered_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_placed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horiz_label_spacer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transDispTranslated</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transXdispYfig</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>This function is called recursively to decorate the axes</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.plot_funcs.DCCT_function.fl_DCCT">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.DCCT_function.</span></span><span class="sig-name descname"><span class="pre">fl_DCCT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">this_nddata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.DCCT_function.fl_DCCT" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.DCCT_function.</span></span><span class="sig-name descname"><span class="pre">fl_DCCT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">this_nddata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.plot_funcs.DCCT_function.majorLocator">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.DCCT_function.</span></span><span class="sig-name descname"><span class="pre">majorLocator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.DCCT_function.majorLocator" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.DCCT_function.</span></span><span class="sig-name descname"><span class="pre">majorLocator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.plot_funcs.DCCT_function.minorLocator">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.DCCT_function.</span></span><span class="sig-name descname"><span class="pre">minorLocator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.DCCT_function.minorLocator" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.DCCT_function.</span></span><span class="sig-name descname"><span class="pre">minorLocator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.plot_funcs.DCCT_function.place_labels">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.DCCT_function.</span></span><span class="sig-name descname"><span class="pre">place_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">my_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_placed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">this_label_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horiz_label_spacer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transDispTranslated</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_from_tick</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_width_px</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.DCCT_function.place_labels" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.DCCT_function.</span></span><span class="sig-name descname"><span class="pre">place_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">my_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_placed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">this_label_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horiz_label_spacer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transDispTranslated</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_from_tick</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_width_px</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Place arrows and dimname labels</p>
 </dd></dl>
 
 </section>
-<section id="module-pyspecdata.plot_funcs.image">
-<span id="pyspecdata-plot-funcs-image-module"></span><h2>pyspecdata.plot_funcs.image module<a class="headerlink" href="#module-pyspecdata.plot_funcs.image" title="Link to this heading">¶</a></h2>
+<section id="pyspecdata-plot-funcs-image-module">
+<h2>pyspecdata.plot_funcs.image module<a class="headerlink" href="#pyspecdata-plot-funcs-image-module" title="Link to this heading">¶</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.plot_funcs.image.fl_image">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">fl_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.image.fl_image" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">fl_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Called as <cite>fl.image()</cite> where <cite>fl</cite> is the <cite>figlist_var</cite>
 object</p>
 <p>Note that this code just wraps the figlist properties, and
 the heavy lifting is done by the <cite>image(</cite> function.
 Together, the effect is as follows:</p>
-<ul>
+<ul class="simple">
 <li><p><cite>check_units</cite> converts to human-readable units, and
 makes sure they match the units already used in the plot.</p></li>
 <li><p>if <cite>A</cite> has more than two dimensions, the final dimension in
@@ -162,27 +163,26 @@ the list <cite>A.dimlabels</cite>) is used as the row dimension. A
 white/black line is drawn after the innermost index used to
 create the direct product is finished iterating.</p></li>
 <li><p>If <cite>A</cite> consists of complex data, then an HSV plot
-(misnomer, actually an HV plot) is used:
-- convert to polar form: <span class="math notranslate nohighlight">\(z=\rho \exp(i \phi)\)</span>
-- <span class="math notranslate nohighlight">\(\phi\)</span> determines the color (Hue)</p>
-<blockquote>
-<div><ul class="simple">
+(misnomer, actually an HV plot) is used:</p>
+<ul>
+<li><p>convert to polar form: <span class="math notranslate nohighlight">\(z=\rho \exp(i \phi)\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\phi\)</span> determines the color (Hue)</p>
+<ul>
 <li><p>Color wheel is cyclical, like <span class="math notranslate nohighlight">\(\exp(i \phi)\)</span></p></li>
 <li><p>red is taken as <span class="math notranslate nohighlight">\(\phi=0\)</span>, purely real and positive</p></li>
 <li><p>green-blue is <span class="math notranslate nohighlight">\(pi\)</span> radians out of phase with red and
 therefore negative real</p></li>
 </ul>
-</div></blockquote>
+</li>
+<li><p><span class="math notranslate nohighlight">\(\rho\)</span> determines the intensity (value)</p>
 <ul>
-<li><p><span class="math notranslate nohighlight">\(\rho\)</span> determines the intensity (value)
-- Depending on whether or not <cite>black</cite> is set (either as a</p>
-<blockquote>
-<div><p>keyword argument, or <cite>fl.black</cite>, the background will be
+<li><p>Depending on whether or not <cite>black</cite> is set (either as a
+keyword argument, or <cite>fl.black</cite>, the background will be
 black with high <span class="math notranslate nohighlight">\(\rho\)</span> values “lit up” (intended for
 screen plotting) or the background will be white with
 the high <span class="math notranslate nohighlight">\(\rho\)</span> values “colored in” (intended for
-printing)</p>
-</div></blockquote>
+printing)</p></li>
+</ul>
 </li>
 </ul>
 </li>
@@ -194,18 +194,18 @@ corresponding colorbar.</p></li>
 current plot in the figurelist</p></li>
 </ul>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pyspecdata.plot_funcs.image.A">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">A</span></span><a class="headerlink" href="#pyspecdata.plot_funcs.image.A" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">A</span></span></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or numpy array</p>
+<dd class="field-odd"><p><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a> or numpy array</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pyspecdata.plot_funcs.image.x">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#pyspecdata.plot_funcs.image.x" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">x</span></span></dt>
 <dd><p>If <cite>A</cite> is a numpy array, then this gives the values along
 the x axis (columns).
 Defaults to the size of the array.
@@ -218,8 +218,8 @@ Not used if <cite>A</cite> is <cite>nddata</cite>.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pyspecdata.plot_funcs.image.y">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#pyspecdata.plot_funcs.image.y" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">y</span></span></dt>
 <dd><p>If <cite>A</cite> is a numpy array, then this gives the values along
 the y axis (columns).
 Defaults to the size of the array.
@@ -232,8 +232,8 @@ Not used if <cite>A</cite> is <cite>nddata</cite>.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pyspecdata.plot_funcs.image.x_first">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">x_first</span></span><a class="headerlink" href="#pyspecdata.plot_funcs.image.x_first" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">x_first</span></span></dt>
 <dd><p>Since it’s designed to represent matrices, an image plot
 by defaults is “transposed” relative to all other plots.
 If you want the first dimension on the x-axis (<em>e.g.</em>, if
@@ -247,8 +247,8 @@ you are plotting a contour plot on top of an image), then set
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pyspecdata.plot_funcs.image.spacing">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">spacing</span></span><a class="headerlink" href="#pyspecdata.plot_funcs.image.spacing" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">spacing</span></span></dt>
 <dd><p>Determines the size of the white/black line drawn
 Defaults to 1</p>
 <dl class="field-list simple">
@@ -259,8 +259,8 @@ Defaults to 1</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pyspecdata.plot_funcs.image.ax">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">ax</span></span><a class="headerlink" href="#pyspecdata.plot_funcs.image.ax" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">ax</span></span></dt>
 <dd><p>the Axis object where the plot should go.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -276,8 +276,8 @@ Defaults to 1</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pyspecdata.plot_funcs.image.origin">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">origin</span></span><a class="headerlink" href="#pyspecdata.plot_funcs.image.origin" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">origin</span></span></dt>
 <dd><p>upper and lower are passed to matplotlib.
 Flip is for 2D nmr, and flips the data manually.</p>
 <dl class="field-list simple">
@@ -310,47 +310,47 @@ fl.plot(z[‘y’:(0,0.01)])</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.plot_funcs.image.image">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_nonuniform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.image.image" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_nonuniform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Please don’t call image directly anymore – use the image method of
 figurelist</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.plot_funcs.image.imagehsv">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">imagehsv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">black</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.image.imagehsv" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">imagehsv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">black</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Map complex-valued data to color using an HSV scheme.</p>
 <p>The phase of the complex number controls the hue while the magnitude
 sets the brightness.  This form of <em>domain coloring</em> is summarized
 below.</p>
 <figure class="align-center" id="id1">
-<img alt="doc_src/_static/presentation_images/image34.png" src="doc_src/_static/presentation_images/image34.png" />
+<img alt="../_images/image34.png" src="../_images/image34.png" />
 <figcaption>
 <p><span class="caption-text">Mapping from phase and magnitude onto the complex color wheel.</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <p>Two typical results from a spin-echo experiment are shown next.</p>
 <figure class="align-center" id="id2">
-<img alt="doc_src/_static/presentation_images/image20.png" src="doc_src/_static/presentation_images/image20.png" />
+<img alt="../_images/image20.png" src="../_images/image20.png" />
 <figcaption>
-<p><span class="caption-text">Raw spin-echo data displayed with <a class="reference internal" href="#pyspecdata.plot_funcs.image.imagehsv" title="pyspecdata.plot_funcs.image.imagehsv"><code class="xref py py-func docutils literal notranslate"><span class="pre">imagehsv()</span></code></a>.</span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
+<p><span class="caption-text">Raw spin-echo data displayed with <code class="xref py py-func docutils literal notranslate"><span class="pre">imagehsv()</span></code>.</span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <figure class="align-center" id="id3">
-<img alt="doc_src/_static/presentation_images/image21.png" src="doc_src/_static/presentation_images/image21.png" />
+<img alt="../_images/image21.png" src="../_images/image21.png" />
 <figcaption>
 <p><span class="caption-text">Coherence pathways visualized after processing.</span><a class="headerlink" href="#id3" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <p>The coherence order scheme for these pathways is illustrated below.</p>
 <figure class="align-center" id="id4">
-<img alt="doc_src/_static/presentation_images/image24.png" src="doc_src/_static/presentation_images/image24.png" />
+<img alt="../_images/image24.png" src="../_images/image24.png" />
 <figcaption>
 <p><span class="caption-text">Evolution of coherence orders under successive pulses.</span><a class="headerlink" href="#id4" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <figure class="align-center" id="id5">
-<img alt="doc_src/_static/presentation_images/image33.png" src="doc_src/_static/presentation_images/image33.png" />
+<img alt="../_images/image33.png" src="../_images/image33.png" />
 <figcaption>
 <p><span class="caption-text">Echo intensity separated by coherence order.</span><a class="headerlink" href="#id5" title="Link to this image">¶</a></p>
 </figcaption>
@@ -358,17 +358,17 @@ below.</p>
 </dd></dl>
 
 </section>
-<section id="module-pyspecdata.plot_funcs.pcolormesh">
-<span id="pyspecdata-plot-funcs-pcolormesh-module"></span><h2>pyspecdata.plot_funcs.pcolormesh module<a class="headerlink" href="#module-pyspecdata.plot_funcs.pcolormesh" title="Link to this heading">¶</a></h2>
+<section id="pyspecdata-plot-funcs-pcolormesh-module">
+<h2>pyspecdata.plot_funcs.pcolormesh module<a class="headerlink" href="#pyspecdata-plot-funcs-pcolormesh-module" title="Link to this heading">¶</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.plot_funcs.pcolormesh.pcolormesh">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.pcolormesh.</span></span><span class="sig-name descname"><span class="pre">pcolormesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'viridis'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shading</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nearest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_independently</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">human_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_balanced_cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handle_axis_sharing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappable_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.pcolormesh.pcolormesh" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.pcolormesh.</span></span><span class="sig-name descname"><span class="pre">pcolormesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'viridis'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shading</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nearest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_independently</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">human_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_balanced_cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handle_axis_sharing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappable_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>generate a pcolormesh and label it with the axis coordinate available
 from the nddata</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fig</strong> (<em>matplotlib figure object</em>) – </p></li>
+<li><p><strong>fig</strong> (<em>matplotlib figure object</em>)</p></li>
 <li><p><strong>cmap</strong> (<em>str</em><em> (</em><em>default 'viridis'</em><em>)</em>) – cmap to pass to matplotlib pcolormesh</p></li>
 <li><p><strong>shading</strong> (<em>str</em><em> (</em><em>default 'nearest'</em><em>)</em>) – the type of shading to pass to matplotlib pcolormesh</p></li>
 <li><p><strong>ax1</strong> (<em>matplotlib axes object</em>) – where do you want the left plot to go?</p></li>
@@ -403,8 +403,8 @@ under a uniform color scale</p>
 </dd></dl>
 
 </section>
-<section id="module-pyspecdata.plot_funcs">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyspecdata.plot_funcs" title="Link to this heading">¶</a></h2>
+<section id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <p>This subpackage contains plotting functions that take advantage of <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code>.  Eventually, all plotting functions should be moved to separate modules in this subpackage.</p>
 </section>
 </section>
@@ -414,14 +414,12 @@ under a uniform color scale</p>
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
-<p class="logo">
-  <a href="../index.html">
-    <img class="logo" src="../_static/pyspec_path_equaltip.png" alt="Logo" />
-    
-  </a>
-</p>
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/pyspec_path_equaltip.png" alt="Logo of pySpecData"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">pySpecData</a></h1>
 
 
 
@@ -433,6 +431,7 @@ under a uniform color scale</p>
 <h3>Navigation</h3>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../find_files.html">Finding Files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the lmfitdata class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
@@ -443,15 +442,27 @@ under a uniform color scale</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">PySpecData Examples</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyspecdata</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyspecdata.html">pyspecdata package</a></li>
+</ul>
+</li>
+</ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">pyspecdata</a><ul>
+  <li><a href="pyspecdata.html">pyspecdata package</a><ul>
+      <li>Previous: <a href="pyspecdata.matrix_math.html" title="previous chapter">pyspecdata.matrix_math package</a></li>
+  </ul></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -459,7 +470,7 @@ under a uniform color scale</p>
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -477,7 +488,7 @@ under a uniform color scale</p>
       &#169;2016, John M. Franck.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

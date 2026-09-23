@@ -8,38 +8,48 @@ pyspecdata.axis\_manipulation.inhomog\_coords module
 ----------------------------------------------------
 
 .. automodule:: pyspecdata.axis_manipulation.inhomog_coords
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.axis\_manipulation.register\_axis module
 ---------------------------------------------------
 
 .. automodule:: pyspecdata.axis_manipulation.register_axis
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.axis\_manipulation.secsy module
 ------------------------------------------
 
 .. automodule:: pyspecdata.axis_manipulation.secsy
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.axis\_manipulation.shear module
 ------------------------------------------
 
 .. automodule:: pyspecdata.axis_manipulation.shear
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: pyspecdata.axis_manipulation
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:

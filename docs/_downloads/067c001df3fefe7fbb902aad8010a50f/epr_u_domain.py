@@ -16,7 +16,7 @@ import re
 psd.init_logging(level="debug")
 Bname = "$B_0$"
 d = psd.find_file(re.escape("220307_S175_KCl.DSC"),
-                  exp_type="francklab_esr/Farhana")
+                  exp_type="francklab_esr/Farhana", zenodo="21084153")
 d.chunk_auto("harmonic")
 d = d["harmonic", 0]["phase", 0]
 d[Bname] *= 1e-4

@@ -17,10 +17,6 @@ Full list of `nddata` methods
 
 .. currentmodule:: pyspecdata
 
-.. autosummary:: 
-    :toctree: generated
-    core.nddata
-
 .. autoclass:: nddata
     :members:
 .. (comment) the :members: properties is needed so it pulls all the members of the class

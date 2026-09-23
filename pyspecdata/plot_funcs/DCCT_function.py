@@ -241,6 +241,7 @@ def DCCT(
         allows user to scale the intensity of data presented
     bbox : list
         contains the following:
+
         :bbox[0]: int
             Left hand side padding between the left side of the figure
             and the left side of the decorations.

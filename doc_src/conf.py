@@ -14,9 +14,7 @@
 
 import sys
 import os
-import shlex
-import mock
-from matplotlib import rcParams, get_data_path
+from matplotlib import get_data_path
 
 print("datapath is", get_data_path())
 # {{{ mock unit registry, which belongs to pint
@@ -39,7 +37,6 @@ if not os.getenv("SPHINX_GALLERY_RUNNING", False):
         def Quantity(self, *args, **kwargs):
             return self
 
-    import sys
     from unittest.mock import MagicMock
 
     # Mock the 'pint' module and its UnitRegistry class
@@ -66,9 +63,9 @@ sys.path.append(os.path.abspath(".."))
 sys.path.insert(0, os.path.abspath("../pyspecdata"))
 sys.path.append(os.path.abspath("../../pint"))
 print("sys.path is", sys.path)
-import pint
+import pint  # noqa: F401,E402 (picks up the mock above)
 
-from pyspecdata.version import __version__
+from pyspecdata.version import __version__  # noqa: E402
 
 # -- General configuration ------------------------------------------------
 
@@ -91,6 +88,7 @@ extensions = [
     #'IPython.sphinxext.ipython_console_highlighting',
     #'IPython.sphinxext.ipython_directive',
     "sphinx_gallery.gen_gallery",
+    "sphinx.ext.apidoc",
 ]
 
 sphinx_gallery_conf = {
@@ -99,16 +97,43 @@ sphinx_gallery_conf = {
         "auto_examples"
     ],  # path to where to save gallery generated output
     "filename_pattern": ".py",  # modified to make more general
-    "ignore_pattern": r"__init__\.py",  # |.*/text_only.*|.*/matplotlib.*',
+    # temp.py is a gitignored scratch file
+    "ignore_pattern": r"__init__\.py|/temp\.py$",
     "reference_url": {
         "pyspecdata": None,
     },
     "doc_module": ("pyspecdata",),
-    ## directory where function/class granular galleries are stored
+    # directory where function/class granular galleries are stored
     "backreferences_dir": "gen_modules/backreferences",
     "image_srcset": ["2x"],
 }
 autosummary_generate = True
+# sphinx-gallery puts functions into its config, so it can't be cached
+suppress_warnings = ["config.cache"]
+# {{{ regenerate the full API reference in auto_api/ on every build
+#     (:no-index: so that the hand-written pages remain the link targets)
+apidoc_modules = [
+    {
+        "path": "../pyspecdata",
+        "destination": "auto_api",
+        "exclude_patterns": ["../pyspecdata/lmfitdataGUI.py"],
+    }
+]
+#     ignore-module-all keeps the package pages from repeating (and trying to
+#     import) everything that the packages re-export
+apidoc_automodule_options = {
+    "members",
+    "undoc-members",
+    "show-inheritance",
+    "no-index",
+    "ignore-module-all",
+}
+# sphinx.ext.apidoc only applies apidoc_automodule_options to module pages,
+# while package pages read this environment variable instead
+os.environ["SPHINX_APIDOC_OPTIONS"] = ",".join(
+    sorted(apidoc_automodule_options)
+)
+# }}}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -153,7 +178,13 @@ language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = []
+exclude_patterns = [
+    "_build",
+    # stale pages that are kept in git, but aren't part of the doc tree
+    "axis_object_plan.rst",
+    "fitdata_old.rst",
+    "temp_stubs.rst",
+]
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -189,11 +220,8 @@ todo_include_todos = True
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# for 0.7.16 alabaster bug, set logo here, and don't include any logo name option
-html_theme_options = {
-    "logo": "pyspec_path_equaltip.png",
-    #'logo_name': None, # don't show the name with the logo
-}
+# (the logo lives in doc_src, not _static, so give it through html_logo)
+html_logo = "pyspec_path_equaltip.png"
 html_favicon = "_static/favicon.ico"
 
 # Add any paths that contain custom themes here, relative to this directory.

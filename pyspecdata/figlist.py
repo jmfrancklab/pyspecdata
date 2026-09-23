@@ -10,12 +10,15 @@ The figure list gives us three things:
     and labeled by 3 different basenames to give 15 plots total
 *   Ability to run the same code from the command line or from within a python
     environment inside latex.
+
     *   this is achieved by choosing figlist (default gui) and figlistl
         (inherits from figlist -- renders to latex -- the :func:`figlist.show`
         method is changed)
     *   potential planned future ability to handle html
+
 *   Ability to handle mayavi plots and matplotlib plots (switch to glumpy,
     etc.?)
+
     *   potential planned future ability to handle gnuplot
 
 .. todo:: 
@@ -36,6 +39,7 @@ The figure list gives us three things:
         using standard matplotlib commands (twinx, subplot, etc.)
     *   figlist will still have a "next" function, but its purpose will be to
         simply:
+
         *   grab the current axis using matplotlib gca() (assuming the id of
             the axis isn't yet assigned to an existing figlist_axis -- see
             below)
@@ -44,23 +48,29 @@ The figure list gives us three things:
             previous bullet point
         *   the next function is only intended to be called explicitly from
             within the organization function
+
     *   figlist will consist simply of a list of figlist_axis objects (a new
         object type), which have the following attributes:
+
         *   type -- indicating the type of object:
+
             *   axis (default)
             *   text (raw latex (or html))
             *   H1 (first level header -- translates to latex section)
             *   H2 (second level...)
+
         *   the name of the plot
         *   a matplotlib or mayavi axes object
         *   the units associated with the axes
         *   a collection.OrderedDict giving the nddata that are associated with
             the plot, by name.
+
             *   If these do not have a name, they will be automatically
                 assigned a name.
             *   The name should be used by the new "plot" method to generate
                 the "label" for the legend, and can be subsequently used to
                 quickly replace data -- e.g. in a Qt application.
+
         *   a dictionary giving any arguments to the pyspecdata.core.plot (or
             countour, waterfall, etc) function
         *   the title -- by default the name of the plot -- can be a setter
@@ -69,8 +79,10 @@ The figure list gives us three things:
         *   do not use check_units -- the plot method (or contour, waterfall,
             etc.) will only add the nddata objects to the OrderedDict, add the
             arguments to the argument dictionary, then exit
+
             *   In the event that more than one plot method is called, the name
                 of the underlying nddaata should be changed
+
         *   a boolean legend_suppress attribute
         *   a boolean legend_internal attribute (to place the legend
             internally, rather than outside the axis)
@@ -81,6 +93,7 @@ The figure list gives us three things:
             (in matplotlib, this should be done with a formatting statement
             rather than by manipulating the axes themselves)
             and finally call autolegend, unless the legend is supressed
+
     *   The "plottype" (currently an argument to the plot function) should be
         an attribute of the axis object
 """
@@ -788,11 +801,12 @@ class figlist(object):
 
         xscale gives the unit scaling
 
-        ..todo::
+        .. todo::
 
             Improve the unit scaling, so that this would also work.
 
             Allow it to include a format string that would use the value.
+
         Parameters
         ----------
 

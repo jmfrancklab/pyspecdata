@@ -42,11 +42,11 @@ function.
 
 
     ----- Results for fitdata: -----
-    output for fitdata: {'M_0': -102.87857607503906, 'M_inf': 102.23079377453595, 'R_1': 6.036261113706332}
+    output for fitdata: {'M_0': np.float64(-102.87857616250544), 'M_inf': np.float64(102.2307937666861), 'R_1': np.float64(6.036261119185841)}
     latex for fitdata: $f(\tau)=102.23 + \left(-1.03\times 10^{2} - 102.23\right) e^{- 6.04 \tau}$
-    $T_1$ for fitdata, 0.1656654642936725
+    $T_1$ for fitdata, 0.1656654641432871
     ----- Results for lmfitdata: -----
-    output for lmfitdata: {'M_inf': 102.23079359781903, 'M_0': -102.8785775851992, 'R_1': 6.0362612172913375}
+    output for lmfitdata: {'R_1': 6.0362612172913375, 'M_0': -102.8785775851992, 'M_inf': 102.23079359781903}
     latex for lmfitdata: $f(\tau)=(102.23) + \left((-1.03\times 10^{2}) - (102.23)\right) e^{- (6.04) \tau}$
     $T_1$ for lmfitdata, 0.1656654614507773
     1: fit with guess |||None
@@ -165,7 +165,7 @@ function.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.759 seconds)
+   **Total running time of the script:** (0 minutes 1.312 seconds)
 
 
 .. _sphx_glr_download_auto_examples_fitting_fit_fake_data.py:

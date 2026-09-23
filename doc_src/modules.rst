@@ -42,6 +42,7 @@ latexscripts
 ------------
 
 .. automodule:: pyspecdata.latexscripts
+   :no-index:
 
 
 ipy
@@ -58,3 +59,4 @@ units
 ------------
 
 .. automodule:: pyspecdata.units
+   :no-index:

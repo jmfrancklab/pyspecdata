@@ -5,7 +5,7 @@ Bruker cw ESR Data
 Load cw Bruker ESR data, both 1D and 2D.
 
 Check out the
-`Simple UV <Cary_simple.html>`_
+:ref:`Simple UV <sphx_glr_auto_examples_UV_Cary_simple.py>`
 example to understand how
 pySpecData locates the file here.
 """

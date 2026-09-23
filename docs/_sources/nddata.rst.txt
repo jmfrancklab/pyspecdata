@@ -16,7 +16,7 @@ Numpy allows you to create multi-dimensional arrays of data.
 
 Conceptually, an :class:`nddata` instance acts as a container that holds the raw
 array along with its descriptive metadata.  A schematic view of this
-structure appears in :numref:`nddata-container-fig` inside the
+structure appears in the figure at the top of the
 API documentation for :class:`pyspecdata.nddata`.
 
 .. figure:: _static/presentation_images/image41.jpg
@@ -131,8 +131,8 @@ multi-dimensional data.
     but follows a distinctly different philosophy.
     Here, we place a strong an emphasis on benefits that can be derived from
     object-oriented programming.
-   For example, we emphasize effort-free error propagation and Fourier transformation,
-   as well as a compact and meaningful slicing notation.
+    For example, we emphasize effort-free error propagation and Fourier transformation,
+    as well as a compact and meaningful slicing notation.
 
 Dimension labels
 ----------------
@@ -366,6 +366,7 @@ below.
    :align: center
 
    Automatic relabeling of the frequency axis.
+
 There is no need to assign the result to a new variable.
 Alternatively, the property ``C`` offers easy access to a copy:
 ``a = d.C.ft('t2')`` leaves ``d`` alone, and returns the FT as a new object

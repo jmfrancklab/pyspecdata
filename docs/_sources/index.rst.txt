@@ -92,6 +92,7 @@ heavy use of this feature to acquire data in real time, as shown below.
 
    A simple GUI window can be used to acquire a spin echo and immediately
    Fourier transform the result.
+
 How do I generate an nddata object?
 -----------------------------------
 
@@ -131,20 +132,25 @@ These and further details are covered in the various sections of the documentati
 .. toctree::
     :maxdepth: 2
 
-    
     nddata.rst
+    find_files.rst
     fitdata.rst
     modules.rst
     notebook.rst
     figlist.rst
     units.rst
-    examples.rst
 
 .. toctree::
     :maxdepth: 2
     :caption: Example Gallery
 
     auto_examples/index
+
+.. toctree::
+    :maxdepth: 2
+    :caption: API Reference
+
+    auto_api/modules
 
 Instrumentation use cases
 -------------------------

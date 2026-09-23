@@ -19,7 +19,7 @@ but rather initializes ``figlist_var``.
 At the end of this file,
 there is a snippet of code that sets
 ``figlist_var`` to choice that's appropriate for the working environment
-(*i.e.*, python, latex environment, *etc.)
+(*i.e.*, python, latex environment, *etc.*)
 
 There are many helper and utility functions that need to be sorted an
 documented by JMF,
@@ -1173,13 +1173,11 @@ class nddata(object):
     For an introduction on how to use ND-Data, see the
     :ref:`Main ND-Data Documentation <nddata-summary-label>`.
 
-    .. _nddata-container-fig:
+    .. figure:: /_static/presentation_images/image69.png
+       :align: center
 
-        .. figure:: ../doc_src/_static/presentation_images/image69.png
-           :align: center
-
-           This annotated diagram highlights the attributes stored within an
-           ``nddata`` instance and how they can be accessed.
+       This annotated diagram highlights the attributes stored within an
+       ``nddata`` instance and how they can be accessed.
     """
 
     want_to_prospa_decim_correct = False
@@ -1872,7 +1870,7 @@ class nddata(object):
 
         See docstring of `figlist_var.image()` for an example
 
-        Attributes
+        Parameters
         ----------
         labels : boolean
             Whether or not the levels should be labeled.
@@ -2440,8 +2438,10 @@ class nddata(object):
     # }}}
     # {{{ get error
     def get_error(self, *args):
-        """get a copy of the errors\neither
-        set_error('axisname',error_for_axis) or set_error(error_for_data)"""
+        """get a copy of the errors
+
+        Use either ``get_error('axisname')`` (errors of an axis) or
+        ``get_error()`` (errors of the data)."""
         if len(args) == 0:
             if self.data_error is None:
                 return None
@@ -5847,9 +5847,12 @@ class nddata(object):
         product, increasing the number of dimensions by the inverse of the
         process by which taking a direct product decreases the number of
         dimensions.  This function chunks axisin into multiple new axes
-        arguments.:
-            axesout -- gives the names of the output axes
-            shapesout -- optional -- if not given, it assumes equal length --
+        arguments:
+
+        axesout
+            gives the names of the output axes
+        shapesout
+            optional -- if not given, it assumes equal length --
             if given, one of the values can be -1, which is assumed length
 
         When there are axes, it assumes that the axes of the new dimensions
@@ -7303,7 +7306,7 @@ class nddata(object):
         datasets,
         and each is named (here, the name is `test_data`).
 
-        .. figure:: ../doc_src/_static/presentation_images/image39.png
+        .. figure:: /_static/presentation_images/image39.png
            :align: center
 
            View of an HDF5 file with nddata arrays and metadata inside

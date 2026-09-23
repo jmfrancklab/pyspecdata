@@ -199,9 +199,8 @@ def emptytest(x):  # test is it is one of various forms of np.empty
 def balance_clims():
     """works with matplotlib to generate a plot
     appropriate for positive and negative
-    from here:
-        https://stackoverflow.com/questions/13060450/\
-                how-to-get-current-plots-clim-in-matplotlib
+    (from `this stackoverflow answer
+    <https://stackoverflow.com/questions/13060450>`_)
     """
     thisi = gci()
     these_clims = thisi.get_clim()
@@ -222,7 +221,7 @@ def process_kwargs(listoftuples, kwargs, pass_through=False, as_attr=False):
 
     Parameters
     ==========
-    kwargs : **dictionary
+    kwargs : dict
 
         The keyword arguments that you want to process.
 
@@ -239,8 +238,8 @@ def process_kwargs(listoftuples, kwargs, pass_through=False, as_attr=False):
         are expected to pass the unprocessed values (in the dictionary after
         the call) on to subsequent processing.
         Importantly, you should *always* end with a `pass_through`=`False` call
-        of this function, or by passing **kwargs to a standard function in the
-        standard way.
+        of this function, or by passing ``**kwargs`` to a standard function in
+        the standard way.
         Otherwise it's possible for the user to pass kwargs that are never
         processed!
     as_attr : bool, object

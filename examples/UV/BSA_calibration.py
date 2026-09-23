@@ -16,6 +16,7 @@ To run the curve for your data:
     correct labels and scan names for all the spectra in your run.
 -   edit the `background` parameter below so that it points to the scan that
     you want to function as your baseline/background.
+
     -   We would rather record the raw absorbance values, rather than rely on
         the spectrometer to subtract and hide the absorbance values of our
         baseline.

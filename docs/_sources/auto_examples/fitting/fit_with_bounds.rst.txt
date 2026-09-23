@@ -40,7 +40,7 @@ to retype them every time.
  .. code-block:: none
 
     ----------  logging output to /home/jmfranck/pyspecdata.0.log  ----------
-    --> fit_with_bounds.py(28):pyspecdata.core             <module> 2025-07-08 15:00:10,100
+    --> fit_with_bounds.py(28):pyspecdata.core             <module> 2026-09-23 14:10:39,987
     INFO: Functional Form: A*exp(-decay**2*x**2)*sin(shift + x/period)
 
 
@@ -105,7 +105,7 @@ to retype them every time.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.443 seconds)
+   **Total running time of the script:** (0 minutes 1.077 seconds)
 
 
 .. _sphx_glr_download_auto_examples_fitting_fit_with_bounds.py:

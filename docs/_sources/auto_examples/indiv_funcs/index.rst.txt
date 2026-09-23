@@ -67,7 +67,7 @@ These are not very important -- just tests to verify the performance of individu
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="show an easy method for matching colors using pyspecdata">
+    <div class="sphx-glr-thumbcontainer" tooltip="Matching Colors">
 
 .. only:: html
 
@@ -78,7 +78,7 @@ These are not very important -- just tests to verify the performance of individu
 
 .. raw:: html
 
-      <div class="sphx-glr-thumbnail-title">show an easy method for matching colors using pyspecdata</div>
+      <div class="sphx-glr-thumbnail-title">Matching Colors</div>
     </div>
 
 

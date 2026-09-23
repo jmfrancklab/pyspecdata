@@ -50,18 +50,35 @@ Examples involving Bruker Electron Spin (Paramagnetic) Resonance Data.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This makes use of the package pint, which is a very nice package for handling units.">
+    <div class="sphx-glr-thumbcontainer" tooltip="Calculation of the Covariance Matrix">
 
 .. only:: html
 
-  .. image:: /auto_examples/ESR/images/thumb/sphx_glr_QESR_thumb.png
+  .. image:: /auto_examples/ESR/images/thumb/sphx_glr_calculate_covariance_thumb.png
     :alt:
 
-  :ref:`sphx_glr_auto_examples_ESR_QESR.py`
+  :ref:`sphx_glr_auto_examples_ESR_calculate_covariance.py`
 
 .. raw:: html
 
-      <div class="sphx-glr-thumbnail-title">Quantitative ESR</div>
+      <div class="sphx-glr-thumbnail-title">Calculation of the Covariance Matrix</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Load CIQTEK JSON EPR data through pyspecdata.find_file.">
+
+.. only:: html
+
+  .. image:: /auto_examples/ESR/images/thumb/sphx_glr_ciqtek_example_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_ESR_ciqtek_example.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">CIQTEK cw ESR Data</div>
     </div>
 
 
@@ -75,5 +92,6 @@ Examples involving Bruker Electron Spin (Paramagnetic) Resonance Data.
 
    /auto_examples/ESR/epr_u_domain
    /auto_examples/ESR/esr_example
-   /auto_examples/ESR/QESR
+   /auto_examples/ESR/calculate_covariance
+   /auto_examples/ESR/ciqtek_example
 

@@ -68,8 +68,6 @@ def dot(self, arg):
     :func:`~pyspecdata.nddata.along` to
     specify the dimensions for matrix
     multiplication / dot product.
-
-    .. literalinclude:: ../examples/matrix_mult.py
     """
     time_dotstart = time.time()
     if hasattr(self, "_matmul_along"):

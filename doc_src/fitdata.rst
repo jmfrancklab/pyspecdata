@@ -38,10 +38,6 @@ illustrated here.
 
 .. currentmodule:: pyspecdata.lmfitdata
 
-.. autosummary::
-    :toctree: generated
-    ~lmfitdata
-
 .. autoclass:: lmfitdata
     :members:
 

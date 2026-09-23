@@ -1,8 +1,8 @@
 r"""This subpackage holds all the routines for reading raw data in proprietary
 formats.
 It's intended to be accessed entirely through the function :func:`find_file`,
-which uses :module:`datadir` to search for the filename, then automatically
-identifies the file type and calls the appropriate module to load the data into
+which uses :mod:`~pyspecdata.datadir` to search for the filename, then
+automatically identifies the file type and calls the appropriate module to load the data into
 an nddata.
 
 Currently, Bruker file formats (both ESR and NMR), CIQTEK JSON EPR files, and
@@ -11,10 +11,7 @@ Currently, Bruker file formats (both ESR and NMR), CIQTEK JSON EPR files, and
 Users/developers are very strongly encouraged to add support for new file
 types.
 
-.. currentmodule:: pyspecdata.load_files
-
-.. autofunction:: find_file
-
+See :func:`~pyspecdata.load_files.find_file` for details.
 """
 
 from . import bruker_nmr
@@ -68,7 +65,7 @@ def search_filename(
         Teams or Google Drive, etc.)
     *   The user wants to seamlessly access the data on their laptop.
 
-    .. figure:: ../../doc_src/_static/presentation_images/image38.jpeg
+    .. figure:: /_static/presentation_images/image38.jpeg
        :align: center
 
        Bruker TopSpin interface showing a typical NMR directory.
@@ -82,6 +79,7 @@ def search_filename(
         your computer, where local copies of files are stored, and then also
         set up one or more remotes using rclone (which is an open source cloud
         access tool).
+
         *   pyspecdata can automatically search all your rclone remotes when
             you try to load a file.  This is obviously slow.
         *   After the auto-search, it adds a line to ``.pyspecdata`` so that it
@@ -302,6 +300,7 @@ def find_file(
         your computer, where local copies of files are stored, and then also
         set up one or more remotes using rclone (which is an open source cloud
         access tool).
+
         *   pyspecdata can automatically search all your rclone remotes when
             you try to load a file.  This is obviously slow.
         *   After the auto-search, it adds a line to ``.pyspecdata`` so that it
@@ -402,8 +401,8 @@ def find_file(
         :add_dims: passed to :func:`~pyspecdata.load_files.load_indiv_file`
         :use_sweep: passed to :func:`~pyspecdata.load_files.load_indiv_file`
         :indirect_dimlabels: passed to
-                             :func:`~pyspecdata.load_files.load_indiv_file`
-                             lookup : dictionary with str:function pairs
+            :func:`~pyspecdata.load_files.load_indiv_file`
+    lookup : dictionary with str:function pairs
         types of postprocessing to add to the `postproc_lookup` dictionary
     zenodo : str, optional
         Deposition number on Zenodo.  When the requested file is not found
@@ -546,6 +545,7 @@ def format_listofexps(args):
     ----------
     args : list or tuple
         can be in one of two formats
+
         :``(dirname,[i,j,k,...N])``:  typically used, *e.g.* for
             Bruker NMR experiments.  ``i,j,...N`` are integer numbers
             referring to individual experiments that are stored in

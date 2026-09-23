@@ -8,54 +8,68 @@ pyspecdata.fourier.convolve module
 ----------------------------------
 
 .. automodule:: pyspecdata.fourier.convolve
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.fourier.ft module
 ----------------------------
 
 .. automodule:: pyspecdata.fourier.ft
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.fourier.ft\_shift module
 -----------------------------------
 
 .. automodule:: pyspecdata.fourier.ft_shift
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.fourier.ftshift module
 ---------------------------------
 
 .. automodule:: pyspecdata.fourier.ftshift
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.fourier.ift module
 -----------------------------
 
 .. automodule:: pyspecdata.fourier.ift
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.fourier.shear module
 -------------------------------
 
 .. automodule:: pyspecdata.fourier.shear
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: pyspecdata.fourier
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:

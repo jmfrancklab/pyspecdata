@@ -84,7 +84,7 @@ class lmfitdata(nddata):
     one of its variables matching the name of the dimension that the
     user would like to fit to.
 
-    .. figure:: ../doc_src/_static/presentation_images/image64.png
+    .. figure:: /_static/presentation_images/image64.png
        :align: center
 
        A typical T₁ relaxation fit produced with ``lmfitdata``.

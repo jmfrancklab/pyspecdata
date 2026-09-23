@@ -8,30 +8,38 @@ pyspecdata.matrix\_math.dot module
 ----------------------------------
 
 .. automodule:: pyspecdata.matrix_math.dot
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.matrix\_math.nnls module
 -----------------------------------
 
 .. automodule:: pyspecdata.matrix_math.nnls
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.matrix\_math.svd module
 ----------------------------------
 
 .. automodule:: pyspecdata.matrix_math.svd
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: pyspecdata.matrix_math
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:

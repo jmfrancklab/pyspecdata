@@ -8,62 +8,88 @@ pyspecdata.load\_files.acert module
 -----------------------------------
 
 .. automodule:: pyspecdata.load_files.acert
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.load\_files.bruker\_esr module
 -----------------------------------------
 
 .. automodule:: pyspecdata.load_files.bruker_esr
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.load\_files.bruker\_nmr module
 -----------------------------------------
 
 .. automodule:: pyspecdata.load_files.bruker_nmr
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
+
+pyspecdata.load\_files.ciqtek module
+------------------------------------
+
+.. automodule:: pyspecdata.load_files.ciqtek
+   :ignore-module-all:
+   :members:
+   :no-index:
+   :show-inheritance:
+   :undoc-members:
 
 pyspecdata.load\_files.load\_cary module
 ----------------------------------------
 
 .. automodule:: pyspecdata.load_files.load_cary
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.load\_files.open\_subpath module
 -------------------------------------------
 
 .. automodule:: pyspecdata.load_files.open_subpath
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.load\_files.prospa module
 ------------------------------------
 
 .. automodule:: pyspecdata.load_files.prospa
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.load\_files.zenodo module
 ------------------------------------
 
 .. automodule:: pyspecdata.load_files.zenodo
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: pyspecdata.load_files
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:

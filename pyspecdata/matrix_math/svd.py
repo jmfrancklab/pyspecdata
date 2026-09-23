@@ -8,7 +8,8 @@ def svd(self, todim, fromdim):
         If you are using it when this note is still around, be sure to
         `.copy_props(`
 
-        Also, error, units, are not currently propagated, but could be relatively easily!
+        Also, error, units, are not currently propagated, but could be
+        relatively easily!
 
     If
 
@@ -19,9 +20,11 @@ def svd(self, todim, fromdim):
     >>> result = U @ Sigma @ Vh
 
     will be the same as ``thisinstance``.
-    Note that this relies on the fact that nddata matrix multiplication doesn't care about the ordering
-    of the dimensions (see :method:`~pyspecdata.core.dot`).
-    The vector space that contains the singular values is called `'SV'` (see more below).
+    Note that this relies on the fact that nddata matrix multiplication
+    doesn't care about the ordering of the dimensions (see
+    :meth:`~pyspecdata.nddata.dot`).
+    The vector space that contains the singular values is called `'SV'` (see
+    more below).
 
     Parameters
     ==========
@@ -51,9 +54,9 @@ def svd(self, todim, fromdim):
     new_order = all_but + [todim,fromdim]
     self.reorder(new_order)
     U, Sigma, Vh = np.linalg.svd(self.data, full_matrices=False)
-    U = self.__class__(U,all_but + [todim,'SV'])
-    Vh = self.__class__(Vh,all_but + ['SV',fromdim])
-    Sigma = self.__class__(Sigma, all_but + ['SV'])
+    U = self.__class__(U,all_but + [todim,"SV"])
+    Vh = self.__class__(Vh,all_but + ["SV",fromdim])
+    Sigma = self.__class__(Sigma, all_but + ["SV"])
     # {{{ label the axes
     for j in all_but:
         U.set_axis(j,self.getaxis(j))

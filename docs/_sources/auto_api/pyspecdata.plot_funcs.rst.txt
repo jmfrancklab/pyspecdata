@@ -8,30 +8,38 @@ pyspecdata.plot\_funcs.DCCT\_function module
 --------------------------------------------
 
 .. automodule:: pyspecdata.plot_funcs.DCCT_function
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.plot\_funcs.image module
 -----------------------------------
 
 .. automodule:: pyspecdata.plot_funcs.image
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.plot\_funcs.pcolormesh module
 ----------------------------------------
 
 .. automodule:: pyspecdata.plot_funcs.pcolormesh
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: pyspecdata.plot_funcs
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:

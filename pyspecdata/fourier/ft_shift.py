@@ -142,8 +142,9 @@ def set_ft_initial(self, axis, which_domain="t", shift=True):
       "frequency-like", which is used in rendering the axes when plotting.
     - Say whether or not we will want the FT to be shifted so that it's center
       is at zero, or not.
-        - More generally, this is achieved by setting the FT "start points"
-          used to determine the windows on the periodic functions.
+
+      - More generally, this is achieved by setting the FT "start points"
+        used to determine the windows on the periodic functions.
 
     Parameters
     ==========
@@ -223,12 +224,12 @@ def ft_new_startpoint(self, axis, which_domain, value=None, nearest=False):
         inverse domain and/or are willing to
         deal with the consequences.
 
-        .. figure:: ../../doc_src/_static/presentation_images/image54.png
+        .. figure:: /_static/presentation_images/image54.png
            :align: center
 
            Aliasing and axis registration applied to a simple Gaussian example.
 
-        .. figure:: ../../doc_src/_static/presentation_images/image62.png
+        .. figure:: /_static/presentation_images/image62.png
            :align: center
 
            Correcting the time origin in NMR greatly improves the phasing.

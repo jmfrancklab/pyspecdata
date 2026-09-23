@@ -20,166 +20,208 @@ pyspecdata.axis\_class module
 -----------------------------
 
 .. automodule:: pyspecdata.axis_class
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.core module
 ----------------------
 
 .. automodule:: pyspecdata.core
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.datadir module
 -------------------------
 
 .. automodule:: pyspecdata.datadir
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.dict\_utils module
 -----------------------------
 
 .. automodule:: pyspecdata.dict_utils
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.figlist module
 -------------------------
 
 .. automodule:: pyspecdata.figlist
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.fl\_dummy module
 ---------------------------
 
 .. automodule:: pyspecdata.fl_dummy
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.fornotebook module
 -----------------------------
 
 .. automodule:: pyspecdata.fornotebook
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.general\_functions module
 ------------------------------------
 
 .. automodule:: pyspecdata.general_functions
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.generate\_fake\_data module
 --------------------------------------
 
 .. automodule:: pyspecdata.generate_fake_data
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.hdf\_utils module
 ----------------------------
 
 .. automodule:: pyspecdata.hdf_utils
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.ipy module
 ---------------------
 
 .. automodule:: pyspecdata.ipy
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.latexscripts module
 ------------------------------
 
 .. automodule:: pyspecdata.latexscripts
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.lmfitdata module
 ---------------------------
 
 .. automodule:: pyspecdata.lmfitdata
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.mpl\_utils module
 ----------------------------
 
 .. automodule:: pyspecdata.mpl_utils
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.ndshape module
 -------------------------
 
 .. automodule:: pyspecdata.ndshape
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.nnls module
 ----------------------
 
 .. automodule:: pyspecdata.nnls
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.placeholder module
 -----------------------------
 
 .. automodule:: pyspecdata.placeholder
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.rec\_utils module
 ----------------------------
 
 .. automodule:: pyspecdata.rec_utils
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.units module
 -----------------------
 
 .. automodule:: pyspecdata.units
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 pyspecdata.version module
 -------------------------
 
 .. automodule:: pyspecdata.version
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: pyspecdata
+   :ignore-module-all:
    :members:
-   :undoc-members:
+   :no-index:
    :show-inheritance:
+   :undoc-members:

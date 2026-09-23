@@ -57,12 +57,8 @@ We use this to demonstrate:
 
     ----------  logging output to /home/jmfranck/pyspecdata.0.log  ----------
     1: initial spectrum |||mT
-    2: u-domain |||kcyc · (T)$^{-1}$
+    2: u-domain |||kcyc/T
 
-    --> _mathtext.py(648):matplotlib.mathtext           _get_glyph 2025-07-08 14:55:19,900
-    INFO: Substituting symbol F from STIXNonUnicode
-    --> _mathtext.py(648):matplotlib.mathtext           _get_glyph 2025-07-08 14:55:20,252
-    INFO: Substituting symbol F from STIXNonUnicode
 
 
 
@@ -79,7 +75,7 @@ We use this to demonstrate:
     psd.init_logging(level="debug")
     Bname = "$B_0$"
     d = psd.find_file(re.escape("220307_S175_KCl.DSC"),
-                      exp_type="francklab_esr/Farhana")
+                      exp_type="francklab_esr/Farhana", zenodo="21084153")
     d.chunk_auto("harmonic")
     d = d["harmonic", 0]["phase", 0]
     d[Bname] *= 1e-4
@@ -102,7 +98,7 @@ We use this to demonstrate:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.692 seconds)
+   **Total running time of the script:** (0 minutes 0.705 seconds)
 
 
 .. _sphx_glr_download_auto_examples_ESR_epr_u_domain.py:

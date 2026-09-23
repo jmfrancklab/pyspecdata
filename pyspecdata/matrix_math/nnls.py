@@ -96,16 +96,16 @@ def nnls(
     parameter :math:`\lambda` according to Tikhonov regularization.
 
     To perform regularized minimization in 1 dimension, provide
-    :str:`dimname_list`, :nddata:`newaxis_dict`, :function:`kernel_func`, and
+    `dimname_list`, `newaxis_dict`, `kernel_func`, and
     regularization parameter `l`. One may set `l` to a :double: of the
     regularization parameter of choice (found, for instance, through L-curve
-    analysis) or set `l` to :str:`BRD` to enable automatic selection of a
+    analysis) or set `l` to `BRD` to enable automatic selection of a
     regularization parameter via the BRD algorithm - namely that described in
     Venkataramanan et al. 2002 but adapted for 1D case (DOI:10.1109/78.995059).
 
     To perform regularized minimization in 2 dimensions, set `l` to
-    :str:`BRD` and provide a tuple of parameters :str:`dimname_list`,
-    :nddata:`newaxis_dict`, and :function:`kernel_func`.  Algorithm
+    `BRD` and provide a tuple of parameters `dimname_list`,
+    `newaxis_dict`, and `kernel_func`.  Algorithm
     described in Venkataramanan et al. 2002 is performed which determines
     optimal :math:`\lambda` for the data (DOI:10.1109/78.995059).
     Note that setting `l` to a :double: for a regularization
@@ -154,7 +154,7 @@ def nnls(
     l : double (default 0) or str
         the regularization parameter :math:`lambda` -- if this is
         set to 0, the algorithm reverts to standard nnls.  If this
-        is set to :str:`BRD`, then automatic parameter selection is executed
+        is set to `BRD`, then automatic parameter selection is executed
         according to the BRD algorithm, either in 1-dimension or
         2-dimensions depending on presence of tuple synax
         (i.e., specifying more than 1 dimension).
@@ -173,7 +173,7 @@ def nnls(
         (innermost).
 
         If the tuple syntax is used to input 2 dimensions and
-        :str:`BRD` is specified, then the individual,
+        `BRD` is specified, then the individual,
         uncompressed kernels :math:`K_{1}` and :math:`K_{2}`
         are returned as properties of the nddata "K1" and "K2"
         respectively. The number of singular values used to

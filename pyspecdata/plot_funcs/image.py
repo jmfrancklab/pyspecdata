@@ -68,7 +68,8 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
                         " For example, if you are looking at NMR data with a"
                         " set of variable delays that are unevenly spaced,"
                         " relabel this axis by index number -->"
-                        " .C.set_axis('%s','#').set_units('%s','scan #').\nThen"
+                        " .C.set_axis('%s','#').set_units('%s','scan #')."
+                        "\nThen"
                         " you have an accurate representation of your data"
                         % (2 * (thisaxis,))
                     )
@@ -247,31 +248,31 @@ def imagehsv(A, logscale=False, black=False, scaling=None):
     sets the brightness.  This form of *domain coloring* is summarized
     below.
 
-    .. figure:: ../doc_src/_static/presentation_images/image34.png
+    .. figure:: /_static/presentation_images/image34.png
        :align: center
 
        Mapping from phase and magnitude onto the complex color wheel.
 
     Two typical results from a spin-echo experiment are shown next.
 
-    .. figure:: ../doc_src/_static/presentation_images/image20.png
+    .. figure:: /_static/presentation_images/image20.png
        :align: center
 
        Raw spin-echo data displayed with :func:`imagehsv`.
 
-    .. figure:: ../doc_src/_static/presentation_images/image21.png
+    .. figure:: /_static/presentation_images/image21.png
        :align: center
 
        Coherence pathways visualized after processing.
 
     The coherence order scheme for these pathways is illustrated below.
 
-    .. figure:: ../doc_src/_static/presentation_images/image24.png
+    .. figure:: /_static/presentation_images/image24.png
        :align: center
 
        Evolution of coherence orders under successive pulses.
 
-    .. figure:: ../doc_src/_static/presentation_images/image33.png
+    .. figure:: /_static/presentation_images/image33.png
        :align: center
 
        Echo intensity separated by coherence order.
@@ -367,19 +368,24 @@ def fl_image(self, A, **kwargs):
       create the direct product is finished iterating.
     - If `A` consists of complex data, then an HSV plot
       (misnomer, actually an HV plot) is used:
+
       - convert to polar form: :math:`z=\rho \exp(i \phi)`
       - :math:`\phi` determines the color (Hue)
+
         - Color wheel is cyclical, like :math:`\exp(i \phi)`
         - red is taken as :math:`\phi=0`, purely real and positive
         - green-blue is :math:`pi` radians out of phase with red and
           therefore negative real
+
       - :math:`\rho` determines the intensity (value)
+
         - Depending on whether or not `black` is set (either as a
           keyword argument, or `fl.black`, the background will be
           black with high :math:`\rho` values "lit up" (intended for
           screen plotting) or the background will be white with
           the high :math:`\rho` values "colored in" (intended for
           printing)
+
     - If the data type (`dtype`) of the data in `A` is real
       (typically achieved by calling `abs(A)` or
       `A.runcopy(real)`), then `A` is plotted with a colormap and

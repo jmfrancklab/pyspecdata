@@ -24,13 +24,14 @@ Bruker cw ESR Data
 Load cw Bruker ESR data, both 1D and 2D.
 
 Check out the
-`Simple UV <Cary_simple.html>`_
+:ref:`Simple UV <sphx_glr_auto_examples_UV_Cary_simple.py>`
 example to understand how
 pySpecData locates the file here.
 
-.. GENERATED FROM PYTHON SOURCE LINES 12-14
+.. GENERATED FROM PYTHON SOURCE LINES 12-16
 
 .. code-block:: Python
+
 
     import matplotlib.pyplot as plt
     import pyspecdata as psd
@@ -41,22 +42,29 @@ pySpecData locates the file here.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 15-18
+
+.. GENERATED FROM PYTHON SOURCE LINES 17-20
 
 Load some 1D ESR data with harmonic + phase info.
 The data is initial organized into two dimensions -- `harmonic` and $B_0$.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 18-25
+.. GENERATED FROM PYTHON SOURCE LINES 20-33
 
 .. code-block:: Python
 
 
-    d = psd.find_file("S175R1a.*DHPC.*200304",
-            exp_type='francklab_esr/Sam')
+    d = psd.find_file(
+        "S175R1a.*DHPC.*today.*200304.*",
+        exp_type="francklab_esr/Sam",
+        zenodo="21287247",
+    )
     print(d.shape)
-    print("here, we see the harmonic axis contains both harmonic and phase info",repr(d.getaxis('harmonic')))
-    d.chunk_auto('harmonic','phase')
+    print(
+        "here, we see the harmonic axis contains both harmonic and phase info",
+        repr(d.getaxis("harmonic")),
+    )
+    d.chunk_auto("harmonic", "phase")
 
 
 
@@ -107,10 +115,11 @@ The data is initial organized into two dimensions -- `harmonic` and $B_0$.
             [ 1.72233837e-03, -9.90763420e-05],
             [-2.16840206e-05,  6.24455227e-03],
             [ 5.35087800e-03, -9.71951497e-03],
-            [ 5.82405591e-04, -3.06429791e-03]]], dtype='>f8')
+            [ 5.82405591e-04, -3.06429791e-03]]],
+          shape=(2048, 5, 2), dtype='>f8')
     	dimlabels=['$B_0$', 'harmonic', 'phase']
     	axes={`$B_0$':array([3436.        , 3436.07324219, 3436.14648438, ..., 3585.78027362,
-           3585.85351581, 3585.926758  ])
+           3585.85351581, 3585.926758  ], shape=(2048,))
     			+/-None,
     		`harmonic':array([1, 2, 3, 4, 5])
     			+/-None,
@@ -120,11 +129,12 @@ The data is initial organized into two dimensions -- `harmonic` and $B_0$.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 26-27
+.. GENERATED FROM PYTHON SOURCE LINES 34-36
 
-`chunk_auto` breaks the `harmonic` dimensions since it was labeled with an axis that had 2 fields.
+`chunk_auto` breaks the `harmonic` dimensions since it was labeled with an
+axis that had 2 fields.
 
-.. GENERATED FROM PYTHON SOURCE LINES 27-35
+.. GENERATED FROM PYTHON SOURCE LINES 36-44
 
 .. code-block:: Python
 
@@ -132,8 +142,8 @@ The data is initial organized into two dimensions -- `harmonic` and $B_0$.
     print(d.shape)
 
     plt.figure(1)
-    psd.plot(d['phase',0], alpha=0.5)
-    psd.plot(d['phase',1], ':', alpha=0.5)
+    psd.plot(d["phase", 0], alpha=0.5)
+    psd.plot(d["phase", 1], ":", alpha=0.5)
     plt.title("1D Data with Multiple Harmonics")
 
 
@@ -155,22 +165,29 @@ The data is initial organized into two dimensions -- `harmonic` and $B_0$.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-37
+.. GENERATED FROM PYTHON SOURCE LINES 45-46
 
 Next, let's load some power-saturation data
 
-.. GENERATED FROM PYTHON SOURCE LINES 37-46
+.. GENERATED FROM PYTHON SOURCE LINES 46-62
 
 .. code-block:: Python
 
 
-    d = psd.find_file("Power.*Sat.*200303",
-            exp_type='francklab_esr/Sam')
-    d.chunk_auto('harmonic','phase')
+    d = psd.find_file(
+        ".*Power.*Sat_200303.*",
+        exp_type="francklab_esr/Sam",
+        zenodo="21287247",
+    )
+    d.chunk_auto("harmonic", "phase")
     plt.figure(2)
-    psd.image(d['harmonic',0]['phase',0].C.set_axis('Microwave Power','#').set_units('Microwave Power','scan #'))
+    psd.image(
+        d["harmonic", 0]["phase", 0]
+        .C.set_axis("Microwave Power", "#")
+        .set_units("Microwave Power", "scan #")
+    )
     plt.title("2D Power Saturation")
-    plt.gca().set_aspect('auto')
+    plt.gca().set_aspect("auto")
     plt.show()
 
 
@@ -187,7 +204,7 @@ Next, let's load some power-saturation data
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.970 seconds)
+   **Total running time of the script:** (0 minutes 0.973 seconds)
 
 
 .. _sphx_glr_download_auto_examples_ESR_esr_example.py:

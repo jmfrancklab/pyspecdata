@@ -93,8 +93,9 @@ To get the results of the code to appear, you need to run this command *twice* t
 
 It might take a few passes, but you should able to run this command without have latex complain about missing packages!
 * If this happens in miktex, you need to
- * go to miktex settings → general, and set it to automatically download new pages. Be sure to click "for all users"!
- * delete `notebook.aux` (`rm notebook.aux`) and the scripts directory, and run again
+
+  * go to miktex settings → general, and set it to automatically download new pages. Be sure to click "for all users"!
+  * delete `notebook.aux` (`rm notebook.aux`) and the scripts directory, and run again
 
 * The first time you do this, miktex might need to install many packages,
   so that you need to keep hitting enter and then reattempting.
@@ -180,7 +181,7 @@ How it works
 * To compile, use ``pdflatex_notebook_wrapper --xelatex`` 
 
 The LaTeX end
-`````````````
+^^^^^^^^^^^^^
 
 The file `mypython.sty` looks for the `python` environment, it pulls the relevant
 code, outputs it to ``scripts/*.py`` and then writes a command to
@@ -190,7 +191,7 @@ The ``scripts/*.tex`` output is only updated once
 ``update_notebook_pythonscripts`` (without arguments) is run.
 
 The python end
-``````````````
+^^^^^^^^^^^^^^
 
 ``update_notebook_pythonscripts`` runs through the various
 ``scripts/*.py`` files, checks and checks whether or not they

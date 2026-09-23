@@ -1371,23 +1371,23 @@ def log_fname(logname, fname, dirname, exp_type):
 
     Also, by setting the `err` flag to True, you can generate an error message
     that will guide you on how to selectively copy down this data from a
-    remote source (google drive, etc.), *e.g.*:
+    remote source (google drive, etc.), *e.g.*::
 
-    ``Traceback (most recent call last):
-      File "proc_square_refl.py", line 21, in <module>
-        directory=getDATADIR(exp_type='test_equip'))
-      File "c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py", line 6630,
-        in __init__ check_only=True, directory=directory)
-      File "c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py", line 1041,
-        in h5nodebypath +errmsg)
-    AttributeError: You're checking for a node in a file (200110_pulse_2.h5)
-      that does not exist
-    I can't find 200110_pulse_2.h5 in C:\Users\johnf\exp_data\test_equip\, so
-      I'm going to search for t in your rclone remotes
-    checking remote g_syr:
-    You should be able to retrieve this file with:
-    rclone copy -v --include '200110_pulse_2.h5' g_syr:exp_data/test_equip
-    C:\\Users\\johnf\\exp_data\\test_equip``
+        Traceback (most recent call last):
+          File "proc_square_refl.py", line 21, in <module>
+            directory=getDATADIR(exp_type='test_equip'))
+          File "c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py",
+            line 6630, in __init__ check_only=True, directory=directory)
+          File "c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py",
+            line 1041, in h5nodebypath +errmsg)
+        AttributeError: You're checking for a node in a file
+          (200110_pulse_2.h5) that does not exist
+        I can't find 200110_pulse_2.h5 in C:\Users\johnf\exp_data\test_equip\,
+          so I'm going to search for t in your rclone remotes
+        checking remote g_syr:
+        You should be able to retrieve this file with:
+        rclone copy -v --include '200110_pulse_2.h5' g_syr:exp_data/test_equip
+        C:\\Users\\johnf\\exp_data\\test_equip
     """
     thefields = ["Filename", "Path", "exp_type"]
     therow = [fname, dirname, exp_type]
