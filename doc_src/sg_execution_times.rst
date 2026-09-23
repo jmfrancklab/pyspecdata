@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:07.653** total execution time for 29 files **from all galleries**:
+**02:58.552** total execution time for 29 files **from all galleries**:
 
 .. container::
 
@@ -32,8 +32,47 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
+   * - :ref:`sphx_glr_auto_examples_temp.py` (``../examples/temp.py``)
+     - 01:24.272
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_ESR_calculate_covariance.py` (``../examples/ESR/calculate_covariance.py``)
+     - 01:17.913
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_image_plot.py` (``../examples/image_plot.py``)
+     - 00:03.663
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_UV_ellmans.py` (``../examples/UV/ellmans.py``)
+     - 00:02.675
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_UV_BSA_calibration.py` (``../examples/UV/BSA_calibration.py``)
+     - 00:02.072
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_ESR_ciqtek_example.py` (``../examples/ESR/ciqtek_example.py``)
+     - 00:01.419
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_ESR_esr_example.py` (``../examples/ESR/esr_example.py``)
+     - 00:01.223
+     - 0.0
    * - :ref:`sphx_glr_auto_examples_ILT_BRD_test.py` (``../examples/ILT/BRD_test.py``)
-     - 00:07.653
+     - 00:01.218
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_fitting_fit_complex_with_transform.py` (``../examples/fitting/fit_complex_with_transform.py``)
+     - 00:01.180
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_fitting_fit_fake_data.py` (``../examples/fitting/fit_fake_data.py``)
+     - 00:00.794
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_ESR_epr_u_domain.py` (``../examples/ESR/epr_u_domain.py``)
+     - 00:00.728
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_UV_Cary_simple.py` (``../examples/UV/Cary_simple.py``)
+     - 00:00.482
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_fitting_fit_complex.py` (``../examples/fitting/fit_complex.py``)
+     - 00:00.466
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_fitting_fit_with_bounds.py` (``../examples/fitting/fit_with_bounds.py``)
+     - 00:00.446
      - 0.0
    * - :ref:`sphx_glr_auto_examples_DCCT_DCCT_dimensions.py` (``../examples/DCCT/DCCT_dimensions.py``)
      - 00:00.000
@@ -41,52 +80,16 @@ Computation times
    * - :ref:`sphx_glr_auto_examples_DCCT_DCCT_side_by_side.py` (``../examples/DCCT/DCCT_side_by_side.py``)
      - 00:00.000
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_ESR_QESR.py` (``../examples/ESR/QESR.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_ESR_epr_u_domain.py` (``../examples/ESR/epr_u_domain.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_ESR_esr_example.py` (``../examples/ESR/esr_example.py``)
-     - 00:00.000
-     - 0.0
    * - :ref:`sphx_glr_auto_examples_ILT_2DILT.py` (``../examples/ILT/2DILT.py``)
      - 00:00.000
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_UV_BSA_calibration.py` (``../examples/UV/BSA_calibration.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_UV_Cary_simple.py` (``../examples/UV/Cary_simple.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_UV_ellmans.py` (``../examples/UV/ellmans.py``)
-     - 00:00.000
-     - 0.0
    * - :ref:`sphx_glr_auto_examples_basic_example.py` (``../examples/basic_example.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_calculate_covariance.py` (``../examples/calculate_covariance.py``)
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_convolution.py` (``../examples/convolution.py``)
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_error_example.py` (``../examples/error_example.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_fitting_fit_complex.py` (``../examples/fitting/fit_complex.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_fitting_fit_complex_with_transform.py` (``../examples/fitting/fit_complex_with_transform.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_fitting_fit_fake_data.py` (``../examples/fitting/fit_fake_data.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_fitting_fit_with_bounds.py` (``../examples/fitting/fit_with_bounds.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_image_plot.py` (``../examples/image_plot.py``)
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_indiv_funcs_convolve.py` (``../examples/indiv_funcs/convolve.py``)
@@ -114,8 +117,5 @@ Computation times
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_ppm_example.py` (``../examples/ppm_example.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_temp.py` (``../examples/temp.py``)
      - 00:00.000
      - 0.0
