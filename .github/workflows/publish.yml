@@ -30,7 +30,8 @@ env:
   # Tell Meson/meson-python to use MinGW toolchain on Windows.
   # PATH is amended by the Windows job steps; here we just point compilers.
   CIBW_ENVIRONMENT_WINDOWS: "CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ FC=x86_64-w64-mingw32-gfortran PKG_CONFIG=C:/msys64/ucrt64/bin/pkgconf.exe"
-  CIBW_ENVIRONMENT_MACOS: "MACOSX_DEPLOYMENT_TARGET=15.0 FC=gfortran"
+  # (CIBW_ENVIRONMENT_MACOS is set per runner in the macOS job, since the
+  # minimum macOS version of each wheel is set by the runner that builds it)
 
 jobs:
   merge_guard:
@@ -246,7 +247,12 @@ jobs:
     needs: [test, version_bump]
     strategy:
       matrix:
-        os: [macos-latest, macos-15, macos-14]   # arm64 and Intel (x86_64)
+        # all arm64.  gfortran's bundled runtime libraries only run on the
+        # macOS version of the runner that built them (and newer), so each
+        # runner builds wheels tagged with its own macOS version as the
+        # minimum, and pip picks the newest wheel that the user's macOS
+        # supports: macos-14 covers older macOS, macos-latest the newest
+        os: [macos-14, macos-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
     steps:
@@ -272,10 +278,15 @@ jobs:
           python -m pip install -U pip
           pip install cibuildwheel delocate
 
+      - name: Target the runner's own macOS version
+        run: |
+          echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d. -f1).0" >> "$GITHUB_ENV"
+
       - name: Build wheels (macOS)
         timeout-minutes: 60
         env:
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: "delocate-wheel -w {dest_dir} {wheel}"
+          CIBW_ENVIRONMENT_MACOS: "MACOSX_DEPLOYMENT_TARGET=$MACOSX_DEPLOYMENT_TARGET FC=gfortran"
 
         run: |
           FC=gfortran python -m cibuildwheel --output-dir wheelhouse
@@ -402,16 +413,16 @@ jobs:
           name: wheels-linux-${{ github.sha }}
           path: dist
 
-      - name: Download macOS wheels (arm64)
-        uses: actions/download-artifact@v4
-        with:
-          name: wheels-macos-macos-15-${{ github.sha }}
-          path: dist
-
-      - name: Download macOS wheels (x86_64)
+      - name: Download macOS wheels (older macOS)
         uses: actions/download-artifact@v4
         with:
           name: wheels-macos-macos-14-${{ github.sha }}
+          path: dist
+
+      - name: Download macOS wheels (newest macOS)
+        uses: actions/download-artifact@v4
+        with:
+          name: wheels-macos-macos-latest-${{ github.sha }}
           path: dist
 
       - name: Download Windows wheels
