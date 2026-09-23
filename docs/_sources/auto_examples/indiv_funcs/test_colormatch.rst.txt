@@ -22,7 +22,7 @@ Matching Colors
 ===============
 Show an easy method for matching colors using pyspecdata.
 
-.. GENERATED FROM PYTHON SOURCE LINES 6-34
+.. GENERATED FROM PYTHON SOURCE LINES 6-33
 
 
 
@@ -52,8 +52,7 @@ Show an easy method for matching colors using pyspecdata.
     psd.plot(a)
     # as long as we don't override that property,
     # it will continue to be used
-    b = a + 10
-    psd.plot(b, alpha=0.2)
+    psd.plot(a + 10, alpha=0.2)
     # and if we copy our properties, this gets copied as one of them
     c = psd.nddata(r_[0:9] + 0.1, "t", alpha=0.2)
     c.copy_props(a)
@@ -69,7 +68,7 @@ Show an easy method for matching colors using pyspecdata.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.239 seconds)
+   **Total running time of the script:** (0 minutes 0.225 seconds)
 
 
 .. _sphx_glr_download_auto_examples_indiv_funcs_test_colormatch.py:

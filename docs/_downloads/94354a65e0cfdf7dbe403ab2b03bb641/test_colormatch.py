@@ -18,8 +18,7 @@ a.set_plot_color_next()
 psd.plot(a)
 # as long as we don't override that property,
 # it will continue to be used
-b = a + 10
-psd.plot(b, alpha=0.2)
+psd.plot(a + 10, alpha=0.2)
 # and if we copy our properties, this gets copied as one of them
 c = psd.nddata(r_[0:9] + 0.1, "t", alpha=0.2)
 c.copy_props(a)

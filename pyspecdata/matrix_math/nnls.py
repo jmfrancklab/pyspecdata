@@ -10,6 +10,7 @@ logger = logging.getLogger("pyspecdata.matrix_math")
 # {{{ local functions
 
 
+# SINGLE_USE_EXCEPTION -- kept separate to preserve the historical diff
 def venk_BRD(initial_α, K_0, mvec, tol=1e-3, maxiter=300):
     """Wrapper calling the compiled Butler-Reeds-Dawson algorithm."""
     f, alpha_new = _nnls.venk_brd(initial_α, K_0, mvec, tol, maxiter)

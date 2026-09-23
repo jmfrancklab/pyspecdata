@@ -120,18 +120,11 @@ apidoc_modules = [
     }
 ]
 #     ignore-module-all keeps the package pages from repeating (and trying to
-#     import) everything that the packages re-export
-apidoc_automodule_options = {
-    "members",
-    "undoc-members",
-    "show-inheritance",
-    "no-index",
-    "ignore-module-all",
-}
-# sphinx.ext.apidoc only applies apidoc_automodule_options to module pages,
-# while package pages read this environment variable instead
-os.environ["SPHINX_APIDOC_OPTIONS"] = ",".join(
-    sorted(apidoc_automodule_options)
+#     import) everything that the packages re-export.
+#     Set these through the environment variable, since
+#     apidoc_automodule_options is ignored for package pages.
+os.environ["SPHINX_APIDOC_OPTIONS"] = (
+    "ignore-module-all,members,no-index,show-inheritance,undoc-members"
 )
 # }}}
 

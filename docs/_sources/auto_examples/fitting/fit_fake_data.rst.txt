@@ -46,7 +46,7 @@ function.
     latex for fitdata: $f(\tau)=102.23 + \left(-1.03\times 10^{2} - 102.23\right) e^{- 6.04 \tau}$
     $T_1$ for fitdata, 0.1656654641432871
     ----- Results for lmfitdata: -----
-    output for lmfitdata: {'R_1': 6.0362612172913375, 'M_0': -102.8785775851992, 'M_inf': 102.23079359781903}
+    output for lmfitdata: {'M_0': -102.8785775851992, 'R_1': 6.0362612172913375, 'M_inf': 102.23079359781903}
     latex for lmfitdata: $f(\tau)=(102.23) + \left((-1.03\times 10^{2}) - (102.23)\right) e^{- (6.04) \tau}$
     $T_1$ for lmfitdata, 0.1656654614507773
     1: fit with guess |||None
@@ -165,7 +165,7 @@ function.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.312 seconds)
+   **Total running time of the script:** (0 minutes 0.791 seconds)
 
 
 .. _sphx_glr_download_auto_examples_fitting_fit_fake_data.py:

@@ -5,6 +5,7 @@ from pylab import gca, sca, imshow, xlabel, ylabel, title, colorbar, setp
 import logging
 
 
+# SINGLE_USE_EXCEPTION -- kept separate to preserve the historical diff
 def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
     """Please don't call image directly anymore -- use the image method of
     figurelist"""
@@ -241,6 +242,7 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
     return retval
 
 
+# SINGLE_USE_EXCEPTION -- kept separate to preserve the historical diff
 def imagehsv(A, logscale=False, black=False, scaling=None):
     """Map complex-valued data to color using an HSV scheme.
 

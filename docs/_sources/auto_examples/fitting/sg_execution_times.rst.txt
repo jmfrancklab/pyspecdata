@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:05.351** total execution time for 4 files **from auto_examples/fitting**:
+**00:02.835** total execution time for 4 files **from auto_examples/fitting**:
 
 .. container::
 
@@ -33,14 +33,14 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_auto_examples_fitting_fit_complex_with_transform.py` (``fit_complex_with_transform.py``)
-     - 00:02.252
+     - 00:01.182
      - 0.0
    * - :ref:`sphx_glr_auto_examples_fitting_fit_fake_data.py` (``fit_fake_data.py``)
-     - 00:01.312
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_fitting_fit_with_bounds.py` (``fit_with_bounds.py``)
-     - 00:01.077
+     - 00:00.791
      - 0.0
    * - :ref:`sphx_glr_auto_examples_fitting_fit_complex.py` (``fit_complex.py``)
-     - 00:00.710
+     - 00:00.454
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_fitting_fit_with_bounds.py` (``fit_with_bounds.py``)
+     - 00:00.408
      - 0.0

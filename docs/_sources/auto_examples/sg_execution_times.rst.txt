@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:15.433** total execution time for 8 files **from auto_examples**:
+**00:15.038** total execution time for 8 files **from auto_examples**:
 
 .. container::
 
@@ -33,26 +33,26 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_auto_examples_ppm_2D.py` (``ppm_2D.py``)
-     - 00:04.963
+     - 00:04.475
      - 0.0
    * - :ref:`sphx_glr_auto_examples_pcolor_example.py` (``pcolor_example.py``)
-     - 00:04.083
+     - 00:04.151
      - 0.0
    * - :ref:`sphx_glr_auto_examples_image_plot.py` (``image_plot.py``)
-     - 00:02.495
+     - 00:02.530
      - 0.0
    * - :ref:`sphx_glr_auto_examples_ppm_example.py` (``ppm_example.py``)
-     - 00:01.323
+     - 00:01.387
      - 0.0
    * - :ref:`sphx_glr_auto_examples_convolution.py` (``convolution.py``)
-     - 00:01.022
+     - 00:01.008
      - 0.0
    * - :ref:`sphx_glr_auto_examples_basic_example.py` (``basic_example.py``)
-     - 00:00.900
+     - 00:00.854
      - 0.0
    * - :ref:`sphx_glr_auto_examples_polyfit.py` (``polyfit.py``)
-     - 00:00.427
+     - 00:00.407
      - 0.0
    * - :ref:`sphx_glr_auto_examples_error_example.py` (``error_example.py``)
-     - 00:00.221
+     - 00:00.227
      - 0.0

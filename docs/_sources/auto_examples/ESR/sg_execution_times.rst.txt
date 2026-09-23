@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**01:25.136** total execution time for 4 files **from auto_examples/ESR**:
+**01:19.636** total execution time for 4 files **from auto_examples/ESR**:
 
 .. container::
 
@@ -33,14 +33,14 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_auto_examples_ESR_calculate_covariance.py` (``calculate_covariance.py``)
-     - 01:21.857
+     - 01:16.063
      - 0.0
    * - :ref:`sphx_glr_auto_examples_ESR_ciqtek_example.py` (``ciqtek_example.py``)
-     - 00:01.601
+     - 00:01.722
      - 0.0
    * - :ref:`sphx_glr_auto_examples_ESR_esr_example.py` (``esr_example.py``)
-     - 00:00.973
+     - 00:00.999
      - 0.0
    * - :ref:`sphx_glr_auto_examples_ESR_epr_u_domain.py` (``epr_u_domain.py``)
-     - 00:00.705
+     - 00:00.852
      - 0.0
