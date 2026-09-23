@@ -95,7 +95,9 @@ doctest:
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
 github: html
-	@cp -a _build/html/. ../docs
+	@# --delete prunes pages that the build no longer makes; .nojekyll is
+	@# needed by GitHub Pages, but isn't made by sphinx
+	@rsync -a --delete --exclude .nojekyll _build/html/ ../docs/
 	@echo "Please notice the status of the docs directory:"
 	@git status ../docs/*
 	@echo "if anything is untracked, you probably want to check it in"
