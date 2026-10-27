@@ -28,7 +28,8 @@ The interfaces below are the implementation plan.
 # Example of a target physical model
 
 The global fit combines magnetization versus power, $M_\epsilon(p)$,
-with FIR curves measured at both recovery time $\tau_j$ and powers $p_j$.
+with FIR curves measured at recovery times $\tau_j$ and powers $p_k$.
+(Currently, an FIR at each power is stored in a different dataset).
 Use $T_1$ for the relaxation time; $R_1=1/T_1$ is its inverse.
 The shared relaxation model is
 
@@ -36,22 +37,19 @@ $$
 \begin{aligned}
 T_{1,w}(p) &= T_{1,w}(0)+p\,\Delta T_{1,w}, \\
 k_{\rho,\mathrm{inv}}(p)
-&= \frac{C_{SL}}{T_1(p)^{-1}-T_{1,w}(p)^{-1}}
-= a+bp+cp^2, \\
-R_1(p) &= \left[
-\frac{1}{T_{1,w}(p)}+\frac{C_{SL}}{k_{\rho,\mathrm{inv}}(p)}
-\right]^{-1}.
+&= \frac{C_{SL}}{R_1(p)-T_{1,w}(p)^{-1}} \\
+&= k_{\rho,\mathrm{inv},a}
++ k_{\rho,\mathrm{inv},b}p+k_{\rho,\mathrm{inv},c}p^2, \\
+R_1(p) &=
+\frac{1}{T_{1,w}(p)}+\frac{C_{SL}}{k_{\rho,\mathrm{inv}}(p)}.
 \end{aligned}
 $$
 
-<!-- for legibility, throughout, rename a, b, and c as $k_{\rho,inv,a}$ $k_{\rho,inv,b}$ and $k_{\rho,inv,c}$-->
-<!-- also, note that I  corrected T1→ R1 above.  You probably need to correct throughout-->
-
 Here $C_{SL}$ is the spin-label concentration.
 It is a **constant** -- *i.e.* it is fixed for all datapoints of all datasets.
-Fix $c=0$ for the linear inverse-relaxivity model in
+Fix $k_{\rho,\mathrm{inv},c}=0$ for the linear inverse-relaxivity model in
 [fit_ODNP_data.py](../../proc_scripts/examples/broken/fit_ODNP_data.py);
-allow $c$ to vary for the quadratic extension.
+allow $k_{\rho,\mathrm{inv},c}$ to vary for the quadratic extension.
 $T_{1,w}(0)$ and $\Delta T_{1,w}$ may either be constants, or fit parameters,
 depending on implementation.
 
@@ -59,8 +57,8 @@ $$
 \begin{aligned}
 s(p) &= \frac{s_{max} p}{p+p_{1/2}}, \\
 M_\epsilon(p) &= M_\epsilon(0)\left[
-1-C_{SL}k_\sigma s(p)
-\left|\frac{\omega_e}{\omega_H}\right|T_1(p)
+1-\frac{C_{SL}k_\sigma s(p)
+\left|\omega_e/\omega_H\right|}{R_1(p)}
 \right].
 \end{aligned}
 $$
@@ -70,47 +68,46 @@ $A=C_{SL}k_\sigma|\omega_e/\omega_H| s_{max}$
 except $k_\sigma$ are constants,
 we can rewrite this as
 
-$$M_\epsilon(p_k) = M_\epsilon(0)\left[
-1-A s_{normed}(p_k)
-T_1(p_k)
-\right].$$
+$$
+M_\epsilon(p_k) = M_\epsilon(0)\left[
+1-\frac{A s_{normed}(p_k)}{R_1(p_k)}
+\right].
+$$
 
-<!-- here I changed the name of p, to express discretization-->
-
-where $s_{normed}$ doesn't include $s_{max}$
+where $s_{normed}(p)=p/(p+p_{1/2})$ does not include $s_{max}$.
 
 The FIR model from
 [proc_FIR.py](../../proc_scripts/examples/proc_FIR.py) includes the finite
 repetition delay:
 
 $$
-M_{\tau}(\tau_j,p_k)=M_{\tau,j}(\infty)
-\left[1-\left(2-e^{-W_j/T_1(p_k)}\right)e^{-\tau/T_1(p_k)}\right].
-$$
-<!-- note how I changed the name here -- carry throughout-->
-<!-- I also changed p to match above, with two indices for the two variables-->
-H
-
-$$
-W_j=10^{-6}\,\mathtt{FIR\_rep\_us}_j
-+10^{-3}\,\mathtt{acq\_time\_ms}_j.
+M_{\tau}(\tau_j,p_k)=M_{\tau,k}(\infty)
+\left[1-\left(2-e^{-W_k R_1(p_k)}\right)e^{-\tau_j R_1(p_k)}\right].
 $$
 
+$$
+W_k=10^{-6}\,\mathtt{FIR\_rep\_us}_k
++10^{-3}\,\mathtt{acq\_time\_ms}_k.
+$$
 
-Use seconds for $W_j$, $\tau$, and $T_1$.
-The acquisition metadata stores `FIR_rep_us` in microseconds and
-`acq_time_ms` in milliseconds.
-The endpoint values $M_\epsilon(0)$ and $M_{\tau,j}(\infty)$
-are scalar fitting parameters, represented below by `M_p0` and `M_inf_i`.
+Use seconds for $W_k$, $\tau$, and $T_1$.
+Use inverse seconds for $R_1$.
+The acquisition metadata stores `FIR_rep_us` (or legacy `FIR_rep`)
+in microseconds and `acq_time_ms` in milliseconds.
+The endpoint values $M_\epsilon(0)$ and $M_{\tau,k}(\infty)$
+are scalar fitting parameters, represented below by `M_p0` and `M_inf_k`.
 They also equal their expressions evaluated at $p=0$ and
 $\tau\to\infty$, respectively.
+Here $j$ indexes recovery times and $k$ indexes powers; the recovery
+asymptote and $W_k$ belong to the experiment at power $p_k$.
 
 Note that we typically write code for the equations above as given above,
 to preserve legibility and ease the process of setting up global fitting.
-We rely on the `lmfitdata` module to perform the subsitution and identify the
+We rely on the `lmfitdata` module to perform the substitution and identify the
 types of parameters (more on this below).
 After substitution, there are only two equations:
-One for $M_{\tau}(\tau_j,p_k)$ that describes the FIR experiments, and one for $M_\epsilon(p_k)$
+one for $M_{\tau}(\tau_j,p_k)$ that describes the FIR experiments,
+and one for $M_\epsilon(p_k)$
 that describes progressive saturation.
 
 # Datasets and functional forms
@@ -126,10 +123,15 @@ datasets = {
 }
 ```
 
-<!-- rather than the following, we would probably identify T1 experiments by regex.  It's also true that we would assume that the power of a given T1 experiment is loaded as a particular named property (you should either deduce from code -- maybe in ~/git_repos/ata_notebook, or failing that, just guess.  You should also explain what it si that you are doing when you  do it-->
+Select recovery experiments by name using a regular expression.
+Assume the loader has stored each experiment's power in watts as a
+top-level `p` property via `.set_prop("p", power_in_watts)`.
+This supplies a power coordinate linking the recovery datasets.
 
 ```python
-T1_names = ("T1_0", "T1_1")
+import re
+
+T1_names = [name for name in datasets if re.fullmatch(r"(?:T1|FIR)_.*", name)]
 
 for name, dataset in datasets.items():
     dataset.name(name)
@@ -137,17 +139,16 @@ for name, dataset in datasets.items():
         dataset.set_prop(key, value)
 
 for name in T1_names:
-    datasets[name].set_prop("p", powers[name])
     acq = datasets[name].get_prop("acq_params")
-    datasets[name].set_prop(
-        "W", acq["FIR_rep"] * 1e-6 + acq["acq_time_ms"] * 1e-3
-    )
+    rep_us = acq["FIR_rep_us"] if "FIR_rep_us" in acq else acq["FIR_rep"]
+    datasets[name].set_prop("W", rep_us * 1e-6 + acq["acq_time_ms"] * 1e-3)
 ```
 
 The recovery datasets already have a `tau` axis; `datasets["M_ε"]` already
 has a `p` axis.
 The `calibration` dictionary supplies fixed top-level properties.
-Its keys are `C_SL`, `T_1w0`, `dT_1w`, and `omega_ratio`.
+Its keys are `C_SL`, `s_max`, and `omega_ratio`.
+Include `T_1w0` and `dT_1w` when fixed; omit them when they are fit parameters.
 Set `omega_ratio` to `abs(omega_e / omega_H)`.
 Likewise, each recovery dataset's power and repetition delay are top-level
 properties, not nested under a `variables` property.
@@ -160,64 +161,67 @@ With symbols named as shown, the physical model becomes
 
 ```python
 functional_forms = {
-    "M_τ": M_inf_i * (1 - (2 - exp(-W / T_1)) * exp(-tau / T_1)),
-    "M_ε": M_p0 * (1 - C_SL * k_sigma * s * omega_ratio * T_1),
-    "T_1": 1 / (1 / T_1w + C_SL / k_rho_inv),
+    "M_τ": M_inf_k * (1 - (2 - exp(-W * R_1)) * exp(-tau * R_1)),
+    "M_ε": M_p0 * (1 - A * s_normed / R_1),
+    "A": C_SL * k_sigma * omega_ratio * s_max,
+    "R_1": 1 / T_1w + C_SL / k_rho_inv,
     "T_1w": T_1w0 + p * dT_1w,
-    "k_rho_inv": a + b * p + c * p**2,
-    "s": p / (p + p_half),
+    "k_rho_inv": k_rho_inv_a + k_rho_inv_b * p + k_rho_inv_c * p**2,
+    "s_normed": p / (p + p_half),
 }
 fit = lmfitdata(datasets, functional_forms=functional_forms)
 ```
 
-The fit shares `a`, `b`, `k_sigma`, `p_half`, and `M_p0` across the
-container, with a separate `M_inf_i` for each recovery dataset.
-<!-- here, match the index (given as i above) for the math vs. variables.  The code should be able to identify an index as needed -- i, j, k, etc.-->
-Fix `c=0` or fit it according to the chosen inverse-relaxivity model.
+The fit shares `k_rho_inv_a`, `k_rho_inv_b`, `k_sigma`, `p_half`,
+and `M_p0` across the container, with a separate `M_inf_k` for each recovery
+dataset at power $p_k$.
+Fix `k_rho_inv_c=0` or fit it according to the chosen inverse-relaxivity model.
 Optimize the shared relaxation parameters jointly from the recovery and
 magnetization data.
 
 # Vocabulary and automatic identification of variables
 
-Define the following vocabulary in the `lmfitdata` class docstring:
-<!-- rather than just saying define, make it clear how centrally important this is, since it allows us to talk about things clearly-->
+Use the following vocabulary consistently in the plan, implementation,
+and `lmfitdata` class docstring so we can discuss the architecture precisely:
 
 - **variables**: fixed symbols identified from dataset axis labels or
   matching top-level property keys.
-  Axis variables determine the model dimensions; scalar properties fix
-  values for an individual dataset.
-  <!-- here, we need to be explicit that we mean properties as in "set prop" I would NOT call them scalar.  I would point out that we do think of these as axis coordinates that are spanning multiple datasets, linking them together-->
+  Axis variables determine the model dimensions.
+  Properties set with `.set_prop()` supply axis coordinates spanning
+  multiple datasets, such as the powers linking the recovery experiments.
 - **parameters**: symbols altered by the optimizer.
 - **globalpars** (global parameters): optimized parameters shared across
   the fitting container.
 - **localpars** (local parameters): quantities local to one dataset,
   either optimized independently or computed by substitution.
 - **dependent localpars**: quantities computed by substituting the supplied
-  expressions, such as `T_1` evaluated at each dataset's power.
-  Do not introduce numbered `T_1_i` symbols.
-- **independent localpars**: per-dataset optimized parameters with trailing
-  `_i`, such as `M_inf_i`.
+  expressions, such as `R_1` evaluated at each dataset's power.
+  Do not introduce numbered `R_1_k` symbols.
+- **independent localpars**: per-dataset optimized parameters with a trailing
+  index letter, such as `_i`, `_j`, or `_k`.
+  Here `M_inf_k` uses the dataset index $k$ from the math.
+  The index $j$ spans recovery times within a dataset.
   Rename these for each dataset, giving `M_inf_0` and `M_inf_1`.
-  Raise an error if an independent localpar lacks `_i`.
-
-<!-- it's fine to use _i here, but clarify, as noted above this can be any letter typically used to indicate an index-->
+  Identify the dataset index letter automatically and raise an error if an
+  independent localpar lacks the corresponding suffix.
 
 The sorting routine must:
 
 1. Normalize the existing single-expression API to
    `functional_forms = {"z_data": expression}`.
 2. Identify variables from each dataset's axes and top-level properties.
-   Use a measured-data expression only when its variables are available
-   and it depends on all of that dataset's axes.
-   <!-- I have no idea what you  mean by "measured data expression" so I don't know how to tell you to change this very confusing expression.  Clearly, you are breaking your instructions and making up terms.-->
+   Among expressions not used as substitutions, choose the expression
+   whose variables are available and which depends on all dataset axes.
+   Inspect the supplied dependent expressions to identify variables such
+   as `p` before substitution.
    Thus `M_τ` describes the recovery datasets with a `tau` axis and fixed
    `p` and `W`, while `M_ε` describes the dataset with a `p` axis.
    Require exactly one expression for each dataset; report missing or
    ambiguous choices.
 3. Substitute dependent expressions recursively.
    Use dictionary keys to identify symbols and reject circular dependencies.
-   Expressions referenced by other expressions supply substitutions.
-   The remaining expressions describe the measured data.
+   Substitute `R_1`, `T_1w`, `k_rho_inv`, `A`, and `s_normed` into the
+   expressions for `M_τ` and `M_ε`.
 4. Rename independent localpars for each dataset and classify all symbols
    using the vocabulary above.
 
