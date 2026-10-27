@@ -159,6 +159,10 @@ of an equality, and its value is the expression on the right.
 Use ordinary SymPy expressions; never construct SymPy equality objects.
 With symbols named as shown, the physical model becomes
 
+<!-- in the following, W varies with each different power, so it should be called W_k-->
+<!-- (in essence, when we set things up, we need to treat it as a dependent localvar.  We can later substitute it out or fix it ot the experimental parameters-->
+<!-- similarly, C_SL is a globalpar, but it will be fixed or subbed out-->
+
 ```python
 functional_forms = {
     "M_τ": M_inf_k * (1 - (2 - exp(-W * R_1)) * exp(-tau * R_1)),
