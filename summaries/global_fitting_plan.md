@@ -1,7 +1,7 @@
 ---
 title: "Global fitting architecture plan"
 subtitle: "lmfitdata as a container for one or more nddata objects"
-date: "Plan revised July 14, 2026; recovered October 7; corrected October 26, 2026"
+date: "October 26, 2026"
 lang: en-US
 documentclass: article
 fontsize: 11pt
@@ -10,201 +10,213 @@ colorlinks: true
 toc: true
 toc-depth: 2
 numbersections: true
+header-includes:
+  - \DeclareUnicodeCharacter{03B5}{\ensuremath{\varepsilon}}
+  - \DeclareUnicodeCharacter{03C4}{\ensuremath{\tau}}
 ---
 
-# Conversation source
+# Objective
 
-This document recovers the final plan from the VS Code Codex conversation
-**Sketch global fitting architecture**. The conversation began on
-July 9, 2026 at 11:47 p.m. America/New_York and continued through July 14.
-The final plan was recorded on July 14, 2026 at 1:24 p.m. America/New_York
-(17:24:22 UTC).
+Refactor `lmfitdata` into a container for one or more `nddata` objects,
+rather than simply inheriting a single `nddata` object.
+Fit across dimensions and datasets by evaluating symbolic expressions and
+concatenating their residuals into one real vector.
+Preserve existing single-dataset behavior and reuse the current symbolic
+evaluation machinery.
+The interfaces below are the implementation plan.
 
-Session identifier:
+# Example of a target physical model
 
-```text
-019f4a22-fd3c-7e51-81be-1d47db0d8e00
-```
+The global fit combines magnetization versus power, $M_\epsilon(p)$,
+with FIR recovery curves measured at powers $p_j$.
+Use $T_1$ for the relaxation time; $R_1=1/T_1$ is its inverse.
+The shared relaxation model is
 
-The source is a local JSONL file in
-`/home/jmfranck/.codex/sessions/2026/07/09/`, named:
+$$
+\begin{aligned}
+T_{1,w}(p) &= T_{1,w}(0)+p\,\Delta T_{1,w}, \\
+k_{\rho,\mathrm{inv}}(p)
+&= \frac{C_{SL}}{T_1(p)^{-1}-T_{1,w}(p)^{-1}}
+= a+bp+cp^2, \\
+T_1(p) &= \left[
+\frac{1}{T_{1,w}(p)}+\frac{C_{SL}}{k_{\rho,\mathrm{inv}}(p)}
+\right]^{-1}.
+\end{aligned}
+$$
 
-```text
-rollout-2026-07-09T23-47-14-
-019f4a22-fd3c-7e51-81be-1d47db0d8e00.jsonl
-```
+Here $C_{SL}$ is the spin-label concentration.
+Fix $c=0$ for the linear inverse-relaxivity model in
+[fit_ODNP_data.py](../../proc_scripts/examples/broken/fit_ODNP_data.py);
+allow $c$ to vary for the quadratic extension.
+The water calibration supplies $T_{1,w}(0)$ and $\Delta T_{1,w}$.
 
-The two lines above form one filename without a newline.
+$$
+\begin{aligned}
+s(p) &= \frac{p}{p+p_{1/2}}, \\
+M_\epsilon(p) &= M_\epsilon(0)\left[
+1-C_{SL}k_\sigma s(p)
+\left|\frac{\omega_e}{\omega_H}\right|T_1(p)
+\right].
+\end{aligned}
+$$
 
-The final plan is lightly edited for standalone use. It incorporates the
-last corrections about decorator transforms and top-level dataset properties.
-Earlier requirements about method chaining, supplying datasets and equations
-at construction, and fitting across both dimensions and datasets are made
-explicit. Two wording slips in the final assistant summary are corrected:
-`.C` means a deep copy, and dependent local parameters are computed quantities,
-rather than independently optimized parameters. These corrections follow your
-instructions in the conversation; the current `nddata.C` implementation also
-returns `self.copy()`.
+This is the source's magnetization expression
+$M_0-M_0 A\,s(p)/R_1(p)$, with
+$A=C_{SL}k_\sigma|\omega_e/\omega_H|$.
+Use the concentration-normalized $k_\sigma$ convention and a positive,
+dimensionless frequency ratio.
+The saturation law has unit limiting saturation; an unknown limiting
+saturation is absorbed into the fitted effective $k_\sigma$.
 
-The document was rechecked against all seven proposed-plan revisions and your
-successive corrections on October 7, 2026. The governing revision is the final
-July 14 plan. Earlier requirements are retained where later corrections did
-not supersede them, including implementing the sorter at stop point 1 and
-showing each dataset's substituted expression.
+The FIR model from
+[proc_FIR.py](../../proc_scripts/examples/proc_FIR.py) includes the finite
+repetition delay:
 
-The October 26 corrections below use magnetization, the ODNP and FIR models
-from `proc_scripts`, dataset mappings, and string-to-expression dictionaries.
-They supersede the corresponding recovered examples.
+$$
+M_{\tau,j}(\tau)=M_{\tau,j}(\infty)
+\left[1-\left(2-e^{-W_j/T_1(p_j)}\right)e^{-\tau/T_1(p_j)}\right].
+$$
 
-<!-- I don't care about any of this historical crap preceding.  We are looking for a concise accounting of the IDEA as a plan that can be ACTED ON-->
+$$
+W_j=10^{-6}\,\mathrm{FIR\_rep}_j
++10^{-3}\,\mathrm{acq\_time\_ms}_j.
+$$
 
-This is a recovered design plan, not a claim that the proposed API has been
-implemented. The Python snippets illustrate the proposed interfaces.
+Use seconds for $W_j$, $\tau$, and $T_1$.
+The acquisition metadata stores `FIR_rep` in microseconds and
+`acq_time_ms` in milliseconds.
+The endpoint values $M_\epsilon(0)$ and $M_{\tau,j}(\infty)$
+are scalar fitting parameters, represented below by `M_p0` and `M_inf_i`.
+They also equal their expressions evaluated at $p=0$ and
+$\tau\to\infty$, respectively.
+The FIR initial value is determined by the model:
 
-# Summary
+$$
+M_{\tau,j}(0)=M_{\tau,j}(\infty)
+\left[e^{-W_j/T_1(p_j)}-1\right].
+$$
 
-Refactor `lmfitdata` into a container that can hold one or more `nddata` objects while preserving current single-dataset behavior. The architecture should support fitting across dimensions and/or across datasets by evaluating symbolic functional forms, raveling every modeled/data residual into one 1D real vector, and optimizing global plus local parameters.
+# Datasets and functional forms
 
-Current single-dataset examples must continue to behave the same. Global fitting intentionally spans both multiple dimensions of one dataset and multiple datasets; the container provides the common abstraction. Multi-dataset behavior is added in staged stop points and reviewed before being broadly tested.
-
-Refactor conservatively from the existing architecture, drawing on the older
-branch history and comments while reusing the current symbolic evaluation
-machinery.
-
-# Public API and compatibility
-
-- With one dataset, existing usage remains valid:
-
-  ```python
-  fit.ft(...)
-  fit.getaxis("t")
-  fit.C
-  fit.copy()
-  ```
-
-- With multiple datasets, direct delegated `nddata` behavior is ambiguous and must use dictionary-like dataset selection:
-
-  ```python
-  fit["M"].ft(...)
-  fit["T1_0"].getaxis("tau")
-  ```
-
-- Delegation covers all `nddata` attributes, methods, and properties. Mutating
-  methods that return the contained dataset must preserve container chaining,
-  such as `fit.ft("t").ift("t")`.
-
-- Accept a dictionary of datasets, including a dictionary-like HDF5 group,
-  directly. Mapping keys identify datasets and must agree with their
-  `nddata.name()` values. For sequence input, keys come from each contained
-  `nddata.name()`; every dataset must already have a name.
-
-- `.copy()` and `.C` are container operations, not delegated dataset operations.
-  - `fit.copy()` deep-copies the whole fitting container.
-  - `fit.C` returns a deep-copied fitting container, preserving symbolic state, parameters, transforms, and contained datasets.
-
-- Single-dataset `eval()` returns an `nddata`, as now.
-- Multi-dataset `eval()` returns a dictionary:
-
-  ```python
-  {
-      "T1_0": fitted_T1_0,
-      "T1_1": fitted_T1_1,
-      "M": fitted_M,
-  }
-  ```
-
-# Nomenclature to add to the `lmfitdata` class docstring
-
-The `lmfitdata` class docstring should define the core vocabulary up front:
-
-- `variables`: symbols defining model coördinates/abscissae. They are not altered by optimization. They come from dataset axis labels or top-level dataset properties whose names match symbols in the functional forms. Axis variables determine the dimensions of the model array that is raveled into the residual vector; a top-level scalar property fixes a variable for that dataset.
-- `parameters`: symbols altered by the optimizer.
-- `globalpars`: short for “global parameters”; optimized parameters shared across the whole fit.
-- `localpars`: quantities local to one dataset, either optimized independently or generated by substitution; document that `localpars` means “local parameters.”
-- `dependent localpars`: local quantities generated by symbolic substitution. Example: `T_1` is replaced by its power-dependent expression below, without creating `T_1_i` symbols.
-- `independent localpars`: per-dataset optimized parameters written with trailing `_i`, e.g. `M_0_i`, `M_inf_i`, then renamed to dataset-specific symbols such as `M_0_0`, `M_0_1`, etc.
-
-If the sorter determines that a symbol is an independent localpar but it lacks trailing `_i`, raise an error.
-
-# Variables and dataset metadata
-
-Variables are discovered from:
-
-- axis labels:
-
-  ```python
-  datasets["M"].setaxis("p", p_axis)
-  ```
-  <!-- previous should be M_ε rather than M (throughout); also the user typically wouldn't setaxis, since that would come from the experimental data, so this is a little confusing.-->
-  <!-- also, the actual math showing he the mathematical model, in real math, should come before this, so the reader knows what they are looking at!-->
-
-- top-level properties whose names match symbols:
-
-  ```python
-  for name in T1_names:
-      datasets[name].set_prop("p", powers[name])
-  ```
-
-Do not use nested props like:
+Accept a dictionary of datasets or a dictionary-like HDF5 group directly.
+For example, select already loaded experimental datasets:
 
 ```python
-set_prop("variables", {"p": p0})
+datasets = {
+    "T1_0": loaded["T1_0"],
+    "T1_1": loaded["T1_1"],
+    "M_ε": loaded["M_ε"],
+}
+T1_names = ("T1_0", "T1_1")
+
+for name, dataset in datasets.items():
+    dataset.name(name)
+    for key, value in calibration.items():
+        dataset.set_prop(key, value)
+
+for name in T1_names:
+    datasets[name].set_prop("p", powers[name])
+    acq = datasets[name].get_prop("acq_params")
+    datasets[name].set_prop(
+        "W", acq["FIR_rep"] * 1e-6 + acq["acq_time_ms"] * 1e-3
+    )
 ```
 
-For each dataset, the sorter should treat a symbol as a variable if it matches either a dataset axis label or a top-level property key.
+The recovery datasets already have a `tau` axis; `datasets["M_ε"]` already
+has a `p` axis.
+The `calibration` dictionary supplies fixed top-level properties.
+Its keys are `C_SL`, `T_1w0`, `dT_1w`, and `omega_ratio`.
+Set `omega_ratio` to `abs(omega_e / omega_H)`.
+Likewise, each recovery dataset's power and repetition delay are top-level
+properties, not nested under a `variables` property.
 
-# Functional forms
-
-Functional forms are supplied as a dictionary. All datasets and relevant equations must be supplied when creating a multi-dataset container.
-
-Existing single-expression API is preserved by internally normalizing to:
+Supply all datasets and expressions at construction.
+Each dictionary key is the string representation of the symbol on the left
+of an equality, and its value is the expression on the right.
+Use ordinary SymPy expressions; never construct SymPy equality objects.
+With symbols named as shown, the physical model becomes
 
 ```python
-functional_forms = {"z_data": expression}
-```
-
-New multi-form API:
-
-<!-- the following was not a good change. You should have rather shown an example of what datasets looked like using a dict construction, and you should have kept something like the functional forms.   EXCEPT that the actual math (as $$ math) should have been given first!!! -->
-```python
+functional_forms = {
+    "M_τ": M_inf_i * (1 - (2 - exp(-W / T_1)) * exp(-tau / T_1)),
+    "M_ε": M_p0 * (1 - C_SL * k_sigma * s * omega_ratio * T_1),
+    "T_1": 1 / (1 / T_1w + C_SL / k_rho_inv),
+    "T_1w": T_1w0 + p * dT_1w,
+    "k_rho_inv": a + b * p + c * p**2,
+    "s": p / (p + p_half),
+}
 fit = lmfitdata(datasets, functional_forms=functional_forms)
 ```
 
-Here `datasets` is a dictionary or dictionary-like HDF5 group of datasets;
-`functional_forms` is the dictionary shown in the ODNP example below.
-Each functional-form key is the string representation of the symbol on the
-left of an equality; its value is the expression on the right. Use ordinary
-SymPy expressions throughout; never construct SymPy equality objects.
-Keys do not manually assign forms to datasets. Dataset-to-form assignment is
-auto-determined by matching variables in the fully substituted expression
-against each dataset's axes and top-level props. A data model must depend on
-all of that dataset's axes; scalar properties supply additional fixed inputs.
-Report ambiguous assignments rather than choosing silently.
+The fit shares `a`, `b`, `k_sigma`, `p_half`, and `M_p0` across the
+container, with a separate `M_inf_i` for each recovery dataset.
+Fix `c=0` or fit it according to the chosen inverse-relaxivity model.
+Optimize the shared relaxation parameters jointly from the recovery and
+magnetization data.
 
-<!-- the following is vervbose, and it uses the "dataset-to-form assignment" which is a confusing and opaque term!-->
+# Vocabulary and automatic identification of variables
 
-The sorter should:
+Define the following vocabulary in the `lmfitdata` class docstring:
 
-- normalize old `.functional_form = expr` / single-expression construction to `{"z_data": expr}`;
-- distinguish observable model roots (`M_tau`, `M_epsilon` below) from dependent symbols referenced by their expressions (`T_1`, `k_rho_inv`, `s`);
-<!-- wtf is a model root???? again with making up terms!-->
-- recursively substitute dependent expressions using the dictionary keys, rejecting cycles;
-- assign each dataset exactly one data-model expression by variable matching;
-- expand independent localpars ending in `_i`;
-- classify symbols as variables, globalpars, dependent localpars, or independent localpars.
+- **variables**: fixed symbols identified from dataset axis labels or
+  matching top-level property keys.
+  Axis variables determine the model dimensions; scalar properties fix
+  values for an individual dataset.
+- **parameters**: symbols altered by the optimizer.
+- **globalpars** (global parameters): optimized parameters shared across
+  the fitting container.
+- **localpars** (local parameters): quantities local to one dataset,
+  either optimized independently or computed by substitution.
+- **dependent localpars**: quantities computed by substituting the supplied
+  expressions, such as `T_1` evaluated at each dataset's power.
+  Do not introduce numbered `T_1_i` symbols.
+- **independent localpars**: per-dataset optimized parameters with trailing
+  `_i`, such as `M_inf_i`.
+  Rename these for each dataset, giving `M_inf_0` and `M_inf_1`.
+  Raise an error if an independent localpar lacks `_i`.
 
-For multi-dataset construction only, print a stdout summary showing:
+The sorting routine must:
 
-- each dataset and its variables;
-- which functional form was assigned to each dataset;
-- the post-substitution/post-renaming expression used for each residual;
-- all variables, globalpars, dependent localpars, and independent localpars.
+1. Normalize the existing single-expression API to
+   `functional_forms = {"z_data": expression}`.
+2. Substitute dependent expressions recursively.
+   Use dictionary keys to identify symbols and reject circular dependencies.
+   Expressions referenced by other expressions supply substitutions.
+   The remaining expressions describe the measured data.
+3. Identify variables from each dataset's axes and top-level properties.
+   Use a measured-data expression only when its variables are available
+   and it depends on all of that dataset's axes.
+   Thus `M_τ` describes the recovery datasets with a `tau` axis and fixed
+   `p` and `W`, while `M_ε` describes the dataset with a `p` axis.
+   Require exactly one expression for each dataset; report missing or
+   ambiguous choices.
+4. Rename independent localpars for each dataset and classify all symbols
+   using the vocabulary above.
 
-# Per-dataset transforms
+For multi-dataset construction, print each dataset's variables and its
+expression after substitution and renaming.
+Also print the globalpars and both kinds of localpars.
 
-Transforms must remain decorator-friendly.
+# Container behavior and transforms
 
-Single-dataset behavior stays as now:
+Preserve all delegated `nddata` attributes, methods, and properties for a
+single dataset, including chaining such as `fit.ft("t").ift("t")`.
+For multiple datasets, select a dataset explicitly:
+
+```python
+fit["M_ε"].getaxis("p")
+fit["T1_0"].getaxis("tau")
+```
+
+Mapping keys must agree with the contained datasets' `nddata.name()` values.
+For sequence input, derive keys from those names and require every dataset
+to be named.
+Both `fit.copy()` and `fit.C` deep-copy the container, including datasets,
+symbolic state, parameters, and transforms.
+Single-dataset `eval()` returns an `nddata`; multi-dataset `eval()` returns
+a dictionary with the input dataset keys.
+
+Keep the existing single-dataset transform decorators:
 
 ```python
 @fit.define_residual_transform
@@ -212,280 +224,75 @@ def residual_domain_transform(d):
     return d.ft("t")
 ```
 
-For multi-dataset fits, transforms are specified through dictionary-like dataset access:
+For multiple datasets, expose decorators through dataset selection:
 
 ```python
-@fit["M"].define_residual_transform
-def M_residual_transform(d):
+@fit["M_ε"].define_residual_transform
+def magnetization_residual_transform(d):
     return d
 
 @fit["T1_0"].define_data_transform
-def T1_0_data_transform(d):
+def recovery_data_transform(d):
     return d
 ```
 
-Implementation should store these in container-level dictionaries keyed by dataset name, while exposing the decorator API through the selected dataset view. This should be done by reusing/retooling `lmfitdata` behavior, not by introducing a separate `FitMember` class.
-
-Residual construction applies each dataset’s own data/residual transform before raveling and concatenating.
+Store transforms in container-level dictionaries keyed by dataset name.
+Reuse or retool `lmfitdata` behavior to support dataset selection and
+these decorators; do not introduce a separate `FitMember` class.
 
 # Residual construction
 
-All fits produce one 1D real residual vector.
+For each dataset, evaluate its substituted expression with axis and
+property variables using the existing compact multi-argument lambda
+machinery, particularly `fitfunc_multiarg_v2`.
+Reshape axis arrays to broadcast correctly for multiple dimensions,
+including nonsquare arrays.
+Apply the dataset's data and residual transforms according to the existing
+convention, subtract the transformed data, and ravel the residual.
+View complex residuals as real using the current convention.
+Concatenate all datasets' residuals into one 1D real vector.
 
-For each dataset:
+# Implementation stop points
 
-- evaluate its assigned symbolic model using the existing compact multi-argument lambda machinery, especially the current `fitfunc_multiarg_v2` pattern;
-- use axis variables and top-level prop variables as the fixed variable inputs;
-- apply that dataset’s data/residual transforms;
-- subtract transformed data;
-- ravel;
-- view complex residuals as real, following the current convention.
+## Stop point 1: container, docstring, and sorting routine
 
-For multi-dataset fits, concatenate the per-dataset residual vectors.
+Implement the container, naming checks, deep copies, delegated chaining,
+and decorator-preserving transform storage and access.
+Normalize the functional-form dictionary and implement the sorting routine
+and docstring vocabulary above; include architecture TODO notes.
+This stage must support multiple datasets in principle, including sorting,
+while deferring multi-dataset tests to stop point 3.
+Run existing relevant tests and repository lint checks, then stop for review.
 
-# ODNP target behavior
+## Stop point 2: single-dataset multidimensional fitting
 
-Use $T_1$ for the longitudinal relaxation time; $R_1(p)=1/T_1(p)$ is
-only its inverse, not an additional fitted quantity. The executable model in
-`~/git_repos/proc_scripts/examples/broken/fit_ODNP_data.py` (the
-`krho_inv`, `R1p_expr`, and `integral_vs_p_fit.functional_form` assignments)
-gives the following relations, written here in terms of $T_1$:
+Implement and test multidimensional evaluation and axis broadcasting.
+Pack residuals into a real vector using the existing evaluator.
+Preserve single-dataset behavior, including complex residuals.
+Run relevant tests and lint checks, then stop for review.
 
-$$
-T_{1,w}(p)=T_{1,w}(0)+p\,\Delta T_{1,w},
-\qquad
-k_{\rho,\mathrm{inv}}(p)
-=\frac{C_{SL}}{T_1(p)^{-1}-T_{1,w}(p)^{-1}}
-=a+bp+cp^2,
-$$
+## Stop point 3: multi-dataset fitting
 
-<!-- what you're doing here doesn't make sense.
-it actually does make sense to define k_{\rho,inv}(p), just to make things look easier,
-but then you should use it in the $T_1(p)$ equation.  The same with $T_{1,w}(p)$-->
-
-$$
-T_1(p)=\left[
-\frac{1}{T_{1,w}(0)+p\,\Delta T_{1,w}}
-+\frac{C_{SL}}{a+bp+cp^2}
-\right]^{-1}.
-$$
-
-<!-- again, the following is just verbose nonsense -- as noted earlier, it also comes out of order-->
-Here $C_{SL}$ is the spin-label concentration. The source fits the inverse
-relaxivity to a **line**, so $c=0$ reproduces its model; the optional quadratic
-coefficient follows the supplied sketch. Thus $a=k_{\rho,\mathrm{inv}}(0)$,
-$b$ is its linear power coefficient, and $c$ its quadratic coefficient (with
-no implicit factorial). The water calibration supplies $T_{1,w}(0)$ and
-$\Delta T_{1,w}$; these and $C_{SL}$ are fixed metadata unless calibration
-datasets are also included. Constrain the model to positive water $T_1$,
-inverse relaxivity, and sample $T_1$ over the fitted power range.
-
-The source magnetization model is $M_0-M_0 A\,s(p)/R_1(p)$, with
-$s(p)=p/(p+p_{1/2})$. Its conversion of $A$ to concentration-normalized
-$k_\sigma$ is $k_\sigma=A|\omega_H/\omega_e|/C_{SL}$. Equivalently,
-
-$$
-s(p)=\frac{p}{p+p_{1/2}},
-\qquad
-M_\epsilon(p)=M_\epsilon(0)\left[
-1-C_{SL}k_\sigma s(p)
-\left|\frac{\omega_e}{\omega_H}\right|T_1(p)
-\right].
-$$
-
-The explicit $C_{SL}$ preserves the source's concentration-normalized
-$k_\sigma$ convention; absorbing it into $k_\sigma$ gives the sketch's
-prefactor. The frequency ratio is positive and dimensionless, with both
-frequencies expressed in the same units. This uses the source's saturation
-law with unit limiting saturation; an unknown limiting saturation would be
-absorbed into the fitted effective $k_\sigma$.
-
-For the recovery datasets, use the FIR expression from
-`~/git_repos/proc_scripts/examples/proc_FIR.py`, including its finite
-repetition-delay correction:
-
-$$
-M_{\tau,j}(\tau;p_j,W_j)=M_{\tau,j}(\infty)
-\left[1-\left(2-e^{-W_j/T_1(p_j)}\right)e^{-\tau/T_1(p_j)}\right].
-$$
-
-$$
-W_j=10^{-6}\,\mathrm{FIR\_rep}_j
-    +10^{-3}\,\mathrm{acq\_time\_ms}_j.
-$$
-
-$W_j$ is in seconds: the source stores `FIR_rep` in microseconds and
-`acq_time_ms` in milliseconds. Use seconds for $\tau$ and $T_1$ too.
-Parentheses denote evaluations: $M_\epsilon(0)$ is the magnetization at
-$p=0$, while $M_{\tau,j}(\infty)$ is the asymptote as $\tau\to\infty$.
-These endpoint values are scalar fitting parameters, represented below by
-`M_p0` and `M_inf_i`, respectively. They are also the corresponding model
-values at those coordinates, not additional independent variables.
-In this FIR model the initial value is constrained:
-
-$$
-M_{\tau,j}(0)=M_{\tau,j}(\infty)
-\left[e^{-W_j/T_1(p_j)}-1\right].
-$$
-
-Thus it is not a separate free parameter. The general endpoint form is
-$M_{\tau,j}(\infty)+[M_{\tau,j}(0)-M_{\tau,j}(\infty)]
-e^{-\tau/T_1(p_j)}$; the **difference** ensures the correct value at
-$\tau=0$.
-
-<!-- again, just SUPER verbose.  Give the physical model up front, legibly and compactly.-->
-
-<!-- so, the following setup is GOOD and should come FIRST, and could preceed a lot of the stuff up above, thus allowing you to preempt the dict-like syntax I was asking for above, for example-->
-Example dataset setup (all datasets already loaded in a dictionary or a
-dictionary-like HDF5 group, with `T1_names` identifying the recovery nodes):
-
-```python
-for name in T1_names:
-    datasets[name].name(name)
-    datasets[name].set_prop("p", powers[name])
-    acq = datasets[name].get_prop("acq_params")
-    datasets[name].set_prop(
-        "W", acq["FIR_rep"] * 1e-6 + acq["acq_time_ms"] * 1e-3
-    )
-
-datasets["M"].name("M")
-# Recovery datasets have a tau axis; datasets["M"] has a p axis.
-# Each dataset also exposes calibrated C_SL, T_1w0, dT_1w,
-# and omega_ratio = abs(omega_e / omega_H) as top-level properties.
-```
-
-Functional forms (symbols declared with their displayed string names):
-
-```python
-functional_forms = {
-    "M_tau": M_inf_i * (1 - (2 - exp(-W / T_1)) * exp(-tau / T_1)),
-    "M_epsilon": M_p0 * (1 - C_SL * k_sigma * s * omega_ratio * T_1),
-    "T_1": 1 / (1 / (T_1w0 + p * dT_1w) + C_SL / k_rho_inv),
-    "k_rho_inv": a + b * p + c * p**2,
-    "s": p / (p + p_half),
-}
-fit = lmfitdata(datasets, functional_forms=functional_forms)
-```
-
-During construction:
-
-- Recovery datasets use `tau` from their axis and scalar `p` and `W` from top-level properties.
-- `T_1`, `k_rho_inv`, and `s` are recursively substituted; no `T_1_i` symbols are created.
-- `M_inf_i` becomes an independent localpar for each recovery dataset.
-- `M_epsilon` uses the `p` axis of `datasets["M"]` and the same substituted $T_1(p)$.
-- `a`, `b`, `k_sigma`, `p_half`, and `M_p0` are globalpars; fix `c=0` for the source's linear model or fit it for the quadratic extension.
-- The residual concatenates all recovery residuals plus the magnetization residual.
-
-For example, the fully substituted expression for recovery dataset `T1_0`
-is, with $p=p_0$ and $W=W_0$ fixed by its properties,
-
-$$
-\begin{aligned}
-M_{\tau,0}(\tau)=M_{\infty,0}\Biggl[1
-&-\left(2-\exp\left\{-W_0\left[
-\frac{1}{T_{1,w}(0)+p_0\Delta T_{1,w}}
-+\frac{C_{SL}}{a+bp_0+cp_0^2}\right]\right\}\right) \\
-&\quad\times\exp\left\{-\tau\left[
-\frac{1}{T_{1,w}(0)+p_0\Delta T_{1,w}}
-+\frac{C_{SL}}{a+bp_0+cp_0^2}\right]\right\}
-\Biggr].
-\end{aligned}
-$$
-
-The magnetization expression after substitution is
-
-$$
-M_\epsilon(p)=M_\epsilon(0)\left[
-1-\frac{C_{SL}k_\sigma\left|\omega_e/\omega_H\right|p}{p+p_{1/2}}
-\left(\frac{1}{T_{1,w}(0)+p\Delta T_{1,w}}
-+\frac{C_{SL}}{a+bp+cp^2}\right)^{-1}
-\right].
-$$
-
-The constructor summary must show each recovery dataset's own renamed
-`M_inf` parameter and substituted expression, as well as the magnetization
-expression. Shared relaxation parameters are optimized jointly from both
-kinds of data, rather than fixed from a preceding fit.
-
-# Stop points
-
-## Stop point 1: container scaffold, docstring, sorting routine
-
-Implement:
-
-- internal container structure;
-- exact preservation of single-dataset behavior;
-- container-level `.copy()` and `.C`;
-- decorator-preserving per-dataset transform storage/access;
-- multi-dataset naming checks;
-- `functional_forms` dictionary normalization, including old API to `{"z_data": expression}`;
-- the variable/globalpar/localpar sorting routine;
-- class docstring nomenclature and architecture TODO notes.
-
-This stage includes code that supports multiple datasets in principle,
-particularly the symbol-sorting routine; it is not limited to an empty
-placeholder. Explicitly defer testing multi-dataset behavior to stop point 3.
-Run existing relevant tests/lint and stop for review.
-
-## Stop point 2: single-dataset multi-D fitting
-
-Implement tested 2D/multi-D symbolic fitting for one dataset.
-
-All model/data residuals should be raveled into one 1D real vector, and complex data should still use the current real-view convention. Reuse the existing compact lambda/evaluator path as much as possible.
-
-Run tests/lint and stop for review.
-
-## Stop point 3: tested multi-dataset fitting
-
-Implement and test:
-
-- functional-form dictionary assignment;
-- recursive dependent substitution for `T_1`, `k_rho_inv`, and `s`;
-- independent localpar `_i` expansion;
-- top-level prop variables via `.set_prop("p", p_value)`;
-- per-dataset decorator transforms;
-- residual concatenation;
-- multi-dataset `eval()` dictionary output;
-- stdout construction summary.
-
-Run tests/lint and stop for review.
+Implement and test recursive substitution, automatic identification of
+variables, independent localpar renaming, dataset-specific decorators,
+residual concatenation, dictionary `eval()` output, and the construction
+summary showing each dataset's substituted expression.
+Cover mapping input, top-level property variables, and errors for ambiguous
+expressions or missing names.
+Run relevant tests and lint checks, then stop for review.
 
 ## Stop point 4: synthetic ODNP test and plotted example
 
-Add:
-
-- a noisy synthetic ODNP test fitting FIR recovery and magnetization versus power together to recover `k_sigma`;
-- a matching example that plots synthetic data and fitted curves.
-
-This becomes the end-to-end demonstration of the intended global fitting architecture.
-
-# Historical context and recovery commentary
-
-The July 10 investigation reported no working general 2D fitting implementation
-in the code paths and branches it inspected. Its nonsquare 2D probe failed when
-raw axis arrays of different lengths reached `fitfunc_multiarg_v2` without
-reshaping for broadcasting. Stop point 2 therefore includes correct axis
-broadcasting as well as residual packing. This is a historical finding from
-the conversation, not a fresh audit of today's repository.
-
-The following implementation questions are recovery commentary added on
-October 7, rather than additional requirements agreed in the July conversation.
-They identify details that the final plan does not specify completely:
-
-<!-- don't call the following "automatic form matching" that's not what it is!!! It's automatic identification of variables.  That's the POINT of defining the vocab, which I said was so important.  Use the all important vocab, don't make up new terminology like "automatic form matching"-->
-- **Automatic form matching.** Apply the axis-coverage rule above after
-  substitution: recovery has a `tau` axis and scalar `p` and `W` properties,
-  while magnetization has a `p` axis. The magnetization model cannot describe
-  a `tau` axis. Other ambiguous matches must raise an error.
-- **Selected dataset interface.** Dictionary access must support both delegated
-  `nddata` operations and the per-dataset transform decorators while retaining
-  the requested `lmfitdata`/`nddata` architecture. The exact mechanism was
-  not settled in the final plan.
+Fit noisy synthetic FIR recovery and magnetization-versus-power datasets
+jointly to recover `k_sigma` with the physical model above.
+Use known calibration values, positive relaxation times and inverse
+relaxivity over the fitted power range, and the stated saturation convention.
+Add a matching example plotting the data and fitted curves.
+Run relevant tests and lint checks.
 
 # Building the PDF
 
-From the repository root, using the TeX Live path configured by interactive
-Bash on this machine:
+From the repository root:
 
 ```bash
 source /home/jmfranck/base/bin/activate
@@ -495,6 +302,4 @@ pandoc summaries/global_fitting_plan.md \
   --output=summaries/global_fitting_plan.pdf
 ```
 
-On a machine where `pdflatex` is already on `PATH`, the `export PATH` line
-is unnecessary. The document metadata sets the page margins, table of contents,
-section numbering, and font size.
+Omit the `export` if `pdflatex` is already on `PATH`.
