@@ -127,15 +127,9 @@ that describes progressive saturation.
 
 # Datasets and functional forms
 
-<!-- The following implementation is a little
-silly.
-First, there's no acknowledgement of the fact
-that if we pull from HDF5 that's saved by
-pyspec, the names will naturally be the same
-as the node names (and therefore the dict
-keys).  Second, why are there two loops?-->
-
 Accept a dictionary of datasets or a dictionary-like HDF5 group directly.
+Datasets loaded from pyspec HDF5 already have names matching their node
+names and dictionary keys.
 For example, select already loaded experimental datasets:
 
 ```python
@@ -155,9 +149,6 @@ Copy it to `p` to supply the coordinate linking the recovery datasets.
 import re
 
 T1_names = [name for name in datasets if re.fullmatch(r"(?:T1|FIR)_.*", name)]
-
-for name, dataset in datasets.items():
-    dataset.name(name)
 
 for name in T1_names:
     datasets[name].set_prop("p", datasets[name].get_prop("power_W"))
