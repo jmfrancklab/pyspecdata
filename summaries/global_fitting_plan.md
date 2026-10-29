@@ -75,6 +75,14 @@ M_\epsilon(p_k) = M_\epsilon(0)\left[
 $$
 
 where $s_{normed}(p)=p/(p+p_{1/2})$ does not include $s_{max}$.
+Fit $A$ directly as a global parameter.
+After fitting, calculate $k_\sigma$ outside the fitting code:
+$$
+k_\sigma=\frac{A}{C_{SL}s_{max}|\omega_e/\omega_H|}.
+$$
+The user performs this conversion using the
+fitted `A`; `k_sigma` is not
+a fitting parameter or a symbol in `functional_forms`.
 
 The FIR model from
 [proc_FIR.py](../../proc_scripts/examples/proc_FIR.py) includes the finite
@@ -145,9 +153,10 @@ for name in T1_names:
 
 The recovery datasets already have a `tau` axis; `datasets["M_ε"]` already
 has a `p` axis.
-Fixed globalpars include `C_SL`, `s_max`, and `omega_ratio`.
-Include `T_1w0` and `dT_1w` when fixed; omit them when they are fit parameters.
-Set `omega_ratio` to `abs(omega_e / omega_H)`.
+The fit fixes the globalpar `C_SL`.
+Fix `T_1w0` and `dT_1w` when known; otherwise vary them in the fit.
+The saturation limit and frequency ratio are used only in the external
+conversion from fitted `A` to $k_\sigma$.
 Each recovery dataset's `p` property supplies a variable,
 while its `W_k`
 property fixes an indeplocalpar for that experiment.
@@ -162,7 +171,6 @@ Use expressions, never SymPy equality objects.
 functional_forms = {
     "M_τ": M_inf_k * (1 - (2 - exp(-W_k * R_1)) * exp(-tau * R_1)),
     "M_ε": M_p0 * (1 - A * s_normed / R_1),
-    "A": C_SL * k_sigma * omega_ratio * s_max,
     "R_1": 1 / T_1w + C_SL / k_rho_inv,
     "T_1w": T_1w0 + p * dT_1w,
     "k_rho_inv": k_rho_inv_a + k_rho_inv_b * p + k_rho_inv_c * p**2,
@@ -171,7 +179,29 @@ functional_forms = {
 fit = lmfitdata(datasets, functional_forms=functional_forms)
 ```
 
-The fit shares `k_rho_inv_a`, `k_rho_inv_b`, `k_sigma`, `p_half`,
+Fix parameters through the existing `lmfitdata.set_guess()` API:
+
+```python
+fit.set_guess(
+    A=dict(value=A_guess),
+    C_SL=dict(value=concentration_M, vary=False),
+    k_rho_inv_c=dict(value=0.0, vary=False),
+)
+```
+
+Use an initial guess `A_guess` and the experimental concentration.
+Supply guesses for the remaining globalpars and expanded indeplocalpars in the
+same call, fixing `T_1w0` and `dT_1w` there too when known.
+The current [`set_guess()` implementation](../pyspecdata/lmfitdata.py)
+sets attributes such as `value` and `vary` on its lmfit parameters and
+returns `self`;
+no direct manipulation of lmfit or new function is needed.
+Currently, fitting with fixed parameters works with `fit(use_jacobian=False)`.
+The default analytic Jacobian includes fixed-parameter rows.
+Stop point 2 must restrict it to varying parameters.
+<!-- rather than introducing all this complexity, we should actually plan on modifying set_guess so it substitutes to remove them from the model  at the very end, while saving the functional form in case we later turn vary off. -->
+
+The fit shares `k_rho_inv_a`, `k_rho_inv_b`, `A`, `p_half`,
 and `M_p0` across the container, with a separate `M_inf_k` for each recovery
 dataset at power $p_k$.
 Thus `C_SL` remains a globalpar when fixed or substituted out.
@@ -201,7 +231,11 @@ and `lmfitdata` class docstring so we can discuss the architecture precisely:
   that (1) matches a top-level property key present in all the nddata and
   (2) does not have a dataset-index
   suffix (`_i`, `_j`, `_k`, etc.) when given in the functional form
-  and (3) does not match a *globalpars* (see below).
+  and (3) does not match a *globalpar* (see below).
+  Every axis coordinate label of every dataset must match a model variable;
+  otherwise the model fails validation.
+  Each variable used by a dataset's funcval must be available there as an
+  axis coordinate or top-level property.
 - **funcvals** (function values): symbols whose expressions calculate
   the values used in residuals, such as `M_ε` and `M_τ`.
   They are neither variables nor parameters.
@@ -214,19 +248,21 @@ and `lmfitdata` class docstring so we can discuss the architecture precisely:
 - **globalpars** (global parameters):
   parameters shared across the
   fitting container.
-  These are identified by being keys of the functional form dictionary whose
-  values are other parameters.
+  These are the remaining model symbols after classifying variables,
+  funcvals, deplocalpars, and indeplocalpars.
 - localpars (local parameters): quantities local to one dataset,
   either optimized independently or computed by substitution.
 - **deplocalpars** (dependent local parameters): quantities computed by
   substituting supplied
-  expressions involving model variables or parameters,
-  such as `R_1(p_k)` at each dataset's
+  expressions involving model variables or parameters.
+  They are the functional-form dictionary keys referenced by other
+  expressions, such as `R_1`.
+  The expression for `R_1` is evaluated at each dataset's
   power `p_k`.
   They are dependent in the sense
   that they depend on other variables and/or
   parameters.
-  Deplocalpars are only used for the user-side definitions
+  Deplocalpars are only used for the user-side definitions.
   Internally, after classifying the variables,
   the code substitutes the expression for each deplocalpar.
   For example, the expression for `R_1`
@@ -346,9 +382,13 @@ Implement classification using sets of symbols and the vocabulary above:
    Reject distinct symbols with the same string representation.
 2. Classify `F = D - R` as funcvals: their expressions are not substituted
    into other supplied expressions.
-   Build the dependency graph for `D & R` and reject circular dependencies.
-3. Collect axis names and coordinate-property names without dataset-index
-   suffixes into the variables set `V`, excluding names already in `D`.
+   Classify `D & R` as deplocalpars.
+   Build their dependency graph and reject circular dependencies.
+3. Collect axis names from every dataset and property names present in
+   every dataset, excluding dataset-index
+   suffixes from the property names.
+   Intersect these names with `R - D` to obtain the variables set `V`.
+   Validate that every axis label of every dataset is in `V`.
    Consider only property names in `S`; ignore unrelated metadata.
    A definition cannot also supply an axis symbol.
    For indexed symbols supplied by properties, such as `W_k`,
@@ -356,21 +396,20 @@ Implement classification using sets of symbols and the vocabulary above:
    A symbol supplied both by a definition and a property is ambiguous.
 4. Among `R - D - V`, classify names with dataset-index suffixes as
    indeplocalpars, whether fixed by metadata or free to optimize.
-   Classify the remaining unbound names as
-   globalpars.
+   Classify all remaining names as
+   globalpars by set subtraction:
+   `G = S - (V | F | deplocalpars | indeplocalpars)`.
    A parameter remains global even if only one funcval uses it.
    If an indexed symbol is bound for some applicable datasets,
    require bindings for all of them rather than optimizing missing values.
-5. Follow the dependency graph to classify each symbol in `D & R`.
-   A definition depending transitively on variables or localpars is a
-   deplocalpar, as is an indexed expression of other parameters.
-   A constant value assigned to an indexed name fixes an indeplocalpar;
-   an index suffix alone does not imply dependence.
-   Other definitions are globalpars, including constants such as `C_SL` and
-   expressions of globalpars such as `A`.
-   Preserve these classifications when substituting or fixing values.
-   Only unbound globalpars and indeplocalpars enter the optimizer,
-   unless explicitly fixed.
+5. Use the dependency graph to determine the substitution order for
+   deplocalpars.
+   Keep fixed parameter values separate from model definitions:
+   use `set_guess()` with `value` and `vary=False` for globalpars.
+   Use per-dataset metadata or `set_guess()` on expanded names for
+   indeplocalpars.
+   Fixing a parameter does not change its classification.
+   Only varying globalpars and indeplocalpars enter the optimizer.
 6. For each dataset, choose exactly one funcval whose variables and required
    fixed localpar bindings are available and whose expression depends on all
    dataset axes.
@@ -380,7 +419,8 @@ Implement classification using sets of symbols and the vocabulary above:
    dependent expressions.
 7. Validate that every symbol in `S` has exactly one of the five classes.
    Their union must equal `S`, and pairwise intersections must be empty.
-   Every funcval must be used and every required binding must exist.
+   Every axis label must match a variable, every funcval must be used,
+   and every required variable or fixed-parameter binding must exist.
    Each dataset must have exactly one funcval.
    Failure to classify any symbol unambiguously fails model validation.
    Report the symbols, competing or missing classes, and affected datasets;
@@ -390,10 +430,11 @@ Add classification and validation unit tests at this stop point.
 For the example, expect funcvals `{M_τ, M_ε}`, variables `{tau, p}`,
 indeplocalpars `{M_inf_k, W_k}` (with `W_k` fixed), and deplocalpars
 `{R_1, T_1w, k_rho_inv, s_normed}`.
-The remaining coefficient and fixed globalpar symbols, including `A` and
+The remaining coefficient and fixed-parameter symbols, including `A` and
 `C_SL`, are globalpars.
 Test fixed values, globalpars used by only one funcval, alternative index
-letters, missing bindings, conflicting classifications, ambiguous funcvals,
+letters, missing bindings, unmatched dataset axes, mixed axis/property
+variables, conflicting classifications, ambiguous funcvals,
 and circular dependencies.
 Defer multi-dataset fitting tests to stop point 3.
 Run existing relevant tests and repository lint checks, then stop for review.
@@ -403,6 +444,9 @@ Run existing relevant tests and repository lint checks, then stop for review.
 Implement and test multidimensional evaluation and axis broadcasting.
 Pack residuals into a real vector using the existing evaluator.
 Preserve single-dataset behavior, including complex residuals.
+Restrict analytic Jacobians to varying parameters in lmfit's parameter order.
+Test that fixed values remain unchanged with both analytic and numerical
+Jacobians, including when other parameters have bounds.
 Run relevant tests and lint checks, then stop for review.
 
 ## Stop point 3: multi-dataset fitting
@@ -418,7 +462,8 @@ Run relevant tests and lint checks, then stop for review.
 ## Stop point 4: synthetic ODNP test and plotted example
 
 Fit noisy synthetic FIR recovery and magnetization-versus-power datasets
-jointly to recover `k_sigma` with the physical model above.
+jointly to recover the globalpar `A` with the physical model above.
+Then calculate `k_sigma` outside the fitting code using the conversion above.
 Use known fixed globalpar values, positive relaxation times and inverse
 relaxivity over the fitted power range, and the stated saturation convention.
 Add a matching example plotting the data and fitted curves.
