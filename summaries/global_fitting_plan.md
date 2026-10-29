@@ -192,14 +192,13 @@ fit.set_guess(
 Use an initial guess `A_guess` and the experimental concentration.
 Supply guesses for the remaining globalpars and expanded indeplocalpars in the
 same call, fixing `T_1w0` and `dT_1w` there too when known.
-The current [`set_guess()` implementation](../pyspecdata/lmfitdata.py)
-sets attributes such as `value` and `vary` on its lmfit parameters and
-returns `self`;
-no direct manipulation of lmfit or new function is needed.
-Currently, fitting with fixed parameters works with `fit(use_jacobian=False)`.
-The default analytic Jacobian includes fixed-parameter rows.
-Stop point 2 must restrict it to varying parameters.
-<!-- rather than introducing all this complexity, we should actually plan on modifying set_guess so it substitutes to remove them from the model  at the very end, while saving the functional form in case we later turn vary off. -->
+Modify the existing [`set_guess()` method](../pyspecdata/lmfitdata.py)
+to save the original functional forms and parameter records.
+After classification, validation, index expansion, and dependent-expression
+substitution, substitute fixed (*i.e.* with `vary=False`) globalpar and indeplocalpar values.
+(This avoids subsequent complications when building Jacobians, etc.)
+When a fixed value or `vary` changes, rebuild from the saved original forms,
+restoring symbols for parameters that become variable again.
 
 The fit shares `k_rho_inv_a`, `k_rho_inv_b`, `A`, `p_half`,
 and `M_p0` across the container, with a separate `M_inf_k` for each recovery
@@ -425,6 +424,11 @@ Implement classification using sets of symbols and the vocabulary above:
    Failure to classify any symbol unambiguously fails model validation.
    Report the symbols, competing or missing classes, and affected datasets;
    do not fit an invalid model.
+   Once validation succeeds, substitute fixed parameter values last and
+   compile evaluators and Jacobians from the remaining variables and
+   varying parameters.
+   Preserve the original forms, classifications, and fixed values for
+   rebuilding, output, and copies.
 
 Add classification and validation unit tests at this stop point.
 For the example, expect funcvals `{M_τ, M_ε}`, variables `{tau, p}`,
@@ -444,9 +448,12 @@ Run existing relevant tests and repository lint checks, then stop for review.
 Implement and test multidimensional evaluation and axis broadcasting.
 Pack residuals into a real vector using the existing evaluator.
 Preserve single-dataset behavior, including complex residuals.
-Restrict analytic Jacobians to varying parameters in lmfit's parameter order.
-Test that fixed values remain unchanged with both analytic and numerical
-Jacobians, including when other parameters have bounds.
+Extend `set_guess()` with the final fixed-value substitution described above.
+Generate analytic Jacobians from the resulting expressions.
+Test fixing parameters, changing fixed values, and changing `vary` in both
+directions while preserving the original forms.
+Verify matching fits with analytic and numerical Jacobians,
+including bounds.
 Run relevant tests and lint checks, then stop for review.
 
 ## Stop point 3: multi-dataset fitting
