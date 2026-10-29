@@ -495,6 +495,12 @@ Omit the `export` if `pdflatex` is already on `PATH`.
 
 **Date: Oct 23, 2026**
 
+**Oct 29, 2026 update:** John Franck's final implementation plan above is
+authoritative. The October 23 discussion below is retained as historical
+analysis; its earlier model, assignment suggestions, and open staging questions
+do not override the final plan. The example script and final validation summary
+have been revised on October 29 to match that plan.
+
 This addition records the understanding, elaboration, research, and proposed
 example discussed on October 23, 2026. It supplements the recovered plan above;
 the possible rules, enhancements, and staging adjustments below are proposals,
@@ -832,221 +838,250 @@ implementation more involved.
 
 ## Example working script for the intended API
 
-The following complete example describes the **intended API after
-implementation**. It uses the plan’s interfaces, with automatic assignment
-following the possible rule discussed above. It cannot run against the
-current container API because that API does not exist yet. If a stricter
-ambiguity policy is chosen instead, this example’s model-assignment setup
-must be revisited accordingly.
+**Updated: Oct 29, 2026.** This example follows John Franck's final plan in
+[commit `8d5e3a81`](https://github.com/jmfrancklab/pyspecdata/commit/8d5e3a810486e7588926708710f97bd4d6702f06),
+as incorporated in
+[`2f454ccc`](https://github.com/jmfrancklab/pyspecdata/commit/2f454ccca0d8d647fbb67cfd2fe3618b56ccfdfe).
+It replaces the earlier linear-rate demonstration. The container API remains
+an implementation target; this is not a claim that the complete script runs
+against the current `lmfitdata` implementation.
 
-The synthetic model uses
-
-$$
-R_1(p)=R_{10}+k_\rho p,\qquad
-s(p)=\frac{p}{p_{1/2}+p},
-$$
+The example generates four finite-repetition FIR experiments and one
+magnetization-versus-power experiment. All five use the same relaxation law:
 
 $$
-E(p)=1-\frac{658\,C\,k_\sigma\,s(p)}{R_1(p)}.
+T_{1,w}(p)=T_{1,w}(0)+p\Delta T_{1,w},\qquad
+k_{\rho,\mathrm{inv}}(p)=a+bp+cp^2,\qquad
+R_1(p)=\frac{1}{T_{1,w}(p)}+
+\frac{C_{SL}}{k_{\rho,\mathrm{inv}}(p)}.
 $$
 
-This enhancement expression follows the steady-state ODNP relationship
-between cross-relaxivity, saturation, and longitudinal relaxation. Here
-concentration and the saturation curve are assumed known.
-[Franck et al., quantitative ODNP analysis](https://pmc.ncbi.nlm.nih.gov/articles/PMC3798041/)
+Here $a$, $b$, and $c$ correspond to `k_rho_inv_a`, `k_rho_inv_b`, and
+`k_rho_inv_c`. Their units are molar seconds, molar seconds per watt, and
+molar seconds per watt squared. This demonstration fixes $c=0$, the known
+concentration, and the known water-relaxation coefficients. It fits the
+remaining shared coefficients and one recovery asymptote per FIR dataset.
 
-**For this synthetic demonstration, the plan’s `k_rho` is an empirical slope
-of relaxation rate versus power, with units $\mathrm{s^{-1}W^{-1}}$. It is
-not the conventional ODNP self-relaxivity $k_\rho$, whose units are
-concentration$^{-1}$time$^{-1}$.** The plan’s identifier is retained to
-make the architecture recognizable; the final scientific example should
-resolve that naming distinction.
+The two funcvals are
 
-The inline comments explain each operation.
+$$
+M_\tau(\tau,p)=M_{\infty,k}
+\left[1-\left(2-e^{-W_kR_1(p)}\right)e^{-\tau R_1(p)}\right],
+\qquad
+M_\epsilon(p)=M_{p0}\left[1-\frac{A}{R_1(p)}
+\frac{p}{p+p_{1/2}}\right].
+$$
+
+Fit `A`, not `k_sigma`. The saturation limit and frequency ratio are known
+inputs used outside the fitting model:
+
+$$
+k_\sigma=\frac{A}{C_{SL}s_{max}|\omega_e/\omega_H|}.
+$$
+
+The physical conventions follow the authoritative model above and the
+referenced
+[FIR processing script](../../proc_scripts/examples/proc_FIR.py),
+[original ODNP example](../../proc_scripts/examples/broken/fit_ODNP_data.py),
+and [current ODNP example](../../proc_scripts/examples/fit_ODNP_data.py).
+For scientific background, see
+[Franck et al., quantitative ODNP analysis](https://pmc.ncbi.nlm.nih.gov/articles/PMC3798041/).
+These scripts provide context; the final plan governs the new API.
 
 ```python
-import matplotlib.pyplot as plt  # Plot the observations and predictions.
-import numpy as np  # Generate coordinates and reproducible synthetic noise.
-import sympy as sp  # Describe models and substitutions symbolically.
-import pyspecdata as psd  # Store labeled data and perform the joint fit.
+import re
+
+import matplotlib.pyplot as plt
+import numpy as np
+import sympy as sp
+import pyspecdata as psd
 
 
 def main():
-    # Fix the random seed so repeated runs generate identical observations.
-    rng = np.random.default_rng(20261023)
+    """Demonstrate the planned joint FIR/magnetization fitting interface."""
+    rng = np.random.default_rng(20261029)
 
-    # These are known experimental constants, not optimizer parameters.
-    concentration = 0.0002  # Spin-probe concentration in mol/L.
-    gamma_ratio = 658.0  # Approximate magnitude of electron/proton ratio.
-    half_power = 0.5  # Known half-saturation power in W.
-    noise_sd = 0.02  # Standard deviation of each dimensionless observation.
+    # Known constants: concentration in M, water T1 in s, slope in s/W.
+    concentration_M = 0.0002
+    water_t1_zero = 2.5
+    water_t1_slope = 0.15
+    saturation_limit = 1.0
+    frequency_ratio = 658.0  # Magnitude of omega_e / omega_H.
+    true_k_sigma = 20.0  # M^-1 s^-1; not a fitting-model symbol.
+    noise_sd = 0.01  # Signal standard deviation in arbitrary units.
 
-    # These values generate the data; they are not supplied as fit results.
-    truth = {"R_10": 1.2, "k_rho": 0.15, "k_sigma": 20.0}
+    # A has units s^-1. The synthetic inverse-relaxivity model is linear.
+    truth = {
+        "A": concentration_M * saturation_limit * frequency_ratio
+        * true_k_sigma,
+        "k_rho_inv_a": 4.0e-4,
+        "k_rho_inv_b": 4.0e-5,
+        "p_half": 0.5,
+        "M_p0": 1.2,
+    }
+    delays = np.linspace(0.0, 5.0, 101)  # Recovery times in seconds.
+    powers = np.linspace(0.0, 3.0, 101)  # Microwave powers in watts.
+    datasets = {}  # Insertion order defines this example's dataset indices.
 
-    # Recovery delays and enhancement powers need not share coordinates.
-    delays = np.linspace(0.0, 4.0, 101)
-    powers = np.linspace(0.0, 3.0, 101)
-
-    # Keep datasets in a defined order for local-parameter numbering.
-    datasets = []
-
-    # Each tuple gives power, initial magnetization, and final magnetization.
-    for index, (power, initial, final) in enumerate(
-        [(0.0, -1.0, 1.0), (3.0, -0.85, 1.1)]
+    for index, (power, asymptote) in enumerate(
+        [(0.0, 1.0), (0.5, 1.05), (1.5, 0.95), (3.0, 1.1)]
     ):
-        # Generate a recovery curve with the shared rate-versus-power law.
-        recovery = final + (initial - final) * np.exp(
-            -delays * (truth["R_10"] + truth["k_rho"] * power)
+        # Simulate the same metadata fields supplied by an experiment loader.
+        acquisition = {
+            "FIR_rep_us": 800000.0 + index * 100000.0,
+            "acq_time_ms": 100.0,
+        }
+        wait_seconds = (
+            acquisition["FIR_rep_us"] * 1e-6
+            + acquisition["acq_time_ms"] * 1e-3
+        )
+        relaxation_rate = (
+            1.0 / (water_t1_zero + power * water_t1_slope)
+            + concentration_M
+            / (truth["k_rho_inv_a"] + truth["k_rho_inv_b"] * power)
         )
 
-        # Add independent Gaussian measurement noise.
+        # Include incomplete recovery during the finite repetition delay.
+        recovery = asymptote * (
+            1.0
+            - (2.0 - np.exp(-wait_seconds * relaxation_rate))
+            * np.exp(-delays * relaxation_rate)
+        )
         recovery += rng.normal(0.0, noise_sd, delays.size)
-
-        # nddata attaches the dimension label "tau" to the measured values.
         dataset = psd.nddata(recovery, "tau")
-
-        # setaxis attaches the actual delay coordinates.
-        dataset.setaxis("tau", delays)
-
-        # set_units records the unit of that coordinate axis.
-        dataset.set_units("tau", "s")
-
-        # name supplies the unique dictionary key used by the container.
-        dataset.name(f"T1_{index}")
-
-        # A top-level property fixes p for this particular recovery dataset.
-        dataset.set_prop("p", power)
-
-        # A scalar error is expanded to an uncertainty for every data point.
+        dataset.setaxis("tau", delays).set_units("tau", "s")
+        dataset.set_prop("power_W", power)
+        dataset.set_prop("acq_params", acquisition)
         dataset.set_error(noise_sd)
+        datasets[f"T1_{index}"] = dataset
 
-        # Add this labeled recovery dataset to the joint fitting problem.
-        datasets.append(dataset)
-
-    # Generate enhancement observations using the same relaxation-rate law.
-    enhancement = 1.0 - gamma_ratio * concentration * truth[
-        "k_sigma"
-    ] * powers / (half_power + powers) / (
-        truth["R_10"] + truth["k_rho"] * powers
+    # Generate magnetization, retaining a fitted zero-power scale M_p0.
+    relaxation_rate = (
+        1.0 / (water_t1_zero + powers * water_t1_slope)
+        + concentration_M
+        / (truth["k_rho_inv_a"] + truth["k_rho_inv_b"] * powers)
+    )
+    magnetization = truth["M_p0"] * (
+        1.0
+        - truth["A"] * powers / (powers + truth["p_half"])
+        / relaxation_rate
+    )
+    magnetization += rng.normal(0.0, noise_sd, powers.size)
+    datasets["M_ε"] = (
+        psd.nddata(magnetization, "p")
+        .setaxis("p", powers)
+        .set_units("p", "W")
+        .set_error(noise_sd)
     )
 
-    # Use the same known noise standard deviation for this demonstration.
-    enhancement += rng.normal(0.0, noise_sd, powers.size)
+    # Mapping keys must agree with nddata.name(); do this before construction.
+    for name, dataset in datasets.items():
+        dataset.name(name)
 
-    # Here p is an axis, rather than a scalar dataset property.
-    dataset = psd.nddata(enhancement, "p")
-    dataset.setaxis("p", powers)
-    dataset.set_units("p", "W")
-    dataset.name("E(p)")
-    dataset.set_error(noise_sd)
-    datasets.append(dataset)
+    # This same preparation applies to datasets supplied by a real loader.
+    recovery_names = [
+        name for name in datasets if re.fullmatch(r"(?:T1|FIR)_.*", name)
+    ]
+    for name in recovery_names:
+        dataset = datasets[name]
+        dataset.set_prop("p", dataset.get_prop("power_W"))
+        acquisition = dataset.get_prop("acq_params")
+        repetition_us = (
+            acquisition["FIR_rep_us"]
+            if "FIR_rep_us" in acquisition
+            else acquisition["FIR_rep"]
+        )
+        dataset.set_prop(
+            "W_k", repetition_us * 1e-6
+            + acquisition["acq_time_ms"] * 1e-3,
+        )
 
-    # Coordinate symbols will be supplied from axes or matching properties.
+    # Variables: tau is an axis; p is an axis or a top-level property.
     tau, p = sp.symbols("tau p", real=True)
 
-    # R_1 is a dependent quantity; the other three symbols are fitted.
-    R_1, R_10, k_rho, k_sigma = sp.symbols("R_1 R_10 k_rho k_sigma", real=True)
-
-    # The _i suffix requests an independent parameter for each dataset.
-    M_0_i, M_inf_i = sp.symbols("M_0_i M_inf_i", real=True)
-
-    # Construction assigns models, substitutes R_1, and expands local names.
-    fit = psd.lmfitdata(
-        datasets,
-        functional_forms={
-            # This expression is assigned to the recovery datasets.
-            "T1": M_inf_i + (M_0_i - M_inf_i) * sp.exp(-tau * R_1),
-            # This expression is assigned to the enhancement dataset.
-            "E(p)": 1
-            - gamma_ratio
-            * concentration
-            * k_sigma
-            * p
-            / (half_power + p)
-            / R_1,
-            # Eq defines a substitution, not another measured dataset.
-            "R_1": sp.Eq(R_1, R_10 + k_rho * p),
-        },
+    # Dependent local parameters are readable intermediate definitions.
+    R_1, T_1w, k_rho_inv, s_normed = sp.symbols(
+        "R_1 T_1w k_rho_inv s_normed", real=True
     )
 
-    # Selected access also exposes the planned decorator interface.
-    # This identity transform is included only to illustrate registration.
-    @fit["E(p)"].define_residual_transform
-    def enhancement_domain(data):
-        # Return an nddata in the domain where residuals are compared.
-        return data
-
-    # set_guess supplies starting values and optional optimizer bounds.
-    # No guess is supplied for R_1 because substitution eliminates it.
-    fit.set_guess(
-        R_10=dict(value=1.0, min=0.01),
-        k_rho=dict(value=0.1, min=0.0),
-        k_sigma=dict(value=15.0, min=0.0),
-        M_0_0=-0.9,
-        M_inf_0=0.9,
-        M_0_1=-0.8,
-        M_inf_1=1.0,
+    # Global parameters retain their classification even when fixed.
+    A, C_SL, T_1w0, dT_1w, M_p0, p_half = sp.symbols(
+        "A C_SL T_1w0 dT_1w M_p0 p_half", real=True
+    )
+    k_rho_inv_a, k_rho_inv_b, k_rho_inv_c = sp.symbols(
+        "k_rho_inv_a k_rho_inv_b k_rho_inv_c", real=True
     )
 
-    # C deep-copies the entire fitting container.
-    # set_to_guess selects initial coefficients for evaluation.
-    # Multi-dataset eval returns {dataset_name: predicted_nddata}.
+    # Indexed independent local parameters: M_inf_k varies; W_k is fixed.
+    M_inf_k, W_k = sp.symbols("M_inf_k W_k", real=True)
+    functional_forms = {
+        "M_τ": M_inf_k * (
+            1 - (2 - sp.exp(-W_k * R_1)) * sp.exp(-tau * R_1)
+        ),
+        "M_ε": M_p0 * (1 - A * s_normed / R_1),
+        "R_1": 1 / T_1w + C_SL / k_rho_inv,
+        "T_1w": T_1w0 + p * dT_1w,
+        "k_rho_inv": (
+            k_rho_inv_a + k_rho_inv_b * p + k_rho_inv_c * p**2
+        ),
+        "s_normed": p / (p + p_half),
+    }
+
+    # Keys name left-hand symbols; values are expressions, never sp.Eq.
+    # The library assigns funcvals and substitutes intermediate definitions.
+    fit = psd.lmfitdata(datasets, functional_forms=functional_forms)
+
+    # All guesses and fixed global values are supplied in one set_guess call.
+    guesses = {
+        "A": dict(value=2.0, min=0.0, max=10.0),
+        "C_SL": dict(value=concentration_M, vary=False),
+        "T_1w0": dict(value=water_t1_zero, vary=False),
+        "dT_1w": dict(value=water_t1_slope, vary=False),
+        "k_rho_inv_a": dict(value=3.5e-4, min=1e-5, max=2e-3),
+        "k_rho_inv_b": dict(value=5e-5, min=0.0, max=2e-4),
+        "k_rho_inv_c": dict(value=0.0, vary=False),
+        "p_half": dict(value=0.7, min=0.05, max=3.0),
+        "M_p0": dict(value=1.1, min=0.1, max=2.0),
+    }
+    for index, name in enumerate(recovery_names):
+        # The four recovery datasets precede M_ε in this mapping.
+        guesses[f"M_inf_{index}"] = dict(value=1.0, min=0.1, max=2.0)
+
+    # W_k values are already fixed by metadata; do not duplicate them here.
+    # Fixed values are substituted last, leaving nine varying parameters.
+    fit.set_guess(guesses)
+
+    # C copies datasets, original forms, parameter records, and transforms.
+    # set_to_guess evaluates initial values; eval returns a keyed dictionary.
     guess_curves = fit.C.set_to_guess().eval()
-
-    # Fit all seven independent parameters against all three datasets.
-    fit.fit()
-
-    # Evaluate each assigned model at its dataset's original coordinates.
+    fit.fit()  # Joint fit with the analytic Jacobian of the reduced model.
     fitted_curves = fit.eval()
 
-    # fit_report returns lmfit's parameter/statistical report as text.
+    # Convert A to k_sigma outside the model; no k_sigma symbol is fitted.
+    fitted_k_sigma = fit.output("A") / (
+        concentration_M * saturation_limit * frequency_ratio
+    )
     print(fit.fit_report())
+    print("Fitted A / s^-1:", fit.output("A"))
+    print("Derived k_sigma / (M^-1 s^-1):", fitted_k_sigma)
+    print("Synthetic k_sigma / (M^-1 s^-1):", true_k_sigma)
 
-    # output(name) returns one fitted value; output() returns a dictionary.
-    print("All fitted parameters:", fit.output())
-    print("Recovered k_sigma:", fit.output("k_sigma"))
-    print("Synthetic k_sigma:", truth["k_sigma"])
-
-    # Create one plot for each measured dataset.
-    figure, axes = plt.subplots(1, 3, figsize=(14, 4))
-
-    for axis, measured in zip(axes, datasets):
-        # name() without an argument retrieves the dataset's name.
-        key = measured.name()
-
-        # dimlabels lists the named dimensions; these datasets are 1D.
+    # Predicted curves remain nddata objects, including axes and metadata.
+    figure, axes = plt.subplots(2, 3, figsize=(14, 8))
+    for axis, (name, measured) in zip(axes.flat, datasets.items()):
         coordinate = measured.dimlabels[0]
-
-        # getaxis retrieves coordinates; data contains measured values.
         axis.errorbar(
-            measured.getaxis(coordinate),
-            measured.data,
-            yerr=measured.get_error(),
-            fmt=".",
-            alpha=0.6,
+            measured.getaxis(coordinate), measured.data,
+            yerr=measured.get_error(), fmt=".", alpha=0.6,
             label="synthetic data",
         )
-
-        # Predictions remain nddata objects with named coordinates.
-        axis.plot(
-            guess_curves[key].getaxis(coordinate),
-            guess_curves[key].data,
-            "--",
-            label="initial guess",
-        )
-        axis.plot(
-            fitted_curves[key].getaxis(coordinate),
-            fitted_curves[key].data,
-            label="joint fit",
-        )
-
-        # Label each panel using the stored coordinate unit.
-        axis.set_title(key)
+        psd.plot(guess_curves[name], "--", ax=axis, label="initial guess")
+        psd.plot(fitted_curves[name], ax=axis, label="joint fit")
+        axis.set_title(name)
         axis.set_xlabel(f"{coordinate} / {measured.get_units(coordinate)}")
-        axis.set_ylabel("normalized signal")
+        axis.set_ylabel("magnetization / a.u.")
         axis.legend()
-
+    axes.flat[-1].set_visible(False)
     figure.tight_layout()
     plt.show()
 
@@ -1055,55 +1090,80 @@ if __name__ == "__main__":
     main()
 ```
 
-Several details in this script are particularly important:
+### How this example follows the final plan
 
-- `"T1"` is a **model label**, not a dataset name. Assignment must come from
-  coordinate matching.
-- `fit["E(p)"]` selects a dataset view. Its decorator must register the
-  transform in the parent container’s dictionary.
-- `R_1` disappears from the optimizer parameter list after substitution.
-- `M_0_i` expands to `M_0_0` and `M_0_1`; the same applies to `M_inf_i`.
-- `k_sigma` remains a global parameter even though only the enhancement
-  equation contains it.
-- The identity transform can be omitted in an actual analysis.
-- The example deliberately uses equal dataset lengths and identical errors.
-  Consequently, a common legacy normalization factor would not alter their
-  relative weighting, although interpreting chi-square still requires
-  resolving the normalization policy.
+- **Mapping input:** four named recovery datasets and `M_ε` are passed as one
+  dictionary. Mapping keys and `nddata.name()` agree.
+- **Expression definitions:** dictionary keys name left-hand symbols and
+  values are right-hand expressions. There are no `Eq` objects.
+- **Funcvals:** `M_τ` and `M_ε` are the unreferenced dictionary keys. The
+  recovery datasets use `M_τ`; the power sweep uses `M_ε`.
+- **Variables:** `tau` and `p`. Recovery datasets supply `p` as metadata;
+  the magnetization dataset supplies it as an axis. A compatible funcval
+  must depend on every axis of its assigned dataset. There is no ranking
+  heuristic: zero or multiple valid assignments fail validation.
+- **Deplocalpars:** `R_1`, `T_1w`, `k_rho_inv`, and `s_normed` are recursively
+  substituted in dependency order. They are not independently fitted.
+- **Indeplocalpars:** `M_inf_k` expands to four free asymptotes, and `W_k`
+  expands to four fixed values from metadata. A fixed local parameter is
+  still an indeplocalpar, not a deplocalpar.
+- **Globalpars:** `A`, `C_SL`, `T_1w0`, `dT_1w`, `k_rho_inv_a`,
+  `k_rho_inv_b`, `k_rho_inv_c`, `p_half`, and `M_p0`. Five vary here; four
+  are fixed. Parameters used by only one funcval remain globalpars.
+- **Fixed-value substitution:** after validation, local index expansion, and
+  dependent substitution, fixed values are substituted last. Analytic
+  Jacobians therefore contain only the varying parameters. Original forms
+  and parameter records must be retained so changing a fixed value or `vary`
+  rebuilds the model correctly.
+- **External conversion:** `A` is the fitted quantity. `k_sigma` is calculated
+  afterward using known concentration, saturation limit, and frequency ratio.
+- **Physical domain:** positive water-relaxation constants, positive
+  `k_rho_inv_a`, nonnegative `k_rho_inv_b`, and fixed `k_rho_inv_c=0`
+  keep relaxation times and inverse relaxivity positive over this nonnegative
+  power range. A quadratic model requires checking positivity over the entire
+  range, not merely changing `vary` on its coefficient.
+- **Weighting:** all datasets have 101 samples and identical errors, so the
+  example does not introduce a relative-weighting difference from separate
+  legacy normalization factors. It does not establish an uncertainty policy
+  for arbitrary datasets or transformed noise.
 
-An independent run of these synthetic equations through **ordinary lmfit
-with a manually concatenated residual** obtained:
+The earlier numerical reference table applied to the superseded linear-rate
+example and is replaced by the following October 29 check. The revised
+script's data and parameter setup was executed with current `nddata` objects.
+An independent lmfit reference then fitted 505 residual entries with nine
+varying parameters. Direct numerical equations agreed with recursively
+substituted symbolic expressions, and analytic and numerical Jacobian fits
+agreed within the checked tolerances.
 
-| Parameter | Synthetic truth | Independent reference fit |
+| Quantity | Synthetic truth | Independent reference fit |
 |---|---:|---:|
-| `R_10` | 1.2 | 1.1922 |
-| `k_rho` | 0.15 | 0.15287 |
-| `k_sigma` | 20.0 | 19.9740 |
+| `A` | 2.632 | 2.64737 |
+| `k_rho_inv_a` | 0.0004 | 0.000399025 |
+| `k_rho_inv_b` | 0.00004 | 0.0000397825 |
+| `p_half` | 0.5 | 0.502633 |
+| `M_p0` | 1.2 | 1.19514 |
+| Derived `k_sigma` | 20.0 | 20.1168 |
 
-That verifies the example’s numerical setup and recoverability for this noise
-realization. It does **not** validate the proposed `pyspecdata` API.
+These are results for one seeded synthetic noise realization, not guaranteed
+accuracy for experimental data. They validate the example's numerical setup,
+not execution of the future container API. End-to-end container acceptance
+and plot inspection belong to stop point 4.
 
 ## Implementation stop points and validation
 
-The four stop points can be preserved while making their acceptance criteria
-concrete:
+**Updated: Oct 29, 2026.** The authoritative stop points above now explicitly
+require classification and validation tests at stop point 1. The earlier
+October 23 staging question is resolved.
 
-| Stop point | Required validation |
+| Stop point | Required work and validation |
 |---|---|
-| **1 — Container and sorter** | Existing examples and Jacobian tests; single-dataset delegation, chaining, copying, direct transform assignment, and return types |
-| **2 — Single-dataset multidimensional fitting** | Nonsquare 2D data, reordered dimensions, scalar derivatives, real/complex packing, float32 inputs, and finite-difference derivative comparisons |
-| **3 — Multiple datasets** | Unequal lengths, automatic assignment and ambiguity errors, substitutions, local numbering, property variables, weighting, fixed parameters, transforms, and dictionary predictions |
-| **4 — Scientific demonstration** | Noiseless recovery, reproducible noisy recovery with justified tolerances, comparison against an independent numerical reference, and inspected plots |
+| **1 — Container, classification, and validation** | Naming, delegation, chaining, deep copies, decorator storage, five disjoint symbol classes, dependency cycles, unique funcval assignment, fixed metadata bindings, and classification/validation unit tests; preserve existing single-dataset tests |
+| **2 — Single-dataset multidimensional fitting** | Named-axis broadcasting, nonsquare arrays, real/complex residuals, final fixed-value substitution in `set_guess()`, rebuilding after fixed-value or `vary` changes, and agreement between analytic and numerical Jacobian fits including bounds |
+| **3 — Multiple datasets** | Mapping input, recursive substitution, index expansion, mixed axis/property variables, dataset decorators, concatenated residuals, dictionary predictions, construction summaries, and missing/ambiguous-input errors |
+| **4 — Synthetic ODNP demonstration** | Fit noisy FIR and magnetization data with the final physical model, recover `A`, convert externally to `k_sigma`, enforce the physical domain, and inspect the matching plotted example |
 
-At every approved step, focused tests should run first, followed by the
-applicable `.github` lint/single-use checks and broader regression validation
-when warranted. Each implementation step, merge, and commit remains subject
-to the separate approval requirements in [AGENTS.md](../AGENTS.md).
-
-There is one staging conflict to settle: the plan explicitly defers
-multidataset testing until stop point 3, whereas AGENTS.md requires tests
-accompanying behavioral changes. **A possible adjustment is to test the
-sorter’s classification and failure cases when it is introduced at stop
-point 1, while retaining full multidataset optimization tests for stop
-point 3.** This is a proposed adjustment to the plan, not an approved change
-to its staging.
+At every approved stop point, run relevant tests and repository lint checks,
+then stop for review as required by the plan. Local validation uses
+`/Users/atahan/.venv` without reinstalling the editable checkout. Each
+implementation step, merge, and commit remains subject to the separate
+approval requirements in [AGENTS.md](../AGENTS.md).
