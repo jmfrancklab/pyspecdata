@@ -28,11 +28,10 @@ The interfaces below are the implementation plan.
 # Example of a target physical model
 
 The global fit combines magnetization versus power, $M_\epsilon(p)$,
-with FIR curves measured at recovery times $\tau_j$ and powers $p_k$.
+with FIR curves, $M_\tau(\tau_j,p_k)$, measured at recovery times $\tau_j$ and powers $p_k$.
 (Currently, an FIR at each power is stored in a different dataset).
 Use $T_1$ for the relaxation time; $R_1=1/T_1$ is its inverse.
 The shared relaxation model is
-
 $$
 \begin{aligned}
 T_{1,w}(p) &= T_{1,w}(0)+p\,\Delta T_{1,w}, \\
@@ -44,7 +43,6 @@ R_1(p) &=
 \frac{1}{T_{1,w}(p)}+\frac{C_{SL}}{k_{\rho,\mathrm{inv}}(p)}.
 \end{aligned}
 $$
-
 Here $C_{SL}$ is the spin-label concentration.
 It is a **constant** -- *i.e.* it is fixed for all datapoints of all datasets.
 Fix $k_{\rho,\mathrm{inv},c}=0$ for the linear inverse-relaxivity model in
@@ -52,7 +50,7 @@ Fix $k_{\rho,\mathrm{inv},c}=0$ for the linear inverse-relaxivity model in
 allow $k_{\rho,\mathrm{inv},c}$ to vary for the quadratic extension.
 $T_{1,w}(0)$ and $\Delta T_{1,w}$ may either be constants, or fit parameters,
 depending on implementation.
-
+Next, for $M_\varepsilon(p_k)$:
 $$
 \begin{aligned}
 s(p) &= \frac{s_{max} p}{p+p_{1/2}}, \\
@@ -67,50 +65,59 @@ Because all the terms on the right hand side of
 $A=C_{SL}k_\sigma|\omega_e/\omega_H| s_{max}$
 except $k_\sigma$ are constants,
 we can rewrite this as
-
 $$
 M_\epsilon(p_k) = M_\epsilon(0)\left[
 1-\frac{A s_{normed}(p_k)}{R_1(p_k)}
 \right].
 $$
-
 where $s_{normed}(p)=p/(p+p_{1/2})$ does not include $s_{max}$.
-Fit $A$ directly as a global parameter.
-After fitting, calculate $k_\sigma$ outside the fitting code:
+Our challenge is then to fit $A$ directly as a global parameter,
+acknowledging that $R_1$ has a complicated power dependence
+that must be measured through a different set of experiments,
+discussed below.
+
+If we can fit our data to this model, we can then calculate $k_\sigma$ outside
+the fitting code:
 $$
 k_\sigma=\frac{A}{C_{SL}s_{max}|\omega_e/\omega_H|}.
 $$
 The user performs this conversion using the
-fitted `A`; `k_sigma` is not
+fitted `A`; $k_\sigma$ is not
 a fitting parameter or a symbol in `functional_forms`.
 
 The FIR model from
-[proc_FIR.py](../../proc_scripts/examples/proc_FIR.py) includes the finite
-repetition delay:
-
+[proc_FIR.py](../../proc_scripts/examples/proc_FIR.py):
 $$
 M_{\tau}(\tau_j,p_k)=M_{\tau,k}(\infty)
 \left[1-\left(2-e^{-W_k R_1(p_k)}\right)e^{-\tau_j R_1(p_k)}\right].
 $$
-
+includes the finite repetition delay:
 $$
 W_k=10^{-6}\,\mathtt{FIR\_rep\_us}_k
 +10^{-3}\,\mathtt{acq\_time\_ms}_k.
 $$
-
 Use seconds for $W_k$, $\tau$, and $T_1$.
 Use inverse seconds for $R_1$.
 The acquisition metadata stores `FIR_rep_us` (or legacy `FIR_rep`)
 in microseconds and `acq_time_ms` in milliseconds.
-The endpoint values $M_\epsilon(0)$ and $M_{\tau,k}(\infty)$
-are scalar fitting parameters, represented below by `M_p0` and `M_inf_k`.
-They also equal their expressions evaluated at $p=0$ and
-$\tau\to\infty$, respectively.
-Here $j$ indexes recovery times and $k$ indexes powers; the recovery
-asymptote and $W_k$ belong to the experiment at power $p_k$.
+Here $j$ indexes recovery times and $k$ indexes powers --
+*e.g.* $W_k$ belong to the experiment at power $p_k$.
 
-Note that we typically write code for the equations above as given above,
-to preserve legibility and ease the process of setting up global fitting.
+The endpoint value $M_{\tau,k}(\infty)$
+is a fitting parameter, represented below by `M_inf_k`.
+It is equal the expression above evaluated at $p_k$ and
+$\tau\to\infty$.
+Initially we will allow this to be fit freely for each
+FIR curve.
+However, note that we could actually say that
+$M_{\tau,k}(\infty) = M_\varepsilon(p_k)$,
+since $M_\varepsilon$ corresponds to
+magnetization that has fully recovered to
+equilibrium.
+
+Note that we typically write code for the equations above
+in a way that closely follows the math,
+in order to preserve legibility and ease the process of setting up global fitting.
 We rely on the `lmfitdata` module to perform the substitution and identify the
 types of parameters (more on this below).
 After substitution, there are only two equations:
@@ -119,6 +126,14 @@ and one for $M_\epsilon(p_k)$
 that describes progressive saturation.
 
 # Datasets and functional forms
+
+<!-- The following implementation is a little
+silly.
+First, there's no acknowledgement of the fact
+that if we pull from HDF5 that's saved by
+pyspec, the names will naturally be the same
+as the node names (and therefore the dict
+keys).  Second, why are there two loops?-->
 
 Accept a dictionary of datasets or a dictionary-like HDF5 group directly.
 For example, select already loaded experimental datasets:
@@ -238,7 +253,7 @@ and `lmfitdata` class docstring so we can discuss the architecture precisely:
 - **funcvals** (function values): symbols whose expressions calculate
   the values used in residuals, such as `M_ε` and `M_τ`.
   They are neither variables nor parameters.
-- **parameters**: quantities that may be
+- ***parameters***: quantities that may be
   optimized, fixed, or computed;
   the overall goal of optimization is to
   adjust the parameters to choose the best
@@ -249,7 +264,7 @@ and `lmfitdata` class docstring so we can discuss the architecture precisely:
   fitting container.
   These are the remaining model symbols after classifying variables,
   funcvals, deplocalpars, and indeplocalpars.
-- localpars (local parameters): quantities local to one dataset,
+- ***localpars*** (local parameters): quantities local to one dataset,
   either optimized independently or computed by substitution.
 - **deplocalpars** (dependent local parameters): quantities computed by
   substituting supplied
@@ -302,8 +317,8 @@ and `lmfitdata` class docstring so we can discuss the architecture precisely:
   thus, *e.g.* `W_k` is still an indeplocalpar.
 
 Classification uses the disjoint classes **variables**, **funcvals**,
-**globalpars**, **deplocalpars**, and **indeplocalpars**.
-`parameters` and `localpars` are umbrella terms for the corresponding classes.
+**globalpars**, **deplocalpars**, and **indeplocalpars**;
+***parameters*** and ***localpars*** are umbrella terms for the corresponding classes.
 Whether a parameter is fixed is separate from its classification.
 The classification procedure and validation requirements are enumerated in
 stop point 1.
