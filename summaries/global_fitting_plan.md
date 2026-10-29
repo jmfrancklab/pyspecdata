@@ -124,9 +124,9 @@ datasets = {
 ```
 
 Select recovery experiments by name using a regular expression.
-Assume the loader has stored each experiment's power in watts as a
-top-level `p` property via `.set_prop("p", power_in_watts)`.
-This supplies a power coordinate linking the recovery datasets.
+Assume the loader supplies each experiment's power in watts in a
+`power_W` property.
+Copy it to `p` to supply the coordinate linking the recovery datasets.
 
 ```python
 import re
@@ -137,34 +137,30 @@ for name, dataset in datasets.items():
     dataset.name(name)
 
 for name in T1_names:
+    datasets[name].set_prop("p", datasets[name].get_prop("power_W"))
     acq = datasets[name].get_prop("acq_params")
     rep_us = acq["FIR_rep_us"] if "FIR_rep_us" in acq else acq["FIR_rep"]
     datasets[name].set_prop("W_k", rep_us * 1e-6 + acq["acq_time_ms"] * 1e-3)
 ```
-<!-- above, you should be setting the power, as well-->
 
 The recovery datasets already have a `tau` axis; `datasets["M_ε"]` already
 has a `p` axis.
-The `calibration` dictionary supplies fixed globalpars.
-<!-- why is this called "calibration"??? that's a bad name-->
 Its keys are `C_SL`, `s_max`, and `omega_ratio`.
 Include `T_1w0` and `dT_1w` when fixed; omit them when they are fit parameters.
 Set `omega_ratio` to `abs(omega_e / omega_H)`.
 Each recovery dataset's `p` property supplies a variable,
 while its `W_k`
-property fixes a dependent localpar for that experiment.
-<!-- WK is not a dependent localpar.  It's independent!-->
+property fixes an independent localpar for that experiment.
 Keep both as top-level properties set with `.set_prop()`.
 
 Supply all datasets and expressions at construction.
 Each dictionary key is the string representation of the symbol on the left
 of an equality, and its value is the expression on the right.
-Use ordinary SymPy expressions; never construct SymPy equality objects.
-With symbols named as shown, the physical model becomes
+Use expressions, never SymPy equality objects.
 
 ```python
 functional_forms = {
-    "M_τ": M_inf_k * (1 - (2 - exp(-W_k * R_1)) * exp(-tau * R_1)),
+    "M_τ": "M_inf_k * (1 - (2 - exp(-W_k * R_1)) * exp(-tau * R_1))",
     "M_ε": M_p0 * (1 - A * s_normed / R_1),
     "A": C_SL * k_sigma * omega_ratio * s_max,
     "R_1": 1 / T_1w + C_SL / k_rho_inv,
@@ -172,19 +168,14 @@ functional_forms = {
     "k_rho_inv": k_rho_inv_a + k_rho_inv_b * p + k_rho_inv_c * p**2,
     "s_normed": p / (p + p_half),
 }
-functional_forms.update(
-    {key: sympify(value) for key, value in calibration.items()}
-)
 fit = lmfitdata(datasets, functional_forms=functional_forms)
 ```
 
 The fit shares `k_rho_inv_a`, `k_rho_inv_b`, `k_sigma`, `p_half`,
 and `M_p0` across the container, with a separate `M_inf_k` for each recovery
 dataset at power $p_k$.
-Calibration values are constant expressions in `functional_forms`.
-<!-- why are you making up vocab still!!!  "calibration" is such a  HORRIBLE word to use here!-->
 Thus `C_SL` remains a globalpar when fixed or substituted out.
-Likewise, `W_k` remains a dependent localpar when fixed from metadata.
+Likewise, `W_k` remains an independent localpar when fixed from metadata.
 Fix `k_rho_inv_c=0` or fit it according to the chosen inverse-relaxivity model.
 Optimize the shared relaxation parameters jointly from the recovery and
 magnetization data.
@@ -195,12 +186,18 @@ Use the following vocabulary consistently in the plan, implementation,
 and `lmfitdata` class docstring so we can discuss the architecture precisely:
 
 - **variables**: coordinates identified from dataset axis coordinate
-  labels or from matching unindexed top-level property keys,
-  <!-- this is unclear -- what does "unindexed" mean here?-->
-  excluding fixed globalpars.
-  Axis variables determine the model dimensions.
-  Coordinate properties set with `.set_prop()` span multiple datasets,
-  such as the powers linking the recovery experiments.
+  (*e.g.* the $\tau$ of an inversion recovery experiment)
+  or with an variable that changes across the different nddata objects
+  (*e.g.* the microwave power $p$ at which the inversion recovery experiment is conducted).
+  Note that it can be both of these -- *e.g.* the same `lmfitdata` container might hold
+  $M_\varepsilon(p)$ data (where $p$ is an axis coordinate) as well as $M_\tau(p,\tau)$ data
+  (where it's a property).
+  A variable is identifed based on its match to name of an nddata axis coordinate label
+  *or* by its match to the name of a symbol found in the functional forms
+  that (1) matches a top-level property key present in all the nddata and
+  (2) does not have a dataset-index
+  suffix (`_i`, `_j`, `_k`, etc.) when given in the functional form
+  and (3) does not match a *globalpars* (see below).
 - **funcvals** (function values): symbols whose expressions calculate
   the values used in residuals, such as `M_ε` and `M_τ`.
   They are neither variables nor parameters.
@@ -209,22 +206,28 @@ and `lmfitdata` class docstring so we can discuss the architecture precisely:
   the overall goal of optimization is to
   adjust the parameters to choose the best
   physical model possible with the functional
-  for that's given.
+  form that's given.
 - **globalpars** (global parameters):
   parameters shared across the
   fitting container.
-- **localpars** (local parameters): quantities local to one dataset,
+  These are identified by being keys of the functional form dictionary whose
+  values are other parameters.
+- localpars (local parameters): quantities local to one dataset,
   either optimized independently or computed by substitution.
-- **dependent localpars**: quantities computed by substituting supplied
-  expressions or experimental metadata,
+- dependent localpars **deplocalpars**: quantities computed by substituting supplied
+  <!-- use this name throughout-->
+  expressions involving model variables or parameters,
   such as `R_1(p_k)` at each dataset's
   power `p_k`.
   They are dependent in the sense
   that they depend on other variables and/or
   parameters.
-  Do not introduce numbered `R_1_k` symbols.
-  <!-- what does this last sentence mean? why?-->
-- **independent localpars**: parameters that vary with each dataset.
+  Substitute the expression for `R_1` and
+  evaluate it using each dataset's
+  power; do not create independently adjustable `R_1_0` or `R_1_1`.
+  Their values are already determined by the shared relaxation model.
+- independent localpars: **indeplocalpars**: parameters that vary with each dataset.
+  <!-- use this name throughout-->
   As such, among the set of variables and
   parameters, they are independent.
   In order for a given model to pass
@@ -235,13 +238,18 @@ and `lmfitdata` class docstring so we can discuss the architecture precisely:
   index letter, such as `_i`, `_j`, or `_k`.
   For example, `M_inf_k` is the value of the
   parameter we call $M_\infty$.
-  There is never a sympy symbol with the name
-  `M_inf_k`.
-  Rather,
+  The SymPy symbol with the name
+  `M_inf_k` is only used in the definition above.
+  Internally, it is replaced with a different variable for each dataset.
+  Specifically,
   for each of datasets indexed by $k$ with
   power $p_k$,
-  we create a separate variable:
+  we create a separate parameter:
   for example `M_inf_0` at the first power, `M_inf_1` at the second, *etc.*
+  A point of clarification:
+  Fixing such a parameter from experimental metadata, as with `W_k`,
+  does not make it dependent on other model variables or parameters;
+  thus, *e.g.* `W_k` is still an indeplocalpar.
 
 Classification uses the disjoint classes **variables**, **funcvals**,
 **globalpars**, **dependent localpars**, and **independent localpars**.
@@ -315,39 +323,47 @@ Add the vocabulary and architecture TODO notes to the class docstring.
 Implement classification using sets of symbols and the vocabulary above:
 
 1. Normalize the single-expression API to `{"z_data": expression}`.
-   Let `D` be the set of symbols named by
-   dictionary keys, `R` the union
-   of the expressions' `free_symbols`, and `S = D | R`.
+   Perform classification on sets of names before index expansion.
+   Let `D` be the dictionary keys and `R` the union
+   of names in the expressions' `free_symbols` and parsed expression strings.
+   Exclude function names and mathematical constants such as `exp` and `pi`.
+   Let `S = D | R`.
    Reject distinct symbols with the same string representation.
+   Do not create SymPy symbols for names ending in dataset-index suffixes.
 2. Classify `F = D - R` as funcvals: their expressions are not substituted
    into other supplied expressions.
    Build the dependency graph for `D & R` and reject circular dependencies.
-3. Collect axis symbols and unindexed coordinate-property symbols into the
-   variables set `V`, excluding symbols already defined in `D`.
+3. Collect axis names and coordinate-property names without dataset-index
+   suffixes into the variables set `V`, excluding names already in `D`.
    Consider only property names in `S`; ignore unrelated metadata.
    A definition cannot also supply an axis symbol.
    For indexed symbols supplied by properties, such as `W_k`,
-   record their dataset bindings as dependent localpars.
+   record their dataset bindings as fixed independent localpars.
    A symbol supplied both by a definition and a property is ambiguous.
-4. Among `R - D - V`, classify unbound symbols with dataset-index suffixes
-   as independent localpars; classify the remaining unbound symbols as
+4. Among `R - D - V`, classify names with dataset-index suffixes as
+   independent localpars, whether fixed by metadata or free to optimize.
+   Classify the remaining unbound names as
    globalpars.
    A parameter remains global even if only one funcval uses it.
    If an indexed symbol is bound for some applicable datasets,
    require bindings for all of them rather than optimizing missing values.
 5. Follow the dependency graph to classify each symbol in `D & R`.
-   An indexed definition, or one depending transitively on variables or
-   localpars, is a dependent localpar.
+   A definition depending transitively on variables or localpars is a
+   dependent localpar, as is an indexed expression of other parameters.
+   A constant value assigned to an indexed name fixes an independent
+   localpar; an index suffix alone does not imply dependence.
    Other definitions are globalpars, including constants such as `C_SL` and
    expressions of globalpars such as `A`.
    Preserve these classifications when substituting or fixing values.
    Only unbound globalpars and independent localpars enter the optimizer,
    unless explicitly fixed.
-6. For each dataset, choose exactly one funcval whose variables and dependent
-   localpar bindings are available and whose expression depends on all dataset
+6. For each dataset, choose exactly one funcval whose variables and required
+   fixed localpar bindings are available and whose expression depends on all dataset
    axes.
-   Inspect dependencies before substitution, then substitute and rename
-   independent localpars for each dataset.
+   Inspect dependencies before substitution, then expand dataset-index
+   suffixes and construct the SymPy expressions for each dataset.
+   Transfer metadata bindings to the expanded names and substitute
+   dependent expressions.
 7. Validate that every symbol in `S` has exactly one of the five classes.
    Their union must equal `S`, and pairwise intersections must be empty.
    Every funcval must be used and every required binding must exist.
@@ -358,9 +374,9 @@ Implement classification using sets of symbols and the vocabulary above:
 
 Add classification and validation unit tests at this stop point.
 For the example, expect funcvals `{M_τ, M_ε}`, variables `{tau, p}`,
-independent localpars `{M_inf_k}`, and dependent localpars
-`{W_k, R_1, T_1w, k_rho_inv, s_normed}`.
-The remaining coefficient and calibration symbols, including `A` and
+independent localpars `{M_inf_k, W_k}` (with `W_k` fixed), and dependent localpars
+`{R_1, T_1w, k_rho_inv, s_normed}`.
+The remaining coefficient and fixed globalpar symbols, including `A` and
 `C_SL`, are globalpars.
 Test fixed values, globalpars used by only one funcval, alternative index
 letters, missing bindings, conflicting classifications, ambiguous funcvals,
@@ -389,7 +405,7 @@ Run relevant tests and lint checks, then stop for review.
 
 Fit noisy synthetic FIR recovery and magnetization-versus-power datasets
 jointly to recover `k_sigma` with the physical model above.
-Use known calibration values, positive relaxation times and inverse
+Use known fixed globalpar values, positive relaxation times and inverse
 relaxivity over the fitted power range, and the stated saturation convention.
 Add a matching example plotting the data and fitted curves.
 Run relevant tests and lint checks.
