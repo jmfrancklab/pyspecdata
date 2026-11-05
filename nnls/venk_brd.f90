@@ -1,4 +1,5 @@
   subroutine venk_brd(initial_alpha,k0_mat,m,n,m_r,f,alpha_out,tol,maxiter)
+    use, intrinsic :: iso_fortran_env, only: output_unit
     !f2py threadsafe
     ! implement the Butler-Reeds-Dawson solver in Fortran
     integer,intent(in) :: m,n,maxiter
@@ -18,13 +19,17 @@
     allocate(c(m),tempvec(n))
     c = 1.0d0
     norm_mr = norm2(m_r)
+    write(output_unit,'(a)',advance='no') 'alpha'
+    flush(output_unit)
     do iter=1,maxiter
       call venk_nnls(k0_mat,m_r,c,alpha,m,n)
       alpha_new = sqrt_n / norm2(c)
-      write(*,*) 'alpha iteration', iter, 'value', alpha_new
+      write(output_unit,'(a)',advance='no') '.'
+      flush(output_unit)
       if (abs(alpha_new-alpha)/alpha < tol) exit
       alpha = alpha_new
     end do
+    write(output_unit,'(a)') ''
     call dgemv('T',m,n,1.0d0,k0_mat,m,c,1,0.0d0,tempvec,1)
     do j=1,n
       if (tempvec(j) > 0.d0) then
