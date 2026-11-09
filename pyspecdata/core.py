@@ -1895,6 +1895,7 @@ class nddata(object):
         return cs
 
     pcolor = this_plotting.pcolormesh.pcolormesh
+    plot_spreading_box = this_plotting.plot_spreading_box.plot_spreading_box
 
     def waterfall(
         self, alpha=0.5, ax=None, rotation=None, color="b", edgecolor="k"
