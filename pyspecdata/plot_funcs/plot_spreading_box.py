@@ -13,12 +13,51 @@ class SpreadingBoxes(PolyCollection):
     Each point starts from a baseline square whose side is *min_pixels*
     pixels on screen (found from the display transform).  Along any
     direction with an error σ, the box is widened to 2σ when that is larger
-    than the baseline.  The opacity is
-    then lowered so that (area × opacity) equals the baseline square at
-    50 % opacity: the same amount of pigment, spread over an area governed
-    by the error.  The boxes are recomputed at every draw, so they stay
-    correct as the axes rescale, zoom or resize.
+    than the baseline.  Each point is given an amount of pigment that would
+    cover the baseline square *base_alpha* times over, and the opacity is
+    the amount of pigment divided by the area of the box.  Because
+    *base_alpha* is typically greater than 1, and pigment that is piled on
+    top of itself can't be more than fully opaque, the opacity is
+    thresholded at 1: boxes smaller than *base_alpha* baseline squares
+    are fully opaque, while larger boxes fade in proportion to their area.
+    The boxes are recomputed at every draw, so they stay correct as the
+    axes rescale, zoom or resize.
+
+    Parameters
+    ==========
+    centers : array
+        The center of each box (in data units), as an N × 2 array.
+    x_error, y_error : array
+        The error (σ) of each point along x and along y, in data units.
+    color :
+        Any matplotlib color.
+    min_pixels : float
+        Side of the baseline square, in pixels.
+    base_alpha : float
+        Amount of pigment for each point, in units of the amount needed to
+        make the baseline square fully opaque.
+    **kwargs :
+        Passed to `PolyCollection` (*e.g.* ``label``).
     """
+
+    def __init__(
+        self,
+        centers,
+        x_error,
+        y_error,
+        color,
+        min_pixels=3,
+        base_alpha=5,
+        **kwargs,
+    ):
+        # no edges, since an edge would add pigment
+        super().__init__([], edgecolors="none", linewidths=0, **kwargs)
+        self._centers = centers
+        self._x_error = x_error
+        self._y_error = y_error
+        self._base_rgba = np.array(to_rgba(color))
+        self._min_pixels = min_pixels
+        self._base_alpha = base_alpha
 
     def _update_boxes(self):
         ax = self.axes
@@ -43,31 +82,38 @@ class SpreadingBoxes(PolyCollection):
             + corners[None, :, :] * np.stack([width, height], axis=-1)[:, None]
         )
         rgba = np.tile(self._base_rgba, (len(self._centers), 1))
-        rgba[:, 3] =  self.base_alpha * baseline[0] * baseline[1] / (width * height)
-        mask = rgba[:,3] > 1
-        rgba[mask,3] = 1
+        # pigment divided by area, where piling up extra pigment can't make
+        # a box more than fully opaque
+        rgba[:, 3] = np.minimum(
+            1, self._base_alpha * baseline[0] * baseline[1] / (width * height)
+        )
         self.set_facecolor(rgba)
 
     def draw(self, renderer):
-        # legend handles are plain copies that carry no box data
-        if hasattr(self, "_centers"):
-            self._update_boxes()
+        self._update_boxes()
         super().draw(renderer)
 
 
-def plot_spreading_box(self, *args, min_pixels=3, ax=None, base_alpha=5, **kwargs):
+def plot_spreading_box(
+    self, *args, min_pixels=3, ax=None, base_alpha=5, **kwargs
+):
     r"""Plot each point as a box whose size shows its error.
 
     Think of using the same amount of pigment for every point, and spreading
     it out over an area that is governed by the error.  A point with no (or
-    small) error is drawn as a small square, 50 % opaque, *min_pixels*
-    pixels on a side.  If the data have an error σ, the box grows to a
-    height of 2σ when that exceeds the square; if the coordinate has an
-    error, the box grows to a width of 2σ in the same way.  A bigger box is
-    proportionally more transparent, so (area × opacity) stays the same, and
-    points with large errors fade out instead of dominating the plot.  The
-    boxes have no edges, since an edge would add pigment and spoil the
-    effect.
+    small) error is drawn as a small square, *min_pixels* pixels on a side.
+    If the data have an error σ, the box grows to a height of 2σ when that
+    exceeds the square; if the coordinate has an error, the box grows to a
+    width of 2σ in the same way.
+
+    We intentionally load each point with extra pigment -- enough to cover
+    the small square *base_alpha* times over.  When that pigment is piled on
+    top of itself in a small area, the extra makes no difference (the box is
+    just fully opaque), so the opacity is thresholded at 1.  Once the box is
+    larger than *base_alpha* small squares, it becomes proportionally more
+    transparent, so that (area × opacity) stays the same, and points with
+    large errors fade out instead of dominating the plot.  The boxes have no
+    edges, since an edge would add pigment and spoil the effect.
 
     The data are first drawn with :func:`~pyspecdata.plot`, so the axes are
     autoscaled (including the error bars) and labelled as usual, from the
@@ -82,6 +128,10 @@ def plot_spreading_box(self, *args, min_pixels=3, ax=None, base_alpha=5, **kwarg
         Side of the baseline square, in pixels.
     ax : matplotlib Axes, optional
         Axes to draw on (default: current axes).
+    base_alpha : float
+        Amount of pigment for each point, in units of the amount needed to
+        make the baseline square fully opaque.  Values greater than 1 keep
+        the points with moderate errors from fading too quickly.
     **kwargs :
         Passed to :func:`~pyspecdata.plot` (*e.g.* ``color``, ``label`` or
         ``human_units``).
@@ -108,7 +158,6 @@ def plot_spreading_box(self, *args, min_pixels=3, ax=None, base_alpha=5, **kwarg
         drawn = [drawn]
     else:  # a list of lines
         line = drawn[0]
-    color = line.get_color()
     centers = np.column_stack([line.get_xdata(), line.get_ydata()])
     x_scale = _scale_between(self.getaxis(dimname), centers[:, 0])
     y_scale = _scale_between(self.data.real, centers[:, 1])
@@ -116,16 +165,14 @@ def plot_spreading_box(self, *args, min_pixels=3, ax=None, base_alpha=5, **kwarg
         artist.remove()
     ax.autoscale_view()
     boxes = SpreadingBoxes(
-        [], edgecolors="none", linewidths=0, label=kwargs.get("label")
+        centers,
+        _error_or_zero(self.get_error(dimname), len(centers)) * x_scale,
+        _error_or_zero(self.get_error(), len(centers)) * y_scale,
+        line.get_color(),
+        min_pixels=min_pixels,
+        base_alpha=base_alpha,
+        label=kwargs.get("label"),
     )
-    SpreadingBoxes.base_alpha = base_alpha
-    boxes._centers = centers
-    boxes._base_rgba = np.array(to_rgba(color))
-    boxes._min_pixels = min_pixels
-    boxes._x_error = _error_or_zero(self.get_error(dimname), len(centers))
-    boxes._x_error = boxes._x_error * x_scale
-    boxes._y_error = _error_or_zero(self.get_error(), len(centers))
-    boxes._y_error = boxes._y_error * y_scale
     # the removed drawing set the data limits and so the pixel scale; now
     # widen the limits once so that whole boxes are visible (the boxes are
     # recomputed for the final scale when drawn)
