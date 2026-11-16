@@ -1,9 +1,14 @@
 # Repository Instructions
 
-- When running locally: Before running tests or making code changes, always use the shared base environment at `/home/jmfranck/base` by running `source /home/jmfranck/base/bin/activate`. Do not reinstall the project locally unless explicitly asked; the local checkout is already installed in editable mode.
-- When running on cloud: Before running tests or making code changes, always install the project in editable mode with Meson by running `pip install -e . --no-build-isolation` from the repository root.
-- When running locally: Do not create or switch to any other virtual environment for this repository.
-- Follow the linting and validation rules enforced by the workflows and scripts in `.github` when making changes.
-- On cloud: Ensure all runtime and testing dependencies are installed so that `pytest` can execute without missing modules. If the editable install fails because build tools are absent (e.g., Meson, ninja, numpy), install the missing packages and rerun the command.
-- On cloud: After installing dependencies, run the relevant `pytest` targets to validate changes.
-- Locally: In the base environment, run the relevant `pytest` targets to validate changes.
+- Follow [STYLE_GUIDE.md](STYLE_GUIDE.md) for pyspecdata-native analysis,
+  examples, and notebooks. Other projects and tools can reference that guide
+  directly.
+- Locally, before making changes or running tests, activate the shared base
+  environment with `source /home/jmfranck/base/bin/activate`. Use only this
+  environment; the checkout is already installed in editable mode. Do not
+  reinstall unless explicitly asked.
+- On cloud, before making changes or running tests, install from the repository
+  root with `pip install -e . --no-build-isolation`. Install missing build,
+  runtime, or testing dependencies as needed and retry if installation fails.
+- Validate changes with the relevant `pytest` targets in the configured
+  environment, and follow the linting and validation rules in `.github`.

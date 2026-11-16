@@ -5,206 +5,51 @@ colored spin-echo data.  This routine displays coherence pathways using
 domain coloring.
 """
 
-from numpy import r_, nan
+import logging
 import numpy as np
-from ..general_functions import strm, process_kwargs
 import matplotlib.pyplot as plt
-import matplotlib.lines as lines
-from matplotlib.patches import FancyArrowPatch
+import matplotlib.ticker as mticker
 from matplotlib.gridspec import SubplotSpec
+from matplotlib.lines import Line2D
+from matplotlib.patches import FancyArrowPatch
 from matplotlib.transforms import (
     ScaledTranslation,
     IdentityTransform,
     blended_transform_factory,
 )
 from pyspecdata.plot_funcs.image import imagehsv, image
-import matplotlib.ticker as mticker
-import logging
-
-majorLocator = lambda: mticker.MaxNLocator(
-    nbins="auto", steps=[1, 2, 2.5, 5, 10]
-)
-minorLocator = lambda: mticker.AutoMinorLocator(n=5)
+from ..general_functions import strm
 
 
-def decorate_axes(
-    my_data,
-    idx,
-    remaining_dim,
-    depth,
-    a_shape,
-    ax_list,
-    ordered_labels,
-    label_placed,
-    horiz_label_spacer,
-    arrow_dx,
-    arrow_dy,
-    fig,
-    transDispTranslated,
-    transXdispYfig,
-):
-    "This function is called recursively to decorate the axes"
-    thisdim = remaining_dim[0]
-    logging.debug(strm("This is remaining dim", remaining_dim))
-    logging.debug(strm("This dim is", thisdim))
-    depth -= 1
-    for j in range(a_shape[thisdim]):
-        idx_slice = idx[thisdim, j]
-        logging.debug(
-            strm("For", thisdim, "element", j, idx_slice.data.ravel())
-        )
-        first_axes = ax_list[idx_slice.data.ravel()[0]]
-        last_axes = ax_list[idx_slice.data.ravel()[-1]]
-        # {{{ Draw span:
-        # Place the vertical lines and labels of the coherence transfer
-        # pathways
-        label_spacing = (
-            depth
-            + 1  # plus one so the first horizontal isn't placed at 0
-            #      (overlapping with the spine of the indirect axis)
-        ) * horiz_label_spacer  # will space the vertical lines along x
-        #                         approp.
-        x1_disp = -label_spacing
-        # {{{ Take y coordinate of top and bottom of axes objects to get the 2
-        #     points for drawing the lines. To be lazy I pull this from the
-        #     axes objects themselves.
-        _, y1_fig = (
-            last_axes.transAxes + fig.transFigure.inverted()
-        ).transform(r_[0, 0.95])
-        _, y2_fig = (
-            first_axes.transAxes + fig.transFigure.inverted()
-        ).transform(r_[0, 0.05])
-        # }}}
-        # for scaled translation, x coords should be display and y coords
-        # should be figure
-        lineA = lines.Line2D(
-            [x1_disp, x1_disp],
-            [y1_fig, y2_fig],
-            linewidth=1,
-            color="k",
-            transform=transXdispYfig,
+def _label_arrow(fig, label, x_tip, arrow_dx, arrow_dy, width, transform):
+    """Draw a grey arrow whose tip is `x_tip` display units to the right of
+    the lower left corner of the bottom axes (and just below it), with
+    `label` at its tail.  `width` is the shaft width in points."""
+    y_tip = -2
+    tail = (x_tip - arrow_dx, y_tip - arrow_dy)
+    fig.add_artist(
+        FancyArrowPatch(
+            tail,
+            (x_tip, y_tip),
             clip_on=False,
-        )
-        plt.text(
-            x1_disp,  # same x coord as the line to keep simple
-            (y2_fig + y1_fig) / 2,  # put in middle of line
-            "%s" % ordered_labels[thisdim][j],
-            va="center",
-            ha="right",
-            rotation=90,
-            transform=transXdispYfig,
-            color="k",
-        )
-        fig.add_artist(lineA)
-        # }}}
-        place_labels(
-            my_data,
-            ax_list[0],
-            "%s" % my_data.unitify_axis("%s" % thisdim),
-            label_placed,
-            depth,
-            horiz_label_spacer,
-            arrow_dx,
-            arrow_dy,
-            fig,
-            transDispTranslated,
-        )
-        new_remaining_dim = remaining_dim[1:]
-        if len(remaining_dim) > 1:
-            decorate_axes(
-                my_data,
-                idx_slice,
-                new_remaining_dim,
-                depth,
-                a_shape,
-                ax_list,
-                ordered_labels,
-                label_placed,
-                horiz_label_spacer,
-                arrow_dx,
-                arrow_dy,
-                fig,
-                transDispTranslated,
-                transXdispYfig,
-            )
-
-
-def place_labels(
-    my_data,
-    ax1,
-    label,
-    label_placed,
-    this_label_num,
-    horiz_label_spacer,
-    arrow_dx,
-    arrow_dy,
-    fig,
-    transDispTranslated,
-    pos_from_tick=False,
-    arrow_width_px=4.0,
-):
-    """Place arrows and dimname labels"""
-    # Take y of bottom axes object as this is the y we want the tip
-    # of the arrow to go to
-    # {{{ determine the x and y position of the label in display coords
-    if not label_placed[this_label_num]:
-        # the x coordinate will be the product of the horizontal label
-        # spacer and the index of the dimension. In this way the x
-        # position will increment with the number of the dimension
-        label_spacing = (this_label_num + 1) * horiz_label_spacer
-        # Calculate coord for base of arrow
-        x_textdisp = -label_spacing
-    if pos_from_tick:
-        # same as above, but determine text position based on tick
-        # labels
-        label = my_data.unitify_axis(my_data.dimlabels[-2])
-        # from here https://stackoverflow.com/questions/44012436/pytho\
-        # n-matplotlib-get-position-of-xtick-labels then searching for
-        # BBox docs
-        logging.debug(
-            strm(
-                "tick locations",
-                [j.get_window_extent().bounds for j in ax1.get_yticklabels()],
-            )
-        )
-        # {{{ only for the innermost,
-        tick_length = [
-            j.get_window_extent().bounds for j in ax1.get_yticklabels()
-        ][-1][-1]
-        x_textdisp = -tick_length
-        # }}}
-    if pos_from_tick or not label_placed[this_label_num]:
-        y_textdisp = -2  # define base of arrow y coord
-        # }}}
-        AnArrow = FancyArrowPatch(
-            (x_textdisp - arrow_dx, y_textdisp - arrow_dy),
-            (x_textdisp, y_textdisp),
-            clip_on=False,
-            transform=transDispTranslated,
+            transform=transform,
             alpha=0.1,
             color="k",
-            mutation_scale=20,
+            # the shaft of the default ("simple") arrow style is 0.2
+            # times the mutation scale
+            mutation_scale=width / 0.2,
         )
-        # could do fancier w/ the following, but need to mess w/ width
-        # parameters
-        # arrow_base = r_[x_arrowbase_fig-arrow_width/2, y_arrowbase_fig]
-        # a = FancyArrowPatch(arrow_base, arrow_base+r_[dx, dy],
-        #        arrowstyle='|-|',
-        #        alpha=0.1,  color='k')
-        fig.add_artist(AnArrow)
-        plt.text(
-            x_textdisp - arrow_dx,
-            y_textdisp - arrow_dy,
-            label,
-            va="top",
-            ha="right",
-            rotation=np.arctan2(arrow_dy, arrow_dx) * 180 / np.pi,
-            clip_on=False,
-            transform=transDispTranslated,
-            color="k",
-        )
-    if not label_placed[this_label_num]:
-        label_placed[this_label_num] = 1
+    )
+    fig.text(
+        *tail,
+        label,
+        va="top",
+        ha="right",
+        rotation=np.degrees(np.arctan2(arrow_dy, arrow_dx)),
+        clip_on=False,
+        transform=transform,
+        color="k",
+    )
 
 
 # SINGLE_USE_EXCEPTION -- exported API
@@ -215,28 +60,35 @@ def DCCT(
     bbox=[0.05, 0.1, 0.90, 0.8],
     gap=0.1,
     horiz_label_spacer=35,
-    shareaxis=False,
-    diagnostic=False,
     cmap=None,
-    pass_frq_slice=False,
+    shareaxis=True,
+    coherence_unmask_fn=None,
     scaling_factor=1,
     max_coh_jump=None,
     direct="t2",
     title=None,
     arrow_dx=30,
     arrow_dy=30,
+    arrow_width_px=None,
     no_aliasing_calc=False,
     interpolation=None,
     **kwargs,
 ):
     """DCCT plot.
 
+    The last dimension is the direct dimension (the *x* axis of each image),
+    the next-to-last ("inner") dimension is the *y* axis of each image, and
+    one image is generated for each element of the remaining ("outer")
+    dimensions.
+    The images are stacked vertically, and the outer dimensions are labeled
+    by nested brackets to the left of the images.
+
     Parameters
     ==========
     this_nddata : nddata
         data being plotted
     fig : figure
-        size/type of figure to be plotted on
+        figure to be plotted on
     custom_scaling : boolean
         allows user to scale the intensity of data presented
     bbox : list
@@ -264,14 +116,22 @@ def DCCT(
         Display coordinates
         Spacing between vertical lines that label the coherence pathways
     shareaxis : boolean
-        Subplots scale together, but currently, this means there
-        must be tick labels on both top and bottom
-    diagnostic : boolean
-        Option to additionally display diagnostic plots
+        If True (default), the images share their axes, so that zooming in
+        on one image zooms in on all of them.
+        If False, each image can be zoomed separately.
+    coherence_unmask_fn : function
+        Used to show a coherence mask:
+        the coherence pathways that are masked out are covered with a hatch.
+        This is the same type of function that is used by
+        `pyspecProcScripts.correl_align`:
+        it takes an nddata that contains only the phase cycling (coherence
+        transfer) dimensions and is filled with zeros,
+        and it returns that nddata with the pathways that are *not* masked
+        set to 1.
+        (The nddata that is passed has the same `coherence_pathway`
+        property as the data.)
     cmap : str
-        Color mapping if specified
-    pass_frq_slice : boolean
-        If true will show the frequency sliced out with hatching
+        Color mapping if specified -- only allowed for real data.
     scaling_factor : float
         If using custom scaling this allows user to set the scaling
         factor
@@ -283,6 +143,18 @@ def DCCT(
         Override the auto-chosen interpolation.
     title : str
         Title for DCCT plot
+    arrow_dx, arrow_dy : float
+        Display coordinates
+        Horizontal and vertical extent of the grey arrows that label the
+        dimensions.
+    arrow_width_px : float
+        Display coordinates
+        Width of the shaft of the grey arrows that label the dimensions
+        (the arrowhead scales with it).
+        Defaults to 4 points.
+    no_aliasing_calc : boolean
+        Label the phase cycling dimensions with their axis coordinates,
+        rather than with the (aliased) coherence changes.
 
     Returns
     =======
@@ -292,17 +164,50 @@ def DCCT(
         dictionary containing the unique transforms generated in
         this function for scaled translations
     """
-    if max_coh_jump is None:
-        all_ph = [j for j in this_nddata.dimlabels if j.startswith("ph")]
-        all_ph.sort()
-        if all_ph != [f"ph{j+1}" for j in range(len(all_ph))]:
+    # {{{ explain what to do about options that have been removed
+    for thisoption, explanation in [
+        (
+            "pass_frq_slice",
+            "It was intended to hatch out part of the plot, but it never"
+            " worked.  To hatch out the coherence pathways that are masked,"
+            " pass coherence_unmask_fn.",
+        ),
+        (
+            "diagnostic",
+            "It was intended to show extra diagnostic plots, but it never"
+            " did anything, so just leave it out.",
+        ),
+        (
+            "ax",
+            "DCCT always generates its own axes, and this was ignored.  To"
+            " control where the plot goes, pass fig and/or bbox (which can"
+            " be a gridspec element).",
+        ),
+        (
+            "spacing",
+            "It was ignored.  To control the spacing between the images,"
+            " use gap, and to control the spacing between the labels, use"
+            " horiz_label_spacer.",
+        ),
+        (
+            "x_first",
+            "It was ignored.  The last dimension is always the x axis, so"
+            " reorder your data, or use direct to say which dimension"
+            " should be the x axis.",
+        ),
+        (
+            "renumber",
+            "It was ignored.  If you want a dimension to be labeled by"
+            " index, set the coordinates of that axis before calling DCCT.",
+        ),
+    ]:
+        if thisoption in kwargs:
             raise ValueError(
-                "If your phases don't label by pulse number, I can't"
-                " automatically determine max_coh_jump"
+                f"The {thisoption} option of DCCT is deprecated, and has"
+                " been removed.  " + explanation
             )
-        max_coh_jump = dict([(f"ph{j+1}", j + 1) for j in range(len(all_ph))])
-    x = []  # List to put direct dim into
-    y = []  # List to put indirect dims into
+    # }}}
+    # {{{ determine the figure and the bbox
     if fig is None:
         if hasattr(bbox, "get_gridspec") and hasattr(
             bbox.get_gridspec(), "figure"
@@ -314,402 +219,393 @@ def DCCT(
                 " (1) use the figlist_var DCCT method (2) pass a bbox or"
                 " (3) pass a fig kwarg"
             )
-    my_data = this_nddata.C
     if isinstance(bbox, SubplotSpec):
-        temp = bbox.get_position(fig)
-        bbox = [
-            temp.x0,
-            temp.y0,
-            temp.width,
-            temp.height,
-        ]
-
-    # {{{ Generate alias labels for phase cycling dimensions
-    ordered_labels = {}
-    if no_aliasing_calc:
-        for this_dim in [j for j in my_data.dimlabels if j.startswith("ph")]:
-
-            ordered_labels[this_dim] = [
-                f"{j}" for j in my_data.getaxis(this_dim)
-            ]
-    else:
-        for this_dim in [j for j in my_data.dimlabels if j.startswith("ph")]:
-            if my_data.get_ft_prop(this_dim):
-                n_ph = my_data.shape[this_dim]
-                this_max_coh_jump = max_coh_jump[this_dim]
-                all_possibilities = np.empty(
-                    (int((2 * this_max_coh_jump + 1) / n_ph) + 1) * n_ph
-                )  # on reviewing, I *believe* this this is designed to
-                #    fit the array from -this_max_coh_jump to
-                #    +this_max_coh_jump, but it needs to round up to the
-                #    closest multiple of n_ph
-                all_possibilities[:] = nan
-                all_possibilities[: this_max_coh_jump + 1] = r_[
-                    0 : this_max_coh_jump + 1
-                ]  # label the positive jumps in order
-                all_possibilities[-this_max_coh_jump:] = r_[
-                    -this_max_coh_jump:0
-                ]  # and alias the negative ones into the correct locations
-                all_possibilities = all_possibilities.reshape(
-                    (-1, n_ph)
-                )  # now, reshape according to the number of dimensions we
-                #    actually have for discriminating
-                labels_in_order = []
-                for j in range(n_ph):
-                    temp = all_possibilities[
-                        :, j
-                    ]  # grab the columns, which are the labels for all
-                    #    aliases that belong at this index
-                    if j == 0:
-                        temp = ", ".join(
-                            [
-                                "%d" % j
-                                for j in np.sort(temp[np.isfinite(temp)])
-                            ]
-                        )
-                    else:
-                        temp = ", ".join(
-                            [
-                                "%+d" % j
-                                for j in np.sort(temp[np.isfinite(temp)])
-                            ]
-                        )
-                    if len(temp) == 0:
-                        temp = "X"
-                    labels_in_order.append(temp)
-                ordered_labels[this_dim] = labels_in_order
-            else:
-                ordered_labels[this_dim] = [
-                    "0" if j == 0.0 else f"{j}"
-                    for j in my_data.getaxis(this_dim)
-                ]
-    for this_dim in [
-        j for j in my_data.dimlabels[:-1] if not j.startswith("ph")
-    ]:
-        if my_data.getaxis(this_dim) is None:
-            my_data.set_axis(this_dim, "#")
-        ordered_labels[this_dim] = [f"{j}" for j in my_data.getaxis(this_dim)]
+        bbox = bbox.get_position(fig).bounds
+    bbox_left, bbox_bottom, bbox_width, bbox_height = bbox
     # }}}
-    real_data = not any(np.iscomplex(my_data.data.ravel()))
-    if cmap is not None:
-        assert (
-            real_data
-        ), "In order to use a color map, you must pass real data"
-        if type(cmap) is str:
-            cmap = plt.get_cmap(cmap)
-            my_data.data = my_data.data.real
-            real_data = True
+    if len(this_nddata.dimlabels) < 3:
+        raise ValueError(
+            "DCCT needs at least 3 dimensions -- for 2D data, just use image"
+        )
+    # we need a copy because human_units changes the axis coordinates
+    my_data = this_nddata.C
+    my_data.reorder(direct, first=False)
     my_data.human_units()
-    a_shape = this_nddata.shape
-    num_dims = len(a_shape.dimlabels[:-2])
+    outer_dims = my_data.dimlabels[:-2]
+    inner_dim, direct = my_data.dimlabels[-2:]
+    outer_shape = [my_data.shape[j] for j in outer_dims]
+    n_axes = int(np.prod(outer_shape))
+    # {{{ all phase cycles need to go exactly once around the circle, in
+    #     evenly spaced steps
+    for thisdim in my_data.dimlabels:
+        if thisdim.startswith("ph") and my_data.shape[thisdim] > 1:
+            if my_data.getaxis(thisdim) is None:
+                raise ValueError(
+                    f"The phase cycling dimension {thisdim} needs an axis"
+                    " that gives the phases, in cycles"
+                )
+            # in the phase cycling domain, the steps need to add up to one
+            # cycle, which is equivalent to a spacing of 1 in the coherence
+            # domain
+            if my_data.get_ft_prop(thisdim):
+                required_step = 1
+            else:
+                required_step = 1 / my_data.shape[thisdim]
+            if not np.allclose(
+                np.diff(my_data.getaxis(thisdim)), required_step
+            ):
+                raise ValueError(
+                    f"The phase cycle along {thisdim} needs to go exactly"
+                    " once around the circle in evenly spaced steps (e.g. 0,"
+                    " 0.25, 0.5, 0.75 cycles), which corresponds to a"
+                    " spacing of 1 in the coherence domain, but along"
+                    f" {thisdim} your data has "
+                    + (
+                        "coherence changes"
+                        if my_data.get_ft_prop(thisdim)
+                        else "phases"
+                    )
+                    + f" of {my_data.getaxis(thisdim)}"
+                )
+    # }}}
+    # {{{ Generate the labels for each element along each indirect dimension
+    #     -- for phase cycling dimensions, these are the alias labels
+    dim_labels = {}
+    for thisdim in my_data.dimlabels[:-1]:
+        if not thisdim.startswith("ph"):
+            if my_data.getaxis(thisdim) is None:
+                my_data.set_axis(thisdim, "#")
+            dim_labels[thisdim] = [
+                f"{j:.4g}" if isinstance(j, (float, np.floating)) else f"{j}"
+                for j in my_data.getaxis(thisdim)
+            ]
+        elif no_aliasing_calc:
+            dim_labels[thisdim] = [f"{j}" for j in my_data.getaxis(thisdim)]
+        elif my_data.get_ft_prop(thisdim):
+            if max_coh_jump is None:
+                all_ph = sorted(
+                    j for j in my_data.dimlabels if j.startswith("ph")
+                )
+                if all_ph != [f"ph{j+1}" for j in range(len(all_ph))]:
+                    raise ValueError(
+                        "If your phases don't label by pulse number, I can't"
+                        " automatically determine max_coh_jump"
+                    )
+                max_coh_jump = {f"ph{j+1}": j + 1 for j in range(len(all_ph))}
+            # {{{ Because the phase cycle goes exactly once around the
+            #     circle, the spectral width of the coherence domain is
+            #     equal to the number of phase cycle steps.  All coherence
+            #     changes that differ by a multiple of the spectral width
+            #     alias onto the same element, so label each element with
+            #     all the allowed changes (i.e. those from -max_coh_jump to
+            #     +max_coh_jump) that alias onto it.  An element that no
+            #     allowed change aliases onto is labeled "X".
+            dp_axis = my_data.getaxis(thisdim)
+            dp_sw = len(dp_axis)
+            dim_labels[thisdim] = [
+                ", ".join(
+                    ("%d" if dp == 0 else "%+d") % dp
+                    for dp in range(
+                        -max_coh_jump[thisdim], max_coh_jump[thisdim] + 1
+                    )
+                    if np.isclose(
+                        (dp - this_dp + dp_sw / 2) % dp_sw, dp_sw / 2
+                    )
+                )
+                or "X"
+                for this_dp in dp_axis
+            ]
+            # }}}
+        else:
+            dim_labels[thisdim] = [
+                "0" if j == 0.0 else f"{j}" for j in my_data.getaxis(thisdim)
+            ]
+    # }}}
+    real_data = not (np.iscomplexobj(my_data.data) and my_data.data.imag.any())
+    if cmap is not None:
+        if not real_data:
+            raise ValueError(
+                "In order to use a color map, you must pass real data"
+            )
+        if isinstance(cmap, str):
+            cmap = plt.get_cmap(cmap)
+    # {{{ Determine the relative sizes of the gaps between the axes.
+    #     Move from the innermost outer dimension to the outermost, zooming
+    #     out with each step: the existing set of gaps is halved, then
+    #     replicated once for each element of the new dimension, with a gap
+    #     of size 1 between the replicas.
     divisions = []
-
-    # {{{ Determine number of axes objects based on shape of phase cycling
-    #     dimensions
-    # the procedure is to move from the innermost dimension to the outermost
-    # dimension, zooming out and replicating the division lines with
-    # each step.
-    for j, thisdim in enumerate(a_shape.dimlabels[::-1][2:]):
-        # I'm going to zoom out, and the division lines I add will be
-        # twice the size of the largest I have added to date, so divide
-        # all previous sizes by 2
-        old = [j / 2.0 for j in divisions]
-        # replicate the previous set of division lines, and adding a bolder
-        # division (thickness = 1 vs. the most recent which is now thickness =
-        # 1/2) between each set of replicas
-        divisions = (old + [1]) * (a_shape[thisdim] - 1) + old
+    for thisdim in outer_dims[::-1]:
+        halved = [j / 2.0 for j in divisions]
+        divisions = (halved + [1]) * (my_data.shape[thisdim] - 1) + halved
         logging.debug(strm("for", thisdim, "I get", divisions))
-    # what I have above represents the relative widths of the divisions
-    # correctly, but I want to make sure that they all add up to "gap", which
-    # is the size that I've actually allocated overall for my divisions
+    # the relative sizes are now correct, but they need to add up to "gap"
     divisions = [j * gap / sum(divisions) for j in divisions]
     # }}}
-    # {{{ Determine the bboxes for all the Axes objects that we are generating
-    # Height of axes object including gap above for space between axes objects
-    axes_height = (bbox[3] - gap) / np.prod(a_shape.shape[:-2])
-    axes_bottom = np.cumsum([axes_height + j for j in divisions])  # ndarray
-    axes_bottom = r_[0, axes_bottom]
+    # {{{ Generate the axes, from bottom to top.  The labels of the outer
+    #     dimensions occupy a width of label_width on the left of the bbox.
+    label_width = horiz_label_spacer * len(outer_dims) / fig.bbox.width
+    axes_left = bbox_left + label_width
+    axes_height = (bbox_height - gap) / n_axes
+    ax_list = [
+        fig.add_axes(
+            [axes_left, thisbottom, bbox_width - label_width, axes_height]
+        )
+        for thisbottom in bbox_bottom + np.cumsum(
+            [0] + [axes_height + j for j in divisions]
+        )
+    ]
     # }}}
-    ax_list = []
-    # Note: Length (in fig coords) between the left most side of the figure to
-    # the left most side of the axes objects as the sum of bbox[0] and
-    # allow_for_labels which defines the length between the left side of the
-    # axes object and the left side of the decorations
-    allow_for_labels, _ = fig.transFigure.inverted().transform(
-        (horiz_label_spacer * num_dims, 0)
-    )
-    axes_bottom += bbox[1]
-    axes_width = bbox[2] - allow_for_labels
-    for j, b in enumerate(axes_bottom):
-        ax_list.append(
-            plt.axes(
+    # {{{ Place the data into the axes
+    x = np.ravel(my_data.getaxis(direct))
+    y = np.ravel(my_data.getaxis(inner_dim))
+    # each image is centered on its coordinate, so the image extends half a
+    # pixel past the first and last coordinates
+    dx = (x[-1] - x[0]) / max(len(x) - 1, 1) / 2
+    dy = (y[-1] - y[0]) / max(len(y) - 1, 1) / 2
+    origin = kwargs.pop("origin", "lower")
+    if origin == "lower":
+        extent = (x[0] - dx, x[-1] + dx, y[0] - dy, y[-1] + dy)
+    elif origin == "upper":
+        extent = (x[0] - dx, x[-1] + dx, y[-1] + dy, y[0] - dy)
+    elif origin == "flip":
+        extent = (x[-1] + dx, x[0] - dx, y[-1] + dy, y[0] - dy)
+    else:
+        raise ValueError(
+            "I don't understand the value you've set for the origin"
+            " keyword argument"
+        )
+    if interpolation is None:
+        # if there are more data points than pixels, we need to interpolate
+        # in order to avoid aliasing
+        width_px, height_px = ax_list[0].get_window_extent().size
+        if len(x) > width_px or len(y) > height_px:
+            logging.debug(
+                strm(
+                    "using bilinear interpolation because data is",
+                    len(x),
+                    "x",
+                    len(y),
+                    "but each image block has only",
+                    width_px,
+                    "x",
+                    height_px,
+                    "pixels",
+                )
+            )
+            interpolation = "bilinear"
+    if interpolation is not None:
+        kwargs["interpolation"] = interpolation
+    imagehsvkwargs = {
+        j: kwargs.pop(j) for j in ["black", "logscale"] if j in kwargs
+    }
+    # one image for each element of the (flattened) outer dimensions
+    all_images = my_data.data.reshape((n_axes, len(y), len(x)))
+    data_max = abs(all_images).max()
+    for thisax, thisimage in zip(ax_list, all_images):
+        if real_data:
+            thisimage = thisimage.real / data_max
+            kwargs["cmap"] = cmap
+        else:
+            thisimage = imagehsv(
+                thisimage,
+                **imagehsvkwargs,
+                scaling=scaling_factor if custom_scaling else data_max,
+            )
+        thisax.imshow(thisimage, extent=extent, origin=origin, **kwargs)
+    # }}}
+    # {{{ hatch out the coherence pathways that are masked
+    if coherence_unmask_fn is not None:
+        # {{{ a slice of the data that has only the phase cycling
+        #     dimensions provides the shape (and axes) for the mask
+        coh_mask = my_data
+        for thisdim in my_data.dimlabels:
+            if not (thisdim.startswith("ph") and my_data.get_ft_prop(thisdim)):
+                coh_mask = coh_mask[thisdim, 0]
+        coh_mask = coh_mask.C
+        coh_mask.data = np.zeros(coh_mask.data.shape)
+        coh_mask.set_prop(
+            "coherence_pathway", this_nddata.get_prop("coherence_pathway")
+        )
+        coh_mask = coherence_unmask_fn(coh_mask)
+        # }}}
+        # {{{ expand the mask so that we have a boolean for each element
+        #     of the inner dimension inside each of the axes
+        coh_mask.reorder(
+            [j for j in my_data.dimlabels if j in coh_mask.dimlabels]
+        )
+        is_masked = np.broadcast_to(
+            coh_mask.data.reshape(
                 [
-                    allow_for_labels + bbox[0],
-                    b,
-                    axes_width,
+                    my_data.shape[j] if j in coh_mask.dimlabels else 1
+                    for j in my_data.dimlabels[:-1]
+                ]
+            )
+            == 0,
+            outer_shape + [len(y)],
+        ).reshape((n_axes, len(y)))
+        # }}}
+        for thisax, masked_rows in zip(ax_list, is_masked):
+            # find where each contiguous set of masked rows starts and stops
+            run_edges = np.flatnonzero(
+                np.diff(np.r_[False, masked_rows, False])
+            )
+            for run_start, run_stop in zip(run_edges[::2], run_edges[1::2]):
+                thisax.axhspan(
+                    y[run_start] - dy,
+                    y[run_stop - 1] + dy,
+                    fill=False,
+                    hatch="//",
+                    linewidth=0,
+                    alpha=0.5,
+                )
+    # }}}
+    # {{{ adjust tick settings
+    if shareaxis:
+        for thisax in ax_list[1:]:
+            thisax.sharex(ax_list[0])
+            thisax.sharey(ax_list[0])
+    for thisax in ax_list:
+        thisax.xaxis.set_major_locator(
+            mticker.MaxNLocator(nbins="auto", steps=[1, 2, 2.5, 5, 10])
+        )
+        thisax.xaxis.set_minor_locator(mticker.AutoMinorLocator(n=5))
+        if inner_dim.startswith("ph"):
+            # label the elements of the phase cycle
+            thisax.set_yticks(y, dim_labels[inner_dim])
+        else:
+            thisax.yaxis.set_minor_locator(mticker.AutoMinorLocator(n=5))
+            thisax.yaxis.set_ticks_position("both")
+        for thislabel in thisax.get_yticklabels():
+            thislabel.set_va("center")
+    ax_list[0].set_xlabel(my_data.unitify_axis(direct), labelpad=12)
+    # only the bottom axes has x tick labels, and the top axes has
+    # (unlabeled) ticks on top, while the ones in between have no x ticks
+    for thisax in ax_list[1:]:
+        thisax.xaxis.set_visible(False)
+    if n_axes > 1:
+        ax_list[-1].xaxis.set_visible(True)
+        ax_list[-1].tick_params(
+            axis="x",
+            which="both",
+            top=True,
+            bottom=False,
+            labeltop=False,
+            labelbottom=False,
+        )
+    # }}}
+    # {{{ Find where the tick labels of the inner dimension are (in display
+    #     coordinates, relative to the left side of the axes).  If they are
+    #     too wide to fit between the axes and the first column of brackets,
+    #     make room by moving the left side of the axes to the right.
+    #     (Matplotlib also generates labels for ticks that fall outside
+    #     the limits of the axes, and we need to ignore those.)
+    tick_extents = [
+        thislabel.get_window_extent()
+        for thistick, thislabel in zip(
+            ax_list[0].get_yticks(), ax_list[0].get_yticklabels()
+        )
+        if min(extent[2:]) <= thistick <= max(extent[2:])
+    ]
+    ticks_left = (
+        min(j.x0 for j in tick_extents) - ax_list[0].get_window_extent().x0
+    )
+    ticks_right = (
+        max(j.x1 for j in tick_extents) - ax_list[0].get_window_extent().x0
+    )
+    tick_overhang = max(0, 4 - ticks_left - horiz_label_spacer)
+    if tick_overhang > 0:
+        axes_left += tick_overhang / fig.bbox.width
+        for thisax in ax_list:
+            thisax.set_position(
+                [
+                    axes_left,
+                    thisax.get_position().y0,
+                    bbox_left + bbox_width - axes_left,
                     axes_height,
                 ]
             )
-        )  # lbwh
-    # {{{ make blended transform for plotting decorations sets origin for the
-    #     blended transform to the bottom left corner of the bottom axes
-    #     object
+    # }}}
+    # {{{ transforms for the decorations:
+    #     transDispTranslated is in display coordinates, with the origin at
+    #     the bottom left corner of the bottom axes
     transDispTranslated = IdentityTransform() + ScaledTranslation(
-        (allow_for_labels + bbox[0]), bbox[1], fig.transFigure
+        axes_left, bbox_bottom, fig.transFigure
     )
-    # transXdispYfig transformation takes x in display coords and y in fig
-    # coords
+    #     transXdispYfig takes x in the same display coordinates, and y in
+    #     figure coordinates
     transXdispYfig = blended_transform_factory(
         transDispTranslated, fig.transFigure
     )
     # }}}
-    # {{{ adjust tick settings -- AFTER extents are set
-    for j in range(len(ax_list)):
-        ax_list[j].set_ylabel(None)
-    for j in [0, len(ax_list) - 1]:
-        ax_list[j].xaxis.set_major_locator(majorLocator())
-        ax_list[j].xaxis.set_minor_locator(minorLocator())
-    # {{{ bottom subplot
-    ax_list[0].set_xlabel(
-        my_data.unitify_axis(my_data.dimlabels[-1]), labelpad=12
-    )
-    # }}}
-    # {{{ intermediate subplots
-    for j in range(1, len(ax_list) - 1):
-        ax_list[j].xaxis.set_ticks([])
-        ax_list[j].get_xaxis().set_visible(False)
-        ax_list[j].set_xlabel(None)
-    # }}}
-    # {{{ top subplot
-    ax_list[-1].set_xlabel(None)
-    ax_list[-1].xaxis.tick_top()
-    # }}}
-    # {{{ all subplots
-    for j in range(0, len(axes_bottom)):
-        ax_list[j].set_ylabel(a_shape.dimlabels[-2])
-        inner_dim = a_shape.dimlabels[-2]
-        inner_dim = str(inner_dim)
-        if inner_dim == "ph2":
-            logging.debug("Inner dimension is phase cycling dimension")
-            ax_list[j].yaxis.set_major_formatter("ph2")
-            ax_list[j].yaxis.set_major_locator(plt.MaxNLocator(integer=True))
-        else:
-            ax_list[j].yaxis.set_minor_locator(minorLocator())
-            ax_list[j].yaxis.set_ticks_position("both")
-        for tick in ax_list[j].get_yticklabels():
-            tick.set_rotation(0)
-            tick.set_va("center")
-    # }}}
-    # }}}
-    # {{{ sharex needs to come at the END, or else it
-    #     messes up setting independent tick appearance
-    #     above
-    for ax in ax_list:
-        ax.sharex(ax_list[0])
-        ax.sharey(ax_list[0])
-    # I need to set visibility on top tick labels after sharex
-    # This doesn't work before, and doing
-    # set_xticklabels either affects both (if used
-    # after) or does nothing (if used before)
-    for thislabel in ax_list[-1].get_xticklabels():
-        thislabel.set_visible(False)
-    # }}}
-    # {{{ smoosh dataset if needed
-    if len(a_shape.dimlabels) > 3:
-        A = this_nddata.C.smoosh(
-            a_shape.dimlabels[:-2], "smooshed", noaxis=True
-        )
-        A.reorder("smooshed", first=True)
-    else:
-        A = this_nddata.C
-        A.rename(a_shape.dimlabels[:-2][0], "smooshed")
-
-    # }}}
-    label_placed = np.zeros(num_dims)
-    imagehsvkwargs = {}
-    for k, v in list(kwargs.items()):
-        if k in ["black", "logscale"]:
-            imagehsvkwargs[k] = kwargs.pop(k)
-
-    # {{{ Place actual data into appropriate axes
-    for j in range(len(ax_list)):
-        spacing, ax, x_first, origin, renumber = process_kwargs(
-            [
-                ("spacing", 1),
-                ("ax", ax_list[j]),
-                ("x_first", False),
-                ("origin", "lower"),
-                ("renumber", None),
-            ],
-            kwargs,
-            pass_through=True,
-        )
-        if isinstance(x, list):
-            x = np.array(my_data.getaxis(direct))
-        if isinstance(y, list):
-            y = np.array(my_data.getaxis(my_data.dimlabels[-2]))
-        if len(x) == 0:
-            x = [1, A.data.shape[1]]
-        else:
-            x = x.flatten()
-        if len(y) == 0:
-            y = [1, A.data.shape[0]]
-        else:
-            y = y.flatten()
-        dx = (x[-1] - x[0]) / len(x)
-        dy = (y[-1] - y[0]) / len(y)
-        if origin == "lower":
-            myext = (
-                x[0] - dx / 2.0,
-                x[-1] + dx / 2.0,
-                y[0] - dy / 2.0,
-                y[-1] + dy / 2.0,
-            )
-        elif origin == "upper":
-            myext = (
-                x[0] - dx / 2.0,
-                x[-1] + dx / 2.0,
-                y[-1] + dy / 2.0,
-                y[0] - dy / 2.0,
-            )
-        elif origin == "flip":
-            # {{{ need to flip
-            myext = (
-                x[-1] + dx / 2.0,
-                x[0] - dx / 2.0,
-                y[-1] + dy / 2.0,
-                y[0] - dy / 2.0,
-            )
-            # }}}
-        else:
-            raise ValueError(
-                "I don't understand the value you've set for the origin"
-                " keyword argument"
-            )
-        kwargs["origin"] = origin  # required so that imshow now displays the
-        #                           image correctly
-        # {{{ IdentityTransform maps display to display, so we use the inverse
-        # of ax.transAxes which maps from axes coords (0–1) to display coords
-        # (pixels)
-        width_px, height_px = ax_list[0].transAxes.transform((1, 1)) - ax_list[
-            0
-        ].transAxes.transform((0, 0))
-        if interpolation:
-            kwargs["interpolation"] = interpolation
-        else:
-            if A["smooshed", j].data.shape[0] > width_px:
-                logging.debug(
-                    strm(
-                        "using bilinear interpolation because data is",
-                        A["smooshed", j].data.shape[0],
-                        "wide, but each image block has only",
-                        width_px,
-                        "pixels",
-                    )
-                )
-                kwargs["interpolation"] = "bilinear"
-            elif A["smooshed", j].data.shape[1] > height_px:
-                logging.debug(
-                    strm(
-                        "using bilinear interpolation because data is",
-                        A["smooshed", j].data.shape[1],
-                        "high, but each image block has only",
-                        height_px,
-                        "pixels",
-                    )
-                )
-                kwargs["interpolation"] = "bilinear"
-        # }}}
-        if real_data:
-            kwargs["cmap"] = cmap
-            K = A["smooshed", j].data / abs(A).data.max()
-        else:
-            if custom_scaling:
-                K = imagehsv(
-                    A["smooshed", j].data,
-                    **imagehsvkwargs,
-                    scaling=scaling_factor,
-                )
-            if not custom_scaling:
-                K = imagehsv(
-                    A["smooshed", j].data,
-                    **imagehsvkwargs,
-                    scaling=abs(A).data.max(),
-                )
-        plt.sca(ax_list[j])
-        plt.imshow(K, extent=myext, **kwargs)
-        ax_list[j].set_ylabel(None)
-        if pass_frq_slice:
-            frq_slice = []
-            start_y = A.getaxis(A.dimlabels[1])[0]
-            stop_y = A.getaxis(A.dimlabels[1])[-1]
-            ax_list[j].fill(
-                [x[0], frq_slice[0], frq_slice[0], x[0]],
-                [start_y, start_y, stop_y, stop_y],
-                fill=None,
-                alpha=0.7,
-                hatch="//",
-            )
-            ax_list[j].fill(
-                [frq_slice[-1], x[-1], x[-1], frq_slice[-1]],
-                [start_y, start_y, stop_y, stop_y],
-                fill=None,
-                alpha=0.7,
-                hatch="//",
-            )
-    # }}}
-    # {{{ grab the initialization for nddata without having to cyclically
-    #     import
-    if type(this_nddata).__name__ == "nddata":
-        inifn = type(this_nddata)
-        logging.debug("nddata")
-    elif type(this_nddata).__name__ == "nddata_hdf5":
-        inifn = type(this_nddata).__base__
-        logging.debug("nddata_hdf5")
-    else:
-        raise ValueError("type is" + type(this_nddata).__name__)
-    # }}}
-    # to drop into ax_list, just do
-    # A.smoosh(a_shape.dimlabels, 'smooshed', noaxis=True)
-    # in ax_list[0] put A['smooshed',0], etc
-    idx = inifn(r_[0 : np.prod(a_shape.shape[:-2])], [-1], ["smooshed"])
-    idx.chunk("smooshed", a_shape.dimlabels[:-2], a_shape.shape[:-2])
-    remaining_dim = a_shape.dimlabels[:-2]
-    depth = num_dims
-
     # {{{ Place decorations on figure
-
-    decorate_axes(
-        my_data,
-        idx,
-        remaining_dim,
-        depth,
-        a_shape,
-        ax_list,
-        ordered_labels,
-        label_placed,
-        horiz_label_spacer,
+    if arrow_width_px is None:
+        arrow_width = 4.0  # in points
+    else:
+        arrow_width = arrow_width_px * 72 / fig.dpi
+    # {{{ Each outer dimension gets a column of vertical brackets, with the
+    #     innermost of the outer dimensions closest to the axes.  Because
+    #     the axes are numbered with the innermost outer dimension varying
+    #     fastest, each element of a dimension spans a contiguous block of
+    #     axes.
+    for j, thisdim in enumerate(outer_dims):
+        x_disp = -tick_overhang - (len(outer_dims) - j) * horiz_label_spacer
+        block_size = int(np.prod(outer_shape[j + 1 :]))
+        for first_ax in range(0, n_axes, block_size):
+            # the bracket goes from just above the bottom of the first axes
+            # to just below the top of the last axes in the block
+            y_bottom = ax_list[first_ax].get_position().y0 + 0.05 * axes_height
+            y_top = (
+                ax_list[first_ax + block_size - 1].get_position().y0
+                + 0.95 * axes_height
+            )
+            fig.add_artist(
+                Line2D(
+                    [x_disp, x_disp],
+                    [y_bottom, y_top],
+                    linewidth=1,
+                    color="k",
+                    transform=transXdispYfig,
+                    clip_on=False,
+                )
+            )
+            fig.text(
+                x_disp,
+                (y_bottom + y_top) / 2,
+                dim_labels[thisdim][
+                    first_ax // block_size % my_data.shape[thisdim]
+                ],
+                va="center",
+                ha="right",
+                rotation=90,
+                transform=transXdispYfig,
+                color="k",
+            )
+        # an arrow points to the bottom of the column of brackets
+        _label_arrow(
+            fig,
+            my_data.unitify_axis(thisdim),
+            x_disp,
+            arrow_dx,
+            arrow_dy,
+            arrow_width,
+            transDispTranslated,
+        )
+    # }}}
+    # {{{ the arrow for the inner dimension points to its tick labels
+    _label_arrow(
+        fig,
+        my_data.unitify_axis(inner_dim),
+        (ticks_left + ticks_right) / 2,
         arrow_dx,
         arrow_dy,
-        fig,
+        arrow_width,
         transDispTranslated,
-        transXdispYfig,
     )
-    place_labels(
-        my_data,
-        ax_list[0],
-        "%s" % (a_shape.dimlabels[-2]),
-        label_placed,
-        depth - 1,
-        horiz_label_spacer,
-        arrow_dx,
-        arrow_dy,
-        fig,
-        transDispTranslated,
-        pos_from_tick=True,
-    )
+    # }}}
+    # }}}
     if title is not None:
-        plt.title(title)
+        ax_list[-1].set_title(title)
     return (
         ax_list,
         {
